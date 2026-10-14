@@ -80,7 +80,8 @@
                                                   Data="{StaticResource DaisyIconHamburger}" />
                                     </daisy:DaisyButton>
 
-                                    <Image Width="48"
+                                    <Image x:Name="HeaderLogo"
+                                           Width="48"
                                            Height="48"
                                            Margin="0,0,12,0"
                                            VerticalAlignment="Center"
@@ -89,7 +90,10 @@
                                            Source="ms-appx:///Assets/flowery-keycap-square-200.png" />
 
                                     <StackPanel Grid.Column="2" Spacing="4">
-                                        <TextBlock x:Name="HeaderTitle" FontSize="28" FontWeight="Bold">
+                                        <TextBlock x:Name="HeaderTitle"
+                                                   FontSize="28"
+                                                   FontWeight="Bold"
+                                                   TextTrimming="CharacterEllipsis">
                                             <TextBlock.Foreground>
                                                 <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
                                                     <GradientStop Offset="0" Color="#F8FAFC" />
@@ -103,12 +107,16 @@
                                                  Foreground="#94A3B8" />
                                         </TextBlock>
                                         <Grid x:Name="SubtitleRow" ColumnDefinitions="*,Auto">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <Grid x:Name="CreditsGrid"
+                                                  ColumnDefinitions="Auto,Auto,*"
+                                                  RowDefinitions="Auto,Auto"
+                                                  ColumnSpacing="6">
                                                 <TextBlock Text="Created by"
                                                            FontSize="13"
                                                            Foreground="#64748B"
                                                            VerticalAlignment="Center" />
-                                                <Button Padding="0"
+                                                <Button Grid.Column="1"
+                                                        Padding="0"
                                                         Background="Transparent"
                                                         BorderThickness="0"
                                                         Click="OpenGitHub_Click">
@@ -118,11 +126,13 @@
                                                                Foreground="#38BDF8" />
                                                 </Button>
                                                 <TextBlock x:Name="MitLicenseText"
+                                                           Grid.Column="2"
                                                            Text=" - 2026 - MIT licensed"
                                                            FontSize="12"
                                                            Foreground="#64748B"
+                                                           TextTrimming="CharacterEllipsis"
                                                            VerticalAlignment="Center" />
-                                            </StackPanel>
+                                            </Grid>
                                             <daisy:DaisyButton x:Name="ScreenshotButton"
                                                                Grid.Column="1"
                                                                Content="Capture"
