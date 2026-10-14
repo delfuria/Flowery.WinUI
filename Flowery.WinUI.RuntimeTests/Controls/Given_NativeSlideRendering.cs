@@ -116,7 +116,9 @@ namespace Flowery.WinUI.RuntimeTests.Controls
                 Assert.IsTrue(observation.Frames.Any(frame => frame.Matches >= 4 && frame.Matches < 16),
                     $"{transition} never presented a partial image reveal before completion. {observation.DescribeFrames()}");
 
-                await WaitForPresentationAsync(container);
+                // Completed cleanup can already be presented when this continuation runs.
+                // Fence its native transaction without requiring another XAML render event.
+                await CommitPresentationAsync(container);
                 var finalPixels = sampler.ReadColors();
                 Assert.AreEqual(16, CountImageMatches(finalPixels),
                     $"{transition} did not present the complete image after completion: {FormatColors(finalPixels)}.");
@@ -192,8 +194,14 @@ namespace Flowery.WinUI.RuntimeTests.Controls
             {
                 CompositionTarget.Rendered -= waiter.OnRendered;
             }
+            await CommitPresentationAsync(element);
+        }
+
+        private static async Task CommitPresentationAsync(FrameworkElement element)
+        {
             Assert.IsTrue(element.DispatcherQueue.HasThreadAccess,
                 "Native composition commits must run on the XAML UI thread.");
+            element.UpdateLayout();
             var compositor = ElementCompositionPreview.GetElementVisual(element).Compositor;
             await compositor.RequestCommitAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(5));
             Marshal.ThrowExceptionForHR(DwmFlush());
