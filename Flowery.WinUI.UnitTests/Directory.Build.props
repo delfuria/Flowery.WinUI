@@ -1,4 +1,5 @@
 <Project>
+  <Import Project="..\Directory.Build.props" />
   <PropertyGroup>
     <EnableMSTestRunner>true</EnableMSTestRunner>
     <TestingPlatformDotNetTestSupport>true</TestingPlatformDotNetTestSupport>

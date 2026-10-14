@@ -1,4 +1,5 @@
 <Project>
+  <Import Project="..\..\Directory.Build.props" />
   <!-- Override parent solution settings for this standalone tool -->
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>

@@ -8,9 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-14
+
+First native WinUI 3 release. Package versions match the Flowery.Uno 1.2.0 baseline.
+
 - Repository: renamed project namespaces, documentation, resource examples, and repository links to Flowery.WinUI.
 - Windows: migrated the nine solution projects to native WinUI 3 and Windows App SDK, including native resources, shadows, and graphics.
 - Build: added exact SDK selection and local dotnet-host selection for early .NET 11 SDK RC2 testing. The application target remains .NET 10 for Windows; the CI matrix includes both SDK 10 and SDK 11 RC2.
+- Build: all projects now use the shared version metadata from `Directory.Build.props`.
 - Effects: preserved 50 carousel effects and 100 transition shaders through a native WinUI 3 WebView2 host.
 - Animations: applied attached zoom intensity to PanAndZoom, kept locked zoom at a constant cover scale, and corrected deferred-start and unload/reload handling.
 - Glass: corrected native snapshot cropping with blur padding, excluded sibling glass overlays from capture, applied tint once, and refreshed snapshots after appearance, size, rasterization, and load changes.
@@ -22,7 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation: replaced obsolete backend and toolkit guidance with native WinUI 3 and Windows App SDK instructions. The generator reads native dependency property types, defaults, and descriptions.
 - Copyright: changed current copyright and Gallery license headers to 2026.
 
-## Original source changes before the native migration
+## [Original source history]
+
+The following entries describe the original source before the native WinUI migration.
+
+### Unreleased before the native migration
 
 - **Breaking:** Build: moved all Windows, Desktop (Skia), Browser and tooling target frameworks from net9.0 to net10.0 (Android was already net10.0); consumers must now target net10.0. Build/run scripts, CI build, runtime test runners and developer docs updated accordingly.
 - Historical Linux target: the original desktop Gallery resumed startup after removal of the incompatible `Tmds.DBus.Protocol` 0.93.0 pin. Its original framework resolved 0.21.3 transitively.
@@ -37,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Security: `System.Security.Cryptography.Xml` (Gallery Browser head) bumped from 10.0.7 to 10.0.13, the first 10.0.x release without known vulnerabilities; this removes the `NU1903` build warnings.
 - ColorPicker: added `DaisyColorPickerDialog`, ported from Flowery.NET 3.1.1. It combines the color wheel, lightness slider, screen color picker, palette and editor in a `FloweryDialogBase`, with a 50-step Undo/Redo history, and `ShowAsync(XamlRoot, Color)` returns the selected color or `null`. Every component, including hex input and the editor sliders, updates the preview and the returned color. The Gallery's Color Picker Dialog sample now uses it instead of a hand-built modal, and `DaisyColorPickerDialog.md` documents the XamlRoot-based dialog API.
 
-## [1.2.0] - 2026-07-09
+### [1.2.0] - 2026-07-09
 
 - Windows: fixed the Gallery startup crash (0xC000027B) caused by library XBFs missing from the app output; the WinAppSDK PRI merge skips multi-targeted library projects, so the Windows head now copies theme/resource XBFs to the library layout paths after build.
 - Kanban: fixed dropping cards onto swimlane cells (lane reassignment within the same column did nothing and drop positions were mapped incorrectly in lane-filtered cells).
@@ -47,14 +56,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests: runtime tests now run with deterministic theme and global size instead of inheriting user-persisted Gallery settings, and no longer overwrite them.
 - Tests: fixed stale default-value assertions and added coverage for drop-index calculation and lane-aware moves; full Skia runtime suite passes again.
 
-## [1.1.0] - 2026-07-04
+### [1.1.0] - 2026-07-04
 
 - Added 25 DaisyLoading animations across business workflow and Win95 retro variants.
 - Added the new DaisyLoading variants to the Gallery feedback examples.
 - Improved small-size readability for Win95 recycle-bin document animations.
 - Ported theme fixes for neutral outline buttons, focused radios, and selected Gallery sidebar items.
 
-## [1.0.0] - 2026-05-10
+### [1.0.0] - 2026-05-10
 
 - Bumped version to 1.0.0 as there's no reason not to. :)
 - Fixed Daisy control public styling behavior for `DaisyRadio`, `DaisyCheckBox`, `DaisyToggle`, and `DaisyTagPicker`.
@@ -62,7 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Public text styling such as `Foreground`, `FontSize`, `FontFamily`, `FontStyle`, and `FontWeight` now flows to visible labels, headers, and tag text.
 - Added runtime coverage for explicit public border and font styling on the updated Daisy controls.
 
-## [0.1.3] - 2026-05-07
+### [0.1.3] - 2026-05-07
 
 - Updated Flowery shared package version metadata to `0.1.3`.
 - Updated the original framework SDK and its package pins to the 6.5 line across the shared projects.
@@ -72,7 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated release artifact actions for Node.js 24 and pinned Windows CI jobs to `windows-2025-vs2026`.
 - Historical mobile packages: normalized library-layout paths so `dotnet pack` emitted matching library and dependency groups.
 
-## [0.1.2] - 2026-02-12
+### [0.1.2] - 2026-02-12
 
 - Refined size design tokens around a 4px grid and introduced mobile-specific sizing via `PlatformCompatibility.IsMobile`, keeping desktop/Windows ergonomics with the existing size presets.
 - Increased mobile touch-target defaults for interactive controls and aligned global default size to `DaisySize.Medium`.
@@ -81,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed browser build scripts to force browser-only framework evaluation and suppress EOL-check noise on preview SDKs (`build_browser.ps1`, `build_core.ps1`, `run-browser.ps1`).
 - Historical mobile targets: migrated the original projects and their build/run scripts from .NET 9 to .NET 10.
 
-## [0.1.1] - 2026-02-07
+### [0.1.1] - 2026-02-07
 
 - Centralized versioning in `Directory.Build.props`.
 - Improved Gallery startup responsiveness by prioritizing initial Home rendering and deferring restore navigation to heavy pages.
@@ -89,6 +98,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Library: mitigated repeated first-chance `NotImplementedException` churn for unsupported stroke APIs by caching runtime support checks.
 - Common versions across projects updated.
 
-## [0.1.0] - 2026-02-03
+### [0.1.0] - 2026-02-03
 
 Initial port to the original cross-platform framework (alpha).
