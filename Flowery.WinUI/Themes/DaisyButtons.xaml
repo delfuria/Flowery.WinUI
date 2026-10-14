@@ -1,0 +1,94 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Flowery.Controls">
+
+    <Style TargetType="controls:DaisyShadowContainer">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controls:DaisyShadowContainer">
+                    <Grid>
+                        <Canvas x:Name="PART_OuterShadows" IsHitTestVisible="False" />
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}">
+                            <ContentPresenter Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                                              ContentTransitions="{TemplateBinding ContentTransitions}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}" />
+                        </Border>
+                        <Image x:Name="PART_InnerShadows" Stretch="Fill" IsHitTestVisible="False" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===================== DaisyButton ===================== -->
+    <ControlTemplate x:Key="DaisyButtonTemplate" TargetType="controls:DaisyButton">
+        <Grid x:Name="RootGrid">
+            <!-- Composition host for neumorphic visuals (kept behind content). -->
+            <Canvas x:Name="PART_NeumorphicHost"
+                    Tag="DaisyNeumorphicHost"
+                    IsHitTestVisible="False"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" />
+
+            <controls:DaisyShadowContainer x:Name="PART_ShadowContainer"
+                                 CornerRadius="{TemplateBinding CornerRadius}">
+                <Border x:Name="ButtonBorder"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <ContentPresenter x:Name="ContentPresenter"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                                      ContentTransitions="{TemplateBinding ContentTransitions}"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      Margin="{TemplateBinding Padding}" />
+                </Border>
+            </controls:DaisyShadowContainer>
+        </Grid>
+    </ControlTemplate>
+
+    <Style x:Key="DaisyButtonStyle" TargetType="controls:DaisyButton">
+        <Setter Property="Template" Value="{StaticResource DaisyButtonTemplate}" />
+    </Style>
+
+    <Style TargetType="controls:DaisyButton" BasedOn="{StaticResource DaisyButtonStyle}" />
+
+    <!-- ===================== DaisyButtonGroup (code-driven visual tree) ===================== -->
+    <Style TargetType="controls:DaisyButtonGroup">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- ===================== DaisyJoin (code-driven visual tree) ===================== -->
+    <Style TargetType="controls:DaisyJoin">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- ===================== DaisyCopyButton (extends DaisyButton, code-driven) ===================== -->
+    <Style TargetType="controls:DaisyCopyButton" BasedOn="{StaticResource DaisyButtonStyle}">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- ===================== DaisyFab (code-driven visual tree) ===================== -->
+    <Style TargetType="controls:DaisyFab">
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+    </Style>
+</ResourceDictionary>

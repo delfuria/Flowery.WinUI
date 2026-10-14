@@ -1,0 +1,10 @@
+<Project>
+  <!-- Native WinUI consumes the original SVG assets directly. -->
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)Flowery.WinUI\Assets\Patterns\**\*.svg"
+             Link="Flowery.WinUI\Assets\Patterns\%(RecursiveDir)%(Filename)%(Extension)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

@@ -27,7 +27,7 @@ FlowerySizeManager.ApplySize(DaisySize.Medium);
 | `Large` | Larger screens, presentations | 32px | 14px |
 | `ExtraLarge` | Maximum readability, kiosk | 36px | 16px |
 
-> **Uno Platform Note:** All size values are defined in `DaisyResourceLookup` and can be accessed via `GetDefaultHeight(size)`, `GetDefaultFontSize(size)`, etc. See [Design Tokens](DesignTokens.md) for the full reference.
+> **Design Tokens:** Use `DaisyResourceLookup.GetDefaultHeight(size)` and `GetDefaultFontSize(size)` to access the default sizes. See [Design Tokens](DesignTokens.md).
 
 ## API Reference
 
@@ -117,7 +117,7 @@ Makes TextBlock font sizes respond to global size changes:
 3. Updates automatically when global size changes
 4. Subscription is cleaned up when control is unloaded
 
-> **Why not ThemeResource?** Uno Platform's nested resource dictionary scoping prevents dynamically updated resources from propagating reliably. The attached property approach (event subscription) is the recommended pattern for text that should scale with global size.
+> **Runtime Sizing:** The attached property subscribes to global size changes and applies the matching font size directly.
 
 ## Supported Controls
 
@@ -178,7 +178,7 @@ public class MyControl : ContentControl
 
 ### Option 2: Add a Size DependencyProperty
 
-For DaisyUI-style controls in Uno/WinUI:
+For DaisyUI-style controls in WinUI 3:
 
 ```csharp
 using Flowery.Theming;
@@ -219,7 +219,7 @@ public class MyDaisyControl : ContentControl
 }
 ```
 
-> **Note:** Uno/WinUI doesn't support XAML selector-based styling for DependencyProperties. Apply sizing programmatically in the property changed callback using `DaisyResourceLookup`.
+> **Note:** WinUI 3 does not support XAML selectors for DependencyProperties. Apply sizing in the property callback through `DaisyResourceLookup`.
 
 ## Built-in UI Control
 
@@ -269,7 +269,7 @@ Each size tier maps to specific [Design Tokens](DesignTokens.md):
 
 ### Accessing Tokens Programmatically
 
-In Uno Platform, use `DaisyResourceLookup` to access token values:
+In Flowery.WinUI, use `DaisyResourceLookup` to access token values:
 
 ```csharp
 using Flowery.Theming;

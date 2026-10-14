@@ -1,6 +1,6 @@
-# Migration Guide: Integrating Flowery.Uno into Existing Apps
+# Migration Guide: Integrating Flowery.WinUI into Existing Apps
 
-This guide explains when and how to use `CustomThemeApplicator` to integrate Flowery.Uno's theme controls into apps with existing theming architectures. For general theme management, see [DaisyThemeManager](controls/DaisyThemeManager.html).
+This guide explains when and how to use `CustomThemeApplicator` to integrate Flowery.WinUI's theme controls into apps with existing theming architectures. For general theme management, see [DaisyThemeManager](controls/DaisyThemeManager.html).
 
 ## When You Need CustomThemeApplicator
 
@@ -21,10 +21,10 @@ If your app works fine with the default behavior, you don't need `CustomThemeApp
 
 ### The Starting Point
 
-You have an Uno/WinUI app with custom resources in `Application.Resources`:
+You have an WinUI 3 app with custom resources in `Application.Resources`:
 
 ```xml
-<!-- App.xaml (before Flowery.Uno) -->
+<!-- App.xaml (before Flowery.WinUI) -->
 <Application ...>
     <Application.Resources>
         <ResourceDictionary>
@@ -38,14 +38,14 @@ You have an Uno/WinUI app with custom resources in `Application.Resources`:
 </Application>
 ```
 
-### Step 1: Add Flowery.Uno
+### Step 1: Add Flowery.WinUI
 
-Add the Flowery.Uno library reference and include the theme resources:
+Add the Flowery.WinUI library reference and include the theme resources:
 
-> **Namespace Note:** Flowery.Uno uses the namespace `Flowery.Controls` for all controls.
+> **Namespace Note:** Flowery.WinUI uses the namespace `Flowery.Controls` for all controls.
 
 ```xml
-<!-- App.xaml (with Flowery.Uno added) -->
+<!-- App.xaml (with Flowery.WinUI added) -->
 <Application ...
              xmlns:controls="using:Flowery.Controls">
     <Application.Resources>
@@ -54,8 +54,8 @@ Add the Flowery.Uno library reference and include the theme resources:
                 <!-- Your existing resources -->
                 <ResourceDictionary Source="ms-appx:///Themes/CustomResources.xaml" />
                 <ResourceDictionary Source="ms-appx:///Themes/Icons.xaml" />
-                <!-- Add Flowery.Uno resources -->
-                <ResourceDictionary Source="ms-appx:///Flowery.Uno/Themes/Generic.xaml" />
+                <!-- Add Flowery.WinUI resources -->
+                <ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/Generic.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -108,7 +108,7 @@ The colors don't update. If you restart the app, it's still using the old theme.
 
 **If your app has complex resource hierarchies**, the new palette may not refresh properly because:
 
-1. WinUI/Uno resource resolution may not trigger a full refresh for MergedDictionaries changes
+1. WinUI 3 resource resolution may not trigger a full refresh for MergedDictionaries changes
 2. Controls may still see cached brush values from `ThemeResource` bindings
 3. The theme change doesn't automatically persist across app restarts
 
@@ -163,7 +163,7 @@ public static bool ApplyThemeCustom(string themeName)
 // App.xaml.cs
 protected override void OnLaunched(LaunchActivatedEventArgs args)
 {
-    // Tell Flowery.Uno to use your custom applicator
+    // Tell Flowery.WinUI to use your custom applicator
     DaisyThemeManager.CustomThemeApplicator = ApplyThemeCustom;
 
     // Initialize tokens
@@ -179,7 +179,7 @@ protected override void OnLaunched(LaunchActivatedEventArgs args)
 
 ### Result
 
-**Now all Flowery.Uno theme controls work with your custom logic:**
+**Now all Flowery.WinUI theme controls work with your custom logic:**
 
 - `DaisyThemeDropdown` works ✓
 - `DaisyThemeController` works ✓  
@@ -254,21 +254,13 @@ DaisyThemeManager.CustomThemeApplicator = themeName =>
 | Theme persistence required separate handling | Persistence built into your applicator |
 | Complex workarounds | Single line of setup |
 
-The `CustomThemeApplicator` pattern gives you full control over how themes are applied while still benefiting from Flowery.Uno's theme UI controls.
+The `CustomThemeApplicator` pattern gives you full control over how themes are applied while still benefiting from Flowery.WinUI's theme UI controls.
 
 ---
 
-## Platform-Specific Notes
-
-### Windows (WinUI)
+## Native Windows Notes
 
 - Use `Windows.Storage.ApplicationData.Current.LocalSettings` for theme persistence
 - `ThemeResource` bindings work but may need explicit refresh for dynamic changes
 
-### Future Platforms (Browser, Android, iOS)
-
-When Flowery.Uno adds support for additional platforms:
-
-- Browser (WebAssembly): Use browser localStorage for persistence
-- Mobile: Use platform-specific settings APIs
-- Consider using `Preferences` from MAUI Essentials if available
+Flowery.WinUI targets Windows with WinUI 3 and Windows App SDK.

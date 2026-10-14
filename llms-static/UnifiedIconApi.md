@@ -8,7 +8,7 @@ The **Unified Icon API** provides a batteries-included approach for adding icons
 - **Auto-coloring** - Icon inherits button Foreground color (including hover/pressed states)
 - **Icon-only mode** - If Content is null, shows just the icon
 - **Icon + Content mode** - Shows icon and content together with proper spacing
-- **Safe rendering** - Uses `Path` instead of `PathIcon` to avoid Uno runtime issues
+- **Path rendering** - Creates a separate `Path` for custom icon data
 - **Viewbox wrapping** - For proper scaling of 24x24 coordinate system paths
 
 ## Properties

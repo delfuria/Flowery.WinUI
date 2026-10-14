@@ -3,7 +3,9 @@
 
 # Overview
 
-DaisyBadge is a compact label for counts, statuses, or tags. It supports **10 color variants**, **4 size presets**, and an **outline** mode for low-emphasis contexts. Works standalone or nested inside other controls (e.g., buttons, lists) to highlight small bits of information without overwhelming the layout.
+DaisyBadge is a compact label for counts, statuses, or tags.
+It supports ten color variants, five size presets, and an outline mode.
+Use it alone or inside buttons and lists.
 
 ## Variant Options
 
@@ -22,13 +24,15 @@ DaisyBadge is a compact label for counts, statuses, or tags. It supports **10 co
 
 ## Size Options
 
-| Size | Approx. Dimensions | Use Case |
+The default tokens below use device-independent pixels. Applications can override them.
+
+| Size | Minimum Height / Horizontal Padding / Font Size | Use Case |
 | --- | --- | --- |
-| ExtraSmall | 12px height, 4px horizontal padding, 8px text | Tiny dots/counts inline with text |
-| Small | 16px height, 6px padding, 10px text | Compact chips for dense lists |
-| Medium (default) | 20px height, 8px padding, 12px text | General-purpose badges |
-| Large | 24px height, 12px padding, 14px text | Emphasized tags or hero labels |
-| ExtraLarge | Falls back to medium metrics | No additional styling in theme |
+| ExtraSmall | 16 / 4 / 7 | Small counts inline with text |
+| Small | 16 / 6 / 9 | Compact labels for dense lists |
+| Medium (default) | 20 / 8 / 10 | General-purpose badges |
+| Large | 24 / 12 / 12 | Emphasized tags |
+| ExtraLarge | 28 / 16 / 14 | Large labels and counts |
 
 ## Outline Mode
 
@@ -57,11 +61,15 @@ DaisyBadge is a compact label for counts, statuses, or tags. It supports **10 co
     <controls:DaisyBadge Content="Small" Size="Small" />
     <controls:DaisyBadge Content="Medium" Size="Medium" />
     <controls:DaisyBadge Content="Large" Size="Large" />
+    <controls:DaisyBadge Content="XL" Size="ExtraLarge" />
 </StackPanel>
 
 <!-- Inside a button -->
-<controls:DaisyButton Variant="Ghost" Content="Messages">
-    <controls:DaisyBadge Content="5" Variant="Error" Size="Small" />
+<controls:DaisyButton Variant="Ghost">
+    <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="Messages" />
+        <controls:DaisyBadge Content="5" Variant="Error" Size="Small" />
+    </StackPanel>
 </controls:DaisyButton>
 
 <!-- Circular status dot (explicit sizing) -->

@@ -1,4 +1,4 @@
-# Flowery.Uno Documentation System
+# Flowery.WinUI Documentation System
 
 The pipeline is **curated-first**. Hand-written markdown in `llms-static/` is the primary and only source. No auto-parsing of source code is needed.
 
@@ -19,9 +19,9 @@ The pipeline is **curated-first**. Hand-written markdown in `llms-static/` is th
 ## Folder Structure
 
 ```txt
-Flowery.Uno/
-  Flowery.Uno/Controls/           # C# control definitions
-  Flowery.Uno.Gallery/Examples/   # XAML examples (for the gallery app)
+Flowery.WinUI/
+  Flowery.WinUI/Controls/             # C# control definitions
+  Flowery.WinUI.Gallery.Core/Examples/ # XAML examples (for the gallery app)
   llms-static/                    # Curated docs (tracked)
     DaisyButton.md
     DaisyIconText.md

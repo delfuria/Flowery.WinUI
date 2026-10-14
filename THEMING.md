@@ -1,6 +1,6 @@
 # Theming Guide
 
-This guide covers theme configuration and advanced theming features in Flowery.Uno.
+This guide covers theme configuration and advanced theming features in Flowery.WinUI.
 
 ## Quick Start
 
@@ -29,7 +29,7 @@ xmlns:daisy="using:Flowery.Controls"
 
 ## Available Themes
 
-Flowery.Uno includes all 36 official DaisyUI themes:
+Flowery.WinUI includes all 36 official DaisyUI themes:
 
 | Light Themes | Dark Themes |
 | --- | --- |
@@ -149,7 +149,7 @@ protected override void OnLaunched(LaunchActivatedEventArgs args)
 
 ## How Theming Works
 
-Flowery.Uno uses a palette-based architecture:
+Flowery.WinUI uses a palette-based architecture:
 
 1. `DaisyPaletteFactory` produces per-theme resources with `DaisyBase100Brush`, `DaisyPrimaryBrush`, etc.
 2. Themes are applied by applying palette resources into `Application.Current.Resources`
@@ -191,7 +191,7 @@ Custom palettes created with `DaisyPaletteFactory.Create(ThemePalette)` can set 
 
 ---
 
-## Uno Platform Theming Considerations
+## WinUI 3 Theming Considerations
 
 ### StaticResource vs ThemeResource
 
@@ -211,33 +211,32 @@ Custom palettes created with `DaisyPaletteFactory.Create(ThemePalette)` can set 
 
 `ThemeResource` updates most reliably when the app theme flips Light↔Dark. Switching between two dark themes (e.g., Dracula → Forest) may not trigger updates if you only replace a `MergedDictionaries` entry.
 
-**Solution:** Flowery.Uno keeps brush *instances* stable and mutates their `Color` property when themes change. This is handled internally by `DaisyThemeManager`.
+**Solution:** Flowery.WinUI keeps brush *instances* stable and mutates their `Color` property when themes change. This is handled internally by `DaisyThemeManager`.
 **Critical detail:** Do NOT remove and replace the palette `ResourceDictionary` at runtime. Replacing the dictionary leaves existing `ThemeResource` bindings pointing at old brush instances, so text/background colors stay on the previous theme until a page reload. Instead, keep the palette dictionary stable and update its brush colors in-place.
 
 ### Resource Lookup Differences
 
-On Uno, `Application.Current.Resources.TryGetValue("SomeKey", ...)` can miss resources in `MergedDictionaries`. Flowery.Uno provides `DaisyResourceLookup` which recursively searches merged dictionaries.
+Flowery.WinUI provides `DaisyResourceLookup` to search resource dictionaries and their merged dictionaries recursively.
 
 ### RequestedTheme Exceptions
 
-Setting `Application.Current.RequestedTheme` can throw `COMException` on some Uno backends. Flowery.Uno wraps this in try/catch to prevent theme switching from failing silently.
+WinUI 3 restricts changes to `Application.Current.RequestedTheme` after startup. Flowery.WinUI handles theme changes through stable palette brushes and element themes.
 
 ---
 
-## ThemeShadow & Elevation Notes
+## Native Shadow Notes
 
-These are based on the official Uno tests in `uno/src/SamplesApp/UITests.Shared/Windows_UI_Xaml_Media/ThemeShadowTests`.
-
-- **ThemeShadow needs receivers**: always add a receiver (`ThemeShadow.Receivers.Add(receiverElement)`), typically a background grid/canvas.
-- **Translation.Z controls shadow depth**: use `Translation="0,0,Z"` on the casting element.
-- **CornerRadius is respected** when `ThemeShadow` is applied to a `Border`/`Rectangle` with radius set.
-- **WASM rounded shadows**: apply `SetElevation` to the template `Border` (e.g., `ButtonBorder`) rather than the `Button` control for correct rounding.
+- `DaisyShadowContainer` renders outer shadows with Windows Composition.
+- `DaisyShadow.IsInner` enables inset alpha masks that SkiaSharp renders at the current XAML rasterization scale.
+- Shadow descriptions support color, opacity, offset, blur, spread, and the container's corner radius.
+- `DaisyNeumorphicHelper` uses native shadow containers for Raised and Flat modes, with gradient overlays for its Inset mode.
+- See [Neumorphism](llms-static/neumorphic.md) for resource setup and custom-control examples.
 
 ---
 
 ## Lightweight Styling (Per-Control Customization)
 
-WinUI/Uno supports "lightweight styling" - overriding theme resources for individual controls without creating full custom styles.
+WinUI 3 supports "lightweight styling" - overriding theme resources for individual controls without creating full custom styles.
 
 ### Override a Single Control's Colors
 
@@ -338,7 +337,7 @@ Place theme overrides in `App.xaml` to affect all controls globally:
 
 ## Daisy Control Styling Resources
 
-Flowery.Uno controls support **lightweight styling** through control-specific resource keys. This allows you to customize individual controls without creating full custom styles.
+Flowery.WinUI controls support **lightweight styling** through control-specific resource keys. This allows you to customize individual controls without creating full custom styles.
 
 ### Why Daisy-Specific Resources?
 

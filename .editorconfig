@@ -1,4 +1,4 @@
-# EditorConfig for Flowery.Uno
+# EditorConfig for Flowery.WinUI
 # https://editorconfig.org/
 
 root = true
@@ -17,13 +17,9 @@ indent_size = 4
 tab_width = 4
 
 # IDE0130: Namespace does not match folder structure
-# Suppressed because our library uses "Flowery.*" namespaces but the project folder is "Flowery.Uno"
+# Suppressed because our library uses "Flowery.*" namespaces but the project folder is "Flowery.WinUI"
 dotnet_diagnostic.IDE0130.severity = none
 resharper_check_namespace_highlighting = none
-
-# UNO0001: Uno Platform unimplemented property
-# Suppressed: We intentionally catch NotImplementedException at runtime for cross-platform compatibility
-dotnet_diagnostic.UNO0001.severity = none
 
 # IDE0028: Use collection initializers
 # Suppressed: The pattern of creating a Grid/Panel and then adding children via .Add() is intentional

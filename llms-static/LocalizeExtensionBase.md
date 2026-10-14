@@ -3,7 +3,7 @@
 
 # Overview
 
-LocalizeExtensionBase is an abstract base class for creating localization markup extensions in Uno Platform/WinUI applications. It provides the core implementation for XAML localization with runtime culture switching support.
+LocalizeExtensionBase is an abstract base class for creating localization markup extensions in WinUI 3 applications. It provides the core implementation for XAML localization with runtime culture switching support.
 
 ## Why Use This?
 
@@ -113,7 +113,7 @@ public class MyAppLocalization : INotifyPropertyChanged
 
 ## Related: CustomResolver for Library Controls
 
-If you need to provide translations for Flowery.Uno library controls (like `FloweryComponentSidebar`), use the `CustomResolver`:
+If you need to provide translations for Flowery.WinUI library controls (like `FloweryComponentSidebar`), use the `CustomResolver`:
 
 ```csharp
 // In your app's localization static constructor:

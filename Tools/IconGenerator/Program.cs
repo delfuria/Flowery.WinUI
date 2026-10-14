@@ -1,6 +1,6 @@
 // Icon SVG Generator
 // Run this to generate icon SVG files from DaisyIcons.xaml
-// This tool references Flowery.Uno to use the icon exporter
+// This tool references Flowery.WinUI to use the icon exporter
 //
 // Usage: dotnet run <output-folder> <hex-color>
 // Example: dotnet run ./icons #FF5733

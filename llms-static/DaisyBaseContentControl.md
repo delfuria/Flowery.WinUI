@@ -3,15 +3,15 @@
 
 # Overview
 
-`DaisyBaseContentControl` is the internal base class for Flowery.Uno components. It centralizes lifecycle management, theme integration, sizing systems, and provides hardware-accelerated visual effects like neumorphism.
+`DaisyBaseContentControl` is the internal base class for Flowery.WinUI components. It centralizes lifecycle management, theme integration, sizing systems, and provides hardware-accelerated visual effects like neumorphism.
 
-Most controls in the library inherit from this class to ensure consistent behavior and high performance across all platforms (WinUI, Android, iOS, WASM).
+Most controls inherit from this class to share lifecycle, theme, and sizing behavior in the native Windows application.
 
 ## Core Systems
 
 ### 1. Lifecycle Management
 
-The base class automatically handles `Loaded` and `Unloaded` events. It ensures that event subscriptions (like theme changes) are properly cleaned up to prevent memory leaks, which is critical for long-running cross-platform applications.
+The base class handles `Loaded` and `Unloaded` events and releases event subscriptions when the control unloads.
 
 ### 2. Theme Integration
 

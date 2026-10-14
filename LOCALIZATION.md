@@ -1,6 +1,6 @@
-# Flowery.Uno Localization Guide
+# Flowery.WinUI Localization Guide
 
-Flowery.Uno provides built-in localization support for theme names and control text, with easy extensibility for additional languages. The API lives in the Flowery.Localization namespace and centers on the FloweryLocalization class.
+Flowery.WinUI provides built-in localization support for theme names and control text, with easy extensibility for additional languages. The API lives in the Flowery.Localization namespace and centers on the FloweryLocalization class.
 
 ## Supported Languages
 
@@ -53,11 +53,11 @@ for (var i = 0; i < codes.Count; i++)
 }
 ```
 
-### XAML Binding in Uno/WinUI Heads (Required)
+### XAML Binding in WinUI 3 (Required)
 
-All Uno heads (Windows, Desktop/Skia, Android, iOS, WASM) use the WinUI XAML compiler and share the same binding rules. Use standard Binding with the indexer and do NOT use x:Bind indexer syntax (it triggers WMC1110).
+The native Windows XAML compiler rejects x:Bind indexer syntax with WMC1110. Use standard Binding with the indexer.
 
-Note: Flowery.Uno does not ship a {loc:Localize} markup extension. Use the indexer binding patterns below.
+Note: Flowery.WinUI does not ship a {loc:Localize} markup extension. Use the indexer binding patterns below.
 
 Preferred pattern (set DataContext once):
 
@@ -76,28 +76,15 @@ Alternative (explicit source per binding):
 Never use:
 
 ```xml
-<!-- Invalid in WinUI/Uno -->
+<!-- Invalid in WinUI 3 -->
 <TextBlock Text="{x:Bind Localization['Gallery_DataInput_Variants']}" />
 <TextBlock Text="{x:Bind Localization[Gallery_DataInput_Variants]}" />
 ```
 
-### Desktop/Skia Runtime Language Switching
+### Runtime Language Switching
 
-FloweryLocalization.SetCulture raises PropertyChanged on the UI thread via DispatcherQueue. Most Uno heads refresh indexer bindings automatically. If you still see stale values on Desktop/Skia, force a rebinding for the element where you set the Localization DataContext.
-
-Fallback example:
-
-```csharp
-// In your page/control that uses {Binding [Key]} with a Localization DataContext.
-Loaded += (_, _) => FloweryLocalization.CultureChanged += OnCultureChanged;
-Unloaded += (_, _) => FloweryLocalization.CultureChanged -= OnCultureChanged;
-
-private void OnCultureChanged(object? sender, string cultureName)
-{
-    RootElement.DataContext = null;
-    RootElement.DataContext = Localization;
-}
-```
+`FloweryLocalization.SetCulture` raises `PropertyChanged` on the UI thread through `DispatcherQueue`.
+The native Windows controls refresh their localized text through the localization notifications.
 
 ### Providing App-Specific Translations for Library Controls
 
@@ -135,9 +122,9 @@ timeline.Locale = CultureInfo.GetCultureInfo(FloweryLocalization.CurrentCultureN
 
 ## JSON-Based Localization
 
-Flowery.Uno uses embedded JSON files for localization. This approach:
+Flowery.WinUI uses embedded JSON files for localization. This approach:
 
-- Works across all Uno Platform targets (Desktop, WASM, Android, iOS)
+- Loads embedded translations in the native Windows application
 - Avoids satellite assembly loading issues
 - Supports CJK/Arabic characters
 - Is AOT/trimming compatible with source generators
@@ -260,13 +247,13 @@ public class MyAppLocalization : INotifyPropertyChanged
     }
 }
 
-// REQUIRED: JSON Source Generator for AOT/WASM compatibility
+// JSON source generator for trimming-compatible deserialization
 [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata)]
 [JsonSerializable(typeof(Dictionary<string, string>))]
 internal partial class LocalizationJsonContext : JsonSerializerContext { }
 ```
 
-Important: The JsonSerializerContext source generator is required for WASM. Without it, you will get JsonSerializerIsReflectionDisabled errors.
+The JsonSerializerContext source generator avoids reflection-based JSON metadata when trimming or AOT disables that metadata.
 
 ---
 
@@ -274,7 +261,7 @@ Important: The JsonSerializerContext source generator is required for WASM. With
 
 For CJK characters to display correctly, you must embed fonts and apply styles in your consuming application.
 
-Important: Flowery.Uno does NOT ship with CJK fonts. Each consuming application that needs CJK support must embed its own fonts.
+Important: Flowery.WinUI does NOT ship with CJK fonts. Each consuming application that needs CJK support must embed its own fonts.
 
 ### 1. Embed CJK Fonts in Your App
 
@@ -316,7 +303,7 @@ In App.xaml:
 
 ## Available Resource Keys
 
-The built-in keys live in Flowery.Uno/Localization/en.json. The list below is complete as of this version.
+The built-in keys live in Flowery.WinUI/Localization/en.json. The list below is complete as of this version.
 
 ```text
 # Size
@@ -500,7 +487,7 @@ Fix:
 
 ### JsonSerializerIsReflectionDisabled error
 
-Cause: WASM has Native AOT which disables reflection.
+Cause: The runtime configuration disables reflection-based JSON metadata.
 Fix: Add a JsonSerializerContext source generator (see Step 3 above).
 
 ---

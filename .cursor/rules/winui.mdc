@@ -1,0 +1,1418 @@
+---
+alwaysApply: true
+---
+# Flowery.WinUI MANDATORY Development Notes
+
+This file captures learnings and patterns discovered during Flowery.WinUI development for future reference.
+
+## 🚨 READ THIS FIRST (top crash-prevention rules)
+
+Read this section before changing native WinUI 3 control lifetime or visual ownership:
+
+- **ContentControls that rebuild `Content`**: ALWAYS detach before re-parenting.
+  - Pattern: `_userContent = Content; Content = null; BuildVisualTree(); _presenter.Content = _userContent;`
+  - See **“UIElement can only have one parent”** (search for `### 19`).
+- **Never bind a `ContentPresenter` back to `this.Content`** in a control that later sets `Content = _rootGrid` (creates self-parenting / re-parenting issues).
+  - See the anti-pattern example under `### 19`.
+- **Create separate icon geometry for each visual**.
+  - Use `Microsoft.UI.Xaml.Shapes.Path` or `Flowery.Helpers.FloweryPathHelpers` instead (search for `### 18`).
+- **Use `DaisyControlExtensions.Icon` for button icons** - This is the GOLD STANDARD (see section below).
+- **Ambiguous type names**: `Path`, `Color`, etc. often need aliasing/qualification.
+  - Example: `using Path = Microsoft.UI.Xaml.Shapes.Path;` (search for `### 12`).
+- **Use the native library shadow resources**.
+  - Merge `ms-appx:///Flowery.WinUI/Themes/Generic.xaml` after `XamlControlsResources`.
+  - Use `DaisyShadowContainer` and `DaisyShadow` from `Flowery.Controls`.
+
+## Neumorphic Takeaways
+
+For the distilled, field-tested fixes and integration notes from recent stability work, see `llms-static/neumorphic.md` → **Field-Tested Integration Notes (Session Takeaways)**.
+
+### Native Shadow Rendering
+
+- `DaisyShadowContainer` uses Windows Composition for outer shadows.
+- Explicit `DaisyShadow.IsInner` descriptions use SkiaSharp alpha masks at the XAML rasterization scale.
+- `DaisyNeumorphicHelper` owns native shadow containers for Raised and Flat modes and gradient overlays for Inset mode.
+- Keep the surface attached until the helper releases its visual layers.
+
+## Pitfalls (Session)
+
+These are compile-time issues that should be avoided up front:
+
+- Do not use `??` with different operand types (e.g., `Border ?? DaisyCard`). Cast to a shared base like `FrameworkElement` first.
+- Do not assign `UIElement` to `FrameworkElement` without an explicit cast and a null/type check.
+- Do not reference non-existent WinUI 3 members like `FrameworkElement.IsVisibleChanged`; use supported events or `RegisterPropertyChangedCallback`.
+- Do not access internal or private helpers (e.g., `PlatformCompatibility`) from outside their assembly.
+- Do not set `null` into non-nullable reference types; update the type or use a nullable value.
+- Do not use `x:Bind` paths that are not real properties on the page (e.g., `Localization`); ensure the property exists and follow the required localization binding pattern.
+
+---
+
+## Native Windows Projects and Tests
+
+Flowery.WinUI uses Microsoft.NET.Sdk, WinUI 3, and Windows App SDK.
+The active solution targets net10.0-windows10.0.19041 on x64.
+The supported build is Windows-only.
+
+- Use the package versions in Directory.Packages.props.
+- Keep native XAML compilation and PRI generation enabled.
+- Merge XamlControlsResources before ms-appx:///Flowery.WinUI/Themes/Generic.xaml.
+- Use DaisyShadowContainer and DaisyShadow for shadows.
+- Build through scripts/build_all.ps1 or scripts/build_windows.ps1.
+- Run scripts/test_windows.ps1 for the native runtime and linked unit tests.
+- The external Windows runner launches the prebuilt Gallery executable.
+- FLOWERY_TEST_RESULTS_ROOT stores reports outside temporary MSTest deployment directories.
+- Runtime tests use isolated state storage.
+- For monitor 2 in its lower half, pass -Monitor 2 -WindowRegion LowerHalf.
+
+GitHub Actions workflows live in .github/workflows.
+Workflow dispatch, releases, commits, and pushes require the user's authorization.
+
+## ⭐ GOLD STANDARD: Button Icons via Attached Property
+
+The library provides attached properties for button icons and manages each icon's presenter.
+
+### Why This Pattern?
+
+- **UIElements can only have ONE parent.** Passing `PathIcon` as `Content` often causes silent failures.
+- **Attached properties** allow the button to build its own icon presenter, avoiding parentage issues.
+- **Supports icon + text** on the same button (not mutually exclusive).
+- **Foreground inheritance** is handled correctly for different button variants/states.
+
+### Using `DaisyControlExtensions.Icon` (Recommended)
+
+```xml
+<!-- Icon-only button -->
+<daisy:DaisyButton Shape="Circle" Variant="Primary">
+    <daisy:DaisyControlExtensions.Icon>
+        <PathIcon Width="16" Height="16" Data="M12 4.5v15m7.5-7.5h-15" />
+    </daisy:DaisyControlExtensions.Icon>
+</daisy:DaisyButton>
+
+<!-- Icon + text button -->
+<daisy:DaisyButton Content="Save" Variant="Primary">
+    <daisy:DaisyControlExtensions.Icon>
+        <PathIcon Width="16" Height="16" Data="M..." />
+    </daisy:DaisyControlExtensions.Icon>
+</daisy:DaisyButton>
+
+<!-- Icon on the right side -->
+<daisy:DaisyButton Content="Next">
+    <daisy:DaisyControlExtensions.Icon>
+        <PathIcon Data="M..." />
+    </daisy:DaisyControlExtensions.Icon>
+    <daisy:DaisyControlExtensions.IconPlacement>Right</daisy:DaisyControlExtensions.IconPlacement>
+</daisy:DaisyButton>
+```
+
+### Using `TriggerIconData` for DaisyFab (Best Practice)
+
+For the FAB trigger button, use `TriggerIconData` (a string containing the path data). This is the safest approach because we create the PathIcon internally, completely avoiding UIElement parentage issues.
+
+```xml
+<daisy:DaisyFab TriggerVariant="Secondary" Size="Medium"
+                TriggerIconData="M12 4.5v15m7.5-7.5h-15"
+                TriggerIconSize="16">
+    <StackPanel>
+        <daisy:DaisyButton Shape="Circle">
+            <PathIcon Width="16" Height="16" Data="M3 9.5l9-7 9 7V20..." />
+        </daisy:DaisyButton>
+    </StackPanel>
+</daisy:DaisyFab>
+```
+
+### Available Attached Properties
+
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `DaisyControlExtensions.Icon` | `IconElement` | `null` | The icon to display |
+| `DaisyControlExtensions.IconWidth` | `double` | `NaN` | Explicit icon width (auto if NaN) |
+| `DaisyControlExtensions.IconHeight` | `double` | `NaN` | Explicit icon height (auto if NaN) |
+| `DaisyControlExtensions.IconPlacement` | `IconPlacement` | `Left` | Position: `Left`, `Right`, `Top`, `Bottom` |
+| `DaisyControlExtensions.IconSpacing` | `double` | `8.0` | Spacing between icon and content |
+| `DaisyControlExtensions.AlternateContent` | `object` | `null` | For toggle controls: content when checked |
+
+> **Note:** The attached properties use `[Bindable]` and `[DynamicDependency]` attributes for XAML binding and trimming metadata.
+
+### ❌ DON'T: Set PathIcon as Direct Content
+
+```xml
+<!-- ❌ FAILS SILENTLY: PathIcon becomes child of DaisyButton,
+     then can't be re-parented to internal presenter -->
+<daisy:DaisyButton Shape="Circle" Variant="Primary">
+    <PathIcon Data="M..." />
+</daisy:DaisyButton>
+```
+
+### ✅ DO: Use the Attached Property Pattern
+
+```xml
+<!-- ✅ WORKS: Icon is picked up by button and placed in its own presenter -->
+<daisy:DaisyButton Shape="Circle" Variant="Primary">
+    <daisy:DaisyControlExtensions.Icon>
+        <PathIcon Data="M..." />
+    </daisy:DaisyControlExtensions.Icon>
+</daisy:DaisyButton>
+```
+
+### Implementation Reference
+
+The pattern is implemented in:
+
+- `Flowery.Controls.DaisyControlExtensions` - Attached properties
+- `Flowery.Controls.DaisyButton.BuildIconLayoutIfNeeded()` - Builds icon+content panel
+- `Flowery.Controls.DaisyFab.TriggerIcon` - FAB trigger icon property
+
+## Native WinUI 3 Setup
+
+Control libraries use Microsoft.NET.Sdk with UseWinUI enabled.
+Each native .csproj sets the Windows target framework and x64 configuration.
+Directory.Build.props supplies shared version, repository, and output configuration.
+Directory.Packages.props pins the Windows App SDK and Windows SDK build tools.
+
+Themes/Generic.xaml contains the native control resources.
+Windows App SDK tooling compiles XAML and merges PRI resources.
+Do not add legacy backend layout or manual XBF copy targets.
+
+Merge the library dictionary after XamlControlsResources:
+
+```xml
+<ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/Generic.xaml" />
+```
+
+## 🛠️ Critical Patterns & Solutions
+
+### Code-Only DataTemplates (Runtime XAML Parsing)
+
+**Problem:** You need a complex DataTemplate (e.g. for a `ComboBox` or `ListView`) in a code-only control, but don't want to bundle a separate `.xaml` file or struggle with programmatic `FrameworkElementFactory` (which is deprecated/limited).
+
+**Solution:** Use `XamlReader.Load` to parse a XAML string at runtime. This allows full usage of bindings and converters without needing a physical XAML file.
+
+**Requirements:**
+
+1. Namespace: `using Microsoft.UI.Xaml.Markup;`
+2. Define the template locally in C#
+3. Assign in `OnLoaded` (not constructor)
+4. Ensure `Items` are populated before assigning
+
+**Example (DaisyThemeDropdown):**
+
+```csharp
+private void OnLoaded(object sender, RoutedEventArgs e)
+{
+    // 1. Create DataTemplate string with standard namespaces
+    string xaml = @"
+        <DataTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>
+            <StackPanel Orientation='Horizontal' Spacing='4'>
+                <Ellipse Width='10' Height='10' Fill='{Binding Primary}'/>
+                <TextBlock Text='{Binding DisplayName}' VerticalAlignment='Center'/>
+            </StackPanel>
+        </DataTemplate>";
+
+    try
+    {
+        // 2. Parse and assign
+        ItemTemplate = (DataTemplate)XamlReader.Load(xaml);
+    }
+    catch (Exception ex)
+    {
+        // 3. Always provide a fallback!
+        System.Diagnostics.Debug.WriteLine($"Template Error: {ex.Message}");
+        DisplayMemberPath = "DisplayName";
+    }
+}
+```
+
+**Why this matters:**
+
+- **Performance:** Efficient enough for UI controls
+- **Stability:** Avoids `PrepareContainerForItemOverride` bugs with `ComboBox` selection display
+- **Flexibility:** Allows using `Binding` syntax which is hard to replicate in pure code
+- **Selection Support:** The template automatically applies to both the list AND the selection box (unlike `DelayLoaded` approaches)
+
+### Code-Behind Visual Wrappers (Dashed Borders)
+
+**Problem:** WinUI `Border` control DOES NOT support `StrokeDashArray`. You cannot achieve dashed borders on standard buttons or containers using standard properties.
+**Solution:** Wrap the content in a `Grid` and overlay a `Microsoft.UI.Xaml.Shapes.Rectangle`, which *does* support `StrokeDashArray`.
+**Pattern:**
+
+1. Check style in `OnLoaded`.
+2. If dashed style:
+   - Create a `Grid` wrapper.
+   - Move `Content` into wrapper.
+   - Add `Rectangle` with `StrokeDashArray` to wrapper.
+   - Set control `Content` to wrapper.
+   - Set native `BorderThickness` to 0.
+
+```csharp
+private void BuildDashedBorderIfNeeded() {
+    if (Style != Dash) return;
+    
+    // 1. Capture content and standard padding
+    var original = Content;
+    var padding = Padding;
+    Padding = new Thickness(0); // Removing padding from button so wrapper fills it
+
+    // 2. Create wrapper
+    var grid = new Grid();
+    
+    // 3. Add ContentPresenter with Margin to simulate padding
+    var innerContent = new ContentPresenter { 
+        Content = original,
+        Margin = padding // Applied here instead!
+    };
+    grid.Children.Add(innerContent);
+    
+    // 4. Add Dashed Border (fills the grid)
+    grid.Children.Add(new Rectangle { 
+        StrokeDashArray = new DoubleCollection { 4, 2 },
+        // ...
+    });
+    
+    Content = grid;
+    
+    // 5. Ensure wrapper fills the button
+    VerticalContentAlignment = VerticalAlignment.Stretch;
+    HorizontalContentAlignment = HorizontalAlignment.Stretch;
+}
+```
+
+**Critical Detail:** The Button's `Padding` must be moved to the inner content's `Margin`. If you leave `Padding` on the Button, the dashed border will be drawn *inside* the padding, making the button look too small.
+
+### Full-Screen Overlay Alignment
+
+**Problem:** Custom controls designed to be overlays (like Modals) appear in the top-left corner or don't cover the screen, even if the inner container is centered.
+**Solution:** Explicitly set `HorizontalAlignment` and `VerticalAlignment` to `Stretch` on **both** the control itself (in constructor) AND the root visual element (Grid/Border).
+**Code:**
+
+```csharp
+public DaisyModal() {
+    // 1. Stretch the control itself
+    HorizontalAlignment = HorizontalAlignment.Stretch;
+    VerticalAlignment = VerticalAlignment.Stretch;
+
+    _root = new Grid {
+        // 2. Stretch the root element
+        HorizontalAlignment = HorizontalAlignment.Stretch,
+        VerticalAlignment = VerticalAlignment.Stretch
+    };
+    // 3. Center the inner dialogue
+    _dialogBorder.HorizontalAlignment = HorizontalAlignment.Center;
+    _dialogBorder.VerticalAlignment = VerticalAlignment.Center;
+}
+```
+
+### Manual Visual State Management
+
+**Problem:** `VisualStateManager` in XAML can be verbose or limited for code-only custom controls that combine multiple independent state axes (e.g., Theme + Variant + MouseState).
+**Solution:** Hook into pointer events (`PointerEntered`, `PointerPressed`, etc.) and call a unified `ApplyVisualState()` method.
+**Pattern:**
+
+1. Define unified state applicator: `ApplyCurrentPointerState()`.
+2. Subscribe to events:
+
+   ```csharp
+   Loaded += (s,e) => {
+       PointerEntered += (s,e) => { _isHover = true; ApplyCurrentPointerState(); };
+       PointerExited += (s,e) => { _isHover = false; ApplyCurrentPointerState(); };
+   };
+   ```
+
+3. In `ApplyCurrentPointerState`:
+   - Resolve BaseBrush based on Theme/Variant.
+   - Modify BaseBrush based on `_isHover` / `_isPressed` (e.g. `WithOpacity`).
+   - Apply to `Background`/`BorderBrush`.
+
+---
+
+## 🎨 Animation Patterns (Composition API)
+
+WinUI 3 provides hardware-accelerated animations through Windows Composition. Existing controls also use native Storyboards.
+
+### Basic Setup
+
+```csharp
+using System.Numerics;
+using Microsoft.UI.Composition;
+using Microsoft.UI.Xaml.Hosting;
+
+// Get visual and compositor from a UI element
+var visual = ElementCompositionPreview.GetElementVisual(element);
+var compositor = visual.Compositor;
+
+// Set center point for rotation/scale (required!)
+visual.CenterPoint = new Vector3((float)(size / 2), (float)(size / 2), 0);
+```
+
+### Rotation Animation (Spinner)
+
+Use the library's existing radians convention with RotationAngle:
+
+```csharp
+var animation = compositor.CreateScalarKeyFrameAnimation();
+animation.InsertKeyFrame(0f, 0f);
+animation.InsertKeyFrame(1f, (float)(Math.PI * 2));
+animation.Duration = TimeSpan.FromMilliseconds(750);
+animation.IterationBehavior = AnimationIterationBehavior.Forever;
+visual.StartAnimation("RotationAngle", animation);
+```
+
+### Scale Animation (Pulse/Bounce)
+
+```csharp
+var scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
+scaleAnimation.InsertKeyFrame(0f, new Vector3(1f, 1f, 1f));
+scaleAnimation.InsertKeyFrame(0.5f, new Vector3(1.3f, 1.3f, 1f));
+scaleAnimation.InsertKeyFrame(1f, new Vector3(1f, 1f, 1f));
+scaleAnimation.Duration = TimeSpan.FromMilliseconds(1000);
+scaleAnimation.IterationBehavior = AnimationIterationBehavior.Forever;
+
+visual.StartAnimation("Scale", scaleAnimation);
+```
+
+### Opacity Animation (Fade/Blink)
+
+```csharp
+var opacityAnimation = compositor.CreateScalarKeyFrameAnimation();
+opacityAnimation.InsertKeyFrame(0f, 1f);
+opacityAnimation.InsertKeyFrame(0.5f, 0.4f);
+opacityAnimation.InsertKeyFrame(1f, 1f);
+opacityAnimation.Duration = TimeSpan.FromMilliseconds(1500);
+opacityAnimation.IterationBehavior = AnimationIterationBehavior.Forever;
+
+visual.StartAnimation("Opacity", opacityAnimation);
+```
+
+### Delayed Animation (Staggered Dots)
+
+Native Composition supports animation.DelayTime.
+Existing implementations can use PlatformCompatibility.StartAnimation for their common delay scheduling.
+
+```csharp
+scaleAnimation.DelayTime = TimeSpan.FromMilliseconds(index * 150);
+visual.StartAnimation("Scale", scaleAnimation);
+```
+
+### Stopping Animations
+
+```csharp
+visual.StopAnimation("RotationAngle");  // Matches the property used to start the rotation.
+visual.StopAnimation("Scale");
+visual.StopAnimation("Opacity");
+```
+
+### Animation Lifecycle
+
+- Start animations in element's `Loaded` event (after it's in visual tree)
+- Stop animations in `Unloaded` event to prevent memory leaks
+- Track `_isAnimating` flag to prevent starting animations after unload
+
+---
+
+## 🎯 Control Development Patterns
+
+### Programmatic Visual Tree (No XAML Templates)
+
+For controls that need runtime flexibility, build the visual tree in code:
+
+```csharp
+public class MyControl : ContentControl
+{
+    private Grid? _rootGrid;
+
+    public MyControl()
+    {
+        DefaultStyleKey = typeof(MyControl);
+        Loaded += OnLoaded;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        BuildVisualTree();
+    }
+
+    private void BuildVisualTree()
+    {
+        _rootGrid = new Grid();
+        // ... build tree
+        Content = _rootGrid;
+    }
+}
+```
+
+### Dependency Properties
+
+```csharp
+public static readonly DependencyProperty VariantProperty =
+    DependencyProperty.Register(
+        nameof(Variant),
+        typeof(MyVariantEnum),
+        typeof(MyControl),
+        new PropertyMetadata(MyVariantEnum.Default, OnAppearanceChanged));
+
+public MyVariantEnum Variant
+{
+    get => (MyVariantEnum)GetValue(VariantProperty);
+    set => SetValue(VariantProperty, value);
+}
+
+private static void OnAppearanceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+{
+    if (d is MyControl control)
+    {
+        control.RebuildVisual();
+    }
+}
+```
+
+### Tab Selection Change Callback
+
+```csharp
+// Use RegisterPropertyChangedCallback for DependencyProperty changes
+MainTabs.RegisterPropertyChangedCallback(DaisyTabs.SelectedIndexProperty, OnTabSelectionChanged);
+
+private void OnTabSelectionChanged(DependencyObject sender, DependencyProperty dp)
+{
+    var selectedIndex = MainTabs.SelectedIndex;
+    // Handle tab change
+}
+```
+
+---
+
+## 🎨 XAML Styles (WinUI 3 Specifics)
+
+This section covers WinUI 3-specific style patterns based on official Microsoft guidance.
+
+### Implicit vs Explicit Styles
+
+Styles without `x:Key` apply automatically to all controls of the target type (implicit). Styles with `x:Key` must be explicitly referenced.
+
+```xml
+<Page.Resources>
+    <!-- Implicit: applies to ALL Buttons in this page -->
+    <Style TargetType="Button">
+        <Setter Property="Background" Value="Blue" />
+    </Style>
+
+    <!-- Explicit: must be referenced via Style="{StaticResource MyButtonStyle}" -->
+    <Style x:Key="MyButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Red" />
+    </Style>
+</Page.Resources>
+
+<Button Content="Blue (implicit)" />
+<Button Content="Red (explicit)" Style="{StaticResource MyButtonStyle}" />
+```
+
+### BasedOn for Style Inheritance
+
+Use `BasedOn` to inherit from another style. The derived style must target the same type or a subclass.
+
+```xml
+<Page.Resources>
+    <Style x:Key="BaseButtonStyle" TargetType="Button">
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Padding" Value="16,8" />
+    </Style>
+
+    <!-- Inherits Height and Padding, adds Background -->
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="Background" Value="{ThemeResource DaisyPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource DaisyPrimaryContentBrush}" />
+    </Style>
+</Page.Resources>
+```
+
+**For system controls using WinUI styles**, use the `Default<ControlName>Style` pattern:
+
+```xml
+<!-- Base on system TextBox style, then customize -->
+<Style TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+    <Setter Property="Foreground" Value="Blue"/>
+</Style>
+```
+
+### Lightweight Styling (Per-Control Resource Overrides)
+
+Override theme resources for a **single control** by placing resources in the control's local `Resources`:
+
+```xml
+<Button Content="Custom Colors">
+    <Button.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="ButtonBackground" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ButtonForeground" Color="MediumSlateBlue"/>
+                    <SolidColorBrush x:Key="ButtonBorderBrush" Color="MediumSlateBlue"/>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="ButtonBackground" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ButtonForeground" Color="Coral"/>
+                    <SolidColorBrush x:Key="ButtonBorderBrush" Color="Coral"/>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Button.Resources>
+</Button>
+```
+
+**State-specific resources** use suffixes: `ButtonBackgroundPointerOver`, `ButtonForegroundPressed`, `ButtonBorderBrushDisabled`, etc.
+
+### Custom Control Styling with Resource Aliasing
+
+For custom controls that should follow system styling patterns, alias your custom resources to system resources:
+
+```xml
+<!-- In your control's style -->
+<Style TargetType="local:MyCustomButton">
+    <Setter Property="Background" Value="{ThemeResource MyCustomButtonBackground}" />
+    <Setter Property="BorderBrush" Value="{ThemeResource MyCustomButtonBorderBrush}"/>
+</Style>
+
+<!-- In your ResourceDictionary, alias to system resources -->
+<ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+        <StaticResource x:Key="MyCustomButtonBackground" ResourceKey="ButtonBackground" />
+        <StaticResource x:Key="MyCustomButtonBorderBrush" ResourceKey="ButtonBorderBrush" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Light">
+        <StaticResource x:Key="MyCustomButtonBackground" ResourceKey="ButtonBackground" />
+        <StaticResource x:Key="MyCustomButtonBorderBrush" ResourceKey="ButtonBorderBrush" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="HighContrast">
+        <StaticResource x:Key="MyCustomButtonBackground" ResourceKey="ButtonBackground" />
+        <StaticResource x:Key="MyCustomButtonBorderBrush" ResourceKey="ButtonBorderBrush" />
+    </ResourceDictionary>
+</ResourceDictionary.ThemeDictionaries>
+```
+
+> **Note:** You must define all three theme dictionaries (`Default`, `Light`, `HighContrast`) for proper theme switching.
+
+### Derived Control Styles
+
+When deriving a custom control from a WinUI control, it won't inherit WinUI styles by default. Apply them explicitly:
+
+```xml
+<ContentDialog x:Class="MyApp.CustomDialog" ...>
+    <ContentDialog.Resources>
+        <!-- Apply WinUI's default ContentDialog style to our derived type -->
+        <Style TargetType="local:CustomDialog" BasedOn="{StaticResource DefaultContentDialogStyle}"/>
+    </ContentDialog.Resources>
+</ContentDialog>
+```
+
+### Style Scope and Precedence
+
+| Location | Scope | Precedence (highest first) |
+| -------- | ----- | ------------------------- |
+| Control.Resources | Single control | 1 (highest) |
+| Page.Resources | Single page | 2 |
+| App.xaml Resources | Entire app | 3 |
+| Generic.xaml | Control library defaults | 4 (lowest) |
+
+If the same key exists in multiple locations, the closest scope wins.
+
+---
+
+## 🎨 Theme Management
+
+### Resource Dictionary Approach
+
+Themes are implemented as `ResourceDictionary` objects with color brushes:
+
+```csharp
+public static ResourceDictionary Create(string themeName)
+{
+    var palette = Palettes[themeName];
+    var resources = new ResourceDictionary();
+
+    // Colors
+    resources["DaisyPrimaryColor"] = ColorFromHex(palette.Primary);
+    
+    // Brushes (for binding)
+    resources["DaisyPrimaryBrush"] = new SolidColorBrush(ColorFromHex(palette.Primary));
+    
+    return resources;
+}
+```
+
+### Applying Themes at Runtime
+
+```csharp
+// Merge theme resources into Application.Current.Resources
+Application.Current.Resources.MergedDictionaries.Clear();
+Application.Current.Resources.MergedDictionaries.Add(themeResources);
+
+// Update RequestedTheme for light/dark
+RootGrid.RequestedTheme = isDark ? ElementTheme.Dark : ElementTheme.Light;
+```
+
+### Accessing Theme Resources in Code
+
+```csharp
+if (Application.Current.Resources.TryGetValue("DaisyPrimaryBrush", out var brush) && brush is Brush b)
+{
+    element.Fill = b;
+}
+else
+{
+    // Fallback
+    element.Fill = new SolidColorBrush(Colors.White);
+}
+```
+
+---
+
+## ⚠️ Common Pitfalls
+
+### 1. Colors Namespace
+
+`Colors` is in `Microsoft.UI` namespace, not `Windows.UI`:
+
+```csharp
+using Microsoft.UI; // For Colors.White, Colors.Black, etc.
+using Windows.UI;   // For Color struct only
+```
+
+### 2. Arc/Path for Spinner
+
+WinUI doesn't have an `Arc` control like Avalonia. Use `Path` with `ArcSegment`:
+
+```csharp
+var pathGeometry = new PathGeometry();
+var pathFigure = new PathFigure { StartPoint = new Point(startX, startY) };
+pathFigure.Segments.Add(new ArcSegment
+{
+    Point = new Point(endX, endY),
+    Size = new Size(radius, radius),
+    SweepDirection = SweepDirection.Clockwise,
+    IsLargeArc = true
+});
+pathGeometry.Figures.Add(pathFigure);
+path.Data = pathGeometry;
+```
+
+### 3. Visual Tree Timing
+
+Elements must be in the visual tree before getting their Visual:
+
+```csharp
+element.Loaded += (s, e) =>
+{
+    var visual = ElementCompositionPreview.GetElementVisual(element);
+    // Now safe to animate
+};
+```
+
+### 4. CenterPoint for Transforms
+
+Always set `CenterPoint` before rotation/scale animations:
+
+```csharp
+visual.CenterPoint = new Vector3((float)(width / 2), (float)(height / 2), 0);
+```
+
+### 5. Use supported WinUI 3 text properties
+
+WinUI 3 XAML does **not** support Avalonia-style attached properties like:
+
+- `TextElement.FontSize="{TemplateBinding BodyFontSize}"`
+
+This fails with:
+
+- `WMC0010: Unknown attachable member 'TextElement.FontSize' on element 'ContentPresenter'`
+
+**Fix pattern (used in this repo):**
+
+- Remove `TextElement.FontSize` from XAML templates (e.g. `Themes/DaisyControls.xaml`)
+- Drive the inherited size from code, e.g. in `DaisyCard.ApplyAll()`:
+  - `FontSize = BodyFontSize;`
+
+### 6. No overridable `OnPropertyChanged(DependencyPropertyChangedEventArgs)` in WinUI 3 controls
+
+WinUI 3 controls do **not** have an overridable method with the signature:
+
+- `protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)`
+
+Attempting this fails with:
+
+- `CS0115: ... no suitable method found to override`
+
+**Fix pattern (used in this repo):**
+
+- Use DP metadata callbacks when registering the property:
+  - `new PropertyMetadata(defaultValue, OnChanged)`
+- Or use `RegisterPropertyChangedCallback(...)` when you need to observe a DP without replacing metadata.
+
+### 7. `x:Type` is NOT supported in WinUI 3 XAML
+
+The `x:Type` markup extension does **not** exist in WinUI 3. This fails:
+
+```xml
+<!-- ❌ FAILS: x:Type doesn't exist -->
+<Style TargetType="controls:DaisyTextArea" BasedOn="{StaticResource {x:Type controls:DaisyInput}}">
+```
+
+Error: `WMC0001: Unknown type 'Type' in XML namespace 'http://schemas.microsoft.com/winfx/2006/xaml'`
+
+**Fix pattern:** Don't use `BasedOn` with type references. If inheritance is needed, handle it in C# code by extending the base class.
+
+```xml
+<!-- ✅ WORKS: Just target the derived type directly -->
+<Style TargetType="controls:DaisyTextArea">
+    <Setter Property="MinHeight" Value="80" />
+</Style>
+```
+
+### 8. `ItemsControl` has no `Content` property
+
+`ItemsControl` does **not** have a `Content` property like `ContentControl` does. If you need both items collection AND a content property, you must choose one approach:
+
+- **Use `ContentControl`** and manage children manually via a collection property
+- **Use `ItemsControl`** and access items via the `Items` collection (but no `Content`)
+
+```csharp
+// ❌ FAILS: ItemsControl has no Content property
+public class MyGroup : ItemsControl
+{
+    private void Build() { Content = _panel; } // CS0103: 'Content' does not exist
+}
+
+// ✅ WORKS: Use ContentControl and collect children from Content
+public class MyGroup : ContentControl
+{
+    private void CollectItems()
+    {
+        if (Content is Panel panel)
+        {
+            foreach (var child in panel.Children) { /* ... */ }
+        }
+    }
+}
+```
+
+### 9. Don't hide inherited `UIElement` methods
+
+`UIElement` has several methods that are easy to accidentally hide with custom methods:
+
+- `UpdateLayout()` - Forces a layout pass
+- `Measure()` / `Arrange()` - Layout methods
+- `Focus()` - Focus management
+
+Using the same name causes warning CS0108:
+
+```csharp
+// ❌ WARNING CS0108: Hides inherited member
+private void UpdateLayout() { /* ... */ }
+
+// ✅ WORKS: Use a different name
+private void RebuildLayout() { /* ... */ }
+private void ApplyLayout() { /* ... */ }
+```
+
+### 10. Reference comparison warnings with DependencyProperty values
+
+When comparing `Content` or other DP values to stored references, use `ReferenceEquals()` to avoid CS0252 warnings:
+
+```csharp
+// ❌ WARNING CS0252: Unintended reference comparison
+if (Content != null && Content != _rootGrid)
+
+// ✅ WORKS: Explicit reference comparison
+if (Content != null && !ReferenceEquals(Content, _rootGrid))
+```
+
+### 11. Duplicate enum/class definitions across files (CS0101)
+
+When porting controls from Avalonia, **check if enums/classes are already defined** in other files before adding them to new control files. Common duplicates:
+
+- `DaisyButtonVariant`, `DaisyButtonStyle` → already in `DaisyButton.cs`
+- `DaisyCollapseVariant` → already in `DaisyCollapse.cs`
+- Event args classes like `ButtonGroupItemSelectedEventArgs`
+
+**Before adding ANY enum or helper class:**
+
+```csharp
+// ❌ DON'T blindly copy from Avalonia source
+public enum DaisyButtonVariant { ... }  // May already exist!
+
+// ✅ DO search existing files first:
+//    grep -r "enum DaisyButtonVariant" Controls/
+//    If found, just use it - don't redefine!
+```
+
+### 12. Ambiguous type references (CS0104)
+
+When using types like `Path`, `Color`, or `Orientation` that exist in multiple namespaces, qualify them explicitly:
+
+```csharp
+// ❌ FAILS: Ambiguous between Microsoft.UI.Xaml.Shapes.Path and System.IO.Path
+private Path? _iconPath;
+
+// ✅ WORKS: Use fully qualified type name
+private Microsoft.UI.Xaml.Shapes.Path? _iconPath;
+```
+
+Common ambiguous types:
+
+- `Path` → `Microsoft.UI.Xaml.Shapes.Path` vs `System.IO.Path`
+- `Color` → `Windows.UI.Color` vs `System.Drawing.Color`
+- `Orientation` → `Microsoft.UI.Xaml.Controls.Orientation` vs others
+
+### 13. Missing enum values when porting
+
+When porting a control that references an enum from another control, ensure all required values exist:
+
+```csharp
+// DaisyCollapse.cs has:
+public enum DaisyCollapseVariant { Arrow, Plus }
+
+// DaisyAccordion.cs needs 'None' for its indicator visibility
+// ❌ FAILS: DaisyCollapseVariant.None doesn't exist
+
+// ✅ FIX: Add the missing value to the original enum
+public enum DaisyCollapseVariant { Arrow, Plus, None }
+```
+
+### 14. `Border` does not have a `Cursor` property in WinUI 3
+
+Unlike WPF, WinUI 3 `Border` does not have a `Cursor` property. Cursor styling must be done differently or omitted.
+
+```csharp
+// ❌ FAILS: Border doesn't have Cursor property
+_headerBorder = new Border
+{
+    Cursor = new Microsoft.UI.Input.InputCursor(...)  // CS0117
+};
+
+// ✅ WORKS: Use supported Border properties
+_headerBorder = new Border
+{
+    CornerRadius = new CornerRadius(8),
+    Padding = new Thickness(16, 12, 16, 12)
+};
+```
+
+### 15. `Border` is not a `Control` - pattern matching fails
+
+`Border` inherits from `FrameworkElement`, not `Control`, so pattern matching `Control` to `Border` will fail.
+
+```csharp
+// ❌ FAILS: Control can't be matched to Border (CS8121)
+if (element is Control control)
+{
+    if (control is Border border) { ... }  // Border is not a Control!
+}
+
+// ✅ WORKS: Check for specific types separately
+if (element is Button button)
+{
+    button.CornerRadius = ...;
+}
+// For Border, check UIElement directly if needed
+```
+
+### 16. `FlowerySizeManager.IgnoreGlobalSize` is a method, not a property
+
+To check if a control should ignore global size, use the `GetIgnoreGlobalSize` method:
+
+```csharp
+// ❌ FAILS: IgnoreGlobalSize is not a property (CS0117)
+var effectiveSize = FlowerySizeManager.IgnoreGlobalSize.GetValue(this) 
+    ? Size 
+    : FlowerySizeManager.CurrentSize;
+
+// ✅ WORKS: Use the method directly
+var effectiveSize = FlowerySizeManager.GetIgnoreGlobalSize(this)
+    ? Size
+    : FlowerySizeManager.CurrentSize;
+```
+
+### 17. Avoid manual Width calculation for stretched content (Sidebar Clipping)
+
+When calculating container widths manually to simulate `Stretch` behavior, specific issues arise when a `ScrollViewer` is involved.
+
+**Problem:**
+If you manually set `Width = RootContainer.ActualWidth - Margins`, you fail to account for the vertical ScrollBar width potentially appearing in the `ScrollViewer`. This results in content being wider than the viewport, causing clipping (e.g., right side cut off).
+
+**Solution:**
+Avoid setting `Width` manually. Rely on `HorizontalAlignment="Stretch"` and let the layout system handle the viewport constraints.
+
+```csharp
+// ❌ FAILS: Content clipped when scrollbar appears
+MyPanel.Width = RootBorder.ActualWidth - Margin.Left - Margin.Right;
+
+// ✅ WORKS: Let layout system handle it
+MyPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
+// MyPanel.Width is not set
+```
+
+### 18. Create separate icon geometry with `FloweryPathHelpers`
+
+Use `FloweryPathHelpers` to create a separate `Path` and geometry for each icon. Do not share one visual between parents.
+
+```csharp
+using Flowery.Helpers;
+
+// ✅ WORKS: Use FloweryPathHelpers
+_previousButton.Content = FloweryPathHelpers.CreateChevron(isLeft: true);
+_nextButton.Content = FloweryPathHelpers.CreateChevron(isLeft: false);
+```
+
+Native WinUI 3 supports dynamic `PathIcon` instances.
+These helpers create separate geometry for each path.
+Do not move an existing icon between parents while it remains attached.
+
+**Available helper methods in `FloweryPathHelpers`:**
+
+| Method | Description |
+| ------ | ----------- |
+| `CreateChevron(bool isLeft, double size = 12, double strokeThickness = 2, Brush? stroke = null)` | Left/right arrow |
+| `CreatePlus(double size = 12, double strokeThickness = 2, Brush? stroke = null)` | Plus (+) icon |
+| `CreateMinus(double size = 12, double strokeThickness = 2, Brush? stroke = null)` | Minus (-) icon |
+| `CreateClose(double size = 12, double strokeThickness = 2, Brush? stroke = null)` | Close (X) icon |
+
+**Alternative: Use `SymbolIcon` for common Windows icons**
+
+For simple, built-in icons (like user silhouettes for avatars), `SymbolIcon` is simpler than `FloweryPathHelpers`:
+
+```csharp
+// ✅ WORKS: SymbolIcon for built-in Windows symbols
+var userIcon = new SymbolIcon(Symbol.Contact);  // User silhouette
+var searchIcon = new SymbolIcon(Symbol.Find);   // Magnifying glass
+var settingsIcon = new SymbolIcon(Symbol.Setting); // Gear
+
+// Add to container
+_avatarPlaceholder.Children.Add(userIcon);
+```
+
+**Common useful symbols:**
+
+| Symbol | Description |
+| ------ | ----------- |
+| `Symbol.Contact` | User silhouette |
+| `Symbol.People` | Multiple users |
+| `Symbol.Account` | User account |
+| `Symbol.Find` | Magnifying glass |
+| `Symbol.Setting` | Gear/settings |
+| `Symbol.Add` | Plus sign |
+| `Symbol.Delete` | Trash can |
+| `Symbol.Edit` | Pencil |
+| `Symbol.Favorite` | Star (outline) |
+| `Symbol.SolidStar` | Star (filled) |
+
+**XAML usage:**
+
+```xml
+<SymbolIcon Symbol="Contact" />
+```
+
+**When to use which:**
+
+| Scenario | Use |
+| -------- | --- |
+| Avatar placeholder (user icon) | `SymbolIcon(Symbol.Contact)` |
+| Custom DaisyUI-specific icons | `FloweryPathHelpers` |
+| Navigation arrows | `FloweryPathHelpers.CreateChevron()` |
+| Generic UI icons (search, settings) | `SymbolIcon` |
+
+### 19. UIElement can only have one parent - clear before re-parenting
+
+A WinUI 3 `UIElement` can have one parent. Detach the element before assigning it to another parent.
+
+```csharp
+// ❌ FAILS: Item is already a child of _nextPresenter
+_nextPresenter.Content = Items[0];
+_currentPresenter.Content = Items[0];  // Throws!
+
+// ✅ WORKS: Clear the previous parent first
+_nextPresenter.Content = null;
+_currentPresenter.Content = Items[0];
+```
+
+**Common scenarios:**
+
+- Swapping content between two `ContentPresenter`s (e.g., animation transitions)
+- Moving items between panels or containers
+- Recycling UI elements across different parents
+
+**Very common trap (ContentControl that rebuilds its own visual tree):**
+
+If you move a user's `Content` into a new `ContentPresenter`, detach it from the original `ContentControl` first.
+
+```csharp
+// ✅ Correct pattern for code-built visual trees in a ContentControl
+private object? _userContent;
+private ContentPresenter? _presenter;
+
+private void OnLoaded(object sender, RoutedEventArgs e)
+{
+    // Capture and DETACH before re-parenting
+    _userContent = Content;
+    Content = null;
+
+    BuildVisualTree();
+    _presenter!.Content = _userContent;
+}
+```
+
+Also avoid this anti-pattern (it can reintroduce self-parenting / re-parenting issues when you later replace `Content` with your root):
+
+```csharp
+// ❌ Anti-pattern: binding presenter back to this.Content in a control that replaces Content
+_presenter.SetBinding(ContentPresenter.ContentProperty,
+    new Microsoft.UI.Xaml.Data.Binding { Source = this, Path = new PropertyPath("Content") });
+```
+
+**Pattern for content swapping (see `DaisyTextRotate.cs`):**
+
+```csharp
+// Always clear both presenters before assigning
+_nextPresenter.Content = null;
+_currentPresenter.Content = null;
+_currentPresenter.Content = Items[idx];
+```
+
+---
+
+### 20. StaticResource scope in templates (merged dictionaries)
+
+`StaticResource` resolves within the same `ResourceDictionary` (and its own merged dictionaries), not across `Generic.xaml` or app-level merges. If a template uses `StaticResource` for Geometry (e.g., icons), make sure the icon dictionary is merged into the same file or the resource won't be found at parse time.
+
+```xml
+<!-- GOOD: merge icon resources into the same dictionary that uses them -->
+<ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/DaisyIcons.xaml" />
+</ResourceDictionary.MergedDictionaries>
+```
+
+If you see `XamlParseException` for `Path.Data`, check that the geometry resources are in-scope.
+
+---
+
+### 21. `{ThemeResource}` does NOT auto-refresh when MergedDictionaries change
+
+**Critical difference from Avalonia:** In Avalonia, `{DynamicResource}` automatically re-evaluates when resource dictionaries are swapped. In WinUI 3, `{ThemeResource}` only re-evaluates when `Application.RequestedTheme` toggles between `Light` and `Dark` — **not** when you swap MergedDictionaries or change resource values.
+
+This means when you switch from one DaisyUI theme to another (e.g., "Dark" → "Dracula", both dark themes), elements using `{ThemeResource DaisyBaseContentBrush}` in XAML will **not** update their colors.
+
+```xml
+<!-- ❌ Will NOT update when theme changes (unless Light<->Dark toggles) -->
+<TextBlock Foreground="{ThemeResource DaisyBaseContentBrush}" />
+```
+
+**Solution:** Subscribe to `DaisyThemeManager.ThemeChanged` and manually update properties:
+
+```csharp
+public MyControl()
+{
+    Loaded += OnLoaded;
+    Unloaded += OnUnloaded;
+}
+
+private void OnLoaded(object sender, RoutedEventArgs e)
+{
+    DaisyThemeManager.ThemeChanged += OnThemeChanged;
+    ApplyTheme();
+}
+
+private void OnUnloaded(object sender, RoutedEventArgs e)
+{
+    DaisyThemeManager.ThemeChanged -= OnThemeChanged;
+}
+
+private void OnThemeChanged(object? sender, string themeName)
+{
+    ApplyTheme();
+}
+
+private void ApplyTheme()
+{
+    var brush = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+    if (brush != null)
+    {
+        MyTextBlock.Foreground = brush;
+    }
+}
+```
+
+**For base classes like `ScrollableExamplePage`:** You can enumerate the visual tree and update all TextBlocks that have a local Foreground value:
+
+```csharp
+private void UpdateThemedForegrounds()
+{
+    var brush = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+    if (brush == null) return;
+
+    foreach (var element in EnumerateVisualTree(this))
+    {
+        if (element is TextBlock textBlock &&
+            textBlock.ReadLocalValue(TextBlock.ForegroundProperty) != DependencyProperty.UnsetValue)
+        {
+            textBlock.Foreground = brush;
+        }
+    }
+}
+```
+
+**Note:** The `DaisyThemeManager.ApplyTheme()` method mutates brush colors in-place via `ApplyPaletteToApplicationResources()`, which works for code-behind lookups but not for XAML `{ThemeResource}` bindings.
+
+---
+
+### 22. ContentControl XAML content capture timing issues
+
+When inheriting from `ContentControl` and trying to capture XAML content (e.g., `<MyControl>Some Text</MyControl>`), timing issues can cause controls to be invisible or malfunction.
+
+**Problem:** Capturing `Content` in `OnLoaded` and rebuilding the visual tree causes controls to become invisible when they have XAML content, while controls without content work fine.
+
+**Root cause:** ContentControl's internal content handling conflicts with manual visual tree rebuilding when content is set via XAML. The sequence of:
+
+1. XAML sets `Content`
+2. `OnLoaded` captures content
+3. Code rebuilds visual tree and sets `Content = _rootGrid`
+
+...can cause rendering issues that are difficult to diagnose.
+
+```csharp
+// ❌ FAILS: Controls with XAML content become invisible
+public class MyDivider : ContentControl
+{
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        _userContent = Content; // Capture
+        RebuildVisualTree();    // Build
+        Content = _rootGrid;    // Sets new content... but something breaks
+    }
+}
+```
+
+**Solution 1 (Recommended):** Build visual tree ONCE in constructor, use dedicated properties for text content:
+
+```csharp
+// ✅ WORKS: Build once in constructor, update dynamically
+public class MyDivider : ContentControl
+{
+    // Use a dedicated property instead of XAML content
+    public string? DividerText { get; set; }
+
+    public MyDivider()
+    {
+        DefaultStyleKey = typeof(MyDivider);
+        BuildVisualTree(); // Build ONCE in constructor
+    }
+
+    private void BuildVisualTree()
+    {
+        _rootGrid = new Grid { ... };
+        _textBlock = new TextBlock { ... };
+        _rootGrid.Children.Add(_textBlock);
+        Content = _rootGrid;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        // Just update existing elements, don't recreate
+        UpdateLayout();
+        ApplyColors();
+    }
+}
+```
+
+XAML usage changes from `<daisy:DaisyDivider>OR</daisy:DaisyDivider>` to `<daisy:DaisyDivider DividerText="OR" />`.
+
+**Solution 2:** If you must support XAML content, use `OnContentChanged` override:
+
+```csharp
+// ⚠️ CAUTION: More complex, test thoroughly
+protected override void OnContentChanged(object oldContent, object newContent)
+{
+    base.OnContentChanged(oldContent, newContent);
+    
+    // Skip our own grid to avoid infinite loop
+    if (newContent != null && !ReferenceEquals(newContent, _rootGrid))
+    {
+        _userContent = newContent as string ?? newContent?.ToString();
+    }
+}
+```
+
+**Key insight:** Building the visual tree in the constructor (before any content is set) and using a dedicated property for text content completely avoids these timing issues.
+
+---
+
+### 23. CA1822 "can be made static" breaks `x:Bind` and XAML event handlers
+
+**Problem:** The analyzer CA1822 suggests "Member does not access instance data and can be marked as static." However, applying this to properties or event handlers used in XAML breaks the build.
+
+**Root cause:** The WinUI XAML compiler generates instance access such as `this.PropertyName` or `this.OnEventHandler(...)`. Static members cause CS0176.
+
+```csharp
+// ❌ FAILS at build time (CS0176) - analyzer suggested static, but XAML needs instance
+public static DateTime Today => DateTime.Today;  // Used in x:Bind
+public static bool IsFeatureEnabled => true;     // Used in x:Bind
+private static void OnButtonClick(object sender, RoutedEventArgs e) { }  // XAML event
+
+// ✅ WORKS - keep as instance members when used in XAML
+public DateTime Today => DateTime.Today;
+public bool IsFeatureEnabled => true;
+private void OnButtonClick(object sender, RoutedEventArgs e) { }
+```
+
+**Rule:** **IGNORE CA1822** for any member that is:
+
+- Referenced in `{x:Bind PropertyName}` in XAML
+- Used as a XAML event handler (e.g., `Click="OnButtonClick"`)
+
+The analyzer doesn't understand XAML bindings and gives incorrect suggestions for these cases.
+
+---
+
+## 📋 Porting Checklist (Quick Reference)
+
+Before creating a new control file:
+
+1. **Search for existing enums**: `grep -r "enum EnumName" Controls/`
+2. **Check for helper classes**: Look for EventArgs, converters, etc.
+3. **Identify ambiguous types**: `Path`, `Color`, `Brush` often need qualification
+4. **Review enum values**: Ensure all values the new control needs are present
+5. **Verify WinUI 3 APIs**: Do not assume that WPF members exist on WinUI types.
+
+After creating the control:
+
+1. **Build immediately**: `dotnet build` to catch CS0101/CS0104 errors early
+2. **Fix duplicates by removing**: Don't add `new` keyword, just delete the duplicate
+3. **Qualify ambiguous types**: Use full namespace path
+4. **Use correct FlowerySizeManager API**: `GetIgnoreGlobalSize(this)` not `.IgnoreGlobalSize.GetValue()`
+
+---
+
+## ⚠️ Known Limitations
+
+### Dashed Borders on Buttons (DaisyButtonStyle.Dash)
+
+WinUI 3 `Button` and `Border` do not natively support dashed borders. Unlike WPF which has `BorderBrush` with `DashStyle`, WinUI requires using a `Rectangle` or `Path` with `StrokeDashArray` overlaid on the control.
+
+**Current behavior:** `DaisyButtonStyle.Dash` renders as `Outline` (solid border).
+
+**Future fix:** Replace the button's border with a custom template containing a `Rectangle`:
+
+```xml
+<Rectangle Stroke="{TemplateBinding BorderBrush}"
+           StrokeThickness="1"
+           StrokeDashArray="4,2"
+           RadiusX="8" RadiusY="8" />
+```
+
+This requires template modifications in `DaisyButton` to use a ControlTemplate with a Grid containing both the dashed Rectangle and the ContentPresenter.
+
+### `ClipToBounds` Does Not Exist
+
+WinUI 3 `Grid` and `Border` do NOT have a `ClipToBounds` property (unlike WPF/Avalonia).
+
+```csharp
+// ❌ FAILS: CS0117 - Border doesn't have ClipToBounds
+_contentBorder = new Border
+{
+    ClipToBounds = true
+};
+
+// ✅ WORKS: Remove ClipToBounds - WinUI handles clipping differently
+// Use UIElement.Clip for explicit rectangle clipping if needed
+_contentBorder = new Border
+{
+    CornerRadius = new CornerRadius(8)
+};
+```
+
+### `UIElement.Clip` Only Accepts `RectangleGeometry`
+
+Unlike WPF/Avalonia where `Clip` accepts any `Geometry`, WinUI 3 only supports `RectangleGeometry`.
+
+```csharp
+// ❌ FAILS: CS0266 - Cannot convert EllipseGeometry to RectangleGeometry
+_border.Clip = new EllipseGeometry { ... };
+_border.Clip = new PathGeometry { ... };
+
+// ✅ WORKS: Only RectangleGeometry is allowed
+_border.Clip = new RectangleGeometry { Rect = new Rect(0, 0, w, h) };
+```
+
+**Workarounds for non-rectangular clipping:**
+
+- Use Windows Composition API's `CompositionGeometricClip`
+- Use opacity masks with image brushes
+- Use a `Path` element as a visual overlay mask
+
+### `RectangleGeometry` Has No `RadiusX`/`RadiusY`
+
+WinUI's `RectangleGeometry` does NOT support rounded corners via `RadiusX`/`RadiusY` properties.
+
+```csharp
+// ❌ FAILS: CS0117 - RectangleGeometry has no RadiusX/RadiusY
+var geo = new RectangleGeometry
+{
+    Rect = new Rect(0, 0, w, h),
+    RadiusX = 8,
+    RadiusY = 8
+};
+
+// ✅ WORKS: Use PathGeometry with Bezier curves for rounded corners
+// Or use Border.CornerRadius for visual rounding (not clipping)
+```
+
+### `ToolTipService.SetToolTip()` Required
+
+Controls don't have a direct `.ToolTip` property. Use `ToolTipService`.
+
+```csharp
+// ❌ FAILS: CS0117 - No ToolTip property
+var kbd = new DaisyKbd { ToolTip = "Press here" };
+
+// ✅ WORKS: Use ToolTipService
+var kbd = new DaisyKbd();
+ToolTipService.SetToolTip(kbd, "Press here");
+```
+
+### `Grid.SetColumn()` Requires `FrameworkElement`
+
+`Grid.SetColumn()`, `Grid.SetRow()`, etc. require `FrameworkElement`, not `UIElement`.
+
+```csharp
+// ❌ FAILS: CS1503 - Cannot convert UIElement to FrameworkElement
+UIElement element = GetElement();
+Grid.SetColumn(element, 0);
+
+// ✅ WORKS: Cast to FrameworkElement first
+if (element is FrameworkElement fe)
+{
+    Grid.SetColumn(fe, 0);
+}
+_grid.Children.Add(element);
+```
+
+## Native Build Script
+
+Use scripts/build_all.ps1 for solution builds.
+Use scripts/build_windows.ps1 for the Gallery and its project references.
+
+```powershell
+pwsh -NoProfile -File ./scripts/build_all.ps1 -Configuration Debug -NoRun
+```
+
+The scripts locate native Visual Studio MSBuild and retain timestamped logs in logs/.
+Do not replace them with direct dotnet build commands.
+
+## ✅ Porting Workflow Checklist
+
+For the step-by-step, repeatable “do this every time” workflow, see:
+
+- `!todos\PORTING_CHECKLIST.md`
+
+---
+
+## Useful Resources
+
+- [WinUI 3](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/)
+- [Windows Composition](https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/composition)
+- [WinUI Controls Reference](https://learn.microsoft.com/en-us/windows/apps/design/controls/)

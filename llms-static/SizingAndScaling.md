@@ -1,6 +1,6 @@
 # Sizing and Scaling
 
-Flowery.Uno provides **two distinct sizing systems**. Understanding when to use each is essential:
+Flowery.WinUI provides **two distinct sizing systems**. Understanding when to use each is essential:
 
 | System | Purpose | Scope |
 | --- | --- | --- |
@@ -10,9 +10,9 @@ Flowery.Uno provides **two distinct sizing systems**. Understanding when to use 
 > [!NOTE]
 > 💡 **Most apps should just use Global Size.** Auto Scaling is an advanced feature for specific responsive-layout scenarios like data forms.
 
-## Uno Platform Implementation
+## Native WinUI Implementation
 
-Flowery.Uno uses a code-based token system instead of XAML resource dictionaries:
+Flowery.WinUI uses a code-based token system instead of XAML resource dictionaries:
 
 | Component | Purpose |
 | --- | --- |
@@ -94,7 +94,7 @@ FlowerySizeManager.SizeChanged += (sender, size) =>
 
 ## Built-in UI Controls
 
-Flowery.Uno provides ready-to-use controls for size selection:
+Flowery.WinUI provides ready-to-use controls for size selection:
 
 ### DaisySizeDropdown
 
@@ -299,7 +299,7 @@ Then apply sizing in your control's code or use a style:
 </Style>
 ```
 
-> **Note:** In Uno/WinUI, conditional styling based on property values is typically done in code-behind or using VisualStateManager rather than selector-based styles.
+> **Note:** In WinUI 3, conditional styling based on property values is typically done in code-behind or using VisualStateManager rather than selector-based styles.
 
 ## Bulk-Applying Size via Reflection
 
@@ -439,7 +439,7 @@ All controls in the panel will automatically resize when the dropdown selection 
 
 ## Continuous Font Scaling (FloweryScaleManager)
 
-While `FlowerySizeManager` provides **discrete size tiers** (Small, Medium, Large), Flowery.Uno also offers **continuous font scaling** based on window size through `FloweryScaleManager`.
+While `FlowerySizeManager` provides **discrete size tiers** (Small, Medium, Large), Flowery.WinUI also offers **continuous font scaling** based on window size through `FloweryScaleManager`.
 
 > **⚠️ Important:** These are **two separate, independent systems**. Auto Scaling ONLY affects controls within a container marked with `EnableScaling="True"`. It does NOT affect the rest of your app (sidebar, navigation, etc.).
 
@@ -477,7 +477,7 @@ xmlns:services="using:Flowery.Services"
 ### Scoped Usage: How It Works
 
 1. Set `EnableScaling="True"` on a container (UserControl, Window, Panel, etc.)
-2. The manager tracks the parent **TopLevel** size (desktop `Window` or browser root)
+2. The manager tracks the native WinUI `Window` size and reads `AppWindow` bounds for the current window.
 3. Calculates a scale factor:
    - Downscaling: `min(width/1920, height/1080)`
    - If `MaxScaleFactor > 1.0`, scale-up is allowed based on the available dimension
@@ -495,7 +495,8 @@ To allow scaling above 1.0, set `FloweryScaleManager.MaxScaleFactor` to your des
 FloweryScaleManager.MaxScaleFactor = 1.5;
 ```
 
-When `MaxScaleFactor > 1.0`, Flowery compensates for OS DPI scaling using `TopLevel.RenderScaling`, so you **don't double-scale** on systems already set to 125% / 150% Windows scaling.
+When `MaxScaleFactor > 1.0`, Flowery compensates for Windows DPI scaling through `XamlRoot.RasterizationScale`.
+This prevents duplicate scaling on displays already configured at 125% or 150%.
 
 **Safety**: `MaxScaleFactor` (and internal scale factors) are sanity-capped at **5.0 (500%)** to prevent extreme values.
 
@@ -581,7 +582,7 @@ private void ApplyScaling(double scaleFactor)
 }
 ```
 
-> **Note:** WinUI/Uno requires code-behind for dynamic property scaling. Flowery controls implementing `IScalableControl` will automatically scale their text when inside an `EnableScaling` container.
+> **Note:** WinUI 3 requires code-behind for dynamic property scaling. Flowery controls implementing `IScalableControl` will automatically scale their text when inside an `EnableScaling` container.
 
 #### Pattern 3: Override Auto Scaling with Global Size
 
@@ -612,4 +613,4 @@ If Auto Scaling is on, but you want specific controls to use the fixed Global Si
 
 ### Learn More
 
-For comprehensive documentation on `FloweryScaleManager`, including configuration, custom control support, and helper methods, see [FloweryScaleManager](https://tobitege.github.io/Flowery.Uno/#FloweryScaleManager).
+For comprehensive documentation on `FloweryScaleManager`, including configuration, custom control support, and helper methods, see [FloweryScaleManager](https://tobitege.github.io/Flowery.WinUI/#FloweryScaleManager).

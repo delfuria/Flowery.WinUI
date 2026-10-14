@@ -2,10 +2,10 @@
 
 ## Purpose
 
-FloweryLogging provides a single, app-wide logging pipeline that works across all Uno targets. It gives:
+FloweryLogging provides one logging pipeline for the native Windows application. It gives:
 
 - A central API for structured log entries with levels and categories.
-- Platform-specific output (Android Logcat, iOS/macOS Debug output, WASM console, desktop Debug).
+- Windows debug output through System.Diagnostics.Debug.WriteLine.
 - Runtime control for enabling/disabling logs and filtering by level.
 - A stable surface for UI log viewers via events.
 
@@ -13,7 +13,7 @@ This replaces ad-hoc Debug.WriteLine calls and keeps debug logging configurable 
 
 ## Architecture
 
-Core types live in `Flowery.Uno/Services`:
+Core types live in `Flowery.WinUI/Services`:
 
 - `FloweryLogging`: static logging entry point and configuration.
 - `FloweryLogEntry`: structured log message (timestamp, level, category, message, exception).
@@ -46,12 +46,7 @@ Formatting flags (default):
 
 ## Platform Output
 
-`FloweryPlatformLogSink` sends logs to:
-
-- Android: Logcat (`Android.Util.Log`)
-- iOS/macOS: `System.Diagnostics.Debug.WriteLine`
-- WASM: `Console.WriteLine`
-- Others: `System.Diagnostics.Debug.WriteLine`
+`FloweryPlatformLogSink` sends native Windows logs to `System.Diagnostics.Debug.WriteLine`.
 
 ## Usage
 
@@ -117,7 +112,7 @@ FloweryLogging.Logged += (_, entry) =>
 
 ```csharp
 using Flowery.Helpers;
-using Flowery.Uno.Gallery;
+using Flowery.WinUI.Gallery;
 
 FloweryDiagnostics.Log("ComboBox created");
 GalleryDiagnostics.Log("LayoutExamples failed to load");

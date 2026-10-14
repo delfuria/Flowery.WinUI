@@ -27,266 +27,74 @@ The effect assumes a **top-left light source** (like sunlight through a window):
 
 ## Technical Implementation
 
-Flowery.Uno implements neumorphism using a cross-platform approach via `DaisyNeumorphicHelper` with platform-specific optimizations.
+Flowery.WinUI renders neumorphism through native WinUI 3 controls and Windows Composition.
 
-### Implementation Strategy by Mode
+| Mode | Implementation |
+| --- | --- |
+| Raised | DaisyShadowContainer with dark and light outer Composition shadows |
+| Flat | DaisyShadowContainer with one reduced outer shadow |
+| Inset | DaisyNeumorphicHelper injects two gradient overlays |
+| None | The helper removes its visual layers |
 
-**Raised/Flat Modes** - Platform-specific shadow rendering:
+DaisyNeumorphicHelper.Windows.cs provides a direct Composition shadow when the visual tree cannot host a shadow container.
+That path uses a single dark shadow.
+Unsupported overlay injection disables the helper's inset layers for that instance.
+The direct shadow follows owner size changes and updates its rounded mask.
+Disposal releases its visual, shadow, mask surface, geometry, brushes, and size subscription.
 
-| Platform | Implementation | Notes |
-| :--- | :--- | :--- |
-| **Windows** | Composition API `DropShadow` | Single shadow (dark) for reliability |
-| **Desktop (Skia)** | `UIElementExtensions.SetElevation()` | Single shadow via ShadowState; some templates (e.g., `DaisyButton`) apply elevation to `PART_ShadowContainer` to avoid clipping |
-| **WASM** | `UIElementExtensions.SetElevation()` | CSS box-shadow |
-| **Android** | `UIElementExtensions.SetElevation()` | ViewCompat.SetElevation |
-| **iOS** | `UIElementExtensions.SetElevation()` | CALayer.shadow* |
+### Native Shadow Container
 
-**Windows-Specific Implementation** (`DaisyNeumorphicHelper.Windows.cs`):
-
-- Uses partial class pattern to isolate Windows code (`#if WINDOWS`)
-- Creates a single `SpriteVisual` with `DropShadow` (dark shadow, bottom-right)
-- Uses a simple opaque mask to render the shadow shape
-- Shadow colors derived from theme tokens (see Theme Integration below)
-- **Alternative**: `UIElementExtensions.SetElevation()` also works on Windows and can be used as a fallback or a simpler path when Composition shadows are disabled.
-- **Direct elevation routing**: use `DaisyNeumorphicHelper.ShouldUseDirectElevation()` to decide when to bypass the helper and call `SetElevation` directly (Skia/WASM/non-Windows).
-- **Elevation target by control (Skia/WASM)**:
-  - `DaisyButton`: apply elevation to `PART_ShadowContainer` (template wrapper) to avoid clipping; falls back to `ButtonBorder` when the container is missing.
-  - Most other controls: apply elevation to their neumorphic host element (e.g., `DaisyCard` uses `PART_SolidBackground`).
-- **Note**: ThemeShadow is intentionally not included due to limited use and compatibility.
-
-### XAML Template Patterns (for custom controls)
-
-**Goal:** make it obvious which element should receive elevation on Skia/WASM and where inset overlays can be injected.
-
-#### Namespace Cheat Sheet (XAML)
-
-- `xmlns:utu="using:Uno.Toolkit.UI"` for `ShadowContainer`
-- `xmlns:controls="using:Flowery.Controls"` for Flowery controls (e.g., `DaisyButton`)
-
-#### Platform Differences (Quick Reference)
-
-- **Windows (WinAppSDK)**: prefers Composition `DropShadow` (single dark shadow); optional ThemeShadow for special cases.
-- **Desktop (Skia)**: uses `UIElementExtensions.SetElevation()`; apply elevation to `PART_ShadowContainer` if the surface is wrapped (prevents clipping).
-- **WASM**: uses CSS `box-shadow` via `SetElevation`; apply elevation to the surface border (or container if used).
-- **Android/iOS**: use native elevation APIs via `SetElevation` (single shadow).
-
-#### Platform × Mode Matrix
-
-| Platform | Raised | Flat | Inset |
-| :--- | :--- | :--- | :--- |
-| **Windows (WinAppSDK)** | Composition `DropShadow` (dark only) | Composition `DropShadow` (reduced) | Gradient overlays (inset borders) |
-| **Desktop (Skia)** | `SetElevation` (single shadow) | `SetElevation` (reduced) | Gradient overlays (inset borders) |
-| **WASM** | `SetElevation` (CSS box-shadow) | `SetElevation` (reduced) | Gradient overlays (inset borders) |
-| **Android** | `SetElevation` (native view elevation) | `SetElevation` (reduced) | Gradient overlays (inset borders) |
-| **iOS** | `SetElevation` (CALayer shadow) | `SetElevation` (reduced) | Gradient overlays (inset borders) |
-
-#### Pattern A — Simple Surface (Most Controls)
-
-- Use a single surface element with a stable name (e.g., `PART_SolidBackground`).
-- In code, override `GetNeumorphicHostElement()` to return that surface.
-- Apply `SetElevation` to that surface on Skia/WASM.
-
-Example (simplified):
+DaisyShadowContainer and DaisyShadow use the Flowery.Controls namespace.
+Merge the library's Generic.xaml after XamlControlsResources.
+These controls require no separate toolkit package.
 
 ```xml
-<Border x:Name="PART_SolidBackground"
-        Background="{TemplateBinding Background}"
-        CornerRadius="{TemplateBinding CornerRadius}">
-  <!-- content -->
-</Border>
+xmlns:daisy="using:Flowery.Controls"
+
+<daisy:DaisyShadowContainer CornerRadius="12">
+    <daisy:DaisyShadowContainer.Shadows>
+        <daisy:DaisyShadow Color="Black" Opacity="0.35"
+                           OffsetX="4" OffsetY="4" BlurRadius="12" />
+    </daisy:DaisyShadowContainer.Shadows>
+    <Border Background="{ThemeResource DaisyBase200Brush}"
+            CornerRadius="12" Padding="16">
+        <TextBlock Text="Native shadow" />
+    </Border>
+</daisy:DaisyShadowContainer>
 ```
 
-#### Pattern B — Shadow Wrapper (DaisyButton Style)
+DaisyShadow describes color, opacity, X/Y offset, blur radius, spread, and IsInner.
+Outer shadows use Windows Composition masks.
+Explicit IsInner shadows use SkiaSharp alpha masks at the current XamlRoot rasterization scale.
+Collection changes, property changes, size changes, and rasterization changes update the shadow.
+Unload releases Composition resources, image sources, and subscriptions.
 
-- Wrap the surface in a `ShadowContainer` so the shadow is not clipped by the border.
-- On Skia/WASM, apply elevation to the `ShadowContainer`, not the inner `Border`.
+The helper's Inset mode uses gradient overlays.
+It is distinct from an explicit DaisyShadow with IsInner set to True.
 
-Example (simplified):
+### Custom Control Integration
 
-```xml
-<!-- xmlns:utu="using:Uno.Toolkit.UI" -->
-<utu:ShadowContainer x:Name="PART_ShadowContainer"
-                     CornerRadius="{TemplateBinding CornerRadius}">
-  <Border x:Name="ButtonBorder"
-          Background="{TemplateBinding Background}"
-          CornerRadius="{TemplateBinding CornerRadius}">
-    <!-- content -->
-  </Border>
-</utu:ShadowContainer>
-```
-
-#### Inset Overlays
-
-- Inset mode injects overlay `Border` elements into a container grid.
-- Ensure the template allows overlay injection (i.e., the host element is part of the visual tree and not re-parented later).
-
-### Full How-To (add neumorphism to a custom control)
-
-#### Step 1: Choose a surface element in XAML
-
-- Pick the element that represents the visible surface (usually a `Border`).
-- If the surface can clip shadows, wrap it in `PART_ShadowContainer` (Pattern B).
-
-#### Step 2: Expose the surface in code
-
-- If your control derives from `DaisyBaseContentControl`, override `GetNeumorphicHostElement()` and return the surface element.
-- If you add a `ShadowContainer` wrapper, make sure you can access it in code (e.g., `GetTemplateChild("PART_ShadowContainer")`).
-
-Example (surface host override):
+1. Derive the control from DaisyBaseContentControl.
+2. Select the element that renders the visible surface.
+3. Override GetNeumorphicHostElement to return that surface.
+4. Cache template parts in OnApplyTemplate.
+5. Call RequestNeumorphicRefresh after the template is ready.
+6. Keep the surface attached while the helper owns its layers.
 
 ```csharp
 protected override FrameworkElement? GetNeumorphicHostElement()
 {
-    return _surfaceBorder ?? this;
+    return _surfaceBorder is { } surface ? surface : this;
 }
 ```
 
-#### Step 3: Apply neumorphic settings
-
-- Use attached properties to opt in or override global settings.
+Enable the effect through the control's existing properties:
 
 ```xml
-<local:MyControl
-    NeumorphicEnabled="True"
-    NeumorphicMode="Raised"
-    NeumorphicIntensity="0.8" />
-```
-
-#### Step 4: Ensure template parts are ready
-
-- In `OnApplyTemplate`, cache template parts (`_surfaceBorder`, `_shadowContainer`, etc.).
-- Call `RequestNeumorphicRefresh()` after template is ready.
-
-#### Step 5: Direct elevation routing
-
-- When `DaisyNeumorphicHelper.ShouldUseDirectElevation()` is true (Skia/WASM/non-Windows), apply `SetElevation` to:
-  - `PART_ShadowContainer` (if you use Pattern B), otherwise
-  - the surface border (Pattern A).
-
-#### Step 6: Clear on None
-
-- When mode is `None`, clear elevation on the same element you used for direct elevation.
-
-#### Step 7: Avoid template conflicts
-
-- Do not re-parent the surface element after the helper has injected overlays.
-- Keep the surface element in the visual tree; avoid replacing it at runtime.
-
-### Worked Example A — Simple Surface (Pattern A)
-
-#### XAML
-
-```xml
-<ControlTemplate x:Key="MyCardTemplate" TargetType="local:MyCard">
-  <Border x:Name="PART_SolidBackground"
-          Background="{TemplateBinding Background}"
-          CornerRadius="{TemplateBinding CornerRadius}">
-    <ContentPresenter Margin="{TemplateBinding Padding}" />
-  </Border>
-</ControlTemplate>
-```
-
-#### Code-Behind
-
-```csharp
-public sealed partial class MyCard : DaisyBaseContentControl
-{
-    private Border? _surfaceBorder;
-
-    public MyCard()
-    {
-        DefaultStyleKey = typeof(MyCard);
-    }
-
-    protected override void OnApplyTemplate()
-    {
-        base.OnApplyTemplate();
-        _surfaceBorder = GetTemplateChild("PART_SolidBackground") as Border;
-        RequestNeumorphicRefresh();
-    }
-
-    protected override FrameworkElement? GetNeumorphicHostElement()
-    {
-        return _surfaceBorder ?? this;
-    }
-}
-```
-
-#### Usage
-
-```xml
-<local:MyCard NeumorphicEnabled="True"
-              NeumorphicMode="Raised"
-              NeumorphicIntensity="0.8" />
-```
-
-### Worked Example B — Shadow Wrapper (Pattern B / DaisyButton Style)
-
-#### XAML B
-
-```xml
-<!-- xmlns:utu="using:Uno.Toolkit.UI" -->
-<ControlTemplate x:Key="MyButtonTemplate" TargetType="local:MyButton">
-  <utu:ShadowContainer x:Name="PART_ShadowContainer"
-                       CornerRadius="{TemplateBinding CornerRadius}">
-    <Border x:Name="PART_SurfaceBorder"
-            Background="{TemplateBinding Background}"
-            CornerRadius="{TemplateBinding CornerRadius}">
-      <ContentPresenter Margin="{TemplateBinding Padding}" />
-    </Border>
-  </utu:ShadowContainer>
-</ControlTemplate>
-```
-
-#### Code-Behind B
-
-```csharp
-public sealed partial class MyButton : DaisyBaseContentControl
-{
-    private Border? _surfaceBorder;
-    private ShadowContainer? _shadowContainer;
-
-    public MyButton()
-    {
-        DefaultStyleKey = typeof(MyButton);
-    }
-
-    protected override void OnApplyTemplate()
-    {
-        base.OnApplyTemplate();
-        _surfaceBorder = GetTemplateChild("PART_SurfaceBorder") as Border;
-        _shadowContainer = GetTemplateChild("PART_ShadowContainer") as ShadowContainer;
-        RequestNeumorphicRefresh();
-    }
-
-    protected override FrameworkElement? GetNeumorphicHostElement()
-    {
-        return _surfaceBorder ?? this;
-    }
-
-    private UIElement? GetElevationTarget()
-    {
-        if (DaisyNeumorphicHelper.ShouldUseDirectElevation() && _shadowContainer != null)
-            return _shadowContainer;
-
-        return _surfaceBorder;
-    }
-}
-```
-
-#### Usage B
-
-```xml
-<local:MyButton NeumorphicEnabled="True"
+<daisy:DaisyCard NeumorphicEnabled="True"
                 NeumorphicMode="Raised"
                 NeumorphicIntensity="0.8" />
 ```
-
-**Inset Mode** - Injects gradient overlay borders into the visual tree:
-
-- Two semi-transparent `Border` elements with `LinearGradientBrush` backgrounds
-- Dark gradient from top-left corner, light gradient from bottom-right corner
-- Overlays on top of the owner's content without blocking interaction
 
 ### Elevation System (Size-Aware)
 
@@ -379,27 +187,27 @@ The following safeguards were added after real-world hangs (scrolling + page swi
 
 ### Field-Tested Integration Notes (Session Takeaways)
 
-These are proven fixes from real-world testing that eliminated regressions across Windows + Desktop:
+These notes describe the native Windows integration:
 
 1. **Pick the real surface as the host element**
    - For composite controls, attach neumorphism to the element that actually renders the surface.
-   - Example: `DaisyCard` now uses `PART_SolidBackground` via `GetNeumorphicHostElement()` to prevent background loss on Windows and Skia.
+   - Example: `DaisyCard` uses `PART_SolidBackground` through `GetNeumorphicHostElement()`.
 
 2. **ComboBox popup anchoring after host changes**
    - When the host is an inner element, anchor the drop-down to the trigger button (not the outer control) so the popup aligns with the input instead of its shadow.
 
-3. **Avoid raw Composition DropShadow on Skia**
-   - `Compositor.CreateDropShadow()` is not implemented in Uno Skia and throws `NotImplementedException`.
-   - Use `DaisyNeumorphicHelper` or `ShadowContainer` for cross-platform shadows instead of raw Composition APIs.
+3. **Use native shadow types**
+   - Use `DaisyNeumorphicHelper`, `DaisyShadowContainer`, and `DaisyShadow` in the native projects.
 
-4. **Do NOT merge Uno.Toolkit.* Generic.xaml**
-   - The toolkit does not ship `Styles/Generic.xaml`. Merging it causes startup failures.
-   - ShadowContainer only needs the package reference; no Generic.xaml merge.
+4. **Load native library resources**
+   - Merge `ms-appx:///Flowery.WinUI/Themes/Generic.xaml` after `XamlControlsResources`.
+   - A separate toolkit dependency is not required.
 
 ### Performance & Threading
 
 - **Low-Priority Dispatching**: Updates to the neumorphic visuals are queued with `DispatcherQueuePriority.Low`. This prevents the UI thread from hanging when hundreds of controls update simultaneously (e.g., when toggling mode in the Sidebar).
-- **Hardware Acceleration**: Shadow rendering is delegated to platform-native APIs which use GPU acceleration.
+- **Outer Shadows**: Windows Composition renders the native outer shadows.
+- **Explicit Inner Shadows**: SkiaSharp creates alpha masks on CPU raster surfaces before WinUI displays them.
 
 ## Effects Usage
 
@@ -456,7 +264,7 @@ DaisyBaseContentControl.GlobalNeumorphicEnabled = true;
 | Mode | Style Guide Term | Description |
 | :--- | :--- | :--- |
 | `None` | — | No effect applied. |
-| `Raised` | Outer | Element appears to "pop out" from the surface. Uses platform elevation API. |
+| `Raised` | Outer | Dark and light outer Composition shadows. |
 | `Inset` | Inner | Element appears "pressed into" the surface. Uses gradient overlays. |
 | `Flat` | — | Single subtle shadow (half of Raised elevation). |
 
@@ -480,32 +288,18 @@ DaisyBaseContentControl.GlobalNeumorphicEnabled = true;
 
 ## Developer Notes
 
-### Partial Class Architecture
+### Native Helper Files
 
-`DaisyNeumorphicHelper` uses a partial class pattern for platform-specific implementations:
-
-```diagram
-Flowery.Uno/Controls/
-├── DaisyNeumorphicHelper.cs          # Shared code, partial method declarations
-└── DaisyNeumorphicHelper.Windows.cs  # Windows-only (#if WINDOWS), Composition API
+```text
+Flowery.WinUI/Controls/
+├── DaisyShadow.cs                    # Dependency properties and observable collection
+├── DaisyShadowContainer.cs           # Outer Composition shadows and explicit inset masks
+├── DaisyNeumorphicHelper.cs           # Layer ownership, mode selection, and gradient overlays
+└── DaisyNeumorphicHelper.Windows.cs   # Direct native Composition shadow path
 ```
 
-**Partial Method Hooks**:
-
-```csharp
-// In DaisyNeumorphicHelper.cs:
-partial void OnApplyDirectElevation(DaisyNeumorphicMode mode, double intensity, double elevation, ref bool handled);
-partial void OnDisposeWindowsShadows();
-
-// In DaisyNeumorphicHelper.Windows.cs (#if WINDOWS):
-partial void OnApplyDirectElevation(..., ref bool handled)
-{
-    ApplyWindowsDropShadows(mode, intensity, elevation);
-    handled = true; // Skip default SetElevation path
-}
-```
-
-This pattern isolates platform-specific code without risking regressions on other platforms.
+The helper tracks its installed child visual.
+Cleanup detaches that visual only when the helper still owns it.
 
 ### Theme Integration (Shadow Colors)
 
@@ -529,13 +323,11 @@ var darkColor = DaisyNeumorphic.GetDarkShadowColor(element)
     ?? DaisyBaseContentControl.GlobalNeumorphicDarkShadowColor; // Theme-derived fallback
 ```
 
-### Platform Considerations
+### Native Windows Rendering
 
-**Windows**: Uses Composition API `DropShadow` via partial class (`DaisyNeumorphicHelper.Windows.cs`). Current implementation uses a single dark shadow for reliability. Falls back to standard `SetElevation` path if Composition API fails.
-
-**Desktop (Skia)**: Shadows are clearly visible and scale well with elevation values. Uses single-shadow `SetElevation` approach.
-
-**WASM**: Uses CSS `box-shadow` via `SetElevation`. May need slightly boosted opacity values for visibility.
+The native solution uses Windows Composition for outer shadows.
+SkiaSharp provides explicit inset alpha masks for DaisyShadowContainer.
+Browser and mobile elevation backends are outside the native build.
 
 ### Container Controls (DaisyButtonGroup, DaisyJoin)
 

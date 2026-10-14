@@ -1,6 +1,6 @@
 # Icon SVG Generator
 
-A standalone CLI tool to export DaisyIcons from `Flowery.Uno/Themes/DaisyIcons.xaml` to individual SVG files with a customizable fill color.
+A standalone CLI tool to export DaisyIcons from `Flowery.WinUI/Themes/DaisyIcons.xaml` to individual SVG files with a customizable fill color.
 
 ## Purpose
 
@@ -85,6 +85,6 @@ Tools/IconGenerator/
 
 ## Related
 
-- `Flowery.Uno/Tools/IconSvgExporter.cs` - The core exporter class
-- `Flowery.Uno/Themes/DaisyIcons.xaml` - Source icon definitions
+- `Flowery.WinUI/Tools/IconSvgExporter.cs` - The core exporter class
+- `Flowery.WinUI/Themes/DaisyIcons.xaml` - Source icon definitions
 - `Tools/PatternGenerator` - Similar tool for pattern tiles

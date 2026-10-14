@@ -1,13 +1,13 @@
 # Overview
 
-A static helper class providing centralized access to design tokens, resource lookups, and default sizing values for all Flowery.Uno controls.
+A static helper class providing centralized access to design tokens, resource lookups, and default sizing values for all Flowery.WinUI controls.
 It provides:
 
 1. **Resource Lookup Methods** - Safe access to `ResourceDictionary` values with fallbacks
 2. **Size Key Helpers** - Convert `DaisySize` enum to resource key strings
 3. **Default Sizing Values** - Hardcoded fallbacks for all control dimensions
 
-All Flowery.Uno controls use this class internally to ensure consistent sizing and theming.
+All Flowery.WinUI controls use this class internally to ensure consistent sizing and theming.
 
 ## Resource Lookup Methods
 

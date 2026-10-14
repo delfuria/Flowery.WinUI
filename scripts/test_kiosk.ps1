@@ -1,0 +1,69 @@
+#requires -Version 7.0
+param(
+    [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
+    [switch]$SkipBuild,
+    [ValidateRange(0, 16)][int]$Monitor = 0,
+    [ValidateSet('Full', 'LowerHalf')][string]$WindowRegion = 'LowerHalf',
+    [string]$SdkVersion,
+    [string]$DotNetPath
+)
+
+$ErrorActionPreference = 'Stop'
+if (-not $IsWindows) { throw 'Run this script in native PowerShell 7 on Windows.' }
+$repoRoot = Split-Path -Parent $PSScriptRoot
+if (-not $SkipBuild) {
+    $buildScript = Join-Path $PSScriptRoot 'build_all.ps1'
+    & $buildScript -Configuration $Configuration -NoRun -SdkVersion $SdkVersion -DotNetPath $DotNetPath
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
+$relative = 'bin\{0}\Flowery.WinUI.Kiosk\net10.0-windows10.0.19041\win-x64\Flowery.WinUI.Kiosk.exe' -f $Configuration
+$executable = Join-Path $repoRoot $relative
+if (-not (Test-Path -LiteralPath $executable -PathType Leaf)) { throw ('Kiosk executable is missing. Build the solution first: {0}' -f $executable) }
+$runId = '{0}-{1}' -f (Get-Date -Format 'yyyyMMdd-HHmmss-fff'), ([Guid]::NewGuid().ToString('N').Substring(0, 8))
+$resultsRoot = Join-Path $repoRoot ('TestResults\Kiosk\{0}\{1}' -f $Configuration, $runId)
+$logRoot = Join-Path $repoRoot 'logs'
+New-Item -ItemType Directory -Path $resultsRoot -Force | Out-Null
+New-Item -ItemType Directory -Path $logRoot -Force | Out-Null
+$reportPath = Join-Path $resultsRoot 'kiosk-smoke.xml'
+$logPath = Join-Path $logRoot ('kiosk-tests-{0}-{1}.log' -f $Configuration, $runId)
+$startInfo = [Diagnostics.ProcessStartInfo]::new()
+$startInfo.FileName = $executable
+$startInfo.WorkingDirectory = Split-Path -Parent $executable
+$startInfo.UseShellExecute = $false
+$startInfo.CreateNoWindow = $true
+$startInfo.RedirectStandardOutput = $true
+$startInfo.RedirectStandardError = $true
+$startInfo.ArgumentList.Add('--smoke-test')
+$startInfo.ArgumentList.Add($reportPath)
+$startInfo.Environment['FLOWERY_STATE_ROOT'] = Join-Path $resultsRoot 'state'
+if ($Monitor -gt 0) {
+    $startInfo.Environment['FLOWERY_MONITOR_DEVICE'] = '\\.\DISPLAY{0}' -f $Monitor
+    $startInfo.Environment['FLOWERY_MONITOR_REGION'] = if ($WindowRegion -eq 'LowerHalf') { 'lower-half' } else { 'full' }
+}
+$process = [Diagnostics.Process]::Start($startInfo)
+Write-Host ('Kiosk process: {0}; report: {1}' -f $process.Id, $reportPath)
+try {
+    $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+    $stderrTask = $process.StandardError.ReadToEndAsync()
+    if (-not $process.WaitForExit(120000)) { throw ('Kiosk smoke test timed out. Assistant-started process {0} requires ownership-checked cleanup.' -f $process.Id) }
+    $exitCode = $process.ExitCode
+    $output = $stdoutTask.GetAwaiter().GetResult() + $stderrTask.GetAwaiter().GetResult()
+    $output | Set-Content -LiteralPath $logPath -Encoding utf8
+}
+finally { $process.Dispose() }
+if (-not (Test-Path -LiteralPath $reportPath -PathType Leaf)) { throw ('Kiosk did not write its report; exit code {0}. Log: {1}' -f $exitCode, $logPath) }
+[xml]$report = Get-Content -LiteralPath $reportPath -Raw -Encoding utf8
+$cases = @($report.tests.test)
+$total = [int]$report.tests.total
+$passed = [int]$report.tests.passed
+$failed = [int]$report.tests.failed
+if ($total -lt 6 -or $cases.Count -ne $total -or $passed + $failed -ne $total) { throw 'Kiosk smoke report has invalid counts.' }
+$names = @($cases | ForEach-Object { [string]$_.name })
+if (@($names | Sort-Object -Unique).Count -ne $total -or @($names | Where-Object { [string]::IsNullOrWhiteSpace($_) }).Count -gt 0) { throw 'Kiosk smoke report has invalid case names.' }
+$failedCases = @($cases | Where-Object { $_.outcome -ne 'Passed' })
+Write-Host ('Kiosk: {0} passed, {1} failed. Report: {2}' -f $passed, $failed, $reportPath)
+if ($exitCode -ne 0 -or $failed -ne 0 -or $failedCases.Count -gt 0 -or $passed -ne $total) {
+    $failedCases | Select-Object -First 3 | ForEach-Object { Write-Host ('{0}: {1}' -f $_.name, $_.message) }
+    exit 1
+}
+exit 0

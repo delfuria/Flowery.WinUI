@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.19041</TargetFramework>
+    <RootNamespace>Flowery.WinUI.Kiosk</RootNamespace>
+    <UseWinUI>true</UseWinUI>
+    <OutputType>WinExe</OutputType>
+    <ApplicationTitle>Flowery.WinUI Kiosk</ApplicationTitle>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <WindowsPackageType>None</WindowsPackageType>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <NoWarn>$(NoWarn);PRI263</NoWarn>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Flowery.WinUI\Flowery.WinUI.csproj" />
+    <ProjectReference Include="..\Flowery.WinUI.Win2D\Flowery.WinUI.Win2D.csproj" />
+    <ProjectReference Include="..\Flowery.WinUI.Gallery.Core\Flowery.WinUI.Gallery.Core.csproj" />
+    <Compile Include="..\Flowery.WinUI.Gallery\NativeWindowPlacement.cs" Link="NativeWindowPlacement.cs" />
+    <Content Include="Assets\Kiosk\*.svg" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Import Project="..\Flowery.WinUI.GalleryAssets.props" />
+  <Import Project="..\Flowery.WinUI.PatternAssets.props" />
+</Project>

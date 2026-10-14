@@ -17,7 +17,7 @@ An enterprise-grade implementation of `IUserProvider` for integrating GitHub ide
 The provider can be initialized with a pre-existing token or by injecting a secure storage service for automatic lifecycle management.
 
 ```csharp
-using Flowery.Integrations.Uno.GitHub;
+using Flowery.Integrations.WinUI.GitHub;
 using Flowery.Services;
 
 // Option 1: Manual Initialization
@@ -73,5 +73,5 @@ The provider maps the following GitHub data to the `IFlowUser` contract:
 ## See Also
 
 - [ISecureStorage](ISecureStorage.md)
-- [IUserProvider](../Flowery.Uno/Controls/Kanban/Users/Interfaces/IUserProvider.cs)
-- [CompositeUserProvider](../Flowery.Uno/Controls/Kanban/Users/Providers/CompositeUserProvider.cs)
+- [IUserProvider](../Flowery.WinUI.Kanban/Controls/Users/Interfaces/IUserProvider.cs)
+- [CompositeUserProvider](../Flowery.WinUI.Kanban/Controls/Users/Providers/CompositeUserProvider.cs)

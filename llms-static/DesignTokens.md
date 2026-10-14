@@ -1,6 +1,6 @@
 # Design Tokens
 
-Flowery.Uno uses centralized design tokens to ensure consistent sizing across all controls. Tokens are defined in code via `DaisyTokenDefaults.cs` and can be accessed programmatically through `DaisyResourceLookup`.
+Flowery.WinUI uses centralized design tokens to ensure consistent sizing across all controls. Tokens are defined in code via `DaisyTokenDefaults.cs` and can be accessed programmatically through `DaisyResourceLookup`.
 
 > **Note:** This document covers **sizing and layout tokens**. For color and brush customization, see [`StylingResources.md`](StylingResources.md).
 
@@ -15,9 +15,9 @@ Design tokens provide a single source of truth for:
 - **Spacing** - Layout spacing values
 - **Border Thickness** - Standard border widths
 
-## Uno Platform Implementation
+## Native WinUI Implementation
 
-Flowery.Uno implements design tokens in C#:
+Flowery.WinUI implements design tokens in C#:
 
 | Component | Purpose |
 | --- | --- |

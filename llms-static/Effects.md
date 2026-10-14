@@ -3,7 +3,7 @@
 
 # Overview
 
-A collection of pluggable visual effects for Uno Platform controls (namespace: Flowery.Effects), designed for cross-platform compatibility including Browser/WASM.
+A collection of visual effects for WinUI 3 controls in the Flowery.Effects namespace.
 
 <img src="images/effects_showcase.webp" alt="Effects Showcase" style="max-width:50%;width:50%;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
 
@@ -163,7 +163,7 @@ Creates a follower element that tracks mouse position with spring physics.
 
 **Note**: Must be applied to a Panel-type control (e.g., `Grid`, `Canvas`, `StackPanel`).
 
-**Desktop only:** This effect is designed for mouse/cursor tracking and is hidden on Android/mobile where touch gestures scroll the page instead.
+This effect tracks the mouse pointer in the native Windows application.
 
 **Container hit testing:** If you want tracking to work across a container's full area (not just over child elements), the Panel must have `Background="Transparent"` (or any brush). Without a background, pointer events are only detected over rendered content.
 
@@ -327,18 +327,14 @@ await AnimationHelper.AnimateAsync(
 
 ---
 
-## Cross-Platform Compatibility
+## Native Windows Runtime
 
-All effects use manual `Task.Delay` + `DispatcherQueue` interpolation instead of declarative animation keyframes. This pattern ensures consistent behavior across:
-
-- ✅ Windows Desktop
-- ✅ Browser / WebAssembly (planned)
-- ✅ iOS / Android (planned)
+The effects use Task.Delay and DispatcherQueue interpolation in the native Windows application.
+The active solution does not target browser or mobile platforms.
 
 ### The Pattern
 
 ```csharp
-// Manual interpolation pattern (used by Flowery.Effects)
 for (int i = 0; i <= steps; i++)
 {
     var t = easing.Ease((double)i / steps);

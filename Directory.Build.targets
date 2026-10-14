@@ -1,31 +1,10 @@
 <Project>
-  <PropertyGroup>
-    <Version Condition="'$(Version)' == '' or '$(Version)' == '1.0.0'">1.1.0</Version>
-    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">1.1.0.0</AssemblyVersion>
-    <FileVersion Condition="'$(FileVersion)' == ''">1.1.0.0</FileVersion>
-    <Authors Condition="'$(Authors)' == '' or '$(Authors)' == '$(MSBuildProjectName)'">tobitege</Authors>
-    <PackageProjectUrl Condition="'$(PackageProjectUrl)' == ''">https://github.com/tobitege/Flowery.Uno</PackageProjectUrl>
-    <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/tobitege/Flowery.Uno</RepositoryUrl>
+  <PropertyGroup Condition="'$(UseWinUI)' == 'true' and '$(IsPackable)' == 'true'">
+    <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
   </PropertyGroup>
-
-  <!-- Android: remove resizetizer outputs with scale-125 to avoid unsupported DPI mapping -->
-  <Target Name="RemoveAndroidScale125ResizetizerOutputs"
-          AfterTargets="UnoResizetizeImages"
-          BeforeTargets="ProcessResizedImages"
-          Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
-    <ItemGroup>
-      <_UnoResizetizerCollectedImages Remove="@(_UnoResizetizerCollectedImages)"
-                                      Condition="$([System.String]::Copy('%(_UnoResizetizerCollectedImages.Filename)').EndsWith('.scale-125'))" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="ConvertTestLogsToUtf8"
-          AfterTargets="InvokeTestingPlatform"
-          Condition="'$(IsTestProject)' == 'true' and '$(TestingPlatformDotNetTestSupport)' == 'true' and '$(OS)' == 'Windows_NT'">
-    <PropertyGroup>
-      <_FloweryTestResultsRoot>$(MSBuildProjectDirectory)\bin\$(Configuration)\TestResults\$(MSBuildProjectName)</_FloweryTestResultsRoot>
-      <_FloweryConvertLogScript>$(MSBuildThisFileDirectory)scripts\Convert-TestLogsToUtf8.ps1</_FloweryConvertLogScript>
-    </PropertyGroup>
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(_FloweryConvertLogScript)&quot; -Root &quot;$(_FloweryTestResultsRoot)&quot;" />
-  </Target>
+  <ItemGroup Condition="'$(UseWinUI)' == 'true'">
+    <Compile Include="$(MSBuildThisFileDirectory)GlobalUsings.cs" Link="GlobalUsings.cs" Condition="'$(MSBuildProjectName)' != 'Flowery.WinUI.Kanban'" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" PrivateAssets="all" />
+  </ItemGroup>
 </Project>

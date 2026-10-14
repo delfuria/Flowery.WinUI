@@ -3,7 +3,7 @@
 
 # Overview
 
-FloweryDialogBase is the foundation for building **themed, responsive modal dialogs** in Flowery.Uno. It inherits from `DaisyModal` and provides **smart sizing** that adapts to any screen size--from narrow mobile portrait to large desktop--plus automatic **theme synchronization**, **standardized 3-row layouts** (header, scrollable content, footer), and factory methods for creating consistent button footers.
+FloweryDialogBase is the foundation for building **themed, responsive modal dialogs** in Flowery.WinUI. It inherits from `DaisyModal` and provides **smart sizing** that adapts to any screen size--from narrow mobile portrait to large desktop--plus automatic **theme synchronization**, **standardized 3-row layouts** (header, scrollable content, footer), and factory methods for creating consistent button footers.
 
 ## Inheritance Chain
 

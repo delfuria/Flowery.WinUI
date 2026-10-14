@@ -1,12 +1,12 @@
 # Supplementary Documentation Workflow
 
-This document provides step-by-step instructions for creating supplementary documentation files for Flowery.Uno controls. Follow these steps exactly.
+This document provides step-by-step instructions for creating supplementary documentation files for Flowery.WinUI controls. Follow these steps exactly.
 
 ---
 
 ## TASK OVERVIEW
 
-You are creating markdown files that provide **human-friendly explanations** of Uno Platform / WinUI controls. These files enhance the auto-generated technical documentation with:
+You are creating markdown files that provide **human-friendly explanations** of WinUI 3 controls. These files enhance the auto-generated technical documentation with:
 
 - Plain-English descriptions of what each variant/option does
 - Visual/behavioral descriptions (since you can't see the actual UI)
@@ -25,19 +25,19 @@ Before writing documentation, you need to gather information from these sources:
 
 ### 1.1 Read the C# Control File
 
-**Location:** `Flowery.Uno/Controls/DaisyControlName.cs`
+**Location:** `Flowery.WinUI/Controls/DaisyControlName.cs`
 
 Extract:
 
 - Class name (e.g., `DaisyButton`)
 - Base class (what it inherits from)
-- All `StyledProperty` definitions
+- Native `DependencyProperty.Register` and `RegisterAttached` definitions, including their CLR accessors
 - All enum definitions (usually at the top of the file)
 - XML documentation comments (`/// <summary>`)
 
 ### 1.2 Read the XAML Theme File (if exists)
 
-**Location:** `Flowery.Uno/Themes/DaisyControlName.xaml`
+**Location:** `Flowery.WinUI/Themes/DaisyControlName.xaml`
 
 Look for:
 
@@ -47,7 +47,7 @@ Look for:
 
 ### 1.3 Read the Example File
 
-**Location:**`Flowery.Uno.Gallery/Examples/*Examples.xaml`
+**Location:**`Flowery.WinUI.Gallery.Core/Examples/*Examples.xaml`
 
 Find the section for this control by searching for:
 
@@ -106,7 +106,9 @@ Write a brief paragraph explaining:
 ```markdown
 # Overview
 
-DaisyButton provides styled buttons with **8 color variants**, **5 style variants**, and **5 size options**. Supports icons, loading states, and can be used for actions, navigation, or form submission.
+DaisyButton provides color variants, button styles, and five size options.
+It supports icons and actions such as navigation or form submission.
+Read the current enum declarations before you document variant counts.
 ```
 
 ### 3.3 Variant Tables (If Applicable)
@@ -208,18 +210,15 @@ Show practical XAML usage:
 ```markdown
 ## Content Structure
 
-DaisyCard expects this structure:
-- Header (optional): Title area
-- Body: Main content
-- Actions (optional): Buttons/links
+Use native layout controls to organize content inside DaisyCard:
 
 \`\`\`xml
 <controls:DaisyCard>
-    <controls:DaisyCard.Header>Title</controls:DaisyCard.Header>
-    <TextBlock>Card content here</TextBlock>
-    <controls:DaisyCard.Actions>
+    <StackPanel Spacing="12">
+        <TextBlock Text="Title" FontSize="20" />
+        <TextBlock Text="Card content here" />
         <controls:DaisyButton Content="Action" />
-    </controls:DaisyCard.Actions>
+    </StackPanel>
 </controls:DaisyCard>
 \`\`\`
 ```
@@ -231,7 +230,7 @@ DaisyCard expects this structure:
 
 - Use `IsEnabled="False"` to disable interaction while preserving visual state
 - Combine with `DaisyTooltip` for additional context
-- For forms, set `IsDefault="True"` on the primary action button
+- Use `ToolTipService.ToolTip` to add a native WinUI 3 tooltip
 ```
 
 ---
@@ -272,17 +271,16 @@ Here is a complete supplementary doc for reference:
 
 ## Overview
 
-DaisyBadge displays small status indicators or labels, typically used for counts, tags, or status markers. Supports **4 style variants**, **9 colors**, and **5 sizes**. Can be used standalone or inside other controls like buttons.
+DaisyBadge displays status labels and counts.
+Use `Variant` for the color, `IsOutline` for an outlined border, and `Size` for one of five sizes.
 
-## Style Variants
+## Appearance
 
-| Style | Description |
+| Property | Description |
 | --- | --- |
-| **Default** | Solid filled background with contrasting text |
-| **Outline** | Transparent background with colored border |
-| **Dash** | Similar to outline but with dashed border |
-| **Ghost** | Very subtle, minimal visual weight |
-| **Soft** | Tinted background, softer than solid |
+| `IsOutline="False"` | Filled background with contrasting text |
+| `IsOutline="True"` | Transparent background with a colored border |
+| `Variant="Ghost"` | Muted background and text |
 
 ## Size Options
 
@@ -301,28 +299,31 @@ DaisyBadge displays small status indicators or labels, typically used for counts
 <controls:DaisyBadge Content="New" />
 
 <!-- Colored badges -->
-<controls:DaisyBadge Content="3" Color="Primary" />
-<controls:DaisyBadge Content="Error" Color="Error" />
-<controls:DaisyBadge Content="Done" Color="Success" />
+<controls:DaisyBadge Content="3" Variant="Primary" />
+<controls:DaisyBadge Content="Error" Variant="Error" />
+<controls:DaisyBadge Content="Done" Variant="Success" />
 
 <!-- Style variants -->
-<controls:DaisyBadge Content="Outline" Style="Outline" Color="Primary" />
-<controls:DaisyBadge Content="Ghost" Style="Ghost" />
+<controls:DaisyBadge Content="Outline" IsOutline="True" Variant="Primary" />
+<controls:DaisyBadge Content="Ghost" Variant="Ghost" />
 
 <!-- Inside a button -->
-<controls:DaisyButton Content="Messages">
-    <controls:DaisyBadge Content="5" Color="Error" Size="Small" />
+<controls:DaisyButton>
+    <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="Messages" />
+        <controls:DaisyBadge Content="5" Variant="Error" Size="Small" />
+    </StackPanel>
 </controls:DaisyButton>
 
 <!-- Empty badge (just a dot) -->
-<controls:DaisyBadge Color="Success" Size="ExtraSmall" />
+<controls:DaisyBadge Variant="Success" Size="ExtraSmall" />
 \`\`\`
 
 ## Tips
 
 - Use `ExtraSmall` with no content for notification dots
-- Pair `Error` color with counts for unread/urgent items
-- `Outline` style works well on colored backgrounds
+- Pair the `Error` variant with counts for unread or urgent items
+- `IsOutline="True"` works well on colored backgrounds
 
 ---
 ```
@@ -371,14 +372,14 @@ Based on complexity, these controls would benefit most:
 1. **List controls** needing documentation:
 
     ```txt
-    List files in Flowery.Uno/Controls/ matching Daisy*.cs
+    List files in Flowery.WinUI/Controls/ matching Daisy*.cs
     ```
 
 2. **For each control**, in order:
 
    a. Read the C# file
    b. Read the theme XAML file (if exists)
-   c. Search for examples in `Flowery.Uno.Gallery/Examples/`
+   c. Search for examples in `Flowery.WinUI.Gallery.Core/Examples/`
    d. Determine if supplementary docs are needed (use criteria above)
    e. If needed, write the markdown file
 
@@ -386,7 +387,7 @@ Based on complexity, these controls would benefit most:
 
 4. **After all files are created**, the user will run:
 
-   ```bash
+   ```powershell
    python Utils/generate_docs.py
    python Utils/generate_site.py
    ```

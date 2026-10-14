@@ -1,6 +1,6 @@
 # FlowKanbanManager
 
-A comprehensive programmatic API for managing Kanban boards in Flowery.Uno.
+A comprehensive programmatic API for managing Kanban boards in Flowery.WinUI.
 
 ## Overview
 
@@ -14,7 +14,7 @@ A comprehensive programmatic API for managing Kanban boards in Flowery.Uno.
 ## Quick Start
 
 ```csharp
-using Flowery.Uno.Kanban.Controls;
+using Flowery.WinUI.Kanban.Controls;
 
 // Create a manager for your Kanban control
 var manager = new FlowKanbanManager(myFlowKanban);

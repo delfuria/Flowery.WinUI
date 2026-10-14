@@ -1,6 +1,6 @@
 # Primary Documentation (llms-static/)
 
-This folder holds the **curated, hand-written** documentation for Flowery.Uno. Files here are the primary source for both the generated site (`docs/`) and the machine-readable `docs/llms.txt`.
+This folder holds the **curated, hand-written** documentation for Flowery.WinUI. Files here are the primary source for both the generated site (`docs/`) and the machine-readable `docs/llms.txt`.
 
 ## Default Workflow (curated-only)
 

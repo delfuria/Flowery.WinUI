@@ -1,11 +1,11 @@
 ---
 alwaysApply: false
 ---
-# Creating a New Flowery.Uno Control (Uno Platform / WinUI)
+# Creating a New Flowery.WinUI Control (WinUI 3)
 
-This rule outlines the complete workflow for creating a new control in Flowery.Uno, whether it's a brand new control or a port from another library.
+This rule outlines the complete workflow for creating a new control in Flowery.WinUI, whether it's a brand new control or a port from another library.
 
-> **Platform**: Uno Platform / WinUI (NOT Avalonia). Use `Microsoft.UI.Xaml.*` namespaces, `.xaml` files, and `DependencyProperty`.
+> **Platform**: WinUI 3 (NOT Avalonia). Use `Microsoft.UI.Xaml.*` namespaces, `.xaml` files, and `DependencyProperty`.
 
 ## Overview
 
@@ -23,11 +23,11 @@ Creating a new control involves these major phases:
 
 ### 1.1 Create the C# Control File
 
-**Location:** `Flowery.Uno/Controls/Daisy[ControlName].cs`
+**Location:** `Flowery.WinUI/Controls/Daisy[ControlName].cs`
 
 > If the control is a **custom extension** (not a direct DaisyUI component), place it under:
 >
-> - `Flowery.Uno/Controls/Custom/Daisy[ControlName].cs`
+> - `Flowery.WinUI/Controls/Custom/Daisy[ControlName].cs`
 > - Namespace: `Flowery.Controls`
 
 **Required elements:**
@@ -53,7 +53,7 @@ namespace Flowery.Controls
     }
 
     /// <summary>
-    /// Brief description of what the control does (Uno/WinUI).
+    /// Brief description of what the control does (WinUI 3).
     /// </summary>
     public partial class Daisy[ControlName] : ContentControl // or appropriate base class
     {
@@ -118,7 +118,7 @@ namespace Flowery.Controls
 - **DependencyProperty Pattern**: Use WinUI's `DependencyProperty.Register` with `PropertyMetadata`
 - **Enums at Namespace Level**: Define enums outside the class, with `public` access
 - **Using Directives**: Add ALL required usings at the file TOP (avoid inline fully-qualified names)
-- **Partial class**: Mark class as `partial` for Uno source generators
+- **Partial class**: Use `partial` where XAML compilation or generated code requires it
 - **DefaultStyleKey**: Set in constructor for templated controls
 
 ### 1.3 Common Base Classes
@@ -137,7 +137,7 @@ namespace Flowery.Controls
 
 ### 2.1 Programmatic Visual Tree (Recommended)
 
-Most Flowery.Uno controls build their visual tree in code-behind for runtime flexibility:
+Most Flowery.WinUI controls build their visual tree in code-behind for runtime flexibility:
 
 ```csharp
 private void BuildVisualTree()
@@ -150,7 +150,7 @@ private void BuildVisualTree()
 
 ### 2.2 XAML Template (Alternative)
 
-If using XAML templates, add to `Flowery.Uno/Themes/DaisyControls.xaml`:
+If using XAML templates, add to `Flowery.WinUI/Themes/DaisyControls.xaml`:
 
 ```xml
 <!-- In DaisyControls.xaml -->
@@ -169,7 +169,7 @@ If using XAML templates, add to `Flowery.Uno/Themes/DaisyControls.xaml`:
 
 ### 2.3 Theme Registration
 
-Themes are merged in `Flowery.Uno/Themes/Generic.xaml`:
+Themes are merged in `Flowery.WinUI/Themes/Generic.xaml`:
 
 ```xml
 <ResourceDictionary
@@ -177,8 +177,8 @@ Themes are merged in `Flowery.Uno/Themes/Generic.xaml`:
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="ms-appx:///Flowery.Uno/Themes/DaisyResources.xaml" />
-        <ResourceDictionary Source="ms-appx:///Flowery.Uno/Themes/DaisyControls.xaml" />
+        <ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/DaisyResources.xaml" />
+        <ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/DaisyControls.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
 ```
@@ -201,15 +201,15 @@ if (resources != null)
 
 ### 3.1 Create or Update Examples File
 
-**Location:** `Flowery.Uno.Gallery/Examples/[Category]Examples.xaml`
+**Location:** `Flowery.WinUI.Gallery.Core/Examples/[Category]Examples.xaml`
 
 ```xml
 <local:ScrollableExamplePage
-    x:Class="Flowery.Uno.Gallery.Examples.[Category]Examples"
+    x:Class="Flowery.WinUI.Gallery.Examples.[Category]Examples"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:daisy="using:Flowery.Controls"
-    xmlns:local="using:Flowery.Uno.Gallery.Examples">
+    xmlns:local="using:Flowery.WinUI.Gallery.Examples">
 
     <ScrollViewer x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto"
                   VerticalScrollMode="Auto" Background="Transparent" Padding="0,0,0,32">
@@ -239,7 +239,7 @@ Create the `.xaml.cs` file inheriting from `ScrollableExamplePage`:
 ```csharp
 using Microsoft.UI.Xaml.Controls;
 
-namespace Flowery.Uno.Gallery.Examples
+namespace Flowery.WinUI.Gallery.Examples
 {
     public sealed partial class [Category]Examples : ScrollableExamplePage
     {
@@ -270,7 +270,7 @@ Notes:
 
 ### 4.1 Add to GallerySidebarData
 
-**Location:** `Flowery.Uno.Gallery/GallerySidebarData.cs`
+**Location:** `Flowery.WinUI.Gallery.Core/GallerySidebarData.cs`
 
 Add a new `SidebarItem` in the appropriate category:
 
@@ -289,7 +289,7 @@ new()
 
 ### 4.2 Add Category Mapping (if new category)
 
-**Location:** `Flowery.Uno.Gallery/MainView.xaml.cs`
+**Location:** `Flowery.WinUI.Gallery.Core/MainView.xaml.cs`
 
 ```csharp
 _categoryControls = new Dictionary<string, Func<Control>>
@@ -301,7 +301,7 @@ _categoryControls = new Dictionary<string, Func<Control>>
 
 ### 4.3 Add Icon (if new category)
 
-**Location:** `Flowery.Uno/Themes/DaisyIcons.xaml`
+**Location:** `Flowery.WinUI/Themes/DaisyIcons.xaml`
 
 ```xml
 <x:String x:Key="DaisyIconNewCategory">M...</x:String>
@@ -311,9 +311,7 @@ _categoryControls = new Dictionary<string, Func<Control>>
 
 If the control sets default user-facing strings (placeholders/watermarks/accessible text):
 
-- Add resource keys to:
-  - `Flowery.Uno/Localization/FloweryStrings.resx`
-  - and ALL localized variants `FloweryStrings.*.resx`
+- Add resource keys to `Flowery.WinUI/Localization/en.json` and every corresponding language JSON file.
 - Retrieve strings via `Flowery.Localization.FloweryLocalization.GetString("Key")`
 
 ---
@@ -384,12 +382,8 @@ The markdown file MUST:
 
 **⚠️ ALWAYS use the build script, NOT `dotnet build` directly:**
 
-```bash
-# From Git Bash:
-./scripts/build_all.sh
-
-# Or from PowerShell:
-.\scripts\build_all.ps1
+```powershell
+pwsh -NoProfile -File ./scripts/build_all.ps1 -Configuration Debug -NoRun
 ```
 
 ### 6.2 Run Gallery
@@ -426,7 +420,7 @@ python Utils/generate_docs.py
 
 ---
 
-## Common Pitfalls (Uno Platform / WinUI)
+## Common Pitfalls (WinUI 3)
 
 | Issue | Solution |
 |-------|----------|
@@ -435,7 +429,7 @@ python Utils/generate_docs.py
 | ScrollToSection not working | Ensure SectionId matches the sidebar item Id |
 | Documentation not merging | Ensure filename matches class name exactly |
 | **UIElement can only have one parent** | Clear `Content = null` before re-parenting elements |
-| **PathIcon throws at runtime** | Use `FloweryPathHelpers` or `Path` with `PathGeometry` instead |
+| **Icon instance already has a parent** | Create a separate icon instance or detach it before moving it |
 | **ThemeResource not updating** | Subscribe to `DaisyThemeManager.ThemeChanged` and manually update |
 
 ### UIElement Parentage Issues
@@ -455,15 +449,12 @@ private void OnLoaded(object sender, RoutedEventArgs e)
 }
 ```
 
-### PathIcon Runtime Issues
+### Separate Icon Instances
 
-`PathIcon` throws `ArgumentException` when used dynamically. Use `FloweryPathHelpers`:
+Native WinUI 3 supports `PathIcon`. Each visual must have only one parent.
+Use `FloweryPathHelpers` when you need separate path and geometry instances:
 
 ```csharp
-// ❌ FAILS: PathIcon throws at runtime
-_button.Content = new PathIcon { Data = geometry };
-
-// ✅ WORKS: Use FloweryPathHelpers
 _button.Content = FloweryPathHelpers.CreateChevron(isLeft: true);
 ```
 
@@ -488,29 +479,28 @@ private void OnThemeChanged(object? sender, string themeName) => ApplyTheme();
 
 ### Animation with Composition API
 
-Use `"RotationAngle"` (radians), NOT `"RotationAngleInDegrees"`:
+Use the existing library convention of `"RotationAngle"` in radians:
 
 ```csharp
 // ✅ WORKS
 animation.InsertKeyFrame(1f, PlatformCompatibility.DegreesToRadians(360f));
 visual.StartAnimation("RotationAngle", animation);
 
-// ❌ FAILS: "RotationAngleInDegrees" not supported in Uno
-visual.StartAnimation("RotationAngleInDegrees", animation);
+// Keep the library's existing radians convention.
 ```
 
 ### Delay Time in Animations
 
-`animation.DelayTime` doesn't work on Uno Skia/WASM. Use `PlatformCompatibility.StartAnimation`:
+Native Composition supports `animation.DelayTime`. Existing controls can use `PlatformCompatibility.StartAnimation` for common delay scheduling:
 
 ```csharp
-// ✅ WORKS across platforms
+// Common delay scheduling in the native library
 PlatformCompatibility.StartAnimation(visual, "Scale", animation, delay);
 ```
 
 ### WinUI vs WPF/Avalonia Differences
 
-| Feature | WPF/Avalonia | WinUI/Uno |
+| Feature | WPF/Avalonia | WinUI 3 |
 |---------|--------------|-----------|
 | Dashed borders | `StrokeDashArray` on Border | Use `Rectangle` overlay |
 | `ClipToBounds` | Available on Grid/Border | NOT available - use `UIElement.Clip` |
@@ -520,7 +510,7 @@ PlatformCompatibility.StartAnimation(visual, "Scale", animation, delay);
 
 ### Namespace Differences from Avalonia
 
-| Avalonia | WinUI/Uno |
+| Avalonia | WinUI 3 |
 |----------|-----------|
 | `Avalonia.Controls` | `Microsoft.UI.Xaml.Controls` |
 | `Avalonia.Media` | `Microsoft.UI.Xaml.Media` |

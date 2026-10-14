@@ -36,7 +36,7 @@ DaisyTagPicker is an organized tag selection component inspired by "Animated Tag
 <controls:DaisyTagPicker Title="Selected Skills">
     <controls:DaisyTagPicker.Tags>
         <x:Array Type="{x:Type sys:String}">
-            <sys:String>Uno Platform</sys:String>
+            <sys:String>WinUI 3</sys:String>
             <sys:String>C#</sys:String>
             <sys:String>DaisyUI</sys:String>
             <sys:String>XAML</sys:String>

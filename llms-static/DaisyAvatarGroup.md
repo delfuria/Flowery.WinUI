@@ -41,7 +41,7 @@ DaisyAvatarGroup arranges multiple `DaisyAvatar` items in an overlapping row. It
 <!-- Tighter overlap for larger avatars -->
 <controls:DaisyAvatarGroup Size="Large">
     <controls:DaisyAvatar Size="Large" Status="Online">
-        <Image Source="ms-appx:///Flowery.Uno.Gallery/Assets/logo.png" Stretch="UniformToFill" />
+        <Image Source="ms-appx:///Flowery.WinUI.Gallery/Assets/logo.png" Stretch="UniformToFill" />
     </controls:DaisyAvatar>
     <controls:DaisyAvatar Size="Large" Status="Offline" Shape="Rounded">
         <PathIcon Data="{StaticResource DaisyIconDog}" Width="56" Height="56" />

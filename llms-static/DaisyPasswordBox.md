@@ -10,7 +10,7 @@ DaisyPasswordBox is a specialized password input field that manages its own reve
 - **Built-in Reveal Button**: Toggle password visibility with a single click.
 - **Floating Labels**: Professional label animation that moves when the field is focused or contains text.
 - **Unified Icon Support**: Easily add icons to the start or end of the field.
-- **Theming & Sizing**: Full integration with the Flowery.Uno design system.
+- **Theming & Sizing**: Full integration with the Flowery.WinUI design system.
 
 ## Variant Options
 

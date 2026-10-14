@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.19041</TargetFramework>
+    <RootNamespace>Flowery.WinUI.Gallery.Core</RootNamespace>
+    <UseWinUI>true</UseWinUI>
+    <OutputType>Library</OutputType>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateLibraryLayout>true</GenerateLibraryLayout>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="WebAssets\*.js" LogicalName="Flowery.GL.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="WebAssets\gl-transitions\**\*" LogicalName="Flowery.GL.Shaders.%(Filename)%(Extension)" />
+    <ProjectReference Include="..\Flowery.WinUI\Flowery.WinUI.csproj" />
+    <ProjectReference Include="..\Flowery.Integrations.WinUI\Flowery.Integrations.WinUI.csproj" />
+    <ProjectReference Include="..\Flowery.WinUI.Kanban\Flowery.WinUI.Kanban.csproj" />
+    <EmbeddedResource Include="Localization\*.json" LogicalName="$(AssemblyName).Localization.%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

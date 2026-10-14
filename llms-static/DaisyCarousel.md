@@ -50,7 +50,7 @@ Transitions are grouped into tiers based on complexity and platform support:
 
 * **Tier 1 (Universal)**: Fade, Slide, Push, Zoom, Flip, Cube, Cover, Reveal. Works on all platforms.
 * **Tier 2 (Clip-based)**: Wipe, Blinds, Slices, Checkerboard, Spiral, Matrix Rain, Wormhole.
-* **Tier 3 (Advanced)**: Dissolve, Pixelate. ✨ Requires Skia-based targets for full effect.
+* **Tier 3 (Windows Composition)**: Dissolve and Pixelate use native visual surfaces and mask grids.
 
 ### Slide Effects (`FlowerySlideEffect`)
 
@@ -181,7 +181,7 @@ Continuous hardware-accelerated animations inspired by cinematic documentary sty
 * Use `WrapAround="True"` for manual photo galleries where users expect to loop continuously.
 * The carousel is keyboard-accessible: Tab to focus, arrow keys to navigate.
 * The timer and effects automatically stop when the carousel is unloaded to prevent memory leaks.
-* **Platform note**: Slide effects require `HAS_UNO` or `WINDOWS` compilation symbols; on other platforms they gracefully fall back to static display.
+* **Native rendering**: Slide effects use WinUI 3 animations in the Windows application.
 
 ## Related Documentation
 

@@ -16,7 +16,7 @@ DaisyThemeManager is the central theme loader/applicator for the **35+ built-in 
 
 ## Product Themes (96 Industry Palettes)
 
-In addition to the 35+ DaisyUI themes, Flowery.Uno includes **96 industry-specific product palettes** from the [UI UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) project. These are professionally crafted color schemes for specific industries:
+In addition to the 35+ DaisyUI themes, Flowery.WinUI includes **96 industry-specific product palettes** from the [UI UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) project. These are professionally crafted color schemes for specific industries:
 
 | Industry | Example Themes |
 | --- | --- |
@@ -62,13 +62,13 @@ var theme = DaisyUiCssParser.ParseFile("mytheme.css");
 DaisyThemeLoader.ApplyThemeToApplication(theme);
 ```
 
-**Prerequisite**: Your `App.xaml` must include Flowery.Uno's `Generic.xaml` in `Application.Resources.MergedDictionaries`:
+**Prerequisite**: Your `App.xaml` must include Flowery.WinUI's `Generic.xaml` in `Application.Resources.MergedDictionaries`:
 
 ```xml
 <Application.Resources>
     <ResourceDictionary>
         <ResourceDictionary.MergedDictionaries>
-            <ResourceDictionary Source="ms-appx:///Flowery.Uno/Themes/Generic.xaml" />
+            <ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/Generic.xaml" />
         </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
 </Application.Resources>
@@ -191,7 +191,7 @@ DaisyThemeManager.ApplyTheme(savedTheme); // Actually applies
 
 ## Custom Theme Applicator
 
-> **[Full Migration Example](../MigrationExample.md)** - Step-by-step guide for integrating Flowery.Uno into existing apps with custom resources.
+> **[Full Migration Example](../MigrationExample.md)** - Step-by-step guide for integrating Flowery.WinUI into existing apps with custom resources.
 
 For apps that need custom theme application logic (e.g., in-place ThemeDictionary updates, persisting settings), set the `CustomThemeApplicator` delegate at startup:
 

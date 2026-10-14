@@ -1,6 +1,6 @@
 # Workflow for generating documentation and deploying to GitHub Pages
 
-name: Deploy Documentation to Pages
+name: Flowery.WinUI Documentation
 
 on:
   # Allows you to run this workflow manually from the Actions tab

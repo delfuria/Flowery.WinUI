@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Flowery.Uno Static Site Generator
+Flowery.WinUI Static Site Generator
 
 Converts markdown documentation into a static HTML website for GitHub Pages.
 
@@ -288,7 +288,7 @@ class MarkdownToHtml:
 class SiteGenerator:
     """Generates static HTML site from markdown docs."""
 
-    # Custom controls (Flowery.Uno-specific, not in original DaisyUI)
+    # Custom controls (Flowery.WinUI-specific, not in original DaisyUI)
     CUSTOM_CONTROL_PREFIXES = (
         'AnimatedNumber',
         'Color',
@@ -319,6 +319,7 @@ class SiteGenerator:
         'ColorCollection',         # Color collection class
         'HslColor',                # Color utility struct
         'FloweryAnimationHelpers', # Animation enums, controllers, and attached properties
+        'FloweryCarouselGL',       # Native WinUI shader hosts and diagnostics
         'FloweryResponsive',       # Responsive layout helper
         'FloweryComponentSidebar', # Pre-built documentation/admin sidebar
         'FloweryScaleManager',     # Opt-in automatic font scaling
@@ -339,7 +340,7 @@ class SiteGenerator:
 
     def generate(self):
         """Generate the complete static site."""
-        print("Flowery.Uno Site Generator")
+        print("Flowery.WinUI Site Generator")
         print("=" * 40)
         if self.use_curated_only:
             print("Mode: CURATED ONLY (llms-static/)")
@@ -592,7 +593,7 @@ class SiteGenerator:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowery.Uno Documentation</title>
+    <title>Flowery.WinUI Documentation</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -609,12 +610,12 @@ class SiteGenerator:
         <nav class="sidebar">
             <h1>
                 <div class="brand">
-                    <a href="https://github.com/tobitege/Flowery.Uno" target="_blank" rel="noopener" class="github-link" title="View on GitHub">
+                    <a href="https://github.com/tobitege/Flowery.WinUI" target="_blank" rel="noopener" class="github-link" title="View on GitHub">
                         <svg class="github-icon" viewBox="0 0 16 16" width="20" height="20">
                             <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
                         </svg>
                     </a>
-                    <span>Flowery.Uno</span>
+                    <span>Flowery.WinUI</span>
                 </div>
                 <button class="theme-toggle" aria-label="Toggle Theme" title="Toggle Theme">
                     <!-- Sun Icon (for Dark mode) -->
@@ -635,7 +636,7 @@ class SiteGenerator:
                     </svg>
                 </button>
             </h1>
-            <p class="subtitle">Beautiful Uno Platform Components</p>
+            <p class="subtitle">Themed WinUI 3 Components</p>
             <ul>
                 {sidebar_html}
             </ul>
@@ -679,24 +680,24 @@ class SiteGenerator:
         footer_html = '''
 <hr class="footer-separator">
 <footer class="index-footer">
-    <p class="disclaimer">This project is not affiliated with, endorsed by, or sponsored by DaisyUI or Uno Platform.</p>
-    <p>Built with inspiration from:</p>
+    <p class="disclaimer">This project is not affiliated with, endorsed by, or sponsored by DaisyUI or Microsoft.</p>
+    <p>Design and native framework:</p>
     <div class="footer-links">
         <a href="https://daisyui.com" target="_blank" rel="noopener" title="DaisyUI">
             <svg class="footer-icon" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
             <span>DaisyUI</span>
         </a>
-        <a href="https://platform.uno" target="_blank" rel="noopener" title="Uno Platform">
+        <a href="https://learn.microsoft.com/en-us/windows/apps/winui/winui3/" target="_blank" rel="noopener" title="WinUI 3">
             <svg class="footer-icon" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 2L2 19h20L12 2zm0 4l7 11H5l7-11z"/></svg>
-            <span>Uno Platform</span>
+            <span>WinUI 3</span>
         </a>
         <a href="https://github.com/saadeghi/daisyui" target="_blank" rel="noopener" title="DaisyUI GitHub">
             <svg class="footer-icon" viewBox="0 0 16 16" width="20" height="20"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
             <span>daisyui</span>
         </a>
-        <a href="https://github.com/unoplatform/uno" target="_blank" rel="noopener" title="Uno Platform GitHub">
+        <a href="https://github.com/microsoft/WindowsAppSDK" target="_blank" rel="noopener" title="Windows App SDK GitHub">
             <svg class="footer-icon" viewBox="0 0 16 16" width="20" height="20"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-            <span>Uno</span>
+            <span>Windows App SDK</span>
         </a>
     </div>
 </footer>
@@ -709,10 +710,10 @@ class SiteGenerator:
     def _generate_llms_txt_from_curated(self) -> str:
         """Generate a master llms.txt from curated docs."""
         lines = []
-        lines.append("# Flowery.Uno Component Library")
+        lines.append("# Flowery.WinUI Component Library")
         lines.append("")
-        lines.append("Flowery.Uno is an Uno Platform / WinUI component library inspired by DaisyUI.")
-        lines.append("It provides styled controls for building modern cross-platform applications.")
+        lines.append("Flowery.WinUI is a WinUI 3 component library inspired by DaisyUI.")
+        lines.append("It provides themed controls for native Windows applications.")
         lines.append("")
         lines.append("## Quick Start")
         lines.append("")
@@ -1121,7 +1122,7 @@ class SiteGenerator:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate Flowery.Uno static documentation site.",
+        description="Generate Flowery.WinUI static documentation site.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

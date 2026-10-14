@@ -127,9 +127,11 @@ When reporting changes, do NOT paste full code snippets that are already applied
 
 ---
 
-### CRITICAL: Do NOT merge Uno.Toolkit.* Generic.xaml
+### Native Shadow Resources
 
-**Uno.Toolkit.* packages do not ship `Styles/Generic.xaml`.** Adding `ResourceDictionary Source="ms-appx:///uno.toolkit.*/Styles/Generic.xaml"` will fail to load resources and can crash on startup. ShadowContainer only needs the package reference; do **not** add toolkit Generic.xaml to merged dictionaries or runtime loaders.
+Use `Flowery.Controls.DaisyShadowContainer` and `DaisyShadow` for native shadow descriptions.
+Merge `ms-appx:///Flowery.WinUI/Themes/Generic.xaml` after `XamlControlsResources`.
+Do not add former toolkit packages or resource dictionaries to the native projects.
 
 ### Neumorphic Takeaways
 
@@ -141,7 +143,7 @@ These are compile-time issues that should be avoided up front:
 
 - Do not use `??` with different operand types (e.g., `Border ?? DaisyCard`). Cast to a shared base like `FrameworkElement` first.
 - Do not assign `UIElement` to `FrameworkElement` without an explicit cast and a null/type check.
-- Do not reference non-existent WinUI/Uno members like `FrameworkElement.IsVisibleChanged`; use supported events or `RegisterPropertyChangedCallback`.
+- Do not reference non-existent WinUI 3 members like `FrameworkElement.IsVisibleChanged`; use supported events or `RegisterPropertyChangedCallback`.
 - Do not access internal or private helpers (e.g., `PlatformCompatibility`) from outside their assembly.
 - Do not set `null` into non-nullable reference types; update the type or use a nullable value.
 - Do not use `x:Bind` paths that are not real properties on the page (e.g., `Localization`); ensure the property exists and follow the required localization binding pattern.
@@ -230,7 +232,7 @@ The shell or tools will often misinterpret backslashes as escape characters, lea
 
 1. **Use relative paths** with forward slashes: `rg "pattern" folder/file.cs`
 2. **Set the Working Directory** (`Cwd`) to the base directory of your search.
-3. If you MUST use absolute paths, use forward slashes: `/d/github/Flowery.Uno/...` (Git Bash style) or `d:/github/Flowery.Uno/...`.
+3. If you MUST use absolute paths, use forward slashes: `/d/github/Flowery.WinUI/...` (Git Bash style) or `d:/github/Flowery.WinUI/...`.
 
 ### PowerShell Best Practices (Windows)
 
@@ -286,58 +288,21 @@ private async Task SetImageClipboardAsync(byte[] pngBytes)
 }
 ```
 
-### Cross-Platform Project Setup
+### Native Windows Project Setup
 
-When a project needs platform-specific clipboard behavior (e.g. WinForms on Windows) but must remain buildable on other platforms:
+Use Microsoft.NET.Sdk and WinUI 3 through Windows App SDK.
+Use the Windows target framework and x64 configuration in the project's .csproj file.
+Directory.Build.props supplies shared version, repository, and output configuration.
+Use the pinned package versions from Directory.Packages.props.
 
-1. **Conditional TFM** in `.csproj`:
-
-   ```xml
-   <TargetFramework Condition="$([MSBuild]::IsOSPlatform('Windows'))">net8.0-windows</TargetFramework>
-   <TargetFramework Condition="!$([MSBuild]::IsOSPlatform('Windows'))">net8.0</TargetFramework>
-   ```
-
-2. **Conditional WinForms** in `.csproj`:
-
-   ```xml
-   <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
-     <UseWindowsForms>true</UseWindowsForms>
-     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
-   </PropertyGroup>
-   ```
-
-3. **Conditional compilation** in code:
-
-```csharp
-#if WINDOWS
-if (OperatingSystem.IsWindows())
-{
-    await SetImageClipboardAsync(pngBytes);
-}
-else
-#endif
-{
-    // Fallback: save to temp file, copy path to clipboard
-    var tempPath = Path.Combine(Path.GetTempPath(), "screenshot.png");
-    await File.WriteAllBytesAsync(tempPath, pngBytes);
-    
-    var dataPackage = new DataPackage();
-    dataPackage.SetText(tempPath);
-    Clipboard.SetContent(dataPackage);
-}
-```
-
-**Key points:**
-
-- Use `#if WINDOWS` preprocessor directives to guard Windows-specific code
-- Mark Windows-specific methods with `[SupportedOSPlatform("windows")]`
-- Always provide a fallback for non-Windows platforms
+Do not add browser, mobile, or alternative desktop backends to the native projects.
+Use the existing Windows build and runtime-test scripts.
 
 ## Localization & Translation Policy
 
 - **Consult `LOCALIZATION.md` FIRST**: When dealing with ANY localization task (XAML bindings, JSON translation files, adding new strings), you MUST read and follow the patterns in `LOCALIZATION.md`.
-- **WinUI/Uno XAML Binding (Required)**: Use `{Binding [KeyName]}` with `DataContext="{x:Bind Localization, Mode=OneWay}"` (or `Source={x:Bind Localization}`) for localization. Do NOT use `{x:Bind Localization[...]}` because the WinUI XamlCompiler rejects indexer syntax (WMC1110). This rule applies to all Uno heads (Windows, Desktop/Skia, Android, iOS, WASM).
-- **Desktop/Skia Runtime Switching (Required)**: If the app supports runtime language switching, you MUST force a rebinding after culture changes (e.g., set the `Localization` `DataContext` to `null` and back). Desktop/Skia does not always refresh indexer bindings from `INotifyPropertyChanged`.
+- **WinUI 3 XAML Binding (Required)**: Use `{Binding [KeyName]}` with `DataContext="{x:Bind Localization, Mode=OneWay}"` (or `Source={x:Bind Localization}`) for localization. Do NOT use `{x:Bind Localization[...]}` because the WinUI XamlCompiler rejects indexer syntax (WMC1110).
+- **Runtime Language Switching**: Raise localization notifications on the WinUI dispatcher. The native project does not build browser or mobile targets.
 - **Do NOT Translate Technical Terms**: Control names (e.g., *Checkbox*, *NumericUpDown*), variant names (e.g., *Primary*, *Ghost*, *Secondary*), size names (e.g., *Extra Small*, *Large*), and code enums/literals MUST remain in their original English form across all translation files (`*.json`). Only descriptive labels, instructional text, and placeholders should be localized.
 
 ## Analyzer and ReSharper Hygiene

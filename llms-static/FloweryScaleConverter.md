@@ -3,7 +3,7 @@
 
 # Overview
 
-Flowery.Uno provides two approaches for responsive scaling based on window size:
+Flowery.WinUI provides two approaches for responsive scaling based on window size:
 
 1. **`ScaleExtension`** (Recommended) - Markup extension with semantic presets
 2. **`FloweryScaleConverter`** - Traditional converter for advanced scenarios

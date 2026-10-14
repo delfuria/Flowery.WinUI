@@ -1,10 +1,7 @@
 {
   "sdk": {
     "version": "10.0.203",
-    "rollForward": "latestFeature",
-    "allowPrerelease": false
-  },
-  "msbuild-sdks": {
-    "Uno.Sdk": "6.5.33"
+    "rollForward": "latestMajor",
+    "allowPrerelease": true
   }
 }

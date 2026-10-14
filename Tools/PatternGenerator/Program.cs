@@ -1,6 +1,6 @@
 // Pattern SVG Generator
 // Run this once to generate pattern tile SVG files
-// This tool references Flowery.Uno to use the same pattern definitions
+// This tool references Flowery.WinUI to use the same pattern definitions
 
 using Flowery.Tools;
 

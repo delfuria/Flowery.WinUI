@@ -1,4 +1,4 @@
-name: CodeQL
+name: Flowery.WinUI CodeQL
 
 on:
   push:
@@ -16,46 +16,40 @@ permissions:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    runs-on: ubuntu-24.04
-
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - language: actions
             build-mode: none
+            os: ubuntu-24.04
           - language: csharp
             build-mode: manual
+            os: windows-2025-vs2026
           - language: javascript-typescript
             build-mode: none
+            os: ubuntu-24.04
           - language: python
             build-mode: none
-
+            os: ubuntu-24.04
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
+      - uses: actions/checkout@v5
       - name: Setup .NET SDK
         if: matrix.language == 'csharp'
         uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
           dependency-caching: true
-
-      - name: Install Android workload
+      - name: Build native Windows solution
         if: matrix.language == 'csharp'
-        run: dotnet workload install android
-
-      - name: Build library for CodeQL extraction
-        if: matrix.language == 'csharp'
-        run: dotnet build Flowery.Uno/Flowery.Uno.csproj -c Release -p:CheckEolWorkloads=false
-
+        shell: pwsh
+        run: ./scripts/build_all.ps1 -Configuration Release -NoRun
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v4
         with:

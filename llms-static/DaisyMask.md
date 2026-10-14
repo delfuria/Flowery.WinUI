@@ -22,7 +22,7 @@ DaisyMask clips its content to preset shapes: squircle, heart, hexagon, circle, 
 ```xml
 <!-- Squircle mask -->
 <controls:DaisyMask Variant="Squircle" Width="100" Height="100">
-    <Image Source="ms-appx:///Flowery.Uno.Gallery/Assets/logo.png" Stretch="UniformToFill" />
+    <Image Source="ms-appx:///Flowery.WinUI.Gallery/Assets/logo.png" Stretch="UniformToFill" />
 </controls:DaisyMask>
 
 <!-- Hexagon badge -->
@@ -32,7 +32,7 @@ DaisyMask clips its content to preset shapes: squircle, heart, hexagon, circle, 
 
 <!-- Heart photo -->
 <controls:DaisyMask Variant="Heart" Width="140" Height="140">
-    <Image Source="ms-appx:///Flowery.Uno.Gallery/Assets/photo.jpg" Stretch="UniformToFill" />
+    <Image Source="ms-appx:///Flowery.WinUI.Gallery/Assets/photo.jpg" Stretch="UniformToFill" />
 </controls:DaisyMask>
 ```
 

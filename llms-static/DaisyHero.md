@@ -29,7 +29,7 @@ DaisyHero is a full-width banner container for impactful headlines. It provides 
 <!-- Hero with image background -->
 <controls:DaisyHero Padding="56">
     <controls:DaisyHero.Background>
-        <ImageBrush ImageSource="ms-appx:///Flowery.Uno.Gallery/Assets/hero.jpg"
+        <ImageBrush ImageSource="ms-appx:///Flowery.WinUI.Gallery/Assets/hero.jpg"
                     Stretch="UniformToFill" />
     </controls:DaisyHero.Background>
     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Spacing="10">

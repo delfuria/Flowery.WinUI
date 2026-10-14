@@ -1,6 +1,6 @@
 # DaisySizeDropdown
 
-A dropdown control for selecting a global size (`DaisySize`) that affects (almost) all Flowery.Uno controls.
+A dropdown control for selecting a global size (`DaisySize`) that affects (almost) all Flowery.WinUI controls.
 
 ## Overview
 
@@ -174,7 +174,7 @@ The dropdown automatically syncs with `FlowerySizeManager.CurrentSize`.
 - **On external size change**: Syncs to match the current global size
 - **On culture change**: Refreshes localized display names
 
-For comprehensive documentation on the sizing system, see [SizingAndScaling](https://tobitege.github.io/Flowery.Uno/#SizingAndScaling).
+For comprehensive documentation on the sizing system, see [SizingAndScaling](https://tobitege.github.io/Flowery.WinUI/#SizingAndScaling).
 
 ---
 

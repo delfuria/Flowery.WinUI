@@ -1,202 +1,129 @@
-# FloweryCarouselGL
+# Native Carousel and Shader Effects
 
-Browser-only Skia runtime previews for transitions/effects not available in XAML on WASM. This feature ships as presets that you can attach to any container, with safe fallbacks on non-browser targets.
+Flowery.WinUI hosts the existing shader effects inside native WinUI 3 WebView2 controls.
+The implementation retains 50 registered effect presets and the Gallery's 100 external transition shaders.
+The repository's `PORTING.md` records validated configurations and runtime verification scope.
 
-Namespace: `Flowery.Effects`
+## Two Shader Hosts
 
-## Quick Start
+| Host | Assembly and namespace | Purpose |
+| --- | --- | --- |
+| CarouselGlEffectHost | Flowery.WinUI, Flowery.Effects | Registered masks, flips, transitions, text fill, and continuous effects |
+| CarouselGlTransitionHost | Flowery.WinUI.Gallery.Core, Flowery.WinUI.Gallery.Effects | Gallery integration for the external transition shader catalog |
+
+Both derive from CarouselGlNativeHost.
+Each host owns its WinUI 3 WebView2 control and renders the existing WebGL shader source.
+The native host embeds its renderer document and scripts.
+A separate browser application or local web server is not required.
+The shader views require Microsoft Edge WebView2 Runtime on the Windows machine.
+
+## Use a Registered Effect
 
 ```xml
 xmlns:fx="using:Flowery.Effects"
+
+<fx:CarouselGlEffectHost Effect="Checkerboard"
+                         Height="280"
+                         TransitionSeconds="0.8"
+                         TransitionSliceCount="8" />
 ```
 
-```xml
-<fx:CarouselGlEffectHost Effect="Checkerboard" HorizontalContentAlignment="Stretch">
-    <Grid>
-        <TextBlock Text="Fallback content for non-WASM targets."
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center" />
-    </Grid>
-</fx:CarouselGlEffectHost>
-```
-
-On Browser/WASM, the Skia runtime renders using the built-in carousel. On other targets, the host behaves like a normal `ContentControl`.
-
-## Built-in Presets
-
-Mask variants (mode: `mask`):
-
-- `MaskTransition` (checkerboard default)
-- `BlindsHorizontal`, `BlindsVertical`
-- `SlicesHorizontal`, `SlicesVertical`
-- `Checkerboard`
-- `Spiral`
-- `MatrixRain`
-- `Wormhole`
-- `Dissolve`
-- `Pixelate`
-
-Flip variants (mode: `flip`):
-
-- `FlipPlane`
-- `FlipHorizontal`
-- `FlipVertical`
-- `CubeLeft`
-- `CubeRight`
-
-Text fill (mode: `text`):
-
-- `TextFill`
-
-Transition variants (mode: `transition`):
-
-- `Fade`, `FadeThroughBlack`, `FadeThroughWhite`
-- `SlideLeft`, `SlideRight`, `SlideUp`, `SlideDown`
-- `PushLeft`, `PushRight`, `PushUp`, `PushDown`
-- `ZoomIn`, `ZoomOut`, `ZoomCross`
-- `CoverLeft`, `CoverRight`
-- `RevealLeft`, `RevealRight`
-- `WipeLeft`, `WipeRight`, `WipeUp`, `WipeDown`
-- `Random`
-
-Effect variants (mode: `effect`):
-
-- `EffectPanAndZoom`
-- `EffectZoomIn`, `EffectZoomOut`
-- `EffectPanLeft`, `EffectPanRight`, `EffectPanUp`, `EffectPanDown`
-- `EffectDrift`, `EffectPulse`, `EffectBreath`, `EffectThrow`
-
-Each preset maps to a distinct shader variant so the look is different for each effect.
-
-## GL Transitions (gl-transitions repo)
-
-The Gallery also ships a separate WebGL-only integration for the `gl-transitions` shader collection. This is used by the `CarouselGlTransitionsExamples` page and is intentionally isolated from the core FloweryCarouselGL presets.
-
-- Shaders live in `Flowery.Uno.Gallery/WasmScripts/gl-transitions`.
-- The loader/runtime is `Flowery.Uno.Gallery/WasmScripts/flowery-carousel-gl-transitions.js`.
-- The XAML host is `Flowery.Uno.Gallery.Effects.CarouselGlTransitionHost`, which drives the browser overlay service.
-- This path is enabled only for Browser/WASM builds via the `FLOWERY_GL_TRANSITIONS` compile define (property `FloweryEnableGlTransitions`).
-
-Credits: Original shader sources are from the `gl-transitions` project (<https://github.com/gl-transitions/gl-transitions>). Local copies include compatibility fixes and default handling for the Flowery Gallery runtime.
-
-## Assets
-
-Presets do not ship with images. Provide your own assets (Content files or absolute URLs) to control the look. If assets are missing or fail to load, the overlay shows a "Not supported" message instead of faking the effect.
-
-For app-local files, include them as Content and reference them with `Assets/...`.
-
-### Asset Resolution Paths
-
-There are two asset loaders depending on which runtime is active:
-
-- **WebGL overlay (Browser/WASM)** uses the JS loader in `WasmScripts/flowery-carousel-gl.js`.
-  - Accepts absolute URLs (`http(s)://...`) and `data:` URIs.
-  - Any other string is treated as a relative path under `document.baseURI/_framework/`.
-  - Example: `Assets/foo.jpg` becomes `_framework/Assets/foo.jpg`.
-  - Do **not** use `ms-appx:///` in this path.
-
-- **Gallery-side Skia preview (Browser/WASM)** uses `CarouselGlSkiaRuntime.Browser.cs` and its `CreateImageSource` helper.
-  - Accepts absolute URLs and `data:` URIs.
-  - `Assets/...` is resolved to `ms-appx:///Flowery.Uno.Gallery/Assets/...`.
-  - `ms-appx:///...` is accepted directly and converted to the Browser `_framework/` URL.
-  - Other strings are treated as `ms-appx:///` relative paths.
-
-## Asset Keys
-
-When overriding assets, use these keys:
-
-- Mask: `maskA`, `maskB`
-- Flip: `flipA`, `flipB`
-- Transition: `transitionA`, `transitionB`
-- Effect: `effect`
-- Text fill: `text`
-
-## Customizing Presets
-
-You can override any preset by re-registering it:
+The registry's built-in definitions have no images by default.
+Register application assets for the selected effect before constructing its host:
 
 ```csharp
-using Flowery.Effects;
-
 CarouselGlEffectRegistry.Register(
     new CarouselGlEffectDefinition(
         CarouselGlEffectKind.Checkerboard,
         "mask",
         new Dictionary<string, string>
         {
-            ["maskA"] = "Assets/my_mask_a.jpg",
-            ["maskB"] = "Assets/my_mask_b.jpg"
+            ["maskA"] = "Assets/slide1.jpg",
+            ["maskB"] = "Assets/slide2.jpg"
         },
         "checkerboard"));
 ```
 
-Notes:
+The Gallery registers its own presets and assets through CarouselGlGalleryPresets.
 
-- `CarouselGlEffectKind` is an enum, so adding brand-new kinds requires a library change.
-- Asset paths can be absolute URLs or relative `Assets/...` paths.
+## Preserved Effect Families
 
-## API Reference
+- Mask patterns, including blinds, slices, checkerboard, spiral, matrix rain, and wormhole.
+- Pixel transitions, including dissolve and pixelate.
+- Flip and cube transitions.
+- Fade, slide, push, zoom, cover, and reveal transitions.
+- Pan, zoom, drift, pulse, breath, and throw effects.
+- Text-fill effects and the external shader collection used by the Gallery.
 
-### CarouselGlEffectHost
+## Effect Host Properties
 
-XAML host control that renders the Skia carousel preview on Browser/WASM.
+| Property | Default | Purpose |
+| --- | --- | --- |
+| Effect | None | Selects the registered preset |
+| OverlayEffect | None | Adds a continuous effect over a compatible transition |
+| IntervalSeconds | 0 | Controls the interval supplied to the renderer |
+| TransitionSeconds | 2.4 | Transition duration |
+| TransitionSliceCount | 8 | Number of tiles or slices |
+| TransitionStaggerSlices | true | Enables staggered slice animation |
+| TransitionSliceStaggerMs | 50 | Delay between slices |
+| TransitionPixelateSize | 20 | Pixel block size |
+| TransitionDissolveDensity | 0.5 | Dissolve density |
+| TransitionFlipAngle | 90 | Flip angle in degrees |
 
-```csharp
-public CarouselGlEffectKind Effect { get; set; }
-public double IntervalSeconds { get; set; }
-public double TransitionSeconds { get; set; }
-public int TransitionSliceCount { get; set; }
-public bool TransitionStaggerSlices { get; set; }
-public double TransitionSliceStaggerMs { get; set; }
-public int TransitionPixelateSize { get; set; }
-public double TransitionDissolveDensity { get; set; }
-public double TransitionFlipAngle { get; set; }
-```
+Property changes refresh the renderer configuration.
+Effect names use CarouselGlEffectKind.
+CarouselGlEffectRegistry.TryGet reads a definition, and Register replaces or adds that definition.
 
-### CarouselGlEffectRegistry
+## Gallery Transition Host
 
-Static registry for presets.
+CarouselGlTransitionHost exposes TransitionName, IntervalSeconds, and TransitionSeconds.
+Its AvailableShaders property provides the complete embedded catalog.
+The shader loader requires exactly 100 entries and reports an error if that catalog is incomplete.
 
-```csharp
-public static bool TryGet(CarouselGlEffectKind kind, out CarouselGlEffectDefinition? definition);
-public static void Register(CarouselGlEffectDefinition definition);
-```
+The Gallery owns this integration.
+Applications that need it can use the same native host pattern with their own shader resources and image configuration.
 
-### CarouselGlEffectDefinition
+## Assets
 
-```csharp
-public CarouselGlEffectDefinition(
-    CarouselGlEffectKind kind,
-    string mode,
-    IReadOnlyDictionary<string, string> assets,
-    string? variant = null);
-```
+Include local images as Content and copy them to the native application's output directory.
+The host accepts relative application paths, `ms-appx` URIs, HTTP(S) URLs, and data URIs.
+Relative paths resolve below `AppContext.BaseDirectory`.
+For `ms-appx:///` paths, the host removes that prefix and decodes URI characters before it resolves the output path.
+It reads local files with `File.ReadAllBytesAsync` and sends their complete contents to the renderer as data URIs.
 
-## Runtime Notes
+Preset asset keys remain unchanged:
 
-- Browser builds use the WebGL overlay runtime (JS shader pipeline).
-- The page is browser-only; non-browser builds are no-ops.
-- Use explicit sizes (Height/MaxWidth) for predictable aspect ratios.
+| Mode | Keys |
+| --- | --- |
+| Mask | maskA, maskB |
+| Flip | flipA, flipB |
+| Transition | transitionA, transitionB |
+| Continuous effect | effect |
+| Text fill | text |
 
-### Transition Parameters (Browser/WebGL)
+## Lifetime and Diagnostics
 
-These parameters now flow into the WebGL shader:
+The host initializes its WebView2 session after Loaded.
+It updates renderer activity when the effective viewport changes.
+Unload closes the session, cancels pending requests, removes event handlers, and closes the WebView2 control.
 
-- `TransitionSliceCount` controls the tile count for mask patterns (blinds/slices/checkerboard/spiral/matrix).
-- `TransitionStaggerSlices` + `TransitionSliceStaggerMs` control the per-slice delay for mask patterns.
-- `TransitionPixelateSize` controls pixel block size for Pixelate.
-- `TransitionDissolveDensity` controls the noise grain for Dissolve.
-- `TransitionFlipAngle` controls the maximum flip rotation (degrees) for flip/cube.
+CarouselGlNativeHost exposes these diagnostics:
 
-### Pixelate Behavior
+| Member | Purpose |
+| --- | --- |
+| IsRendererInitialized | Indicates that the renderer session completed initialization |
+| LastRenderError | Retains the most recent initialization or render error |
+| RenderFailed | Reports renderer failures |
+| ReadFrameAsync(elapsedSeconds) | Reads renderer identity, frame count, pixel sample, and dimensions from a loaded host |
+| CompileShadersAsync() | Compiles the host's shader catalog and returns its shader names |
 
-Pixelate is a two-phase transition:
+Renderer failures remain visible and cause diagnostic requests to fail.
+FLOWERY_STATE_ROOT or FLOWERY_TEST_RESULTS_ROOT selects an isolated WebView2 profile for controlled runs.
+Frame and shader diagnostics require a loaded host.
 
-1. Outgoing image pixelates to the target block size.
-2. Switch to the next image at mid-duration, then un-pixelate back to full sharpness.
+## References
 
-On Browser/WebGL, the transition duration is dynamically scaled so the pixelation fully completes for the configured pixel size.
-
-## Troubleshooting
-
-- If images do not load, ensure the files are included as Content and referenced with `Assets/...`.
+- [DaisyCarousel](DaisyCarousel.md)
+- [Carousel Tutorial](carousel-tutorial.md)
+- [Graphics](Graphics.md)
+- [Animation Helpers](FloweryAnimationHelpers.md)

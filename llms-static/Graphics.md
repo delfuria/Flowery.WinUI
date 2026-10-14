@@ -1,6 +1,6 @@
 # Graphics & Visual Effects
 
-This document describes the graphics rendering capabilities, visual effects, and animation systems in Flowery.Uno.
+This document describes the graphics rendering capabilities, visual effects, and animation systems in Flowery.WinUI.
 
 ---
 
@@ -11,22 +11,22 @@ This document describes the graphics rendering capabilities, visual effects, and
 3. [Glass Blur Effects](#glass-blur-effects) (DaisyGlass & DaisyCard)
 4. [Carousel Slide Effects](#carousel-slide-effects)
 5. [Carousel Slide Transitions](#carousel-slide-transitions)
-6. [Platform Support Matrix](#platform-support-matrix)
+6. [Native Windows Support](#native-windows-support)
 7. [Performance Considerations](#performance-considerations)
 
 ---
 
 ## Overview
 
-Flowery.Uno provides three layers of graphics capabilities:
+Flowery.WinUI provides native animation and image-processing capabilities:
 
 | Layer | Technology | Purpose |
 | ----- | ---------- | ------- |
 | **UI Animations** | WinUI Composition API, Storyboards | Standard control animations, transitions |
-| **Skia Processing** | SkiaSharp | Image blur, saturation, glass effects |
-| **Carousel GL Effects** | Skia (Browser only) | Advanced carousel transitions/effects |
+| **Skia Processing** | CPU SkiaSharp raster surfaces | Image blur, saturation, glass effects |
+| **Native Geometry** | Win2D and Windows Composition | Masks and vector geometry |
 
-All effects are designed for cross-platform compatibility across Desktop (Skia), Browser (WASM), Windows, Android, and iOS.
+The repository targets Windows with WinUI 3 and Windows App SDK.
 
 ---
 
@@ -37,22 +37,22 @@ All effects are designed for cross-platform compatibility across Desktop (Skia),
 The `Flowery.Skia` namespace provides core image processing capabilities:
 
 ```txt
-Flowery.Uno/Skia/
+Flowery.WinUI/Skia/
 ├── SkiaImageProcessor.cs      # Core blur, saturation, glass effect processing
 └── SkiaBackdropCapture.cs     # WinUI ↔ Skia bridge for backdrop capture
 ```
 
 ### SkiaImageProcessor
 
-Static utility class for GPU-accelerated image processing:
+Static utility class for CPU image processing:
 
 | Method | Description |
 | ------ | ----------- |
 | `ApplyBlur(bytes, sigmaX, sigmaY)` | Gaussian blur on image bytes |
 | `ApplyBlurAndSaturation(bytes, sigma, saturation)` | Combined blur + saturation adjustment |
 | `ApplyGlassEffect(bitmap, blur, saturation, tint, opacity, radius)` | Full glass effect with tint overlay and rounded corners |
-| `CreateSaturationFilter(saturation)` | Creates SKColorFilter for saturation (0 = grayscale, 1 = normal) |
 | `FromPixelData(pixels, width, height)` | Convert BGRA pixel data to SKBitmap |
+| `ToPixelData(bitmap)` | Copy an SKBitmap's raw pixel bytes to a byte array |
 
 ### SkiaBackdropCapture
 
@@ -71,12 +71,12 @@ var imageSource = await SkiaBackdropCapture.CaptureAndApplyGlassEffectAsync(
 
 **How it works:**
 
-1. Finds parent element with background
-2. Temporarily hides target element
-3. Captures region via `RenderTargetBitmap`
-4. Converts to `SKBitmap`
-5. Applies blur + saturation + tint via Skia
-6. Returns as WinUI `ImageSource`
+1. Finds the background source and serializes capture with other glass panels.
+2. Temporarily hides glass overlays in that scene, including sibling panels.
+3. Captures native WinUI content with `RenderTargetBitmap` at the XamlRoot rasterization scale.
+4. Restores overlay opacity values and bindings.
+5. Processes a padded region with CPU SkiaSharp blur, saturation, and tint.
+6. Crops and rounds the result to the panel bounds, then returns a WinUI `ImageSource`.
 
 ---
 
@@ -86,11 +86,16 @@ Both `DaisyGlass` and `DaisyCard` (with `IsGlass="True"` or `CardStyle="Glass"`)
 
 ### Blur Modes
 
-| Mode | Description | Performance | Quality |
-| ---- | ----------- | ----------- | ------- |
-| `Simulated` | Gradient overlays only (no real blur) | ⚡ Fastest | Good |
-| `BitmapCapture` | One-time capture + Skia blur | ⚡⚡ Medium | Better |
-| `SkiaSharp` | GPU blur via SkiaSharp | ⚡⚡⚡ Variable | Best |
+| Mode | Description |
+| ---- | ----------- |
+| `Simulated` | Translucent fills and highlights, without real capture or blur |
+| `BitmapCapture` | Native bitmap snapshot processed by CPU SkiaSharp |
+| `SkiaSharp` | The same native snapshot and CPU SkiaSharp processing path |
+
+The captured image includes its tint once; a second tint fill does not cover it.
+Size, blur, saturation, tint, corner-radius, and rasterization changes invalidate the snapshot.
+Unload clears the image and invalidates pending work; reload schedules a new capture.
+For background-content changes, use `RefreshBackdrop()`.
 
 ### Key Properties
 
@@ -205,7 +210,7 @@ Slide effects animate the **currently visible** slide during display. They creat
 | `ZoomIntensity` | `double` | `0.15` | Zoom scale (0.15 = 115%) |
 | `PanDistance` | `double` | `50` | Pan distance in pixels |
 | `PulseIntensity` | `double` | `0.08` | Pulse scale (0.08 = 108%) |
-| `PanAndZoomLockZoom` | `bool` | `false` | Pan only (no zoom) |
+| `PanAndZoomLockZoom` | `bool` | `false` | Pan at a constant computed cover scale |
 | `PanAndZoomPanSpeed` | `double` | `4.0` | Pan speed (px/sec) |
 | `PanAndZoomCycleSeconds` | `double` | `6.0` | Effect cycle duration |
 
@@ -227,9 +232,9 @@ Slide effects animate the **currently visible** slide during display. They creat
 
 Slide transitions animate the **change between** slides. They are categorized by implementation complexity.
 
-### Tier 1: Transform-Based (Universal)
+### Tier 1: Native Transforms
 
-Uses `CompositeTransform` and `PlaneProjection`. Works on all platforms.
+Uses native WinUI 3 `CompositeTransform` and `PlaneProjection`.
 
 | Family | Transitions |
 | ------ | ----------- |
@@ -242,7 +247,7 @@ Uses `CompositeTransform` and `PlaneProjection`. Works on all platforms.
 
 ### Tier 2: Clip-Based (Advanced)
 
-Uses animated `RectangleGeometry` clips. Works on most platforms.
+Uses animated native `RectangleGeometry` clips.
 
 | Family | Transitions |
 | ------ | ----------- |
@@ -250,9 +255,10 @@ Uses animated `RectangleGeometry` clips. Works on most platforms.
 | **Blinds** | `BlindsHorizontal`, `BlindsVertical` |
 | **Slices** | `SlicesHorizontal`, `SlicesVertical`, `Checkerboard`, `Spiral`, `MatrixRain`, `Wormhole` |
 
-### Tier 3: Skia-Based (Experimental)
+### Tier 3: Windows Composition
 
-Requires SkiaSharp rendering. Only on Skia-enabled targets (Desktop, WASM).
+`Dissolve` and `Pixelate` use Windows Composition visual surfaces and mask grids.
+The repository's `PORTING.md` records the native runtime verification scope.
 
 | Transition | Description |
 | ---------- | ----------- |
@@ -361,7 +367,7 @@ FlowerySlideEffects.StopEffectPreservingTransform(myImage);
 | `FlowerySlideTransitionHelpers` | Applies transitions between two slide elements |
 | `FlowerySlideTransitionParams` | Record for configuring transition parameters |
 | `FlowerySlideTransitionParser` | Parses string names to `FlowerySlideTransition` enum |
-| `FloweryTransitionTier` | Enum categorizing transitions (Transform/Clip/Skia) |
+| `FloweryTransitionTier` | Enum categorizing transitions (Transform/Clip/Composition) |
 
 **Programmatic Transition:**
 
@@ -392,37 +398,12 @@ FlowerySlideTransition applied = FlowerySlideTransitionHelpers.ApplyTransition(
 | `FlowerySlideshowMode` | Enum: `Manual`, `Slideshow`, `Random`, `Kiosk` |
 | `FlowerySlideChangedEventArgs` | Event args with old/new index, applied effect, current element |
 
-### Carousel GL Effects (Browser Only)
+### Native Geometry and Masks
 
-Located in `Flowery.Effects` namespace:
-
-| Class | Purpose |
-| ----- | ------- |
-| `CarouselGlEffectHost` | Control that hosts Skia carousel previews (browser only) |
-| `CarouselGlEffectRegistry` | Maps `CarouselGlEffectKind` to effect definitions |
-| `CarouselGlRuntime` | Selects browser Skia runtime or no-op |
-| `CarouselGlEffectKind` | Enum of all GL effect types |
-
-**Browser Skia Usage:**
-
-```xml
-xmlns:fx="using:Flowery.Effects"
-
-<fx:CarouselGlEffectHost Effect="MatrixRain"
-                         OverlayEffect="Dissolve"
-                         IntervalSeconds="4">
-    <Image Source="slide.jpg" />
-</fx:CarouselGlEffectHost>
-```
-
-**Available Carousel GL Effects:**
-
-| Category | Effects |
-| -------- | ------- |
-| **Shader Transitions** | `MaskTransition`, `Dissolve`, `Pixelate`, `FlipPlane` |
-| **Grid Patterns** | `BlindsHorizontal/Vertical`, `SlicesHorizontal/Vertical`, `Checkerboard`, `Spiral`, `MatrixRain`, `Wormhole` |
-| **3D Transforms** | `FlipHorizontal/Vertical`, `CubeLeft/Right` |
-| **Motion Effects** | `EffectPanAndZoom`, `EffectZoomIn/Out`, `EffectPan*`, `EffectDrift`, `EffectPulse`, `EffectBreath`, `EffectThrow` |
+The optional Flowery.WinUI.Win2D project supplies Composition geometry and masking support.
+The native solution uses Microsoft.Graphics.Win2D with Windows Composition.
+The native shader-effect host uses WinUI 3 WebView2 and retains the original shader presets.
+See [Native Carousel Rendering](FloweryCarouselGL.md) for its API and diagnostics.
 
 ### Skia Infrastructure
 
@@ -451,20 +432,15 @@ byte[]? glass = SkiaImageProcessor.ApplyGlassEffect(
 
 ---
 
-## Platform Support Matrix
+## Native Windows Support
 
-| Feature | Windows | Desktop (Skia) | Browser (WASM) | Android | iOS |
-| ------- | ------- | -------------- | -------------- | ------- | --- |
-| **DaisyGlass Simulated** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **DaisyGlass BitmapCapture** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **DaisyGlass SkiaSharp** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Tier 1 Transitions** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Tier 2 Transitions** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Tier 3 Transitions** | ⚠️ | ✅ | ✅ | ⚠️ | ⚠️ |
-| **Slide Effects** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Carousel GL Effects** | ❌ | ❌ | ✅ | ❌ | ❌ |
+Flowery.WinUI targets Windows with WinUI 3.
+Composition animations, Storyboards, bitmap capture, and SkiaSharp image processing run in the native build.
+The optional Flowery.WinUI.Win2D project supplies Win2D graphics.
 
-Legend: ✅ Full support | ⚠️ Experimental/Limited | ❌ Not supported
+The shader effects and gallery examples use a native WinUI 3 WebView2 host.
+Tier 3 carousel transitions use Windows Composition surfaces and mask grids.
+The repository's `PORTING.md` records validated configurations and verification scope.
 
 ---
 
@@ -473,27 +449,26 @@ Legend: ✅ Full support | ⚠️ Experimental/Limited | ❌ Not supported
 ### DaisyGlass
 
 - **Simulated mode** is always the fastest; use for high-frequency scenarios
-- **BitmapCapture** captures once on load; call `RefreshBackdrop()` sparingly
+- **Capture modes** refresh after relevant state changes; call `RefreshBackdrop()` after the background content changes
 - **SkiaSharp** blur sigma scales with CPU cost; keep `GlassBlur` under 50 for smooth performance
-- Backdrop capture temporarily hides the element; avoid during animations
+- Backdrop capture temporarily hides glass overlays in the sampled scene; avoid unnecessary recaptures during animations
 
 ### Carousel Effects
 
 - **Slide effects** run continuously; prefer lower `ZoomIntensity` and `PanDistance` for smooth 60fps
 - **PanAndZoom** is the most versatile but most complex; test on target devices
-- **Tier 3 transitions** require Skia rendering; may not work on all platforms
+- **Tier 3 transitions** use native Composition surfaces and mask grids; cell budgets limit the number of visual elements
 
 ### Memory
 
 - SkiaSharp bitmaps are disposed after processing
-- `RenderTargetBitmap` captures can be large; scale factor (0.75) reduces memory
+- `RenderTargetBitmap` captures use the current rasterization scale; large backgrounds increase snapshot and processing memory
 - Clear `ImageSource` on Unloaded to free resources
 
 ---
 
-## Future Enhancements
+## Snapshot Capture Scope
 
-- **Real-time blur** via `SKCanvasElement` (live backdrop sampling)
-- **Composition API blur** using `GaussianBlurEffect` where available
-- **Hardware backdrop** on platforms that support native acrylic
-- **Animated glass** with continuous background sampling
+The glass implementation uses native WinUI snapshots and CPU SkiaSharp processing.
+It does not continuously sample the backdrop or use a Composition blur pipeline.
+Use `RefreshBackdrop()` when background content changes independently of the panel's properties.

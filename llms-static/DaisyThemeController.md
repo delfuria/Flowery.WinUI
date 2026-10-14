@@ -48,10 +48,10 @@ xmlns:controls="using:Flowery.Controls"
     UncheckedLabel="Light" CheckedLabel="Synthwave" />
 ```
 
-**Prerequisite**: Your `App.xaml` must include Flowery.Uno's theme resources in `Application.Resources.MergedDictionaries`:
+**Prerequisite**: Your `App.xaml` must include Flowery.WinUI's theme resources in `Application.Resources.MergedDictionaries`:
 
 ```xml
-<ResourceDictionary Source="ms-appx:///Flowery.Uno/Themes/Generic.xaml" />
+<ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/Generic.xaml" />
 ```
 
 ## Tips & Best Practices

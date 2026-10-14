@@ -54,10 +54,8 @@ The control displays a compact panel (140×80 pixels) showing:
 | Platform | Support |
 | --- | --- |
 | **Windows** | ✅ Full support using GDI32 `GetPixel` API |
-| **macOS** | ⚠️ Limited - drag works but color capture may not function |
-| **Linux** | ⚠️ Limited - drag works but color capture may not function |
 
-The control uses Windows-specific P/Invoke calls (`GetCursorPos`, `GetDC`, `GetPixel`) for screen color capture. On non-Windows platforms, the drag interaction works but the color value won't update.
+The native Windows control uses P/Invoke calls (`GetCursorPos`, `GetDC`, `GetPixel`) for screen color capture.
 
 ## Quick Examples
 
@@ -144,7 +142,7 @@ Color currentColor = picker.Color;
 - **Explain the interaction** to users - the click-and-drag model may be unfamiliar
 - The control shows a **live preview** of the color under the cursor while dragging
 - **Hex and RGB values** update in real-time during drag
-- Works best on **Windows** - other platforms have limited color capture support
+- Uses the native **Windows** screen capture APIs
 - Combine with `DaisyColorEditor` or `DaisyColorGrid` for a complete color picker interface
 - The `IsCapturing` property can be used to conditionally show/hide UI elements
 - Use `PickingCompleted` event to trigger actions after successful color selection
@@ -160,4 +158,4 @@ Color currentColor = picker.Color;
 
 ## Acknowledgments
 
-This control is part of the Flowery.Uno color picker suite, inspired by the [Cyotek ColorPicker](https://github.com/cyotek/Cyotek.Windows.Forms.ColorPicker) library (MIT License).
+This control is part of the Flowery.WinUI color picker suite, inspired by the [Cyotek ColorPicker](https://github.com/cyotek/Cyotek.Windows.Forms.ColorPicker) library (MIT License).

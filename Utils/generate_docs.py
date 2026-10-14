@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Flowery.Uno Documentation Generator
+Flowery.WinUI Documentation Generator
 
-Generates markdown documentation from curated llms-static/ files.
+Generates Markdown documentation from native C# metadata and curated llms-static/ files.
 
 Usage:
     python Utils/generate_docs.py
@@ -14,7 +14,7 @@ CODE REQUIREMENTS FOR PARSING
 For the documentation generator to correctly extract metadata, code must follow
 these conventions:
 
-C# CONTROL FILES (Flowery.Uno/Controls/Daisy*.cs):
+C# CONTROL FILES (Flowery.WinUI/Controls/Daisy*.cs):
 --------------------------------------------------
 1. Class XML documentation must immediately precede the class definition:
 
@@ -23,16 +23,27 @@ C# CONTROL FILES (Flowery.Uno/Controls/Daisy*.cs):
    /// </summary>
    public class DaisyButton : Button
 
-2. StyledProperty definitions (or DependencyProperty for Uno) must follow consistent patterns:
+2. Register native dependency properties with their name, value type, owner, and metadata:
 
-   public static readonly DependencyProperty NAMEProperty =
+   public static readonly DependencyProperty VariantProperty =
+       DependencyProperty.Register(
+           nameof(Variant),
+           typeof(DaisyButtonVariant),
+           typeof(DaisyButton),
+           new PropertyMetadata(DaisyButtonVariant.Default, OnStylePropertyChanged));
 
-3. Property XML documentation must immediately precede the StyledProperty:
+   DependencyProperty.RegisterAttached and the new field modifier are also supported.
+
+3. Put property XML documentation immediately before the field or CLR property:
 
    /// <summary>
    /// Gets or sets the button variant (Primary, Secondary, etc.).
    /// </summary>
-   public static readonly StyledProperty<DaisyButtonVariant> VariantProperty = ...
+   public DaisyButtonVariant Variant
+   {
+       get => (DaisyButtonVariant)GetValue(VariantProperty);
+       set => SetValue(VariantProperty, value);
+   }
 
 4. Enums must be defined at namespace level with public access:
 
@@ -48,7 +59,6 @@ OUTPUT:
 -------
     llms/llms.txt            - Master index for LLMs
     llms/controls/*.md       - Per-control documentation
-    llms/categories/*.md     - Category overviews
 
 SUPPLEMENTARY DOCUMENTATION:
 ----------------------------
@@ -58,8 +68,9 @@ overwritten by the generator, create markdown files in llms-static/:
     llms-static/DaisyLoading.md   - Extra docs for DaisyLoading control
     llms-static/DaisyButton.md    - Extra docs for DaisyButton control
 
-The supplementary content is inserted AFTER the header/description and BEFORE the
-auto-generated Properties section. HTML comments (<!-- -->) are stripped.
+The supplementary content follows the control header, description, base class, and images.
+The index uses parsed property names. Detailed property tables stay in the curated files.
+HTML comments outside code blocks are stripped.
 
 Example supplementary file:
     ## Overview
@@ -128,7 +139,7 @@ class EnumInfo:
 
 @dataclass
 class PropertyInfo:
-    """Represents a StyledProperty definition."""
+    """Represents a native dependency property registration."""
     name: str
     prop_type: str
     default: str
@@ -208,9 +219,9 @@ class CSharpParser:
         Extract class info for the target class name.
         Returns (class_name, base_class, description).
         """
-        # Pattern for class declaration with optional generic constraints
+        # Native controls can be partial, sealed, or abstract.
         class_pattern = re.compile(
-            rf'public\s+(?:partial\s+)?class\s+({target_name})\s*:\s*(\w+)',
+            rf'public\s+(?:(?:partial|sealed|abstract)\s+)*class\s+({re.escape(target_name)})\s*:\s*([\w.]+)',
             re.MULTILINE
         )
 
@@ -243,40 +254,41 @@ class CSharpParser:
         return class_name, base_class, description
 
     def _extract_properties(self, content: str) -> list[PropertyInfo]:
-        """Extract all StyledProperty definitions."""
+        """Extract native dependency property registrations and CLR summaries."""
         properties = []
 
-        # Pattern for DependencyProperty.Register (Uno/WinUI style)
+        # Read the complete call: nameof, typeof, and defaults contain nested parentheses.
         prop_pattern = re.compile(
-            r'public\s+static\s+readonly\s+DependencyProperty\s+(\w+)Property\s*=\s*'
-            r'DependencyProperty\.Register\s*\([^)]+\)',
+            r'public\s+(?:(?:static|new|readonly)\s+)+DependencyProperty\s+(\w+)Property\s*=\s*'
+            r'DependencyProperty\.Register(?:Attached)?\s*\(',
             re.DOTALL
         )
 
         for match in prop_pattern.finditer(content):
             prop_name = match.group(1)
-            block = match.group(0)
+            arguments, call_end = self._read_call_arguments(content, match.end() - 1)
+            if len(arguments) != 4:
+                raise ValueError(f"Unexpected DependencyProperty registration for {prop_name}")
 
-            # Get property type from the register call
-            type_match = re.search(r'typeof\(([^)]+)\)', block)
-            prop_type = type_match.group(1) if type_match else "object"
+            type_argument = self._argument_value(arguments[1])
+            type_match = re.fullmatch(r'typeof\s*\(\s*(.*?)\s*\)', type_argument, re.DOTALL)
+            if not type_match:
+                raise ValueError(f"Missing native property type for {prop_name}")
+            prop_type = type_match.group(1)
 
-            # Get default value
-            default = self._extract_default(block, prop_type)
+            default = self._extract_default(self._argument_value(arguments[3]), prop_type)
+            description = self._summary_before(content, match.start())
 
-            # Look for summary comment before property
-            prop_start = match.start()
-            before_prop = content[max(0, prop_start - 500):prop_start]
-
-            description = ""
-            summary_pattern = re.compile(
-                r'///\s*<summary>\s*(.*?)\s*///\s*</summary>',
-                re.DOTALL
+            # The native controls normally document the CLR property after registration.
+            next_registration = prop_pattern.search(content, call_end)
+            wrapper_end = next_registration.start() if next_registration else len(content)
+            wrapper_pattern = re.compile(
+                rf'public\s+(?:(?:new|virtual|override|sealed)\s+)*'
+                rf'[\w.<>,?\[\] \t]+\s+{re.escape(prop_name)}\s*(?:\{{|=>)'
             )
-
-            # Find the last summary in the search area
-            for summary_match in summary_pattern.finditer(before_prop):
-                description = self._clean_summary(summary_match.group(1))
+            wrapper = wrapper_pattern.search(content, call_end, wrapper_end)
+            if wrapper:
+                description = self._summary_before(content, wrapper.start()) or description
 
             properties.append(PropertyInfo(
                 name=prop_name,
@@ -287,19 +299,58 @@ class CSharpParser:
 
         return properties
 
+    def _read_call_arguments(self, content: str, opening_index: int) -> tuple[list[str], int]:
+        """Split one C# call without splitting nested expressions, strings, or comments."""
+        tokens = re.compile(
+            r'@"(?:""|[^"])*"|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\''
+            r'|//[^\r\n]*|/\*.*?\*/|[()\[\]{},]',
+            re.DOTALL
+        )
+        arguments = []
+        nesting = ['(']
+        argument_start = opening_index + 1
+        closing = {')': '(', ']': '[', '}': '{'}
+
+        for match in tokens.finditer(content, argument_start):
+            token = match.group(0)
+            if token in ('(', '[', '{'):
+                nesting.append(token)
+            elif token in closing:
+                if nesting[-1] != closing[token]:
+                    raise ValueError("Unbalanced C# dependency property expression")
+                nesting.pop()
+                if not nesting:
+                    arguments.append(content[argument_start:match.start()].strip())
+                    return arguments, match.end()
+            elif token == ',' and len(nesting) == 1:
+                arguments.append(content[argument_start:match.start()].strip())
+                argument_start = match.end()
+
+        raise ValueError("Unterminated C# dependency property registration")
+
+    @staticmethod
+    def _argument_value(argument: str) -> str:
+        """Remove an optional C# named-argument prefix."""
+        return re.sub(r'^\s*\w+\s*:\s*', '', argument).strip()
+
+    def _summary_before(self, content: str, declaration_start: int) -> str:
+        """Read XML comments attached to this declaration, not a previous member."""
+        comment = re.search(
+            r'((?:[ \t]*///[^\r\n]*(?:\r?\n|$))+)(?:\s*\[[^\]]*\])*\s*$',
+            content[:declaration_start]
+        )
+        if not comment:
+            return ""
+        summary = re.search(r'<summary>(.*?)</summary>', comment.group(1), re.DOTALL)
+        return self._clean_summary(summary.group(1)) if summary else ""
+
     def _extract_default(self, block: str, prop_type: str) -> str:
-        """Extract default value from property registration block."""
-        # Look for PropertyMetadata with default value
-        default_patterns = [
-            r'new\s+PropertyMetadata\s*\(\s*([^,)]+)',  # PropertyMetadata(default, ...)
-            r'defaultValue:\s*([^,)]+)',  # Named parameter
-        ]
-
-        for pattern in default_patterns:
-            match = re.search(pattern, block)
-            if match:
-                return self._clean_default(match.group(1).strip(), prop_type)
-
+        """Read the complete default expression from native PropertyMetadata."""
+        metadata = re.search(r'new\s+PropertyMetadata\s*\(', block)
+        if metadata:
+            arguments, _ = self._read_call_arguments(block, metadata.end() - 1)
+            if arguments:
+                return self._clean_default(self._argument_value(arguments[0]), prop_type)
         return "-"
 
     def _clean_summary(self, text: str) -> str:
@@ -317,18 +368,8 @@ class CSharpParser:
         if not default:
             return "null" if "?" in prop_type else "-"
         default = default.strip().rstrip(',')
-        # Simplify common patterns
-        if 'new Thickness(' in default:
-            match = re.search(r'Thickness\((\d+)\)', default)
-            if match:
-                return f"Thickness({match.group(1)})"
-            return "Thickness"
-        if 'Color.FromArgb' in default:
-            return "Color(semitransparent)"
-        if 'Colors.' in default:
-            return default.replace('Colors.', '')
-        # Enum defaults
-        if '.' in default:
+        # Shorten enum/constants only; retain decimals, constructors, and method calls.
+        if re.fullmatch(r'[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+', default):
             return default.split('.')[-1]
         return default
 
@@ -501,21 +542,21 @@ class MarkdownGenerator:
         """Generate the master llms.txt index file."""
         lines = []
 
-        lines.append("# Flowery.Uno Component Library")
+        lines.append("# Flowery.WinUI Component Library")
         lines.append("")
-        lines.append("Flowery.Uno is an Uno Platform / WinUI component library inspired by DaisyUI.")
-        lines.append("It provides styled controls for building modern cross-platform applications.")
+        lines.append("Flowery.WinUI is a WinUI 3 component library inspired by DaisyUI.")
+        lines.append("It provides themed controls for native Windows applications.")
         lines.append("")
         lines.append("## Documentation Structure")
         lines.append("")
-        lines.append("- `docs/llms.txt` - This file (overview and quick reference)")
-        lines.append("- `docs/controls/*.md` - Per-control documentation with properties, enums, and examples")
+        lines.append("- `llms/llms.txt` - This file (overview and quick reference)")
+        lines.append("- `llms/controls/*.md` - Per-control documentation from the curated source files")
         lines.append("")
         lines.append("## Quick Start")
         lines.append("")
         lines.append("Add the namespace to your XAML:")
         lines.append("```xml")
-        lines.append('xmlns:daisy="using:Flowery.Controls"')
+        lines.append('xmlns:controls="using:Flowery.Controls"')
         lines.append("```")
         lines.append("")
         lines.append("## Controls Overview")
@@ -559,25 +600,24 @@ class MarkdownGenerator:
         lines.append("")
         lines.append("```xml")
         lines.append('<controls:DaisyButton Size="Large" Content="Large Button"/>')
-        lines.append('<controls:DaisyInput Size="Small" Watermark="Small input"/>')
+        lines.append('<controls:DaisyInput Size="Small" PlaceholderText="Small input"/>')
         lines.append("```")
         lines.append("")
         lines.append("### Theming")
         lines.append("Use `DaisyThemeManager` to switch themes programmatically:")
         lines.append("```csharp")
-        lines.append('DaisyThemeManager.Instance.CurrentTheme = "dracula";')
+        lines.append('using Flowery.Controls;')
+        lines.append('')
+        lines.append('DaisyThemeManager.ApplyTheme("Dracula");')
         lines.append("```")
         lines.append("")
         lines.append("Or use theme controls:")
         lines.append("```xml")
         lines.append('<controls:DaisyThemeDropdown/>')
-        lines.append('<controls:DaisyThemeSwap LightTheme="light" DarkTheme="dark"/>')
+        lines.append('<controls:DaisyThemeSwap LightTheme="Light" DarkTheme="Dark"/>')
         lines.append("```")
         lines.append("")
-        lines.append("Available themes: light, dark, cupcake, bumblebee, emerald, corporate,")
-        lines.append("synthwave, retro, cyberpunk, valentine, halloween, garden, forest,")
-        lines.append("aqua, lofi, pastel, fantasy, wireframe, black, luxury, dracula, cmyk,")
-        lines.append("autumn, business, acid, lemonade, night, coffee, winter, dim, nord, sunset")
+        lines.append("Read `DaisyThemeManager.AvailableThemes` for the current theme catalog.")
         lines.append("")
 
         return '\n'.join(lines)
@@ -592,7 +632,7 @@ class DocumentationGenerator:
 
     def __init__(self, root_dir: Path):
         self.root_dir = root_dir
-        self.controls_dir = root_dir / "Flowery.Uno" / "Controls"
+        self.controls_dir = root_dir / "Flowery.WinUI" / "Controls"
         self.output_dir = root_dir / "llms"
         self.supplementary_dir = root_dir / "llms-static"
 
@@ -601,7 +641,7 @@ class DocumentationGenerator:
 
     def generate(self):
         """Generate all documentation."""
-        print("Flowery.Uno Documentation Generator")
+        print("Flowery.WinUI Documentation Generator")
         print("=" * 40)
         print("Mode: CURATED (llms-static/)")
 
@@ -654,7 +694,7 @@ class DocumentationGenerator:
 
 def main():
     """Main entry point."""
-    print("Running Flowery.Uno Documentation Generator...")
+    print("Running Flowery.WinUI Documentation Generator...")
 
     script_dir = Path(__file__).parent
     root_dir = script_dir.parent

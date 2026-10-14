@@ -67,10 +67,11 @@ output/
 The `DaisyPatternedCard` control uses `FloweryPatternMode.Tiled` by default, which generates pattern geometry at runtime using `FloweryPatternTileGenerator`. This provides:
 
 - Theme-aware coloring (uses `Foreground` brush)
-- Consistent rendering across all platforms
+- Native Windows rendering
 - No asset loading overhead
 
-The SVG assets in `Flowery.Uno/Assets/Patterns/` are **not included in the build** - they are kept for reference only.
+The SVG assets in `Flowery.WinUI/Assets/Patterns/` are included in the native build and packages.
+The asset loader uses native SvgImageSource for those pattern tiles.
 
 ## API Reference
 

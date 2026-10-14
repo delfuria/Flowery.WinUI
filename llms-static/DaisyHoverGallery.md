@@ -37,9 +37,9 @@ DaisyHoverGallery displays one item at a time from an item collection, switching
                             VisibleIndex="1"
                             DividerBrush="#66FFFFFF"
                             DividerThickness="2">
-    <Image Source="ms-appx:///Flowery.Uno.Gallery/Assets/photo1.jpg" Stretch="UniformToFill" />
-    <Image Source="ms-appx:///Flowery.Uno.Gallery/Assets/photo2.jpg" Stretch="UniformToFill" />
-    <Image Source="ms-appx:///Flowery.Uno.Gallery/Assets/photo3.jpg" Stretch="UniformToFill" />
+    <Image Source="ms-appx:///Flowery.WinUI.Gallery/Assets/photo1.jpg" Stretch="UniformToFill" />
+    <Image Source="ms-appx:///Flowery.WinUI.Gallery/Assets/photo2.jpg" Stretch="UniformToFill" />
+    <Image Source="ms-appx:///Flowery.WinUI.Gallery/Assets/photo3.jpg" Stretch="UniformToFill" />
 </controls:DaisyHoverGallery>
 ```
 

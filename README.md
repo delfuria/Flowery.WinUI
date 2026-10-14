@@ -1,104 +1,52 @@
-<!-- markdownlint-disable MD033 -->
-<!-- markdownlint-disable MD041 -->
-<div align="center">
+# Flowery.WinUI
 
-![Flowery.Uno Banner](banner.png)
-
-# 🌼 Flowery.Uno
-
-**An [Uno Platform](https://platform.uno/) / WinUI port of [Flowery.NET](https://github.com/tobitege/Flowery.NET) — fully themed C# controls.**
-
-[![NuGet](https://img.shields.io/nuget/v/Flowery.Uno?style=flat-square)](https://www.nuget.org/packages/Flowery.Uno)
-[![Downloads](https://img.shields.io/nuget/dt/Flowery.Uno?style=flat-square)](https://www.nuget.org/packages/Flowery.Uno)
-[![License](https://img.shields.io/github/license/tobitege/Flowery.Uno?style=flat-square)](LICENSE)
-[![Uno Platform](https://img.shields.io/badge/Uno%20Platform-6.x-blue?style=flat-square)](https://platform.uno/)
-[![Docs](https://img.shields.io/badge/Docs-GitHub%20Pages-blue?style=flat-square)](https://tobitege.github.io/Flowery.Uno/)
-[![X](https://img.shields.io/badge/X-@tobitege-000000?style=flat-square&logo=x)](https://x.com/tobitege)
-
-</div>
-
-<div align="center">
-
-🌐 **Localized in 12 languages** including:
-
-🇯🇵 日本語にローカライズ済み &nbsp;•&nbsp; 🇰🇷 한국어로 현지화됨 &nbsp;•&nbsp; 🇨🇳 已本地化为简体中文
-
-🇺🇦 Локалізовано українською &nbsp;•&nbsp; 🇸🇦 مترجم للعربية &nbsp;•&nbsp; 🇮🇱 מתורגם לעברית
-
-</div>
-
-Flowery.Uno provides native WinUI controls that mimic the utility-first, semantic class naming of DaisyUI, making it easy to build beautiful, themed UIs.
-
-> [!NOTE]
-> This is still in alpha. Features may be added/removed or need fixing. I'm just a *guy with an AI*! Took all of my spare time over 5+ weeks for just the initial alpha. This Flowery version has even more controls and features then the original. This repo is ~134K lines of code with 900+ files.  
-I hope this will be useful and fun to work with! -- tobitege
-
-## Relationship to Flowery.NET
-
-- **Flowery.NET (Avalonia)** was the starting point and the reference implementation.
-- **Flowery.Uno (Uno Platform / WinUI)** reuses the same DaisyUI-inspired design language:
-  - semantic variants (`Primary`, `Secondary`, `Accent`, etc.)
-  - DaisyUI theme names and runtime switching
-  - similar control names (`DaisyButton`, `DaisyInput`, `DaisyThemeDropdown`, …)
+Flowery.WinUI is a Windows-only WinUI 3 control library for the Windows App SDK.
+It continues the original control implementation and Git history.
+The active projects use the native Windows App SDK.
 
 ## Features
 
-- **DaisyUI-inspired Controls**: C# classes inheriting from WinUI primitives (e.g., `DaisyButton : Button`).
-- **35 DaisyUI Themes**: All official DaisyUI themes included (Light, Dark, Cupcake, Dracula, Nord, Synthwave, and more).
-- **Runtime Theme Switching**: Use `DaisyThemeDropdown` to switch themes at runtime.
-- **Lightweight Styling**: Customize individual controls with control-specific resource keys. [📖 Reference](llms-static/StylingResources.md)
-- **Localization Support**: Built-in i18n with **12 languages** (🇺🇸 🇩🇪 🇫🇷 🇪🇸 🇮🇹 🇨🇳 🇰🇷 🇯🇵 🇸🇦 🇹🇷 🇺🇦 🇮🇱), localizable theme names, and runtime language switching. [📖 Guide](LOCALIZATION.md) WinUI/Uno heads must use `{Binding [Key]}` with a `Localization` DataContext; `x:Bind` indexers are invalid on all heads. Desktop/Skia must force a `DataContext` refresh on culture change to update indexer bindings.
-- **FlowKanban**: Full Kanban board control with swimlanes, WIP limits, drag & drop, undo/redo history, multi-board home, and JSON persistence + migration. [📖 Guide](llms-static/FlowKanban.md)
-- **Variants**: Supports `Primary`, `Secondary`, `Accent`, `Ghost`, etc.
-- **Gallery App**: Demo application showcasing all controls and features.
+- DaisyUI themes and runtime theme changes.
+- Input, selection, navigation, popup, dialog, layout, and data display controls.
+- Twelve localization languages.
+- Native Composition shadows and animations.
+- Kanban boards, persistence, undo and redo, filtering, and user integrations.
+- Optional Win2D graphics support.
+- Shader-effect hosts through native WinUI 3 WebView2 controls.
+- A Windows Gallery with the existing control examples.
+- A native Windows Kiosk with six showcase slides.
+- A native test host for the existing unit and runtime tests.
 
-## FlowKanban
+## Requirements
 
-`FlowKanban` is a full Kanban board system built for Flowery.Uno. It ships as a single control but includes a full ecosystem of models, dialogs, and a Home screen for managing multiple boards.
+- Windows 10 version 2004 or later.
+- A .NET SDK selected by `global.json`, or an explicit `-SdkVersion`.
+- Visual Studio with MSBuild and the WinUI development tools.
+- Microsoft Edge WebView2 Runtime for the shader-effect views.
+- The package versions in `Directory.Packages.props`.
 
-### FlowKanban Highlights
+The source build uses the native Windows XAML compiler.
+The repository builds native Windows projects only.
+SkiaSharp remains a separate image-processing dependency.
+The projects target .NET 10 for Windows.
+The build scripts also support early compiler testing with .NET 11 SDK RC2; this does not change the target runtime.
+See [SDK selection](scripts/README.md#select-the-net-sdk) for exact-version and local SDK commands.
 
-- Swimlanes with lane-aware drag and drop.
-- WIP limits with visual enforcement and warnings.
-- Undo/redo history for all board operations.
-- Multi-board Home screen (search, sort, rename, duplicate, export).
-- JSON persistence with atomic saves + migration support.
-- Command surface for common actions (add/remove/rename/zoom).
-- Search and filtering for tasks and boards.
-- Industrial sidebar layout with board-level actions.
+## Use the library
 
-### Architecture
-
-- `FlowKanban`: Control shell + state + persistence.
-- `FlowKanbanManager`: Programmatic API for manipulating boards.
-- `FlowKanbanHome`: Multi-board Home screen control.
-- `FlowTaskCard` / `FlowKanbanColumn`: Visual task + column building blocks.
-
-### Usage
+1. Add a project reference to `Flowery.WinUI/Flowery.WinUI.csproj` in a WinUI 3 application.
+2. Merge the library resources after `XamlControlsResources` in the application resources.
 
 ```xml
-xmlns:kanban="using:Flowery.Uno.Kanban.Controls"
-
-<kanban:FlowKanban x:Name="ProjectBoard" />
+<ResourceDictionary>
+    <ResourceDictionary.MergedDictionaries>
+        <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+        <ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/Generic.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>
 ```
 
-📖 **[FlowKanban Guide](llms-static/FlowKanban.md)** - Full feature list, architecture, and usage examples.
-
-## Quick Start
-
-1. Reference the `Flowery.Uno` project (or later: a NuGet package).
-
-2. Ensure `Themes/Generic.xaml` is loaded in your app. The library uses `GenerateLibraryLayout=true`.
-
-3. (Recommended) Seed design tokens early if you calculate layout before any Daisy control loads:
-
-```csharp
-using Flowery.Theming;
-
-DaisyResourceLookup.EnsureTokens();
-```
-
-4. Use controls in your views:
+3. Use the existing control namespace.
 
 ```xml
 xmlns:daisy="using:Flowery.Controls"
@@ -108,15 +56,70 @@ xmlns:daisy="using:Flowery.Controls"
 <daisy:DaisyThemeDropdown MinWidth="220" />
 ```
 
-📖 **[Full Theming Guide](THEMING.md)** - Detailed setup, theme switching, persistence, and custom theme loading.
+4. For Kanban, add a reference to `Flowery.WinUI.Kanban` and merge `ms-appx:///Flowery.WinUI.Kanban/Themes/Generic.xaml`.
 
----
+Core controls use `Flowery.Controls`.
+Kanban controls use `Flowery.WinUI.Kanban.Controls`.
+Integrations use `Flowery.Integrations.WinUI`.
+Project, assembly, and package names use `Flowery.WinUI`.
+This local migration does not establish that a public NuGet package exists.
+
+## Build and run
+
+Run these commands in native PowerShell 7 from the repository root:
+
+```powershell
+pwsh -NoProfile -File ./scripts/build_all.ps1 -Configuration Debug -NoRun
+pwsh -NoProfile -File ./scripts/build_all.ps1 -Configuration Release -NoRun
+pwsh -NoProfile -File ./scripts/run-windows.ps1 -Configuration Debug
+```
+
+For the Gallery and its project references only, use `scripts/build_windows.ps1`.
+Build logs are in `logs/`.
+The scripts retain a separate log for each run.
+
+## Tests
+
+The existing unit tests create WinUI objects.
+They run with the runtime tests inside the native Gallery test host.
+
+```powershell
+pwsh -NoProfile -File ./scripts/test_windows.ps1 -Configuration Debug
+```
+
+After a successful build, use `-SkipBuild` to run the same prebuilt binaries.
+For a specific display, use `-Monitor 2 -WindowRegion LowerHalf` to place the test window in its lower half.
+The Windows runner passes an isolated results path to the Gallery.
+The Gallery stores test state beside that path, separate from personal Gallery settings.
+Results and logs are in `TestResults/` and `logs/`.
+
+## Projects
+
+| Project | Purpose |
+| --- | --- |
+| `Flowery.WinUI` | Core controls, resources, themes, and localization |
+| `Flowery.WinUI.Kanban` | Kanban controls and board persistence |
+| `Flowery.Integrations.WinUI` | User providers and authentication integrations |
+| `Flowery.WinUI.Win2D` | Optional native Win2D graphics |
+| `Flowery.WinUI.Gallery.Core` | Gallery views, examples, and assets |
+| `Flowery.WinUI.Gallery` | Native Windows application and test host |
+| `Flowery.WinUI.Kiosk` | Native showcase slideshow application |
+| `Flowery.WinUI.RuntimeTests` | Runtime tests and linked unit tests |
+| `Flowery.WinUI.RuntimeTests.WindowsRunner` | External process runner and result assertions |
+
+The current source tree targets native Windows.
+The shader-effect and kiosk implementations use native hosts with their functions preserved.
+See [the migration record](PORTING.md) for dated build results and runtime verification scope.
+
+The Kiosk advances every eight seconds and supports manual navigation.
+See [Kiosk scripts](scripts/README.md#build-or-run-the-kiosk) for build, run, and verification commands.
+See [Shader effects](llms-static/FloweryCarouselGL.md) for the native host API and rendering scope.
 
 ## Components
 
 ### Actions
 
-- **Button** (`DaisyButton`): Buttons with variants (Primary, Secondary, Accent, Ghost, Link) and sizes (Large, Normal, Small, Tiny). Supports Outline and Active states.
+- **Button** (`DaisyButton`): Buttons with color variants, button styles, shapes, and five sizes from ExtraSmall to ExtraLarge.
 - **Fab** (`DaisyFab`): Floating Action Button (Speed Dial) with support for multiple actions.
 - **Modal** (`DaisyModal`): Dialog box with backdrop overlay.
 - **Swap** (`DaisySwap`): Toggle control that swaps between two content states with optional Rotate/Flip effects.
@@ -127,7 +130,7 @@ xmlns:daisy="using:Flowery.Controls"
 - **Alert** (`DaisyAlert`): Feedback messages (Info, Success, Warning, Error).
 - **Avatar** (`DaisyAvatar`): User profile image container (Circle, Square) with online/offline status indicators.
 - **Avatar Group** (`DaisyAvatarGroup`): Groups multiple avatars with automatic overflow into "+N" placeholder.
-- **Badge** (`DaisyBadge`): Small status indicators (Primary, Secondary, Outline, etc.).
+- **Badge** (`DaisyBadge`): Small status indicators with color variants, five sizes, and an `IsOutline` option.
 - **Card** (`DaisyCard`): Content container with padding and shadow.
 - **Carousel** (`DaisyCarousel`): Scrollable container for items.
 - **Chat Bubble** (`DaisyChatBubble`): Message bubbles with header, footer, and alignment (Start/End).
@@ -187,9 +190,9 @@ xmlns:daisy="using:Flowery.Controls"
 
 ---
 
-## ✨ Flowery.Uno Exclusives
+## ✨ Flowery.WinUI extensions
 
-> **Beyond DaisyUI** - The following features and controls are **not part of the original DaisyUI CSS specification**. They are unique to Flowery, built natively for Uno Platform.
+> **Beyond DaisyUI** - The following features and controls are **not part of the original DaisyUI CSS specification**. They are unique to Flowery, built for WinUI 3.
 
 ### Utility Controls
 
@@ -212,7 +215,7 @@ A complete color picker suite rebuilt natively for WinUI with DaisyUI styling:
 - **Color Slider** (`DaisyColorSlider`): Channel-specific sliders (R/G/B/A/H/S/L).
 - **Color Editor** (`DaisyColorEditor`): Comprehensive RGB/HSL editor.
 - **Color Picker Dialog** (`DaisyColorPickerDialog`): Full-featured modal dialog.
-- **Screen Color Picker** (`DaisyScreenColorPicker`): Screen sampling tool (Windows/Desktop).
+- **Screen Color Picker** (`DaisyScreenColorPicker`): Screen sampling tool (Windows).
 
 ### Date Timeline
 
@@ -223,125 +226,21 @@ A horizontal scrollable date picker:
 
 ---
 
-## Build & Run
 
-Build scripts (PowerShell + Git Bash) exist for these heads:
+## Documentation
 
-- Desktop (Skia): `build_desktop.ps1` / `build_desktop.sh`
-- Windows (WinUI): `build_windows.ps1` / `build_windows.sh`
-- Browser (WASM): `build_browser.ps1` / `build_browser.sh`
-- Android: `build_android.ps1` / `build_android.sh`
-- Kiosk Browser: `build_kiosk_browser.ps1` / `build_kiosk_browser.sh`
-- All heads: `build_all.ps1` / `build_all.sh`
+- [Theming](THEMING.md)
+- [Localization](LOCALIZATION.md)
+- [Control documentation](llms-static/README.md)
+- [Style resources](llms-static/StylingResources.md)
+- [Kanban](llms-static/FlowKanban.md)
+- [Migration record and validation status](PORTING.md)
 
-Run scripts exist for these heads:
+Historical changelog entries describe their original releases.
 
-- `run-desktop.ps1`
-- `run-windows.ps1`
-- `run-browser.ps1`
-- `run-android.ps1`
+## License and credits
 
-Common build parameters (apply to all build scripts):
-
-- `-Configuration <Debug|Release>`
-- `-NoRun`
-- `-Rebuild`
-- `-VerboseOutput`
-
-Additional parameters (script-specific):
-
-- `build_android.ps1`: `-AndroidSdkDirectory <path>`
-- `build_all.ps1`: `-RestoreWorkloads`
-
-Examples:
-
-```powershell
-pwsh ./scripts/build_desktop.ps1
-pwsh ./scripts/build_windows.ps1 -NoRun -VerboseOutput
-pwsh ./scripts/build_browser.ps1 -Configuration Release
-```
-
-```bash
-./scripts/build_desktop.sh
-./scripts/build_windows.sh -NoRun -VerboseOutput
-```
-
-## Technical Requirements
-
-**To use the library:**
-
-- .NET 8.0+
-- Uno Platform 6.x
-
-**To build from source:**
-
-- .NET 10.0 SDK or later
-- Visual Studio 2022, JetBrains Rider, or VS Code
-- Windows, macOS, or Linux
-
-**Required .NET Workloads:**
-
-Different platform heads require specific workloads. Install them as needed:
-
-```powershell
-# Browser (WebAssembly) - Required for Flowery.Uno.Gallery.Browser
-dotnet workload install wasm-tools
-
-# Android - Required for Flowery.Uno.Gallery.Android
-dotnet workload install android
-
-# Or restore all workloads defined in the solution
-dotnet workload restore
-```
-
-> **Tip:** Run `dotnet workload list` to see currently installed workloads.
-
----
-
-## Project Structure
-
-| Project | Description |
-| --- | --- |
-| `Flowery.Uno` | Core library containing all controls |
-| `Flowery.Uno.Win2D` | Optional Win2D extension library for advanced geometry/effects |
-| `Flowery.Uno.Gallery` | Shared Gallery UI library |
-| `Flowery.Uno.Gallery.Windows` | WinUI (Windows) Gallery head |
-| `Flowery.Uno.Gallery.Desktop` | Skia desktop Gallery head (Windows/Linux/macOS) |
-| `Flowery.Uno.Gallery.Browser` | WebAssembly Gallery head |
-| `Flowery.Uno.Gallery.Android` | Android Gallery head |
-
----
-
-## Design Tokens & Styling
-
-| Documentation | Purpose |
-| --- | --- |
-| [`Flowery.Uno/DesignTokens.md`](Flowery.Uno/DesignTokens.md) | Token keys (spacing, sizing, colors) and override guidance |
-| [`llms-static/StylingResources.md`](llms-static/StylingResources.md) | Control-specific styling resources for lightweight customization |
-| [`THEMING.md`](THEMING.md) | Full theming guide, theme controls, and per-control styling patterns |
-
----
-
-## License
-
-MIT
-
-## Support
-
-If you find this library useful, consider supporting its development:
-
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=flat-square&logo=buy-me-a-coffee)](https://buymeacoffee.com/tobitege23) [![Ko-Fi](https://img.shields.io/badge/Ko--Fi-support-ff5e5b?style=flat-square&logo=ko-fi)](https://ko-fi.com/tobitege)
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
-
-## Credits & References
-
-- [**Uno Platform**](https://platform.uno/) - The cross-platform WinUI implementation.
-- [**DaisyUI**](https://daisyui.com/) - The original Tailwind CSS component library.
-- [**Cyotek ColorPicker**](https://github.com/cyotek/Cyotek.Windows.Forms.ColorPicker) - Inspiration for color picker controls.
-- [**Easy Date Timeline**](https://github.com/FadyFayezYounan/easy_date_timeline) - Inspiration for date timeline controls.
-- [**HappyHues.co**](https://www.happyhues.co/) - Inspirations for several extra themes
-
-> **Disclaimer:** This project is not affiliated with, endorsed by, or sponsored by any of the above.
+[MIT](LICENSE).
+The project retains its original implementation and Git history.
+[DaisyUI](https://daisyui.com/) supplies the design language.
+[WinUI 3](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/) and the Windows App SDK supply the native Windows framework.

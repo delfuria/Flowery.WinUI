@@ -1,6 +1,5 @@
 <Project>
   <PropertyGroup>
-    <!-- Default configuration if not specified -->
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <BaseOutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\</BaseOutputPath>
     <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
@@ -9,41 +8,12 @@
     <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">1.2.0.0</AssemblyVersion>
     <FileVersion Condition="'$(FileVersion)' == ''">1.2.0.0</FileVersion>
     <Authors Condition="'$(Authors)' == ''">tobitege</Authors>
-    <PackageProjectUrl Condition="'$(PackageProjectUrl)' == ''">https://github.com/tobitege/Flowery.Uno</PackageProjectUrl>
-    <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/tobitege/Flowery.Uno</RepositoryUrl>
+    <PackageProjectUrl Condition="'$(PackageProjectUrl)' == ''">https://github.com/tobitege/Flowery.WinUI</PackageProjectUrl>
+    <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/tobitege/Flowery.WinUI</RepositoryUrl>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(FloweryRuntimeIntermediateRoot)' != ''">
-    <BaseIntermediateOutputPath>$(FloweryRuntimeIntermediateRoot)$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(UnoSdkExtrasTasksAssembly)' == ''">
-    <_UnoSdkExtrasRoot Condition="'$(NUGET_PACKAGES)' != ''">$(NUGET_PACKAGES)</_UnoSdkExtrasRoot>
-    <_UnoSdkExtrasRoot Condition="'$(_UnoSdkExtrasRoot)' == '' and '$(UserProfile)' != ''">$(UserProfile)\.nuget\packages</_UnoSdkExtrasRoot>
-    <_UnoSdkExtrasRoot Condition="'$(_UnoSdkExtrasRoot)' == '' and '$(HOME)' != ''">$(HOME)/.nuget/packages</_UnoSdkExtrasRoot>
-    <UnoSdkExtrasTasksAssembly Condition="'$(_UnoSdkExtrasRoot)' != ''">$([System.IO.Path]::Combine('$(_UnoSdkExtrasRoot)','uno.sdk.extras','6.3.1','buildTransitive','netstandard2.0','Uno.Sdk.Extras_v9d177673b7.dll'))</UnoSdkExtrasTasksAssembly>
-  </PropertyGroup>
-
-  <!-- Android: Skip scale-125 which is not supported (only WinUI supports it) -->
-  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
-    <UnoResizetizerSkipScales>scale-125</UnoResizetizerSkipScales>
-    <!-- HotDesign/AI assets pull in Uno.WinUI.Graphics2DSK, which is not packaged on Android -->
-    <UnoDisableHotDesign>true</UnoDisableHotDesign>
-  </PropertyGroup>
-
-  <!-- Force CoreCLR on Windows targets to avoid deprecated Mono desktop runtime packs -->
-  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows')) and ($([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows' or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'desktop')">
-    <UseMonoRuntime>false</UseMonoRuntime>
-  </PropertyGroup>
-
-  <!-- Ensure Desktop/Skia builds have the standard Uno define for Skia. -->
-  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'desktop'">
-    <DefineConstants>$(DefineConstants);__SKIA__;HAS_UNO_SKIA</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)GlobalUsings.cs" Link="GlobalUsings.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <CompilerVisibleProperty Include="MSBuildProjectFullPath" />

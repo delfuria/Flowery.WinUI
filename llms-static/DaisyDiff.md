@@ -52,10 +52,10 @@ DaisyDiff is a before/after comparison control with a draggable grip. It overlay
 <!-- Image comparison with custom start offset -->
 <controls:DaisyDiff Width="500" Height="300" Offset="30">
     <controls:DaisyDiff.Image1>
-        <Image Source="ms-appx:///Flowery.Uno.Gallery/Assets/photo-before.jpg" Stretch="UniformToFill" />
+        <Image Source="ms-appx:///Flowery.WinUI.Gallery/Assets/photo-before.jpg" Stretch="UniformToFill" />
     </controls:DaisyDiff.Image1>
     <controls:DaisyDiff.Image2>
-        <Image Source="ms-appx:///Flowery.Uno.Gallery/Assets/photo-after.jpg" Stretch="UniformToFill" />
+        <Image Source="ms-appx:///Flowery.WinUI.Gallery/Assets/photo-after.jpg" Stretch="UniformToFill" />
     </controls:DaisyDiff.Image2>
 </controls:DaisyDiff>
 ```

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.19041</TargetFramework>
+    <RootNamespace>Flowery.WinUI.Kanban</RootNamespace>
+    <UseWinUI>true</UseWinUI>
+    <OutputType>Library</OutputType>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateLibraryLayout>true</GenerateLibraryLayout>
+    <PackageId>Flowery.WinUI.Kanban</PackageId>
+    <Description>Native WinUI 3 Kanban controls for Flowery.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Flowery.WinUI\Flowery.WinUI.csproj" />
+    <EmbeddedResource Include="Localization\*.json" LogicalName="$(AssemblyName).Localization.%(Filename)%(Extension)" />
+    <Compile Remove="$(MSBuildProjectDirectory)\..\GlobalUsings.cs" />
+  </ItemGroup>
+</Project>

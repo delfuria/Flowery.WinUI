@@ -113,4 +113,4 @@ var slider = new DaisyColorSlider
 
 ## Acknowledgments
 
-This control is part of the Flowery.Uno color picker suite, inspired by the [Cyotek ColorPicker](https://github.com/cyotek/Cyotek.Windows.Forms.ColorPicker) library (MIT License).
+This control is part of the Flowery.WinUI color picker suite, inspired by the [Cyotek ColorPicker](https://github.com/cyotek/Cyotek.Windows.Forms.ColorPicker) library (MIT License).

@@ -1,7 +1,4 @@
-name: CI Build
-
-# Builds on every commit to verify everything compiles
-# Does NOT publish anything - just verification
+name: Flowery.WinUI CI
 
 on:
   workflow_dispatch:
@@ -13,54 +10,42 @@ permissions:
   contents: read
 
 jobs:
-  build-library:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: actions/setup-dotnet@v5
-        with:
-          global-json-file: global.json
-
-      - name: Setup Uno Workloads
-        run: dotnet workload install uno-check || true
-
-      - name: Install Android workload
-        run: dotnet workload install android
-
-      - name: Install Uno.Check
-        run: dotnet tool install -g Uno.Check || true
-
-      - name: Build Library
-        run: dotnet build Flowery.Uno/Flowery.Uno.csproj -c Release -p:CheckEolWorkloads=false
-
-  build-gallery:
+  windows:
     runs-on: windows-2025-vs2026
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+        sdk:
+          - version: '10.0.402'
+            quality: ga
+            name: net10
+          - version: '11.0.100-rc.2.26504.105'
+            quality: preview
+            name: net11-rc2
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-dotnet@v5
         with:
-          global-json-file: global.json
-
-      - name: Setup Uno Workloads
-        run: dotnet workload install uno-check || true
-
-      - name: Install WebAssembly tools
-        run: dotnet workload install wasm-tools
-
-      - name: Install Android workload
-        run: dotnet workload install android
-
-      - name: Restore (Windows only)
-        run: |
-          dotnet restore Flowery.Uno.Gallery/Flowery.Uno.Gallery.csproj `
-            -p:TargetFramework=net10.0-windows10.0.19041 `
-            -p:TargetFrameworks=net10.0-windows10.0.19041
-
-      - name: Build Gallery Windows Desktop
-        run: |
-          dotnet build Flowery.Uno.Gallery/Flowery.Uno.Gallery.csproj `
-            -c Release `
-            -f net10.0-windows10.0.19041 `
-            --no-restore
+          dotnet-version: |
+            10.0.402
+            ${{ matrix.sdk.version }}
+          dotnet-quality: ${{ matrix.sdk.quality }}
+      - name: Build native Windows solution
+        shell: pwsh
+        run: ./scripts/build_all.ps1 -Configuration ${{ matrix.configuration }} -SdkVersion '${{ matrix.sdk.version }}' -NoRun
+      - name: Run native Windows tests
+        shell: pwsh
+        run: ./scripts/test_windows.ps1 -Configuration ${{ matrix.configuration }} -SdkVersion '${{ matrix.sdk.version }}' -SkipBuild
+      - name: Run native Kiosk tests
+        shell: pwsh
+        run: ./scripts/test_kiosk.ps1 -Configuration ${{ matrix.configuration }} -SdkVersion '${{ matrix.sdk.version }}' -SkipBuild
+      - name: Upload test results and logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Flowery.WinUI-windows-${{ matrix.sdk.name }}-${{ matrix.configuration }}-results
+          path: |
+            logs/
+            TestResults/
+          if-no-files-found: ignore

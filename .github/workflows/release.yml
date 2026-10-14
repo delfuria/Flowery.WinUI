@@ -1,7 +1,7 @@
-name: Release
+name: Flowery.WinUI Release
 
 # MANUAL TRIGGER ONLY - Creates a new release with NuGet package and Gallery app
-# Go to Actions → Release → Run workflow → Enter version (e.g., 0.1.0)
+# Go to Actions → Flowery.WinUI Release → Run workflow → Enter version (e.g., 0.1.0)
 
 on:
   workflow_dispatch:
@@ -10,6 +10,14 @@ on:
         description: 'Version to release (e.g., 0.1.0) - without "v" prefix'
         required: true
         type: string
+      sdk_version:
+        description: '.NET SDK used for the native Windows build'
+        required: true
+        type: choice
+        options:
+          - '10.0.402'
+          - '11.0.100-rc.2.26504.105'
+        default: '10.0.402'
       skip_nuget:
         description: 'Skip NuGet publish (useful for re-running failed releases)'
         required: false
@@ -47,55 +55,49 @@ jobs:
 
   build-library:
     needs: validate
-    runs-on: ubuntu-24.04
+    runs-on: windows-2025-vs2026
+    defaults:
+      run:
+        shell: pwsh
     steps:
       - uses: actions/checkout@v5
 
       - uses: actions/setup-dotnet@v5
         with:
-          global-json-file: global.json
-
-      - name: Setup Uno Workloads
-        run: dotnet workload install uno-check || true
-
-      - name: Install WebAssembly tools
-        run: dotnet workload install wasm-tools
-
-      - name: Install Android workload
-        run: dotnet workload install android
+          dotnet-version: |
+            10.0.402
+            ${{ inputs.sdk_version }}
 
       - name: Verify version from evaluated MSBuild properties
         run: |
-          EVALUATED_VERSION=$(dotnet msbuild Flowery.Uno/Flowery.Uno.csproj -nologo -getProperty:Version | tail -n 1 | tr -d '[:space:]')
-          if [ "$EVALUATED_VERSION" != "${{ needs.validate.outputs.version }}" ]; then
-            echo "::error::Version mismatch! evaluated project version is $EVALUATED_VERSION but you specified ${{ needs.validate.outputs.version }}"
-            echo "::error::Please update the centralized version metadata (Directory.Build.*) or project metadata."
-            exit 1
-          fi
-          echo "✅ Version matches: $EVALUATED_VERSION"
-
-      - name: Build library
-        run: dotnet build Flowery.Uno/Flowery.Uno.csproj -c Release -o ./build-output -p:CheckEolWorkloads=false
+          $project = 'Flowery.WinUI/Flowery.WinUI.csproj'
+          $arguments = @('msbuild', $project, '-nologo', '-getProperty:Version')
+          $version = (& dotnet @arguments | Select-Object -Last 1).Trim()
+          if ($LASTEXITCODE -ne 0 -or $version -ne '${{ needs.validate.outputs.version }}') {
+            throw "Version mismatch: project version $version."
+          }
 
       - name: Create NuGet package
-        run: dotnet pack Flowery.Uno/Flowery.Uno.csproj -c Release -o ./artifacts -p:CheckEolWorkloads=false
+        run: ./scripts/build_nuget.ps1 -Configuration Release -OutputDir ./artifacts -SdkVersion '${{ inputs.sdk_version }}'
+
+      - name: Run native Windows tests
+        run: ./scripts/test_windows.ps1 -Configuration Release -SkipBuild
+      - name: Run native Kiosk tests
+        run: ./scripts/test_kiosk.ps1 -Configuration Release -SkipBuild
 
       - name: Create library zip
         run: |
-          mkdir -p ./artifacts/lib
-          cp ./build-output/Flowery.Uno.dll ./artifacts/lib/ || true
-          cp ./build-output/Flowery.Uno.pdb ./artifacts/lib/ || true
-          cd ./artifacts/lib
-          zip ../Flowery.Uno-lib.zip * || echo "No library files to zip"
+          $libraryOutput = './bin/Release/Flowery.WinUI/net10.0-windows10.0.19041/win-x64'
+          Compress-Archive -Path "$libraryOutput/*" -DestinationPath './artifacts/Flowery.WinUI-lib.zip'
 
       - name: Upload library artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: library-artifacts
+          name: Flowery.WinUI-library-artifacts
           path: |
             ./artifacts/*.nupkg
-            ./artifacts/Flowery.Uno-lib.zip
-          if-no-files-found: ignore
+            ./artifacts/Flowery.WinUI-lib.zip
+          if-no-files-found: error
 
   build-gallery:
     needs: [validate, build-library]
@@ -108,10 +110,9 @@ jobs:
 
       - uses: actions/setup-dotnet@v5
         with:
-          global-json-file: global.json
-
-      - name: Setup Uno Workloads
-        run: dotnet workload install uno-check || true
+          dotnet-version: |
+            10.0.402
+            ${{ inputs.sdk_version }}
 
       - name: Publish Gallery App (Windows)
         shell: pwsh
@@ -120,17 +121,32 @@ jobs:
             -Configuration Release `
             -RuntimeIdentifier win-x64 `
             -SelfContained:$true `
-            -OutputDir publish
+            -OutputDir publish `
+            -SdkVersion '${{ inputs.sdk_version }}'
 
       - name: Zip Windows artifact
-        run: Compress-Archive -Path ./publish/* -DestinationPath ./Flowery.Gallery-Windows-x64.zip
+        run: Compress-Archive -Path ./publish/* -DestinationPath ./Flowery.WinUI.Gallery-Windows-x64.zip
         shell: pwsh
+
+      - name: Publish Kiosk App (Windows)
+        shell: pwsh
+        run: ./scripts/publish_windows.ps1 -Application Kiosk -Configuration Release -OutputDir publish-kiosk -SdkVersion '${{ inputs.sdk_version }}'
+
+      - name: Zip Kiosk artifact
+        shell: pwsh
+        run: Compress-Archive -Path ./publish-kiosk/* -DestinationPath ./Flowery.WinUI.Kiosk-Windows-x64.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: Flowery.Gallery-Windows-x64
-          path: ./Flowery.Gallery-Windows-x64.zip
+          name: Flowery.WinUI.Gallery-Windows-x64
+          path: ./Flowery.WinUI.Gallery-Windows-x64.zip
+
+      - name: Upload Kiosk artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Flowery.WinUI.Kiosk-Windows-x64
+          path: ./Flowery.WinUI.Kiosk-Windows-x64.zip
 
   publish:
     needs: [validate, build-library, build-gallery]
@@ -144,7 +160,9 @@ jobs:
 
       - uses: actions/setup-dotnet@v5
         with:
-          global-json-file: global.json
+          dotnet-version: |
+            10.0.402
+            ${{ inputs.sdk_version }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v8
@@ -243,18 +261,19 @@ jobs:
           |-------|-------------|
           FOOTER
 
-          echo "| \`Flowery.Uno.${{ needs.validate.outputs.version }}.nupkg\` | NuGet package (also on [nuget.org](https://www.nuget.org/packages/Flowery.Uno)) |" >> release_notes.md
-          echo "| \`Flowery.Uno-lib.zip\` | Compiled DLL and PDB |" >> release_notes.md
+          echo "| \`Flowery.WinUI.${{ needs.validate.outputs.version }}.nupkg\` | NuGet package (also on [nuget.org](https://www.nuget.org/packages/Flowery.WinUI)) |" >> release_notes.md
+          echo "| \`Flowery.WinUI-lib.zip\` | Compiled DLL and PDB |" >> release_notes.md
 
           cat >> release_notes.md << 'GALLERY'
 
           ## 🌸 Gallery Demo App
 
-          Self-contained executable for demoing Flowery.Uno controls (no .NET install required).
+          Self-contained executable for demoing Flowery.WinUI controls (no .NET install required).
 
           | Platform | Download |
           |----------|----------|
-          | Windows x64 | `Flowery.Gallery-Windows-x64.zip` |
+          | Windows x64 | `Flowery.WinUI.Gallery-Windows-x64.zip` |
+          | Windows x64 Kiosk | `Flowery.WinUI.Kiosk-Windows-x64.zip` |
           GALLERY
 
           echo "=== Release Notes ==="
@@ -271,7 +290,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.validate.outputs.tag }}
           name: "v${{ needs.validate.outputs.version }}"
@@ -287,5 +306,5 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Version:** ${{ needs.validate.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Tag:** ${{ needs.validate.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **NuGet:** https://www.nuget.org/packages/Flowery.Uno/${{ needs.validate.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **NuGet:** https://www.nuget.org/packages/Flowery.WinUI/${{ needs.validate.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Release:** ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.validate.outputs.tag }}" >> $GITHUB_STEP_SUMMARY

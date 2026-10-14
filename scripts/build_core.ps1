@@ -1,335 +1,267 @@
-<#
-.SYNOPSIS
-    Core build functions for Flowery.Uno projects.
+#requires -Version 7.0
+# Shared native Windows build functions.
 
-.DESCRIPTION
-    This script provides reusable build functions and must be dot-sourced by build scripts.
-    It does nothing when run directly - callers must define projects and invoke functions.
-
-.NOTES
-    Usage (from another script):
-        . "$PSScriptRoot\build_core.ps1"
-        Initialize-BuildEnvironment -HeadName "Desktop" -LogFileName "desktop_build.log"
-        Invoke-ProjectBuild -Title "Flowery.Uno" -Project $floweryProject
-        Write-BuildSummary
-#>
-
-# --- GUARD: Do nothing if run directly without setup ---
-if (-not $script:BuildCoreInitialized) {
-    $script:BuildCoreInitialized = $false
-}
-
-# --- SHARED STATE ---
 $script:BuildResults = @()
 $script:BuildStartTime = $null
 $script:LogFile = $null
-$script:HeadName = $null
 $script:VerboseOutput = $false
 $script:MSBuildPath = $null
+$script:SdkEnvironment = @{}
 
-# --- INITIALIZATION ---
-
-function Initialize-BuildEnvironment {
-    <#
-    .SYNOPSIS
-        Initializes the build environment. Must be called before any build operations.
-    .PARAMETER HeadName
-        Name of the head being built (e.g., "Desktop", "Windows", "Android", "iOS")
-    .PARAMETER LogFileName
-        Name of the log file (placed in logs/ folder)
-    .PARAMETER Configuration
-        Build configuration (Debug or Release)
-    .PARAMETER VerboseOutput
-        If true, prints output to console instead of log file
-    .PARAMETER Cli
-        If true, skips terminal clear for non-interactive shells
-    #>
-    param(
-        [Parameter(Mandatory = $true)][string]$HeadName,
-        [Parameter(Mandatory = $true)][string]$LogFileName,
-        [string]$Configuration = "Debug",
-        [switch]$VerboseOutput,
-        [switch]$Cli
-    )
-
-    $script:HeadName = $HeadName
-    $script:VerboseOutput = $VerboseOutput
-    $script:BuildStartTime = Get-Date
-    $script:BuildResults = @()
-
-    # Clear terminal (skip in non-interactive shells)
-    if (-not $Cli) {
-        try {
-            Clear-Host
-        } catch {
-        }
-    }
-
-    # Locate MSBuild via vswhere
-    $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-    if (-not (Test-Path $vswhere)) {
-        Write-Error "vswhere.exe not found."
-        exit 1
-    }
-
-    $vsPath = & $vswhere -latest -property installationPath
-    if (-not $vsPath) {
-        Write-Error "No Visual Studio found."
-        exit 1
-    }
-
-    $script:MSBuildPath = Join-Path $vsPath "MSBuild\Current\Bin\MSBuild.exe"
-    if (-not (Test-Path $script:MSBuildPath)) {
-        Write-Error "MSBuild not found."
-        exit 1
-    }
-
-    # Setup logging
-    $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-    $logsDir = Join-Path $repoRoot "logs"
-    if (-not (Test-Path $logsDir)) {
-        New-Item -ItemType Directory -Path $logsDir | Out-Null
-    }
-    $script:LogFile = Join-Path $logsDir $LogFileName
-
-    # Clear previous log
-    if (Test-Path $script:LogFile) {
-        Remove-Item $script:LogFile
-    }
-
-    $script:BuildCoreInitialized = $true
-
-    # Print header
-    Write-Host "Building Flowery.Uno $HeadName projects ($Configuration)..." -ForegroundColor Cyan
-    Write-Host ""
+function Get-RepoRoot {
+    return (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 }
 
-# --- BUILD FUNCTION ---
+function Resolve-BuildSdk {
+    param([string]$SdkVersion, [string]$DotNetPath)
+
+    $dotnetHost = if ($DotNetPath) {
+        (Resolve-Path -LiteralPath $DotNetPath -ErrorAction Stop).Path
+    } else {
+        (Get-Command 'dotnet.exe' -CommandType Application -ErrorAction Stop).Source
+    }
+    if (-not (Test-Path -LiteralPath $dotnetHost -PathType Leaf)) {
+        throw ('dotnet.exe not found: {0}' -f $dotnetHost)
+    }
+
+    Push-Location (Get-RepoRoot)
+    try {
+        if ([string]::IsNullOrWhiteSpace($SdkVersion)) {
+            $versionOutput = & $dotnetHost '--version'
+            if ($LASTEXITCODE -ne 0) { throw 'The dotnet host could not select an SDK from global.json.' }
+            $SdkVersion = ($versionOutput | Select-Object -Last 1).Trim()
+        }
+        $sdkList = & $dotnetHost '--list-sdks'
+        if ($LASTEXITCODE -ne 0) { throw 'The dotnet host could not list installed SDKs.' }
+    }
+    finally { Pop-Location }
+
+    $installed = foreach ($line in $sdkList) {
+        if ($line -match '^(?<Version>\S+)\s+\[(?<Root>.+)\]$' -and $Matches.Version -ceq $SdkVersion) {
+            [pscustomobject]@{ Version = $Matches.Version; Root = $Matches.Root }
+        }
+    }
+    $installed = @($installed)
+    if ($installed.Count -ne 1) {
+        throw ('SDK {0} is not uniquely installed for {1}. No other SDK will be substituted.' -f $SdkVersion, $dotnetHost)
+    }
+    $sdkDirectory = Join-Path $installed[0].Root $SdkVersion
+    $sdksDirectory = Join-Path $sdkDirectory 'Sdks'
+    $sdkProps = Join-Path $sdksDirectory 'Microsoft.NET.Sdk\Sdk\Sdk.props'
+    $runtimeConfigPath = Join-Path $sdkDirectory 'dotnet.runtimeconfig.json'
+    foreach ($path in @($sdkProps, $runtimeConfigPath)) {
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw ('SDK file not found: {0}' -f $path) }
+    }
+    $runtimeConfig = Get-Content -LiteralPath $runtimeConfigPath -Raw -Encoding utf8 | ConvertFrom-Json
+    return [pscustomobject]@{
+        Version = $SdkVersion
+        HostPath = $dotnetHost
+        HostDirectory = Split-Path -Path $dotnetHost -Parent
+        SdkDirectory = $sdkDirectory
+        SdksDirectory = $sdksDirectory
+        Runtime = $runtimeConfig.runtimeOptions.framework
+    }
+}
+
+function Invoke-NativeMSBuild {
+    param([Parameter(Mandatory)][string[]]$Arguments)
+
+    $processInfo = [System.Diagnostics.ProcessStartInfo]::new()
+    $processInfo.FileName = $script:MSBuildPath
+    $processInfo.WorkingDirectory = Get-RepoRoot
+    $processInfo.UseShellExecute = $false
+    $processInfo.CreateNoWindow = $true
+    $processInfo.RedirectStandardOutput = $true
+    $processInfo.RedirectStandardError = $true
+    $processInfo.StandardOutputEncoding = [System.Text.Encoding]::UTF8
+    $processInfo.StandardErrorEncoding = [System.Text.Encoding]::UTF8
+    $null = $processInfo.Environment.Remove('MSBuildSDKsPath')
+    foreach ($entry in $script:SdkEnvironment.GetEnumerator()) {
+        $processInfo.Environment[$entry.Key] = $entry.Value
+    }
+    foreach ($argument in $Arguments) { $processInfo.ArgumentList.Add($argument) }
+
+    $process = [System.Diagnostics.Process]::Start($processInfo)
+    try {
+        $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+        $stderrTask = $process.StandardError.ReadToEndAsync()
+        $process.WaitForExit()
+        return [pscustomobject]@{
+            Stdout = $stdoutTask.GetAwaiter().GetResult()
+            Stderr = $stderrTask.GetAwaiter().GetResult()
+            ExitCode = $process.ExitCode
+        }
+    }
+    finally { $process.Dispose() }
+}
+
+function Initialize-BuildEnvironment {
+    param(
+        [Parameter(Mandatory)][string]$HeadName,
+        [Parameter(Mandatory)][string]$LogFileName,
+        [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
+        [switch]$VerboseOutput,
+        [switch]$Cli,
+        [string]$SdkVersion,
+        [string]$DotNetPath
+    )
+
+    if (-not $IsWindows) {
+        throw 'Flowery.WinUI builds require native Windows and PowerShell 7.'
+    }
+
+    $script:BuildStartTime = Get-Date
+    $script:BuildResults = @()
+    $script:VerboseOutput = $VerboseOutput
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+    if (-not (Test-Path -LiteralPath $vswhere)) {
+        throw ('Visual Studio locator not found: {0}' -f $vswhere)
+    }
+
+    $locatorArgs = @('-latest', '-requires', 'Microsoft.Component.MSBuild', '-property', 'installationPath')
+    $vsPath = & $vswhere @locatorArgs
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($vsPath)) {
+        throw 'Visual Studio with MSBuild is required.'
+    }
+
+    $script:MSBuildPath = Join-Path $vsPath 'MSBuild\Current\Bin\MSBuild.exe'
+    if (-not (Test-Path -LiteralPath $script:MSBuildPath)) {
+        throw ('MSBuild not found: {0}' -f $script:MSBuildPath)
+    }
+
+    $sdk = Resolve-BuildSdk -SdkVersion $SdkVersion -DotNetPath $DotNetPath
+    $script:SdkEnvironment = @{
+        DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR = $sdk.SdksDirectory
+        DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER = $sdk.Version
+        DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR = $sdk.HostDirectory
+        DOTNET_HOST_PATH = $sdk.HostPath
+    }
+
+    $logsDir = Join-Path (Get-RepoRoot) 'logs'
+    if (-not (Test-Path -LiteralPath $logsDir)) {
+        New-Item -ItemType Directory -Path $logsDir | Out-Null
+    }
+    $logStem = [System.IO.Path]::GetFileNameWithoutExtension($LogFileName)
+    $stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
+    $script:LogFile = Join-Path $logsDir ('{0}-{1}-sdk{2}-{3}.log' -f $logStem, $Configuration.ToLowerInvariant(), $sdk.Version, $stamp)
+    New-Item -ItemType File -Path $script:LogFile -ErrorAction Stop | Out-Null
+
+    $project = Join-Path (Get-RepoRoot) 'Flowery.WinUI\Flowery.WinUI.csproj'
+    $metadataArgs = @($project, '-nologo', '-nodeReuse:false',
+        '-getProperty:NETCoreSdkVersion,NETCoreSdkBundledVersionsProps,MicrosoftNETBuildTasksAssembly,MSBuildSDKsPath,MSBuildRuntimeType,MSBuildVersion,SdkResolverMSBuildTaskHostRuntimeVersion')
+    $metadataResult = Invoke-NativeMSBuild -Arguments $metadataArgs
+    $toolchainText = ('dotnet host: {0}{1}SDK directory: {2}{1}SDK host runtime: {3} {4}{1}MSBuild executable: {5}{1}{6}{1}{7}' -f
+        $sdk.HostPath, [Environment]::NewLine, $sdk.SdkDirectory, $sdk.Runtime.name, $sdk.Runtime.version,
+        $script:MSBuildPath, $metadataResult.Stdout, $metadataResult.Stderr)
+    Add-Content -LiteralPath $script:LogFile -Value $toolchainText -Encoding utf8
+    Write-Host $toolchainText
+    if ($metadataResult.ExitCode -ne 0) { throw ('MSBuild SDK evaluation failed. Log: {0}' -f $script:LogFile) }
+    $metadata = $metadataResult.Stdout | ConvertFrom-Json
+    $expectedSdkProps = Join-Path $sdk.SdkDirectory 'Microsoft.NETCoreSdk.BundledVersions.props'
+    $selectedSdkProps = [System.IO.Path]::GetFullPath([string]$metadata.Properties.NETCoreSdkBundledVersionsProps)
+    if ($metadata.Properties.NETCoreSdkVersion -cne $sdk.Version -or
+        -not [string]::Equals($selectedSdkProps, $expectedSdkProps, [StringComparison]::OrdinalIgnoreCase)) {
+        throw ('MSBuild did not select the requested SDK {0}. Log: {1}' -f $sdk.Version, $script:LogFile)
+    }
+    Write-Host ('Building Flowery.WinUI {0} ({1})...' -f $HeadName, $Configuration) -ForegroundColor Cyan
+}
 
 function Invoke-ProjectBuild {
-    <#
-    .SYNOPSIS
-        Builds a single project using MSBuild.
-    .PARAMETER Title
-        Display name for the project
-    .PARAMETER Project
-        Full path to the .csproj file
-    .PARAMETER Configuration
-        Build configuration (default: Debug)
-    .PARAMETER Rebuild
-        If true, performs a clean rebuild
-    .PARAMETER Framework
-        Target framework (e.g., net10.0-windows10.0.19041, net10.0-desktop)
-    .RETURNS
-        $true if build succeeded, $false otherwise
-    #>
     param(
-        [Parameter(Mandatory = $true)][string]$Title,
-        [Parameter(Mandatory = $true)][string]$Project,
-        [string]$Configuration = "Debug",
+        [Parameter(Mandatory)][string]$Title,
+        [Parameter(Mandatory)][string]$Project,
+        [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
         [switch]$Rebuild,
         [string]$Framework
     )
 
-    if (-not $script:BuildCoreInitialized) {
-        Write-Error "Build environment not initialized. Call Initialize-BuildEnvironment first."
-        exit 1
+    if (-not $script:MSBuildPath -or -not $script:LogFile) {
+        throw 'Call Initialize-BuildEnvironment before building.'
+    }
+    if (-not (Test-Path -LiteralPath $Project)) {
+        throw ('Build input not found: {0}' -f $Project)
     }
 
-    $rebuildSuffix = if ($Rebuild) { " (rebuild)" } else { "" }
-    Write-Host "Building $Title...$rebuildSuffix" -ForegroundColor Cyan
-    $stepStart = Get-Date
-
-    # Build arguments
-    $target = if ($Rebuild) { "Rebuild" } else { "Build" }
-    $buildArgs = @("$Project", "-t:$target", "-verbosity:normal", "-nologo", "-restore", "-p:Configuration=$Configuration", "-p:CheckEolWorkloads=false", "-p:CheckEolTargetFramework=false")
+    $target = if ($Rebuild) { 'Rebuild' } else { 'Build' }
+    $buildArgs = @($Project, ('-t:{0}' -f $target), '-restore', '-nologo', '-nodeReuse:false', '-verbosity:normal', '-m:1',
+        ('-p:Configuration={0}' -f $Configuration), '-p:Platform=x64')
     if ($Framework) {
-        $buildArgs += "-p:TargetFramework=$Framework"
-        $buildArgs += "-p:TargetFrameworks=$Framework"
+        $buildArgs += ('-p:TargetFramework={0}' -f $Framework)
     }
 
-    # Run MSBuild
-    $stdout = ""
-    $stderr = ""
-
-    if ($script:VerboseOutput) {
-        # In verbose mode, we still need to capture output to count warnings
-        $pInfo = New-Object System.Diagnostics.ProcessStartInfo
-        $pInfo.FileName = $script:MSBuildPath
-        $pInfo.Arguments = $buildArgs -join " "
-        $pInfo.RedirectStandardOutput = $true
-        $pInfo.RedirectStandardError = $true
-        $pInfo.UseShellExecute = $false
-        $pInfo.CreateNoWindow = $true
-        # Use UTF-8 encoding to prevent codepage mangling of special characters (German umlauts, etc.)
-        $pInfo.StandardOutputEncoding = [System.Text.Encoding]::UTF8
-        $pInfo.StandardErrorEncoding = [System.Text.Encoding]::UTF8
-
-        $p = [System.Diagnostics.Process]::Start($pInfo)
-        $stdout = $p.StandardOutput.ReadToEnd()
-        $stderr = $p.StandardError.ReadToEnd()
-        $p.WaitForExit()
-        $exitCode = $p.ExitCode
-
-        # Print to console in verbose mode
-        Write-Host $stdout
-        if ($stderr) { Write-Host $stderr -ForegroundColor Yellow }
-    } else {
-        $pInfo = New-Object System.Diagnostics.ProcessStartInfo
-        $pInfo.FileName = $script:MSBuildPath
-        $pInfo.Arguments = $buildArgs -join " "
-        $pInfo.RedirectStandardOutput = $true
-        $pInfo.RedirectStandardError = $true
-        $pInfo.UseShellExecute = $false
-        $pInfo.CreateNoWindow = $true
-        # Use UTF-8 encoding to prevent codepage mangling of special characters (German umlauts, etc.)
-        $pInfo.StandardOutputEncoding = [System.Text.Encoding]::UTF8
-        $pInfo.StandardErrorEncoding = [System.Text.Encoding]::UTF8
-
-        $p = [System.Diagnostics.Process]::Start($pInfo)
-        $stdout = $p.StandardOutput.ReadToEnd()
-        $stderr = $p.StandardError.ReadToEnd()
-        $p.WaitForExit()
-        $exitCode = $p.ExitCode
-
-        # Append to log file
-        $logContent = "=== BUILD: $Title ===`r`n" + $stdout + "`r`n" + $stderr + "`r`n"
-        $logContent | Out-File -FilePath $script:LogFile -Append -Encoding utf8
-    }
-
-    $stepDuration = (Get-Date) - $stepStart
-
-    # Count warnings from output (pattern: "warning CS1234:" or "warning NU1234:" etc.)
-    $warningCount = ($stdout | Select-String -Pattern "warning [A-Z]+\d+:" -AllMatches).Matches.Count
-
-    if ($exitCode -ne 0) {
-        $script:BuildResults += [PSCustomObject]@{ Project = $Title; Status = "FAILED"; Duration = $stepDuration; Warnings = $warningCount }
-        return $false
-    }
-
-    $script:BuildResults += [PSCustomObject]@{ Project = $Title; Status = "OK"; Duration = $stepDuration; Warnings = $warningCount }
-    return $true
+    return Invoke-MSBuildOperation -Title $Title -Arguments $buildArgs
 }
 
-# --- FAILURE OUTPUT ---
+function Invoke-MSBuildOperation {
+    param([Parameter(Mandatory)][string]$Title, [Parameter(Mandatory)][string[]]$Arguments)
+
+    Write-Host ('Running {0}...' -f $Title) -ForegroundColor Cyan
+    $start = Get-Date
+    $result = Invoke-NativeMSBuild -Arguments $Arguments
+    $stdout = $result.Stdout
+    $stderr = $result.Stderr
+    $exitCode = $result.ExitCode
+
+    $output = ('=== {0} ==={1}{2}{1}{3}{1}' -f $Title, [Environment]::NewLine, $stdout, $stderr)
+    Add-Content -LiteralPath $script:LogFile -Value $output -Encoding utf8
+    if ($script:VerboseOutput) {
+        Write-Host $output
+    }
+    $warningPattern = '\bwarning\s+[A-Za-z]+\d+:'
+    $warnings = @($stdout -split '\r?\n' |
+        Where-Object { $_ -match $warningPattern } |
+        ForEach-Object { $_.Trim() } |
+        Select-Object -Unique).Count
+    $script:BuildResults += [pscustomobject]@{
+        Project = $Title
+        ExitCode = $exitCode
+        Duration = (Get-Date) - $start
+        Warnings = $warnings
+    }
+    return $exitCode -eq 0
+}
 
 function Write-BuildFailure {
-    <#
-    .SYNOPSIS
-        Displays build failure information with errors/warnings from log.
-    .PARAMETER ProjectName
-        Name of the failed project
-    #>
     param([string]$ProjectName)
 
-    Write-Host ""
-    Write-Host "BUILD FAILED: $ProjectName" -ForegroundColor Red
-
-    if (-not $script:VerboseOutput -and (Test-Path $script:LogFile)) {
-        Write-Host ""
-        Write-Host "=== Errors and Warnings ===" -ForegroundColor Yellow
-        Get-Content $script:LogFile | Select-String -Pattern "(error|warning) [A-Z]+\d+:" | ForEach-Object {
-            Write-Host $_.Line.Trim() -ForegroundColor ($_.Line -match "error" ? "Red" : "Yellow")
-        }
-        Write-Host ""
-        Write-Host "Full log: $script:LogFile" -ForegroundColor Gray
+    Write-Host ('Build failed: {0}' -f $ProjectName) -ForegroundColor Red
+    if (-not $script:VerboseOutput) {
+        $pattern = '(error|warning) [A-Z]+\d+:'
+        Select-String -LiteralPath $script:LogFile -Pattern $pattern |
+            ForEach-Object { Write-Host $_.Line }
     }
+    Write-Host ('Log: {0}' -f $script:LogFile)
 }
-
-# --- SUMMARY ---
 
 function Write-BuildSummary {
-    <#
-    .SYNOPSIS
-        Writes the build summary to console.
-    #>
-    if (-not $script:BuildCoreInitialized) {
-        Write-Error "Build environment not initialized."
-        exit 1
-    }
-
-    $totalDuration = (Get-Date) - $script:BuildStartTime
-
-    $summary = [System.Text.StringBuilder]::new()
-    [void]$summary.AppendLine()
-    [void]$summary.AppendLine("═══════════════════════════════════════════════════════════")
-    [void]$summary.AppendLine(" BUILD SUMMARY")
-    [void]$summary.AppendLine("═══════════════════════════════════════════════════════════")
-    [void]$summary.AppendLine()
-
-    $totalWarnings = 0
     foreach ($result in $script:BuildResults) {
-        $totalWarnings += $result.Warnings
-        $warnText = if ($result.Warnings -gt 0) { " ($($result.Warnings) warnings)" } else { "" }
-        if ($result.Status -eq "OK") {
-            [void]$summary.AppendLine(("  [OK] {0,-40} {1}{2}" -f $result.Project, $result.Duration.ToString("mm\:ss\.ff"), $warnText))
-        } else {
-            [void]$summary.AppendLine(("  [FAILED] {0,-40} {1}{2}" -f $result.Project, $result.Duration.ToString("mm\:ss\.ff"), $warnText))
-        }
+        $status = if ($result.ExitCode -eq 0) { 'OK' } else { 'FAILED' }
+        Write-Host ('[{0}] {1}: {2:hh\:mm\:ss}, {3} warnings' -f $status, $result.Project, $result.Duration, $result.Warnings)
     }
-
-    [void]$summary.AppendLine()
-    [void]$summary.AppendLine(("  Total time: {0:mm\:ss\.ff}" -f $totalDuration))
-    [void]$summary.AppendLine(("  Projects built: {0}" -f $script:BuildResults.Count))
-    if ($totalWarnings -gt 0) {
-        [void]$summary.AppendLine(("  Total warnings: {0}" -f $totalWarnings))
-    }
-    [void]$summary.AppendLine("  Log: $script:LogFile")
-    [void]$summary.AppendLine()
-
-    $failedCount = ($script:BuildResults | Where-Object { $_.Status -eq "FAILED" }).Count
-    if ($failedCount -eq 0) {
-        [void]$summary.AppendLine("All builds completed successfully.")
-        Write-Host $summary.ToString() -ForegroundColor Green
-    } else {
-        [void]$summary.AppendLine("$failedCount build(s) failed.")
-        Write-Host $summary.ToString() -ForegroundColor Red
-    }
+    Write-Host ('Log: {0}' -f $script:LogFile)
 }
-
-# --- APP RUNNER ---
 
 function Start-GalleryApp {
-    <#
-    .SYNOPSIS
-        Starts the Gallery application after a successful build.
-    .PARAMETER ExePattern
-        Pattern to search for the executable (e.g., "Flowery.Uno.Gallery.exe")
-    .PARAMETER Configuration
-        Build configuration to find the correct output folder
-    .PARAMETER Framework
-        Target framework to narrow down the search path
-    #>
     param(
-        [Parameter(Mandatory = $true)][string]$ExePattern,
-        [string]$Configuration = "Debug",
-        [string]$Framework
+        [string]$ExePattern = 'Flowery.WinUI.Gallery.exe',
+        [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
+        [string]$Framework = 'net10.0-windows10.0.19041',
+        [switch]$Wait
     )
 
-    $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-
-    # With single-project structure, output is in bin/$Configuration/Flowery.Uno.Gallery/$Framework
-    if ($Framework) {
-        $outputDir = Join-Path $repoRoot "bin\$Configuration\Flowery.Uno.Gallery\$Framework"
-    } else {
-        $outputDir = Join-Path $repoRoot "bin\$Configuration"
+    $relative = 'bin\{0}\Flowery.WinUI.Gallery\{1}\win-x64\{2}' -f $Configuration, $Framework, $ExePattern
+    $exePath = Join-Path (Get-RepoRoot) $relative
+    if (-not (Test-Path -LiteralPath $exePath)) {
+        throw ('Gallery executable not found: {0}' -f $exePath)
     }
-
-    $exePath = Get-ChildItem -Path $outputDir -Recurse -Filter $ExePattern -ErrorAction SilentlyContinue |
-               Sort-Object LastWriteTime -Descending |
-               Select-Object -First 1
-
-    if ($exePath) {
-        Write-Host "Starting Gallery app..." -ForegroundColor Cyan
-        Start-Process -FilePath $exePath.FullName -WorkingDirectory $exePath.DirectoryName | Out-Null
-        Write-Host "Started: $($exePath.Name)" -ForegroundColor Green
-    } else {
-        Write-Host "Warning: Could not find $ExePattern in $outputDir" -ForegroundColor Yellow
+    $processArgs = @{
+        FilePath = $exePath
+        WorkingDirectory = Split-Path -Path $exePath -Parent
+        PassThru = $true
     }
-}
-
-# --- UTILITY ---
-
-function Get-RepoRoot {
-    return Resolve-Path (Join-Path $PSScriptRoot "..")
+    if ($Wait) {
+        $processArgs.Wait = $true
+    }
+    $process = Start-Process @processArgs
+    Write-Host ('Started Gallery process {0}: {1}' -f $process.Id, $exePath)
 }

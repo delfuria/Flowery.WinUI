@@ -12,7 +12,7 @@ FloweryComponentSidebar is a high-performance, navigational sidebar designed for
 - **Uniform Selector Widths:** Theme/Language/Size dropdowns use a consistent fixed width inside the sidebar to keep alignment stable across themes.
 - **Theme/Language Integration:** Special items for quick switching of UI settings.
 - **Search Filtering:** Integrated search bar that filters categories and items in real-time.
-- **Platform Optimized:** Uses `DaisyExpander` to bypass typical Uno/XAML performance issues on Skia/WASM.
+- **Category Expansion:** Uses `DaisyExpander` for expandable categories in the native Windows Gallery.
 
 ## Key Properties & Events
 

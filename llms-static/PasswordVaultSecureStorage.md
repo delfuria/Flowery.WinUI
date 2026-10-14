@@ -1,15 +1,12 @@
 # PasswordVaultSecureStorage
 
-The standard cross-platform implementation of `ISecureStorage` using native operating system security services.
+The Windows implementation of `ISecureStorage` using the operating system credential vault.
 
 ## Overview
 
-`PasswordVaultSecureStorage` wraps the `Windows.Security.Credentials.PasswordVault` API. Thanks to the Uno Platform, this single implementation provides hardware-backed security on supported target platforms, with a fallback on platforms where `PasswordVault` is not available:
-
-- **Windows**: Persists to the **Windows Credential Manager**.
-- **iOS / macOS**: Stores data in the **System Keychain**.
-- **Android**: Stores data in the **Android KeyStore**.
-- **WASM / Browser / Skia Desktop**: Falls back to `ApplicationData.Current.LocalSettings` (localStorage on WASM, settings files on desktop). This is **not** a secure vault.
+`PasswordVaultSecureStorage` wraps `Windows.Security.Credentials.PasswordVault` and stores Windows credentials in Credential Manager.
+If the vault reports an unsupported operation, the implementation falls back to `ApplicationData.Current.LocalSettings`.
+That fallback is not a secure credential vault.
 
 ## Performance and Security
 
@@ -50,4 +47,4 @@ The class uses `PasswordCredential` as the underlying transport. It calls `.Retr
 
 - [ISecureStorage](ISecureStorage.md)
 - [GitHubUserProvider](GitHubUserProvider.md)
-- [PlatformCompatibility](../Flowery.Uno/Services/PlatformCompatibility.cs)
+- [PlatformCompatibility](../Flowery.WinUI/Services/PlatformCompatibility.cs)

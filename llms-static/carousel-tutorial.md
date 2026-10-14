@@ -2,16 +2,16 @@
 
 This guide shows how to add DaisyCarousel to your app and wire up common scenarios with clear, practical steps.
 
-## 1) Add Flowery.Uno and theme resources
+## 1) Add Flowery.WinUI and theme resources
 
-1. Reference Flowery.Uno (project reference or NuGet package).
+1. Reference Flowery.WinUI (project reference or NuGet package).
 2. Ensure the library theme resources are merged in `App.xaml`:
 
 ```xml
 <Application.Resources>
     <ResourceDictionary>
         <ResourceDictionary.MergedDictionaries>
-            <ResourceDictionary Source="ms-appx:///Flowery.Uno/Themes/Generic.xaml" />
+            <ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/Generic.xaml" />
         </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
 </Application.Resources>
@@ -111,7 +111,8 @@ Useful knobs:
 - `TransitionPixelateSize`, `TransitionDissolveDensity`
 - `TransitionFlipAngle`, `TransitionPerspectiveDepth`
 
-Note: `Dissolve` and `Pixelate` require Skia-enabled targets (Desktop/WASM). On other targets they may fall back.
+`Dissolve` and `Pixelate` use Windows Composition visual surfaces and mask grids.
+The repository's `PORTING.md` records the native runtime verification scope.
 
 ## 6) Data binding with ItemTemplate
 
@@ -150,22 +151,11 @@ public ObservableCollection<CarouselItem> Slides { get; } = new()
 - `WrapAround="True"` keeps the carousel looping on manual navigation.
 - Bind `SelectedIndex` if you need to drive it from view-model state.
 
-## 8) Browser (WASM) and GL versions
+## 8) Native Windows Scope
 
-DaisyCarousel works normally on the Browser/WASM head using its standard XAML-based transitions and effects. WebGL-based transitions are a separate, browser-only path.
-
-There are two GL implementations to be aware of:
-
-1) **FloweryCarouselGL (built-in presets)**  
-   - Use `Flowery.Effects.CarouselGlEffectHost` to render WebGL/Skia shader presets.  
-   - Browser-only; on other heads it behaves like a normal `ContentControl`.  
-   - This is the recommended GL path for app developers.
-
-2) **gl-transitions repo integration (Gallery reference)**  
-   - Optional integration used by the Gallery only.  
-   - Requires the `FLOWERY_GL_TRANSITIONS` compile define (property `FloweryEnableGlTransitions` in the Browser head).  
-   - Uses `flowery-carousel-gl-transitions.js` and the shader folder under `WasmScripts/gl-transitions`.  
-   - If you want this in your app, mirror the Gallery setup and copy those assets into your Browser head.
+Flowery.WinUI uses WinUI 3 transitions and image processing on Windows.
+The native WinUI 3 WebView2 host retains the shader effect presets and gallery examples.
+See [Native Carousel Rendering](FloweryCarouselGL.md) for the supported rendering paths.
 
 ## References
 
@@ -173,4 +163,4 @@ There are two GL implementations to be aware of:
 - `llms-static/FloweryAnimationHelpers.md` for slide effects and helpers.
 - `llms-static/Graphics.md` for platform notes and transition tiers.
 - `THEMING.md` if you need theme setup or customization.
-- `llms-static/FloweryCarouselGL.md` for browser-only GL preview effects.
+- `llms-static/FloweryCarouselGL.md` for native carousel rendering scope.

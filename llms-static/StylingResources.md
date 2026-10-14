@@ -2,7 +2,7 @@
 
 > ✅ **IMPLEMENTED** for core and secondary controls
 >
-> This document describes the resource naming convention for lightweight styling in Flowery.Uno.
+> This document describes the resource naming convention for lightweight styling in Flowery.WinUI.
 > See [STYLING_IMPLEMENTATION_PLAN.md](../!todos/STYLING_IMPLEMENTATION_PLAN.md) for full status.
 
 ---

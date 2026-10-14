@@ -37,7 +37,7 @@ DaisyAvatar renders user/profile images or initials with **5 sizes**, **3 shapes
 ```xml
 <!-- Image avatar (default circle, medium) -->
 <controls:DaisyAvatar>
-    <Image Source="ms-appx:///Flowery.Uno.Gallery/Assets/logo.png" />
+    <Image Source="ms-appx:///Flowery.WinUI.Gallery/Assets/logo.png" />
 </controls:DaisyAvatar>
 
 <!-- Initials with status and ring (using Initials property) -->

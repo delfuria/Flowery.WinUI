@@ -55,7 +55,7 @@ The Kanban system spans multiple files for modularity:
 - **Board Actions**: Rename, duplicate, delete, and export boards directly from the Home screen.
 - **Drag & Drop Ready**: Columns and tasks are hosted in reorder-capable containers.
 - **JSON Persistence**: Atomic save strategy (temp-file rename), schema migration support, and safe-load validation.
-- **Source Gen Support**: Native AOT and WASM compatibility via `FlowKanbanJsonContext`.
+- **Source Gen Support**: Source-generated JSON metadata through `FlowKanbanJsonContext`.
 - **Industrial Sidebar**: A dedicated space for board-level controls (home, settings, undo/redo, zoom, save/load, metrics/help).
 - **User-Scoped Preferences**: Confirmation prompts, auto-save, add card placement, and welcome message settings are stored per user.
 - **Global Admin Bootstrap**: Assigns the first available current user as global admin on initial run.
@@ -511,7 +511,7 @@ var json = manager.ExportToJson();
 - Cards expose `AutomationProperties.AutomationId` via task ID for stable testing hooks.
 - Buttons and icon-only controls use their localized tooltip string as the UIA name.
 
-### Platform Notes
+### Native Windows Focus
 
-- Keyboard focus is supported on all targets except iOS by default; enable experimental keyboard focus on iOS:
-  `WinRTFeatureConfiguration.Focus.EnableExperimentalKeyboardFocus = true`.
+The control uses WinUI 3 focus APIs and keyboard events.
+No backend feature switch is required.

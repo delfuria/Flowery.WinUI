@@ -5,7 +5,7 @@
 
 FloweryAnimationHelpers provides a comprehensive, reusable animation and slideshow infrastructure for building cinematic UI experiences. It includes enums for visual effects, a controller for slideshow logic, and attached properties for declarative animations.
 
-**Namespace**: `Flowery.Services`
+**Namespace**: `Flowery.Helpers`
 
 ## Components
 
@@ -85,7 +85,7 @@ Specifies visual animations that occur when navigating **between** slides.
 | --- | --- | --- |
 | **Tier 1** | Transform | `Fade`, `Slide`, `Push`, `Zoom`, `Flip`, `Cube`, `Cover`, `Reveal` |
 | **Tier 2** | Clip-based | `Wipe`, `Blinds`, `Slices`, `Checkerboard`, `Spiral`, `MatrixRain`, `Wormhole` |
-| **Tier 3** | Skia-based | `Dissolve`, `Pixelate` (Requires Skia-enabled target) |
+| **Tier 3** | Windows Composition | `Dissolve`, `Pixelate` through visual surfaces and mask grids |
 
 ### FlowerySlideTransitionParams
 
@@ -188,15 +188,17 @@ Apply cinematic effects to any `UIElement` declaratively in XAML.
 | --- | --- | --- | --- |
 | `Effect` | `FlowerySlideEffect` | `None` | The slide effect to apply. |
 | `Duration` | `double` | `3.0` | Effect duration in seconds. |
-| `ZoomIntensity` | `double` | `0.15` | Zoom scale factor (0.0 to 0.5). |
+| `ZoomIntensity` | `double` | `0.15` | Zoom intensity; also supplies `PanAndZoomZoom` when the attached effect starts. |
 | `PanDistance` | `double` | `50` | Pan distance in pixels (0 to 200). |
 | `PulseIntensity` | `double` | `0.08` | Pulse amplitude (0.0 to 0.2). |
+| `PanAndZoomLockZoom` | `bool` | `false` | Keep the computed cover scale constant while panning. |
+| `PanAndZoomPanSpeed` | `double` | `4.0` | Pan speed in device-independent pixels per second. |
 | `AutoStart` | `bool` | `true` | Whether to start when the element loads. |
 
 ### XAML Usage
 
 ```xml
-xmlns:services="using:Flowery.Services"
+xmlns:services="using:Flowery.Helpers"
 
 <!-- Pan And Zoom effect on a hero image -->
 <Image Source="ms-appx:///Assets/hero.jpg"
@@ -233,6 +235,14 @@ FlowerySlideEffects.SetAutoStart(myImage, false);
 FlowerySlideEffects.StartEffect(myImage);
 ```
 
+### Loaded and Unloaded
+
+Setting `AutoStart="False"` cancels a pending automatic start before `Loaded`.
+Use `StartEffect` for explicit control; on an unloaded element, it waits for that element to load.
+`StopEffect` removes pending start handlers and stops the active animation.
+Unload stops the effect and releases its tracked target.
+An automatic effect starts again after reload; a manual effect requires another `StartEffect` call.
+
 ---
 
 ## FlowerySlideEffectParams
@@ -241,11 +251,19 @@ Configuration record for fine-tuning effect parameters.
 
 | Property | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ZoomIntensity` | `double` | `0.15` | Zoom scale factor. 0.15 = zoom to 115%. |
+| `ZoomIntensity` | `double` | `0.2` | Intensity for zoom and subtle pan effects. 0.2 = zoom to 120%. |
 | `PanDistance` | `double` | `50.0` | Pan distance in pixels. |
 | `PulseIntensity` | `double` | `0.08` | Pulse amplitude. 0.08 = pulse to 108%. |
 | `VerticalPanRatio` | `double` | `0.6` | Vertical pan multiplier relative to horizontal. |
 | `SubtleZoomRatio` | `double` | `0.1` | Subtle zoom multiplier for pan effects. |
+| `PanAndZoomZoom` | `double` | `0.2` | Zoom intensity used specifically by `PanAndZoom`. |
+| `PanAndZoomLockZoom` | `bool` | `false` | Pan at a constant computed cover scale, without a changing zoom scale. |
+| `PanAndZoomPanSpeed` | `double` | `4.0` | Pan speed in device-independent pixels per second. |
+
+The parameter record defaults to `ZoomIntensity=0.2`; the attached property defaults to `0.15`.
+The attached effect forwards its intensity to both `ZoomIntensity` and `PanAndZoomZoom`.
+When you configure the record directly for `PanAndZoom`, set `PanAndZoomZoom`.
+Locked zoom can keep the image enlarged to cover the viewport; only its pan position changes.
 
 ```csharp
 var customParams = new FlowerySlideEffectParams
@@ -266,13 +284,18 @@ Low-level animation factory methods for building custom effects.
 
 | Method | Description |
 | --- | --- |
-| `CreateSlideAnimation(...)` | Creates a Storyboard for slide effects with configurable parameters. |
-| `CreateDoubleAnimation(...)` | Creates a DoubleAnimation with easing. |
-| `CreateFadeAnimation(...)` | Creates opacity fade animations. |
+| `CreateStoryboard(bool repeatForever = false)` | Creates an empty Storyboard with optional repeat behavior. |
+| `ApplySlideEffect(storyboard, transform, effect, duration, params, effectTarget)` | Adds the configured slide effect and returns the resolved effect. |
+| `EnsureCompositeTransform(element)` | Attaches or returns a CompositeTransform and centers RenderTransformOrigin. |
+| `AddDoubleAnimation(storyboard, target, property, from, to, duration, easing, beginTime)` | Adds an animation for the specified dependency property. Easing and begin time are optional. |
+| `AddFadeAnimation(storyboard, element, fromOpacity, toOpacity, duration, easing, beginTime)` | Adds an opacity animation. Easing and begin time are optional. |
+
+The `Add` methods append animations to the supplied Storyboard.
+Call `Begin()` when the target is loaded and the Storyboard is ready.
 
 ### Platform Support
 
-Slide effects require `HAS_UNO` or `WINDOWS` compilation symbols. On other platforms, effects gracefully fall back to static display.
+Slide effects use native WinUI 3 animation APIs in the Windows application.
 
 ---
 
@@ -291,7 +314,7 @@ Slide effects require `HAS_UNO` or `WINDOWS` compilation symbols. On other platf
 
 ## Technical Reference (Implementation Files)
 
-For deep implementation details, consult the following source files in the `Flowery.Uno` project:
+For deep implementation details, consult the following source files in the `Flowery.WinUI` project:
 
 | File | Primary Coverage |
 | --- | --- |

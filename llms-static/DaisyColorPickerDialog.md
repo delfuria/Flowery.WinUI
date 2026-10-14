@@ -105,7 +105,7 @@ dialog.PreviewColorChanged += (s, e) => PreviewBorder.Background = new SolidColo
 var color = await dialog.ShowAsync(XamlRoot);
 ```
 
-The screen color picker is hidden on Android and iOS, where screen capture is not available.
+The native Windows dialog includes screen capture through `DaisyScreenColorPicker` when `ShowScreenColorPicker` is true.
 
 ## Typical Layout
 

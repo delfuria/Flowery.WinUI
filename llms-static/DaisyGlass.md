@@ -3,30 +3,34 @@
 
 # Overview
 
-DaisyGlass is a frosted-glass container with multiple blur strategies: simulated gradients, bitmap capture, or SkiaSharp GPU blur. It exposes tint/opacity controls, saturation, reflection parameters, and a toggle for real backdrop capture. Use it to create translucent panels over imagery or colorful backgrounds.
+DaisyGlass creates translucent panels over native WinUI 3 content.
+Use simulated layers for a light glass appearance, or enable snapshot capture for actual blur.
+The capture modes use WinUI RenderTargetBitmap and CPU SkiaSharp image processing.
 
 ## Blur Modes
 
 | Mode | Description |
 | --- | --- |
-| `Simulated` | No real blur; uses layered gradients/textures for a lightweight glass look. |
-| `BitmapCapture` (default) | Captures underlying content once and blurs it; good balance of quality/perf. |
-| `SkiaSharp` | GPU blur via Skia; more real-time but experimental. |
+| `Simulated` (default) | Uses translucent fills and highlights without backdrop capture. |
+| `BitmapCapture` | Captures the background and processes the snapshot with SkiaSharp. |
+| `SkiaSharp` | Uses the same native snapshot and CPU SkiaSharp processing path. |
+
+Capture modes update after relevant property, size, theme, or rasterization-scale changes.
+They do not continuously sample the background.
 
 ## Key Properties
 
 | Property | Description |
 | --- | --- |
-| `EnableBackdropBlur` (bool) | Enables real capture/blur; simulated layers are always rendered. |
+| `EnableBackdropBlur` (bool) | Enables snapshot capture when BlurMode is not Simulated. Default false. |
 | `BlurMode` | Chooses blur pipeline (Simulated/BitmapCapture/SkiaSharp). |
 | `GlassBlur` | Blur radius/strength. |
-| `GlassOpacity` | Base tint opacity (overlay). |
-| `GlassTint` / `GlassTintOpacity` | Tint color and intensity. |
+| `GlassOpacity` | Opacity of the simulated base fill. |
+| `GlassTint` / `GlassTintOpacity` | Tint color and intensity, applied once to a processed snapshot. |
 | `GlassBorderOpacity` | Subtle outline opacity. |
-| `GlassReflectDegree` / `GlassReflectOpacity` | Control the reflection effect. |
-| `GlassTextShadowOpacity` | Shadow for text content. |
+| `GlassReflectOpacity` | Opacity of the reflection highlight. |
 | `GlassSaturation` | Saturation of blurred background (0 = grayscale). |
-| `BlurredBackground` (read-only) | Captured/blurred image when backdrop blur is enabled. |
+| `CornerRadius` | Corner radius used for the final captured-image clip. |
 
 ## Quick Examples
 
@@ -47,23 +51,34 @@ DaisyGlass is a frosted-glass container with multiple blur strategies: simulated
                      GlassTintOpacity="0.35">
     <StackPanel Padding="16" Spacing="8">
         <TextBlock Text="Blurred Panel" FontWeight="Bold" />
-        <TextBlock Text="Captures background once and blurs it." />
+        <TextBlock Text="Captures and blurs the background." />
     </StackPanel>
 </controls:DaisyGlass>
 
-<!-- SkiaSharp live blur -->
+<!-- SkiaSharp snapshot blur -->
 <controls:DaisyGlass EnableBackdropBlur="True"
                      BlurMode="SkiaSharp"
                      GlassBlur="40"
                      GlassSaturation="0.9">
-    <TextBlock Text="Live GPU blur" Margin="16,12" />
+    <TextBlock Text="Blurred snapshot" Margin="16,12" />
 </controls:DaisyGlass>
 ```
 
 ## Tips & Best Practices
 
 - Use `EnableBackdropBlur=False` (default) for best performance; turn it on only where blur is critical.
-- Keep `GlassBlur` moderate (20–40) to avoid heavy GPU/CPU load; higher values can be expensive.
+- Keep `GlassBlur` moderate (20–40); larger blur kernels increase CPU work.
 - For dynamic backgrounds, call `RefreshBackdrop()` after major layout/content changes when using capture mode.
-- Prefer `Simulated` on low-powered devices; use `SkiaSharp` only when GPU acceleration is available and acceptable.
+- Prefer `Simulated` when the background changes frequently and snapshot blur is unnecessary.
 - Ensure the parent has a background; backdrop capture looks better when sampling colorful or textured surfaces.
+
+## Capture and Lifetime
+
+Capture temporarily hides glass overlays in the sampled scene, including sibling glass panels.
+The capture restores their opacity values and bindings before image processing continues.
+The blur includes padding around the panel, then crops and clips the processed result to its bounds.
+This avoids treating the panel edge as the edge of the background image.
+
+Unload clears the captured image and detaches rasterization notifications.
+Reload schedules a new capture.
+Results from an earlier size, property state, or load cycle do not replace the current image.

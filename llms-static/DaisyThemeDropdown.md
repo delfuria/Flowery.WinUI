@@ -52,10 +52,10 @@ xmlns:controls="using:Flowery.Controls"
 <controls:DaisyThemeDropdown SelectedTheme="{Binding CurrentTheme, Mode=TwoWay}" />
 ```
 
-**Prerequisite**: Your `App.xaml` must include Flowery.Uno's theme resources in `Application.Resources.MergedDictionaries`:
+**Prerequisite**: Your `App.xaml` must include Flowery.WinUI's theme resources in `Application.Resources.MergedDictionaries`:
 
 ```xml
-<ResourceDictionary Source="ms-appx:///Flowery.Uno/Themes/Generic.xaml" />
+<ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/Generic.xaml" />
 ```
 
 ## Automatic Sizing

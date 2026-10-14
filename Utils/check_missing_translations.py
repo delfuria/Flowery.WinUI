@@ -43,7 +43,7 @@ def main():
     else:
         # Default: relative to this script's location
         script_dir = Path(__file__).parent
-        localization_dir = script_dir.parent / "Flowery.Uno.Gallery" / "Localization"
+        localization_dir = script_dir.parent / "Flowery.WinUI.Gallery.Core" / "Localization"
 
     if not localization_dir.exists():
         print(f"ERROR: Localization directory not found: {localization_dir}")
