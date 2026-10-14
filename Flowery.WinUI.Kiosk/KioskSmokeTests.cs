@@ -85,7 +85,20 @@ internal static class KioskSmokeTests
                         break;
                     case 4:
                         scalingSlide = RequireSlide<ScalingSlide>(page);
-                        await CheckScalingAsync(scalingSlide, report, token);
+                        var previousMaxWidth = scalingSlide.MaxWidth;
+                        var previousMaxHeight = scalingSlide.MaxHeight;
+                        try
+                        {
+                            // Exercise the compact CI viewport even on larger local displays.
+                            scalingSlide.MaxWidth = Math.Min(previousMaxWidth, 752);
+                            scalingSlide.MaxHeight = Math.Min(previousMaxHeight, 480);
+                            await CheckScalingAsync(scalingSlide, report, token);
+                        }
+                        finally
+                        {
+                            scalingSlide.MaxWidth = previousMaxWidth;
+                            scalingSlide.MaxHeight = previousMaxHeight;
+                        }
                         break;
                     case 5:
                         patternsSlide = RequireSlide<PatternsSlide>(page);
@@ -344,6 +357,10 @@ internal static class KioskSmokeTests
             "The wrapping rows did not receive the displayed scaling factor.");
         Require(Find<DaisyRadialProgress>(slide, "ZoomProgress").Value == percent,
             "The zoom indicator differs from the applied zoom.");
+        var zoomPanel = Find<StackPanel>(slide, "ZoomPanel");
+        RequireContained(slide, zoomPanel, "Zoom panel within slide");
+        foreach (var text in Descendants<TextBlock>(zoomPanel).Where(IsVisibleText))
+            CheckTextVisible(text, zoomPanel, $"Zoom panel text '{text.Text}'", probes);
         RequireContained(slide, card, "Card within slide");
         RequireContained(body, content, "Demo content within card body");
         CheckTextVisible(title, content, "Complete demo title", probes);
@@ -413,7 +430,7 @@ internal static class KioskSmokeTests
         {
             _root = slide.Content as Grid ?? throw new InvalidOperationException("The scaling page root is missing.");
             _host = new Canvas { Width = 0, Height = 0, Opacity = 0, IsHitTestVisible = false };
-            var texts = Descendants<TextBlock>(Find<DaisyCard>(slide, "DemoCard")).Where(IsVisibleText).ToArray();
+            var texts = Descendants<TextBlock>(slide).Where(IsVisibleText).ToArray();
             foreach (var text in texts)
             {
                 var probe = new TextBlock
