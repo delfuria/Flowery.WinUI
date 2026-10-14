@@ -31,6 +31,7 @@ namespace Flowery.WinUI.Gallery.Examples
             }
 
             DiagnosticsTextBox.Text += message;
+            UpdateDiagnosticsVisibility();
         }
 
         public void SetDiagnosticsText(string? text)
@@ -39,6 +40,15 @@ namespace Flowery.WinUI.Gallery.Examples
                 return;
 
             DiagnosticsTextBox.Text = text ?? string.Empty;
+            UpdateDiagnosticsVisibility();
+        }
+
+        // The box only gets text while MainView's central diagnostics log is enabled; hide it while empty.
+        private void UpdateDiagnosticsVisibility()
+        {
+            DiagnosticsTextBox.Visibility = string.IsNullOrEmpty(DiagnosticsTextBox.Text)
+                ? Visibility.Collapsed
+                : Visibility.Visible;
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
