@@ -8,6 +8,10 @@ on:
     - cron: '28 3 * * 1'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   actions: read
   contents: read
@@ -42,6 +46,9 @@ jobs:
           global-json-file: global.json
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
+        env:
+          # Overlay databases do not support the manual C# build.
+          CODEQL_OVERLAY_DATABASE_MODE: ${{ matrix.language == 'csharp' && 'none' || '' }}
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
