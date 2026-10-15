@@ -74,6 +74,7 @@ namespace Flowery.Controls
 
         private SizePreviewInfo[]? _instanceSizes;
         private bool _isSyncing;
+        private bool _eventsSubscribed;
 
         public DaisySizeDropdown() : base(subscribeSizeChanges: false)
         {
@@ -101,19 +102,28 @@ namespace Flowery.Controls
 
         protected override void OnBeforeLoaded()
         {
+            if (!IsLoaded || _eventsSubscribed)
+                return;
+
             FlowerySizeManager.SizeChanged += OnSizeChanged;
             FloweryLocalization.CultureChanged += OnCultureChanged;
+            _eventsSubscribed = true;
         }
 
         protected override void OnAfterLoaded()
         {
+            RefreshLocalizedSizes();
             SyncWithCurrentSize();
         }
 
         protected override void OnBeforeUnloaded()
         {
+            if (!_eventsSubscribed)
+                return;
+
             FlowerySizeManager.SizeChanged -= OnSizeChanged;
             FloweryLocalization.CultureChanged -= OnCultureChanged;
+            _eventsSubscribed = false;
         }
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -130,6 +140,17 @@ namespace Flowery.Controls
 
         private void OnCultureChanged(object? sender, string cultureName)
         {
+            if (DispatcherQueue.HasThreadAccess)
+                RefreshLocalizedSizes();
+            else
+                DispatcherQueue.TryEnqueue(RefreshLocalizedSizes);
+        }
+
+        private void RefreshLocalizedSizes()
+        {
+            if (!IsLoaded)
+                return;
+
             _instanceSizes = null;
             RefreshVisibleSizes();
         }
