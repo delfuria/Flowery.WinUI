@@ -42,6 +42,9 @@ jobs:
           global-json-file: global.json
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
+        env:
+          # Overlay databases do not support the manual C# build.
+          CODEQL_OVERLAY_DATABASE_MODE: ${{ matrix.language == 'csharp' && 'none' || '' }}
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
