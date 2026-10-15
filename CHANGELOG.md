@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added `Flowery.WinUI.Photos`, a demo app for viewing photos and making basic edits with Flowery controls, Win2D, runtime themes, global sizing and 12 languages.
+
+### Fixed
+
+- Fixed `DaisyToggle` default size tokens to match the documented design tokens and the control fallbacks (for example Medium 36×20 with a 16 px knob). Toggles were much smaller than labels and other controls of the same size.
+
 ## [1.2.1] - 2026-10-15
 
 ### Fixed
