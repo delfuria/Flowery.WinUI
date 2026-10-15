@@ -196,7 +196,6 @@ namespace Flowery.Controls
         private readonly DaisyControlLifecycle _lifecycle;
 
         // Incremental rebuild state
-        private long _rebuildGeneration;
         private readonly Queue<SidebarCategory> _buildQueue = new();
         private bool _isProcessingQueue;
         private SidebarMetrics _currentMetrics;
@@ -795,9 +794,6 @@ namespace Flowery.Controls
             if (_categoriesPanel == null)
                 return;
 
-            _rebuildGeneration++;
-            var currentGeneration = _rebuildGeneration;
-
             double? previousOffset = null;
             if (preserveScrollOffset && _categoriesScrollViewer != null)
                 previousOffset = _categoriesScrollViewer.VerticalOffset;
@@ -858,7 +854,7 @@ namespace Flowery.Controls
                 if (_buildQueue.Count > 0 && !_isProcessingQueue)
                 {
                     _isProcessingQueue = true;
-                    DispatcherQueue?.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () => ProcessNextBuildBatch(currentGeneration));
+                    DispatcherQueue?.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, ProcessNextBuildBatch);
                 }
             }
             catch (Exception ex)
@@ -989,9 +985,11 @@ namespace Flowery.Controls
             RefreshItemVisuals();
         }
 
-        private void ProcessNextBuildBatch(long generation)
+        // One chain of batches works through the queue. A rebuild refills the queue in place and does not start
+        // a second chain while one is pending, so the pending batch continues with the categories of the newest rebuild.
+        private void ProcessNextBuildBatch()
         {
-            if (generation != _rebuildGeneration || _buildQueue.Count == 0)
+            if (_buildQueue.Count == 0)
             {
                 _isProcessingQueue = false;
                 return;
@@ -1020,7 +1018,7 @@ namespace Flowery.Controls
 
             if (_buildQueue.Count > 0)
             {
-                DispatcherQueue?.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () => ProcessNextBuildBatch(generation));
+                DispatcherQueue?.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, ProcessNextBuildBatch);
             }
             else
             {
