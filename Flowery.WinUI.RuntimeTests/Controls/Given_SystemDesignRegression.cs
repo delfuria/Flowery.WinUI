@@ -57,6 +57,33 @@ public class Given_SystemDesignRegression
     }
 
     [TestMethod]
+    public void When_MotionPreferenceIsOverridden_SystemRefreshPreservesItUntilReset()
+    {
+        var setMotion = Appearance.GetMethod("SetMotionPreference", BindingFlags.NonPublic | BindingFlags.Static)!;
+        var resetMotion = Appearance.GetMethod("ResetMotionPreference", BindingFlags.NonPublic | BindingFlags.Static)!;
+        var refresh = Appearance.GetMethod("Refresh", BindingFlags.NonPublic | BindingFlags.Static)!;
+        var motion = Appearance.GetProperty("AnimationsEnabled", BindingFlags.NonPublic | BindingFlags.Static)!;
+        var previousOverride = (bool?)Appearance.GetField("_motionPreferenceOverride", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null);
+        var settings = new Windows.UI.ViewManagement.UISettings();
+        var testPreference = !settings.AnimationsEnabled;
+        try
+        {
+            setMotion.Invoke(null, new object[] { testPreference });
+            refresh.Invoke(null, null);
+            Assert.AreEqual(testPreference, (bool)motion.GetValue(null)!, "OS refresh must preserve the test override.");
+            resetMotion.Invoke(null, null);
+            Assert.AreEqual(settings.AnimationsEnabled, (bool)motion.GetValue(null)!, "Reset must restore the current OS preference.");
+        }
+        finally
+        {
+            if (previousOverride is { } previous)
+                setMotion.Invoke(null, new object[] { previous });
+            else
+                resetMotion.Invoke(null, null);
+        }
+    }
+
+    [TestMethod]
     public async Task When_WaveTextChanges_AnimationRestartsAndReducedMotionStopsIt()
     {
         var setMotion = Appearance.GetMethod("SetMotionPreference", BindingFlags.NonPublic | BindingFlags.Static)!;

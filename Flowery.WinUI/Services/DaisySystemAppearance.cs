@@ -16,6 +16,7 @@ internal static class DaisySystemAppearance
     private static DispatcherQueue? _dispatcher;
     private static bool _highContrast = Accessibility.HighContrast;
     private static bool _animationsEnabled = Settings.AnimationsEnabled;
+    private static bool? _motionPreferenceOverride;
 
     static DaisySystemAppearance()
     {
@@ -59,14 +60,26 @@ internal static class DaisySystemAppearance
     private static void Refresh()
     {
         var highContrast = Accessibility.HighContrast;
-        var animationsEnabled = Settings.AnimationsEnabled;
+        var animationsEnabled = _motionPreferenceOverride ?? Settings.AnimationsEnabled;
         var colorsChanged = highContrast != _highContrast || highContrast;
         _highContrast = highContrast;
         if (colorsChanged) ColorsChanged?.Invoke(null, EventArgs.Empty);
-        SetMotionPreference(animationsEnabled);
+        ApplyMotionPreference(animationsEnabled);
     }
 
     internal static void SetMotionPreference(bool enabled)
+    {
+        _motionPreferenceOverride = enabled;
+        ApplyMotionPreference(enabled);
+    }
+
+    internal static void ResetMotionPreference()
+    {
+        _motionPreferenceOverride = null;
+        ApplyMotionPreference(Settings.AnimationsEnabled);
+    }
+
+    private static void ApplyMotionPreference(bool enabled)
     {
         if (_animationsEnabled == enabled) return;
         _animationsEnabled = enabled;

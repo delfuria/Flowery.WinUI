@@ -31,7 +31,6 @@ public class Given_BehaviorMotionRegression
         var host = new StackPanel { Children = { wave, typewriter, scramble, reveal, follower } };
         try
         {
-            SetMotion(true);
             WaveTextBehavior.SetIsEnabled(wave, true);
             TypewriterBehavior.SetSpeed(typewriter, TimeSpan.FromSeconds(10));
             TypewriterBehavior.SetIsEnabled(typewriter, true);
@@ -41,9 +40,13 @@ public class Given_BehaviorMotionRegression
             RevealBehavior.SetMode(reveal, RevealMode.ScaleSlide);
             RevealBehavior.SetIsEnabled(reveal, true);
             CursorFollowBehavior.SetIsEnabled(follower, true);
-            await Load(host);
+            await Load(host, wave, typewriter, scramble, reveal, follower);
+            // Establish the active state after native Loaded callbacks and pending settings notifications.
+            SetMotion(true);
+            TypewriterBehavior.Restart(typewriter);
             RevealBehavior.TriggerReveal(reveal);
-            Assert.IsNotNull(GetTimer(typeof(WaveTextBehavior), wave));
+            Assert.IsNotNull(GetTimer(typeof(WaveTextBehavior), wave),
+                $"Wave start state: Loaded={wave.IsLoaded}, Enabled={WaveTextBehavior.GetIsEnabled(wave)}, Motion={MotionEnabled}, Text={wave.Text}.");
             Assert.IsNotNull(GetTimer(typeof(TypewriterBehavior), typewriter));
             Assert.AreEqual(1, follower.Children.Count);
 
@@ -124,11 +127,13 @@ public class Given_BehaviorMotionRegression
     private static DispatcherTimer? GetTimer(Type behavior, DependencyObject element)
         => element.GetValue((DependencyProperty)behavior.GetField("TimerProperty", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!) as DispatcherTimer;
 
-    private static async Task Load(FrameworkElement element)
+    private static async Task Load(FrameworkElement element, params FrameworkElement[] children)
     {
         RuntimeTestHelpers.AttachToHost(element);
         await RuntimeTestHelpers.EnsureLoadedAsync(element).WaitAsync(TimeSpan.FromSeconds(5));
-        var flushed = new TaskCompletionSource();
+        foreach (var child in children)
+            await RuntimeTestHelpers.EnsureLoadedAsync(child).WaitAsync(TimeSpan.FromSeconds(5));
+        var flushed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         element.DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () => flushed.SetResult());
         await flushed.Task.WaitAsync(TimeSpan.FromSeconds(5));
         element.UpdateLayout();
