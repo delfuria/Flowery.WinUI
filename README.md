@@ -13,7 +13,7 @@
 
 **NuGet packages**
 
-[![Flowery.WinUI: unpublished](https://img.shields.io/badge/Core-unpublished-004880?style=flat-square&logo=nuget&logoColor=white)](Flowery.WinUI/Flowery.WinUI.csproj) [![Flowery.WinUI.Kanban: unpublished](https://img.shields.io/badge/Kanban-unpublished-004880?style=flat-square&logo=nuget&logoColor=white)](Flowery.WinUI.Kanban/Flowery.WinUI.Kanban.csproj) [![Flowery.WinUI.Win2D: unpublished](https://img.shields.io/badge/Win2D-unpublished-004880?style=flat-square&logo=nuget&logoColor=white)](Flowery.WinUI.Win2D/Flowery.WinUI.Win2D.csproj) [![Flowery.Integrations.WinUI: unpublished](https://img.shields.io/badge/Integrations-unpublished-004880?style=flat-square&logo=nuget&logoColor=white)](Flowery.Integrations.WinUI/Flowery.Integrations.WinUI.csproj)
+[![Flowery.WinUI NuGet version](https://img.shields.io/nuget/v/Flowery.WinUI?style=flat-square&label=Core&logo=nuget&logoColor=white)](https://www.nuget.org/packages/Flowery.WinUI) [![Flowery.WinUI.Kanban NuGet version](https://img.shields.io/nuget/v/Flowery.WinUI.Kanban?style=flat-square&label=Kanban&logo=nuget&logoColor=white)](https://www.nuget.org/packages/Flowery.WinUI.Kanban) [![Flowery.WinUI.Win2D NuGet version](https://img.shields.io/nuget/v/Flowery.WinUI.Win2D?style=flat-square&label=Win2D&logo=nuget&logoColor=white)](https://www.nuget.org/packages/Flowery.WinUI.Win2D) [![Flowery.Integrations.WinUI NuGet version](https://img.shields.io/nuget/v/Flowery.Integrations.WinUI?style=flat-square&label=Integrations&logo=nuget&logoColor=white)](https://www.nuget.org/packages/Flowery.Integrations.WinUI)
 
 [![GitHub stars](https://img.shields.io/github/stars/tobitege/Flowery.WinUI?style=flat-square&logo=github)](https://github.com/tobitege/Flowery.WinUI/stargazers) [![GitHub forks](https://img.shields.io/github/forks/tobitege/Flowery.WinUI?style=flat-square&logo=github)](https://github.com/tobitege/Flowery.WinUI/forks) [![Open issues](https://img.shields.io/github/issues/tobitege/Flowery.WinUI?style=flat-square)](https://github.com/tobitege/Flowery.WinUI/issues) [![Last commit](https://img.shields.io/github/last-commit/tobitege/Flowery.WinUI/main?style=flat-square)](https://github.com/tobitege/Flowery.WinUI/commits/main) [![Repository size](https://img.shields.io/github/repo-size/tobitege/Flowery.WinUI?style=flat-square)](https://github.com/tobitege/Flowery.WinUI)
 
@@ -25,7 +25,7 @@
 
 Flowery.WinUI is a native WinUI 3 control library for the Windows App SDK.
 Build themed Windows applications with Flowery controls and optional Kanban, Win2D, and authentication packages.
-The NuGet packages are not published yet; use project references or [build local packages](scripts/README.md#create-nuget-packages).
+Version [1.2.0](https://github.com/tobitege/Flowery.WinUI/releases/tag/v1.2.0) is available on NuGet.
 
 ## Features
 
@@ -57,7 +57,12 @@ See [SDK selection](scripts/README.md#select-the-net-sdk) for exact-version and 
 
 ## Use the library
 
-1. Add a project reference to `Flowery.WinUI/Flowery.WinUI.csproj` in a WinUI 3 application.
+1. Add the `Flowery.WinUI` NuGet package to a WinUI 3 application.
+
+```powershell
+dotnet add package Flowery.WinUI --version 1.2.0
+```
+
 2. Merge the library resources after `XamlControlsResources` in the application resources.
 
 ```xml
@@ -79,13 +84,13 @@ xmlns:daisy="using:Flowery.Controls"
 <daisy:DaisyThemeDropdown MinWidth="220" />
 ```
 
-4. For Kanban, add a reference to `Flowery.WinUI.Kanban` and merge `ms-appx:///Flowery.WinUI.Kanban/Themes/Generic.xaml`.
+4. For Kanban, add the `Flowery.WinUI.Kanban` package and merge `ms-appx:///Flowery.WinUI.Kanban/Themes/Generic.xaml`.
 
 Core controls use `Flowery.Controls`.
 Kanban controls use `Flowery.WinUI.Kanban.Controls`.
 Integrations use `Flowery.Integrations.WinUI`.
 Project, assembly, and package names use `Flowery.WinUI`.
-This local migration does not establish that a public NuGet package exists.
+For source builds, use project references or [build local packages](scripts/README.md#create-nuget-packages).
 
 ## Build and run
 
