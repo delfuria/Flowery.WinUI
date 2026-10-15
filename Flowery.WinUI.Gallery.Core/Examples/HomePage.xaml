@@ -63,7 +63,8 @@
                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
                      HorizontalAlignment="Stretch"
-                     MinHeight="200" />
+                     MinHeight="200"
+                     Visibility="Collapsed" />
         </StackPanel>
     </ScrollViewer>
 </UserControl>

@@ -65,6 +65,7 @@ namespace Flowery.Controls
         {
             base.OnLoaded();
             Flowery.Services.DaisyMotion.Changed += OnMotionChanged;
+            FloweryLocalization.CultureChanged += OnCultureChanged;
 
             _isLoaded = true;
             if (_paddingChangedToken == 0)
@@ -92,6 +93,7 @@ namespace Flowery.Controls
         protected override void OnUnloaded()
         {
             Flowery.Services.DaisyMotion.Changed -= OnMotionChanged;
+            FloweryLocalization.CultureChanged -= OnCultureChanged;
             _floatingLabelStoryboard?.Stop();
             base.OnUnloaded();
             _isLoaded = false;
@@ -116,6 +118,24 @@ namespace Flowery.Controls
                 _automationNameChangedToken = 0;
             }
             DetachPendingFocusHandler();
+        }
+
+        private void OnCultureChanged(object? sender, string cultureName)
+        {
+            if (DispatcherQueue.HasThreadAccess)
+                UpdateLocalizedText();
+            else
+                DispatcherQueue.TryEnqueue(UpdateLocalizedText);
+        }
+
+        private void UpdateLocalizedText()
+        {
+            if (!_isLoaded)
+                return;
+
+            if (_optionalText != null)
+                _optionalText.Text = FloweryLocalization.GetStringInternal("Input_Optional", "Optional");
+            UpdateRevealIconData();
         }
 
         protected override void OnThemeChanged(string themeName)
@@ -1468,6 +1488,7 @@ namespace Flowery.Controls
 
             if (_optionalText != null)
             {
+                _optionalText.Text = FloweryLocalization.GetStringInternal("Input_Optional", "Optional");
                 _optionalText.Visibility = IsOptional && hasLabel && !isFloating ? Visibility.Visible : Visibility.Collapsed;
             }
 

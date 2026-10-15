@@ -212,6 +212,7 @@ namespace Flowery.Controls
         protected override void OnLoaded()
         {
             base.OnLoaded();
+            FloweryLocalization.CultureChanged += OnCultureChanged;
 
             if (_rootGrid != null)
             {
@@ -221,6 +222,36 @@ namespace Flowery.Controls
 
             BuildVisualTree();
             ApplyAll();
+        }
+
+        protected override void OnUnloaded()
+        {
+            FloweryLocalization.CultureChanged -= OnCultureChanged;
+            base.OnUnloaded();
+        }
+
+        private void OnCultureChanged(object? sender, string cultureName)
+        {
+            if (DispatcherQueue.HasThreadAccess)
+                UpdateSlotAccessibility();
+            else
+                DispatcherQueue.TryEnqueue(UpdateSlotAccessibility);
+        }
+
+        private void UpdateSlotAccessibility()
+        {
+            if (!IsLoaded)
+                return;
+
+            for (var index = 0; index < _slots.Count; index++)
+                SetSlotAccessibilityName(_slots[index], index);
+        }
+
+        private void SetSlotAccessibilityName(TextBox slot, int index)
+        {
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(slot,
+                string.Format(System.Globalization.CultureInfo.CurrentCulture,
+                    FloweryLocalization.GetStringInternal("OtpInput_Digit", "Code digit {0} of {1}"), index + 1, Length));
         }
 
         protected override void OnThemeChanged(string themeName)
@@ -439,9 +470,7 @@ namespace Flowery.Controls
             box.Resources["TextBoxDeleteButtonForegroundFocused"] = baseContentBrush;
 
             box.TextChanged += OnSlotTextChanged;
-            Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(box,
-                string.Format(System.Globalization.CultureInfo.CurrentCulture,
-                    FloweryLocalization.GetStringInternal("OtpInput_Digit", "Code digit {0} of {1}"), index + 1, Length));
+            SetSlotAccessibilityName(box, index);
             box.KeyDown += OnSlotKeyDown;
             box.GotFocus += OnSlotGotFocus;
             box.Paste += OnSlotPaste;
@@ -675,6 +704,7 @@ namespace Flowery.Controls
         {
             ApplySizing();
             ApplyColors();
+            UpdateSlotAccessibility();
         }
 
         private void ApplySizing()

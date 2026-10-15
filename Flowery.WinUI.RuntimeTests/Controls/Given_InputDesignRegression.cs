@@ -1,10 +1,12 @@
 using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Flowery.Controls;
 using Flowery.Enums;
+using Flowery.Localization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
@@ -34,6 +36,159 @@ public partial class Given_InputDesignRegression
         Assert.IsTrue(AutomationProperties.GetIsRequiredForForm(input));
         Assert.AreEqual("Hint Help", AutomationProperties.GetHelpText(input));
         Assert.AreEqual(new Thickness(9), input.Padding);
+    }
+
+    [TestMethod]
+    public async Task When_PasswordCultureChanges_RevealActionAndOptionalLabelFollowAfterReload()
+    {
+        var previousCulture = FloweryLocalization.CurrentCultureName;
+        var control = new DaisyPasswordBox { Label = "Password", IsOptional = true, Password = "secret" };
+        try
+        {
+            FloweryLocalization.SetCulture("en");
+            await LoadVisualTreeAsync(control);
+            var input = Descendants(control).OfType<PasswordBox>().Single();
+            var reveal = Descendants(control).OfType<Button>().Single(button => button.Content is Path);
+            var optional = Descendants(control).OfType<TextBlock>().Single(text => text.Text == "Optional");
+            var toggle = typeof(DaisyPasswordBox).GetMethod("OnRevealButtonClick", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.IsNotNull(toggle);
+            Assert.AreEqual("Show password", AutomationProperties.GetName(reveal));
+
+            FloweryLocalization.SetCulture("de");
+            await EnqueueAsync(control);
+            Assert.AreEqual("Passwort anzeigen", AutomationProperties.GetName(reveal));
+            toggle.Invoke(control, new object[] { reveal, new RoutedEventArgs() });
+            Assert.AreEqual(PasswordRevealMode.Visible, input.PasswordRevealMode);
+            Assert.AreEqual("Passwort ausblenden", AutomationProperties.GetName(reveal));
+
+            await Task.Run(static () => FloweryLocalization.SetCulture("fr"));
+            await EnqueueAsync(control);
+            Assert.AreEqual("Masquer le mot de passe", AutomationProperties.GetName(reveal));
+            Assert.AreEqual("Facultatif", optional.Text);
+            toggle.Invoke(control, new object[] { reveal, new RoutedEventArgs() });
+            Assert.AreEqual(PasswordRevealMode.Hidden, input.PasswordRevealMode);
+            Assert.AreEqual("Afficher le mot de passe", AutomationProperties.GetName(reveal));
+
+            await DetachAsync(control);
+            FloweryLocalization.SetCulture("en");
+            await EnqueueAsync(control);
+            Assert.AreEqual("Afficher le mot de passe", AutomationProperties.GetName(reveal));
+            Assert.AreEqual("Facultatif", optional.Text);
+
+            await LoadVisualTreeAsync(control);
+            Assert.AreEqual("Show password", AutomationProperties.GetName(reveal));
+            Assert.AreEqual("Optional", optional.Text);
+            FloweryLocalization.SetCulture("de");
+            await EnqueueAsync(control);
+            Assert.AreEqual("Passwort anzeigen", AutomationProperties.GetName(reveal));
+            Assert.AreEqual("secret", control.Password);
+        }
+        finally
+        {
+            RuntimeTestHelpers.GetHostPanel().Children.Remove(control);
+            await EnqueueAsync(control);
+            FloweryLocalization.SetCulture(previousCulture);
+        }
+    }
+
+    [TestMethod]
+    public async Task When_OtpCultureChanges_ExistingSlotNamesFollowAfterReloadWithoutChangingTheCode()
+    {
+        var previousCulture = FloweryLocalization.CurrentCultureName;
+        var control = new DaisyOtpInput { Length = 3, Value = "123" };
+        try
+        {
+            FloweryLocalization.SetCulture("en");
+            await LoadVisualTreeAsync(control);
+            var slots = Descendants(control).OfType<TextBox>().ToArray();
+            Assert.HasCount(3, slots);
+            AssertSlotNames(slots, "Code digit {0} of {1}");
+
+            FloweryLocalization.SetCulture("de");
+            await EnqueueAsync(control);
+            AssertSlotNames(slots, "Codeziffer {0} von {1}");
+            await Task.Run(static () => FloweryLocalization.SetCulture("fr"));
+            await EnqueueAsync(control);
+            AssertSlotNames(slots, "Chiffre du code {0} sur {1}");
+            CollectionAssert.AreEqual(slots, Descendants(control).OfType<TextBox>().ToArray());
+            Assert.AreEqual("123", string.Concat(slots.Select(slot => slot.Text)));
+
+            await DetachAsync(control);
+            FloweryLocalization.SetCulture("en");
+            await EnqueueAsync(control);
+            AssertSlotNames(slots, "Chiffre du code {0} sur {1}");
+            await LoadVisualTreeAsync(control);
+            AssertSlotNames(slots, "Code digit {0} of {1}");
+            CollectionAssert.AreEqual(slots, Descendants(control).OfType<TextBox>().ToArray());
+            FloweryLocalization.SetCulture("de");
+            await EnqueueAsync(control);
+            AssertSlotNames(slots, "Codeziffer {0} von {1}");
+            Assert.AreEqual("123", control.Value);
+        }
+        finally
+        {
+            RuntimeTestHelpers.GetHostPanel().Children.Remove(control);
+            await EnqueueAsync(control);
+            FloweryLocalization.SetCulture(previousCulture);
+        }
+    }
+
+    [TestMethod]
+    public async Task When_SizeDropdownCultureChanges_SidebarInitializationKeepsOneSubscriptionAndPreservesSelection()
+    {
+        var previousCulture = FloweryLocalization.CurrentCultureName;
+        var previousSize = FlowerySizeManager.CurrentSize;
+        var control = new DaisySizeDropdown();
+        try
+        {
+            FloweryLocalization.SetCulture("en");
+            FlowerySizeManager.ApplySize(DaisySize.Large);
+            control.EnsureInitializedForSidebar("Runtime test before loading");
+            AssertSizeDropdownSubscriptions(control, 0);
+
+            await LoadVisualTreeAsync(control);
+            control.EnsureInitializedForSidebar("Runtime test first initialization");
+            control.EnsureInitializedForSidebar("Runtime test repeated initialization");
+            await EnqueueAsync(control);
+            AssertSizeDropdownSubscriptions(control, 1);
+            var trigger = Descendants(control).OfType<Button>().First();
+            AssertSizeSelection(control, trigger, "Large");
+
+            await Task.Run(static () => FloweryLocalization.SetCulture("fr"));
+            await EnqueueAsync(control);
+            AssertSizeSelection(control, trigger, "Grand");
+            var frenchOptions = (SizePreviewInfo[])control.ItemsSource!;
+            CollectionAssert.AreEqual(new[] { "Très petit", "Petit", "Moyen", "Grand", "Très grand" },
+                frenchOptions.Select(option => option.DisplayName).ToArray());
+            AssertSizeDropdownSubscriptions(control, 1);
+
+            await DetachAsync(control);
+            AssertSizeDropdownSubscriptions(control, 0);
+            await Task.Run(static () => FloweryLocalization.SetCulture("en"));
+            await EnqueueAsync(control);
+            Assert.AreSame(frenchOptions, control.ItemsSource);
+
+            await LoadVisualTreeAsync(control);
+            AssertSizeDropdownSubscriptions(control, 1);
+            Assert.AreNotSame(frenchOptions, control.ItemsSource);
+            AssertSizeSelection(control, trigger, "Large");
+            await Task.Run(static () => FloweryLocalization.SetCulture("fr"));
+            await EnqueueAsync(control);
+            AssertSizeSelection(control, trigger, "Grand");
+        }
+        finally
+        {
+            RuntimeTestHelpers.GetHostPanel().Children.Remove(control);
+            await EnqueueAsync(control);
+            try
+            {
+                FloweryLocalization.SetCulture(previousCulture);
+            }
+            finally
+            {
+                FlowerySizeManager.ApplySize(previousSize);
+            }
+        }
     }
 
     [TestMethod]
@@ -160,6 +315,46 @@ public partial class Given_InputDesignRegression
 
     private static object? VisibleSwapContent(DaisySwap control) =>
         ((Grid)control.Content).Children.OfType<ContentPresenter>().Single(presenter => presenter.Visibility == Visibility.Visible).Content;
+
+    private static void AssertSlotNames(TextBox[] slots, string format)
+    {
+        for (var index = 0; index < slots.Length; index++)
+            Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, format, index + 1, slots.Length),
+                AutomationProperties.GetName(slots[index]));
+    }
+
+    private static void AssertSizeSelection(DaisySizeDropdown control, Button trigger, string text)
+    {
+        var selected = control.SelectedItem as SizePreviewInfo;
+        Assert.IsNotNull(selected);
+        Assert.AreEqual(DaisySize.Large, selected.Size);
+        Assert.AreEqual(DaisySize.Large, control.SelectedSize);
+        Assert.AreEqual(DaisySize.Large, FlowerySizeManager.CurrentSize);
+        Assert.AreEqual(text, trigger.Content);
+        Assert.AreEqual(text, AutomationProperties.GetName(trigger));
+    }
+
+    private static void AssertSizeDropdownSubscriptions(DaisySizeDropdown control, int expected)
+    {
+        Assert.AreEqual(expected, CountStaticSubscriptions(typeof(FloweryLocalization), nameof(FloweryLocalization.CultureChanged), control));
+        Assert.AreEqual(expected, CountStaticSubscriptions(typeof(FlowerySizeManager), nameof(FlowerySizeManager.SizeChanged), control));
+    }
+
+    private static int CountStaticSubscriptions(Type owner, string eventName, object target)
+    {
+        var eventField = owner.GetField(eventName, BindingFlags.Static | BindingFlags.NonPublic);
+        Assert.IsNotNull(eventField);
+        var count = 0;
+        if (eventField.GetValue(null) is Delegate handlers)
+        {
+            foreach (var handler in handlers.GetInvocationList())
+            {
+                if (ReferenceEquals(handler.Target, target))
+                    count++;
+            }
+        }
+        return count;
+    }
 
     private static async Task LoadVisualTreeAsync(FrameworkElement element)
     {
