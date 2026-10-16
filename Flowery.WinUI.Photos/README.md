@@ -9,6 +9,14 @@ It is a showcase, not a replacement for a full photo manager or image editor.
 
 ## Features
 
+### Home
+
+- **Start page:** greeting with a library summary and quick actions (slideshow, add folder, import),
+  counts for photos, favorites, albums and folders, and rows of recently taken photos, favorites,
+  folders and albums.
+- **Welcome page:** an empty library shows the first steps (add a folder, import photos or use the
+  sample photos) and what the app can do.
+
 ### Library and gallery
 
 - **Folders as library:** starts with your `Pictures` folder. Add more folders, include or exclude
@@ -39,8 +47,8 @@ It is a showcase, not a replacement for a full photo manager or image editor.
 
 ### Viewer
 
-- Zoom with the mouse wheel (or switch the wheel to next/previous), double-click for 100 %,
-  drag to pan, fit to window, zoom presets and slider.
+- Zoom with the mouse wheel (or switch the wheel to next/previous) in round steps (10 % below
+  100 %, then 25 %), double-click for 100 %, drag to pan, fit to window, zoom presets and slider.
 - Previous/next with arrow keys or the overlay buttons; opening a single file from outside the
   library browses its folder.
 - File info panel: folder, size, dimensions, dates, camera, lens, exposure and GPS location
@@ -49,7 +57,8 @@ It is a showcase, not a replacement for a full photo manager or image editor.
 - Immersive full screen (`F11`): hides the taskbar and the title bar; toolbar and status bar float
   above the photo and fade out until the pointer reaches the top or bottom edge.
 - **View options:** rulers with pixel coordinates, gridlines, status bar on/off, auto-hide toolbar,
-  and a navigator thumbnail for panning zoomed photos.
+  and a navigator thumbnail for panning zoomed photos. The auto-hidden toolbar stays while the pointer
+  is near it and hides at once on a click elsewhere; the title bar then offers the view options.
 
 ### Editing
 
@@ -66,7 +75,7 @@ All edits are non-destructive and GPU accelerated (Win2D) until you save.
   color adjustments, color harmonies, a palette extracted from the photo, palette import/export
   (Paint Shop Pro JASC-PAL, GIMP `.gpl`) and a full color editor.
 - **Compare:** split view with a draggable before/after divider.
-- **Undo/redo** for every step, **Revert** to the original.
+- **Undo/redo** for every step, **Revert** to the original (at the top of the edit panel).
 - **Save:** save a copy (default), replace the original after confirmation, or copy the edited
   image to the clipboard. Unsaved edits are never lost silently.
 
@@ -76,6 +85,7 @@ All edits are non-destructive and GPU accelerated (Win2D) until you save.
   Spanish, Italian, Chinese (Simplified), Japanese, Korean, Turkish, Arabic, Hebrew, Ukrainian),
   switchable at runtime.
 - Custom title bar with search, navigation rail, toasts and dialogs.
+- The window frame and the hover, focus and selection frames use the Windows accent color.
 - Settings open as a modal dialog above the current view (also above the editor). Changes preview
   live; **OK** keeps them, **Cancel** (or `Esc`) restores the previous state and returns to where you were.
 - Window position, size and all preferences are remembered.
@@ -100,6 +110,16 @@ All edits are non-destructive and GPU accelerated (Win2D) until you save.
 | `F5` | Slideshow |
 | `F11` | Full screen |
 | `Esc` | Close / go back |
+
+## Screenshots
+
+[`Screenies`](Screenies) contains feature screenshots (1920x1080). `Screenies/Capture-Screenshots.ps1`
+recreates them: it starts the built app with an isolated state folder and the bundled sample photos,
+copies only theme, language, size and view options from your settings, and drives the UI.
+
+```powershell
+pwsh -File Flowery.WinUI.Photos/Screenies/Capture-Screenshots.ps1 -Language en
+```
 
 ## Build and run
 
