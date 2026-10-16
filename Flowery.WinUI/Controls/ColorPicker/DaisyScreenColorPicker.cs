@@ -155,6 +155,21 @@ namespace Flowery.Controls.ColorPicker
             return _rootBorder ?? base.GetNeumorphicHostElement();
         }
 
+        protected override void OnLoaded()
+        {
+            base.OnLoaded();
+            FloweryLocalization.CultureChanged += OnCultureChanged;
+            UpdateDisplay();
+        }
+
+        protected override void OnUnloaded()
+        {
+            base.OnUnloaded();
+            FloweryLocalization.CultureChanged -= OnCultureChanged;
+        }
+
+        private void OnCultureChanged(object? sender, string cultureName) => UpdateDisplay();
+
         private static void OnColorPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is DaisyScreenColorPicker picker)
@@ -351,7 +366,7 @@ namespace Flowery.Controls.ColorPicker
             _hexText.Text = $"#{displayColor.R:X2}{displayColor.G:X2}{displayColor.B:X2}";
             _rgbText.Text = $"R:{displayColor.R} G:{displayColor.G} B:{displayColor.B}";
 
-            _statusText.Text = _isCapturing ? "Release to pick" : "Click and drag to pick";
+            _statusText.Text = FloweryLocalization.GetStringInternal(_isCapturing ? "ColorPicker_ReleaseToPick" : "ColorPicker_ClickAndDrag");
             _statusText.Foreground = new SolidColorBrush(_isCapturing ? Color.FromArgb(255, 100, 200, 100) : Color.FromArgb(255, 150, 150, 150));
 
             if (_rootBorder.BorderBrush is SolidColorBrush borderBrush)
@@ -488,7 +503,10 @@ namespace Flowery.Controls.ColorPicker
             if (string.IsNullOrWhiteSpace(name))
             {
                 var displayColor = _isCapturing ? _previewColor : Color;
-                name = $"Screen color picker #{displayColor.R:X2}{displayColor.G:X2}{displayColor.B:X2}";
+                name = string.Format(
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    FloweryLocalization.GetStringInternal("ColorPicker_ScreenPickerName"),
+                    $"#{displayColor.R:X2}{displayColor.G:X2}{displayColor.B:X2}");
             }
 
             DaisyAccessibility.SetAutomationNameOrClear(this, name);

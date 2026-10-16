@@ -141,7 +141,20 @@
   "Common_Connected": "Connected",
   "Common_Delete": "Видалити",
   "Common_ConfirmDelete": "Підтвердити видалення",
-  "Weather_FeelsLike": "Відчувається як"
+  "Weather_FeelsLike": "Відчувається як",
+  "Common_Ok": "OK",
+  "ColorPicker_Title": "Вибір кольору",
+  "ColorPicker_Undo": "Скасувати дію",
+  "ColorPicker_Redo": "Повторити",
+  "ColorPicker_Lightness": "Світлість",
+  "ColorPicker_ScreenPicker": "Піпетка екрана",
+  "ColorPicker_Original": "Оригінал",
+  "ColorPicker_New": "Новий",
+  "ColorPicker_Palette": "Палітра кольорів",
+  "ColorPicker_Values": "Значення кольору",
+  "ColorPicker_ClickAndDrag": "Натисніть і тягніть",
+  "ColorPicker_ReleaseToPick": "Відпустіть для вибору",
+  "ColorPicker_ScreenPickerName": "Піпетка екрана {0}"
 }
 
 

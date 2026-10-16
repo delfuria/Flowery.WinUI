@@ -143,7 +143,20 @@
   "Common_Connected": "Connected",
   "Common_Delete": "Delete",
   "Common_ConfirmDelete": "Confirm Delete",
-  "Weather_FeelsLike": "Feels Like"
+  "Weather_FeelsLike": "Feels Like",
+  "Common_Ok": "OK",
+  "ColorPicker_Title": "Color Picker",
+  "ColorPicker_Undo": "Undo",
+  "ColorPicker_Redo": "Redo",
+  "ColorPicker_Lightness": "Lightness",
+  "ColorPicker_ScreenPicker": "Screen Picker",
+  "ColorPicker_Original": "Original",
+  "ColorPicker_New": "New",
+  "ColorPicker_Palette": "Color Palette",
+  "ColorPicker_Values": "Color Values",
+  "ColorPicker_ClickAndDrag": "Click and drag to pick",
+  "ColorPicker_ReleaseToPick": "Release to pick",
+  "ColorPicker_ScreenPickerName": "Screen color picker {0}"
 }
 
 

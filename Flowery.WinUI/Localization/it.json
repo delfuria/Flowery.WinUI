@@ -141,7 +141,20 @@
   "Common_Connected": "Connected",
   "Common_Delete": "Elimina",
   "Common_ConfirmDelete": "Conferma eliminazione",
-  "Weather_FeelsLike": "Percepito"
+  "Weather_FeelsLike": "Percepito",
+  "Common_Ok": "OK",
+  "ColorPicker_Title": "Selettore colore",
+  "ColorPicker_Undo": "Annulla azione",
+  "ColorPicker_Redo": "Ripeti",
+  "ColorPicker_Lightness": "Luminosità",
+  "ColorPicker_ScreenPicker": "Contagocce schermo",
+  "ColorPicker_Original": "Originale",
+  "ColorPicker_New": "Nuovo",
+  "ColorPicker_Palette": "Tavolozza colori",
+  "ColorPicker_Values": "Valori colore",
+  "ColorPicker_ClickAndDrag": "Fai clic e trascina",
+  "ColorPicker_ReleaseToPick": "Rilascia per scegliere",
+  "ColorPicker_ScreenPickerName": "Contagocce schermo {0}"
 }
 
 
