@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Aligned the font tokens with Flowery.NET. The primary ladder is now 10/12/14/18/20 (was 8/10/12/14/16), and the secondary, tertiary, section header, header, line height, badge, menu, kbd, divider and DateTimeline font tokens grow with it. `GetDefaultFontSize`, `GetDefaultLineHeight` and the `GetFontSizeForTier` fallbacks use the same values. Badge, kbd, DateTimeline, TextArea and floating input heights follow the Flowery.NET tokens so the larger text fits.
+- Added `DaisyCheckbox{Size}FontSize`, `DaisyRadio{Size}FontSize` and `DaisyToggle{Size}FontSize` label tokens (Flowery.NET parity).
 - Corrected the checkbox, radio and toggle size tables in `llms-static/DesignTokens.md` to the compact indicator tokens (for example a 12 px checkbox and radio and a 24×12 toggle with an 8 px knob at Medium) and documented the separate `DaisyRadio{Size}Size` tokens.
 
 ## [1.2.1] - 2026-10-15

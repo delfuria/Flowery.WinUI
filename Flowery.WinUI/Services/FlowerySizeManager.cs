@@ -375,12 +375,12 @@ namespace Flowery.Controls
 
             return tier switch
             {
-                ResponsiveFontTier.Primary => 10,
-                ResponsiveFontTier.Secondary => 9,
-                ResponsiveFontTier.Tertiary => 8,
-                ResponsiveFontTier.SectionHeader => 12,
-                ResponsiveFontTier.Header => 14,
-                _ => 10
+                ResponsiveFontTier.Primary => 14,
+                ResponsiveFontTier.Secondary => 12,
+                ResponsiveFontTier.Tertiary => 11,
+                ResponsiveFontTier.SectionHeader => 16,
+                ResponsiveFontTier.Header => 20,
+                _ => 14
             };
         }
 

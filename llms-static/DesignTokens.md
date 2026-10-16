@@ -53,7 +53,7 @@ using Flowery.Controls;
 
 // Get default values based on DaisySize
 double height = DaisyResourceLookup.GetDefaultHeight(DaisySize.Medium);        // 28
-double fontSize = DaisyResourceLookup.GetDefaultFontSize(DaisySize.Medium);    // 12
+double fontSize = DaisyResourceLookup.GetDefaultFontSize(DaisySize.Medium);    // 14
 Thickness padding = DaisyResourceLookup.GetDefaultPadding(DaisySize.Medium);   // 10,0,10,0
 CornerRadius radius = DaisyResourceLookup.GetDefaultCornerRadius(DaisySize.Medium); // 8
 
@@ -67,8 +67,9 @@ double actualHeight = DaisyResourceLookup.GetDouble(resources, "DaisySizeMediumH
 | Method | Returns | Description |
 | --- | --- | --- |
 | `GetDefaultHeight(size)` | double | Standard control height (22-36) |
-| `GetDefaultFloatingInputHeight(size)` | double | Taller input height (28-46) |
-| `GetDefaultFontSize(size)` | double | Primary font size (9-16) |
+| `GetDefaultFloatingInputHeight(size)` | double | Taller input height (36-50) |
+| `GetDefaultFontSize(size)` | double | Primary font size (10-20) |
+| `GetDefaultLineHeight(size)` | double | Primary line height (14-28) |
 | `GetDefaultHeaderFontSize(size)` | double | Large display font size (12-24) |
 | `GetDefaultPadding(size)` | Thickness | Horizontal button padding |
 | `GetDefaultCornerRadius(size)` | CornerRadius | Rounded corners (4-12) |
@@ -105,9 +106,11 @@ Specific heights for taller input controls like `DaisyNumericUpDown` and `DaisyF
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyInputFloating{Size}Height` | 28 | 34 | 38 | 42 | 46 |
+| `DaisyInputFloating{Size}Height` | 36 | 40 | 44 | 48 | 50 |
 
 ### Font Sizes
+
+The font ladders match Flowery.NET.
 
 #### Primary Font Sizes
 
@@ -115,7 +118,8 @@ Typography scale used across controls for main content.
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisySize{Size}FontSize` | 9 | 10 | 12 | 14 | 16 |
+| `DaisySize{Size}FontSize` | 10 | 12 | 14 | 18 | 20 |
+| `DaisySize{Size}LineHeight` | 14 | 16 | 20 | 24 | 28 |
 
 #### Secondary Font Sizes
 
@@ -123,7 +127,7 @@ For hint text, helper text, captions, labels (~0.8x of primary).
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisySize{Size}SecondaryFontSize` | 8 | 9 | 10 | 12 | 14 |
+| `DaisySize{Size}SecondaryFontSize` | 9 | 10 | 12 | 14 | 16 |
 
 #### Tertiary Font Sizes
 
@@ -131,7 +135,7 @@ For very small captions, counters (~0.7x of primary).
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisySize{Size}TertiaryFontSize` | 8 | 8 | 9 | 10 | 12 |
+| `DaisySize{Size}TertiaryFontSize` | 8 | 9 | 11 | 12 | 14 |
 
 #### Section Header Font Sizes
 
@@ -139,7 +143,7 @@ For section titles within pages.
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisySize{Size}SectionHeaderFontSize` | 10 | 12 | 13 | 15 | 17 |
+| `DaisySize{Size}SectionHeaderFontSize` | 12 | 14 | 16 | 20 | 22 |
 
 #### Header Font Sizes
 
@@ -147,7 +151,7 @@ For large display headings (~1.4x of primary).
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisySize{Size}HeaderFontSize` | 12 | 14 | 17 | 20 | 24 |
+| `DaisySize{Size}HeaderFontSize` | 14 | 16 | 20 | 24 | 28 |
 
 ### Corner Radius
 
@@ -183,13 +187,13 @@ Both horizontal and vertical padding (tabs don't use fixed height).
 
 ### Badge Tokens
 
-Badges use a separate, more compact scale.
+Badge text uses the primary font ladder.
 
-| Token | XS | S | M | L |
-| ----- | -- | -- | -- | -- |
-| `DaisyBadge{Size}Height` | 14 | 16 | 20 | 22 |
-| `DaisyBadge{Size}FontSize` | 8 | 9 | 10 | 12 |
-| `DaisyBadge{Size}Padding` | 4,0 | 6,0 | 8,0 | 12,0 |
+| Token | XS | S | M | L | XL |
+| ----- | -- | -- | -- | -- | --- |
+| `DaisyBadge{Size}Height` | 16 | 20 | 24 | 28 | 32 |
+| `DaisyBadge{Size}FontSize` | 10 | 12 | 14 | 18 | 20 |
+| `DaisyBadge{Size}Padding` | 4,0 | 6,0 | 8,0 | 12,0 | 16,0 |
 
 ### Card Padding
 
@@ -255,6 +259,16 @@ Radio buttons use their own outer size tokens (independent of the checkbox sizes
 | ----- | -- | -- | -- | -- | --- |
 | `DaisyRadioDot{Size}Size` | 4 | 5 | 6 | 7 | 8 |
 
+### Label Font Sizes
+
+Checkbox, radio and toggle labels use the primary font ladder.
+
+| Token | XS | S | M | L | XL |
+| ----- | -- | -- | -- | -- | --- |
+| `DaisyCheckbox{Size}FontSize` | 10 | 12 | 14 | 18 | 20 |
+| `DaisyRadio{Size}FontSize` | 10 | 12 | 14 | 18 | 20 |
+| `DaisyToggle{Size}FontSize` | 10 | 12 | 14 | 18 | 20 |
+
 ---
 
 ## Toggle Switch Sizes
@@ -307,7 +321,7 @@ Radio buttons use their own outer size tokens (independent of the checkbox sizes
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyMenu{Size}FontSize` | 9 | 10 | 12 | 13 | 15 |
+| `DaisyMenu{Size}FontSize` | 10 | 12 | 14 | 18 | 20 |
 
 ---
 
@@ -315,9 +329,9 @@ Radio buttons use their own outer size tokens (independent of the checkbox sizes
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyKbd{Size}Height` | 12 | 16 | 20 | 24 | 28 |
+| `DaisyKbd{Size}Height` | 16 | 20 | 24 | 32 | 40 |
 | `DaisyKbd{Size}Padding` | 2,0 | 3,0 | 4,0 | 6,0 | 8,0 |
-| `DaisyKbd{Size}FontSize` | 8 | 9 | 10 | 12 | 13 |
+| `DaisyKbd{Size}FontSize` | 10 | 12 | 14 | 18 | 20 |
 | `DaisyKbd{Size}CornerRadius` | 2 | 3 | 4 | 5 | 6 |
 
 ---
@@ -326,7 +340,7 @@ Radio buttons use their own outer size tokens (independent of the checkbox sizes
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyTextArea{Size}MinHeight` | 40 | 48 | 64 | 96 | 128 |
+| `DaisyTextArea{Size}MinHeight` | 48 | 60 | 80 | 120 | 160 |
 | `DaisyTextArea{Size}Padding` | 6 | 10 | 12 | 14 | 18 |
 
 ---
@@ -335,7 +349,7 @@ Radio buttons use their own outer size tokens (independent of the checkbox sizes
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyDateTimeline{Size}Height` | 48 | 56 | 64 | 80 | 104 |
+| `DaisyDateTimeline{Size}Height` | 56 | 68 | 80 | 96 | 130 |
 | `DaisyDateTimeline{Size}ItemWidth` | 48 | 56 | 64 | 80 | 96 |
 | `DaisyDateTimeline{Size}CornerRadius` | 8 | 10 | 12 | 16 | 20 |
 | `DaisyDateTimeline{Size}DayNumberFontSize` | 14 | 16 | 20 | 26 | 32 |
@@ -371,7 +385,7 @@ Tag chip text uses the shared `DaisySize{Size}FontSize` tokens. Tag-specific tok
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
 | `DaisyDivider{Size}Thickness` | 1 | 1.5 | 2 | 3 | 4 |
-| `DaisyDivider{Size}FontSize` | 9 | 10 | 12 | 14 | 16 |
+| `DaisyDivider{Size}FontSize` | 10 | 12 | 14 | 18 | 20 |
 | `DaisyDivider{Size}TextPadding` | 8 | 10 | 12 | 16 | 18 |
 | `DaisyDivider{Size}Margin` | 2 | 3 | 4 | 6 | 8 |
 

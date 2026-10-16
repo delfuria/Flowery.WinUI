@@ -274,7 +274,8 @@ namespace Flowery.Controls
 
             if (!_hasFontSizeOverride)
             {
-                SetFontSize(DaisyResourceLookup.GetDefaultFontSize(Size));
+                SetFontSize(DaisyResourceLookup.GetDouble($"DaisyCheckbox{sizeKey}FontSize",
+                    DaisyResourceLookup.GetDefaultFontSize(Size)));
             }
         }
 

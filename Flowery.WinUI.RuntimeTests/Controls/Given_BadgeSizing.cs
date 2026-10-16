@@ -20,8 +20,8 @@ namespace Flowery.WinUI.RuntimeTests.Controls
         [TestMethod]
         public async Task When_BadgeSizeChanges_AllFiveTiersGrowWithoutClipping()
         {
-            double[] fonts = [7, 9, 10, 12, 14];
-            double[] minimumHeights = [16, 16, 20, 24, 28];
+            double[] fonts = [10, 12, 14, 18, 20];
+            double[] minimumHeights = [16, 20, 24, 28, 32];
             var badge = CreateBadge();
             double previousWidth = 0, previousHeight = 0, previousTextWidth = 0, previousTextHeight = 0;
             double previousContentWidth = 0, previousContentHeight = 0;

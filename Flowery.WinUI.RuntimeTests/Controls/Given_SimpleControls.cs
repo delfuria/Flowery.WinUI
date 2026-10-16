@@ -1208,9 +1208,9 @@ namespace Flowery.WinUI.RuntimeTests.Controls
             Assert.AreEqual(DateTime.Today.AddMonths(-1), timeline.FirstDate);
             Assert.AreEqual(DateTime.Today.AddMonths(3), timeline.LastDate);
             Assert.AreEqual(DateTime.Today, timeline.SelectedDate);
-            // ItemWidth is resolved from the DaisyDateTimelineMediumItemWidth token (52)
+            // ItemWidth is resolved from the DaisyDateTimelineMediumItemWidth token (64)
             // during ApplySizing unless explicitly set.
-            Assert.AreEqual(52.0, timeline.ItemWidth);
+            Assert.AreEqual(64.0, timeline.ItemWidth);
             // ItemSpacing is resolved from the DaisyDateTimelineItemSpacing token (6)
             // during ApplySizing unless explicitly set.
             Assert.AreEqual(6.0, timeline.ItemSpacing);

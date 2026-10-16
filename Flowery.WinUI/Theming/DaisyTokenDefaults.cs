@@ -23,54 +23,54 @@ namespace Flowery.Theming
             Ensure(resources, "DaisySizeExtraSmallHeight", 24d);
 
             // ---- Floating input heights ----
-            Ensure(resources, "DaisyInputFloatingExtraLargeHeight", 48d);
-            Ensure(resources, "DaisyInputFloatingLargeHeight", 44d);
-            Ensure(resources, "DaisyInputFloatingMediumHeight", 40d);
-            Ensure(resources, "DaisyInputFloatingSmallHeight", 36d);
-            Ensure(resources, "DaisyInputFloatingExtraSmallHeight", 32d);
+            Ensure(resources, "DaisyInputFloatingExtraLargeHeight", 50d);
+            Ensure(resources, "DaisyInputFloatingLargeHeight", 48d);
+            Ensure(resources, "DaisyInputFloatingMediumHeight", 44d);
+            Ensure(resources, "DaisyInputFloatingSmallHeight", 40d);
+            Ensure(resources, "DaisyInputFloatingExtraSmallHeight", 36d);
 
             // ---- Font sizes (primary) ----
-            // Reduced ~15-20% proportional to control heights; XS floors at 9px for readability
-            Ensure(resources, "DaisySizeExtraLargeFontSize", 16d);
-            Ensure(resources, "DaisySizeLargeFontSize", 14d);
-            Ensure(resources, "DaisySizeMediumFontSize", 12d);
-            Ensure(resources, "DaisySizeSmallFontSize", 10d);
-            Ensure(resources, "DaisySizeExtraSmallFontSize", 8d);
+            // Same ladders as Flowery.NET (DaisyTokens.axaml and FlowerySizeManager.GetFontSizeForTier).
+            Ensure(resources, "DaisySizeExtraLargeFontSize", 20d);
+            Ensure(resources, "DaisySizeLargeFontSize", 18d);
+            Ensure(resources, "DaisySizeMediumFontSize", 14d);
+            Ensure(resources, "DaisySizeSmallFontSize", 12d);
+            Ensure(resources, "DaisySizeExtraSmallFontSize", 10d);
 
             // ---- Line heights (primary) ----
-            Ensure(resources, "DaisySizeExtraLargeLineHeight", 24d);
-            Ensure(resources, "DaisySizeLargeLineHeight", 20d);
-            Ensure(resources, "DaisySizeMediumLineHeight", 16d);
+            Ensure(resources, "DaisySizeExtraLargeLineHeight", 28d);
+            Ensure(resources, "DaisySizeLargeLineHeight", 24d);
+            Ensure(resources, "DaisySizeMediumLineHeight", 20d);
             Ensure(resources, "DaisySizeSmallLineHeight", 16d);
-            Ensure(resources, "DaisySizeExtraSmallLineHeight", 12d);
+            Ensure(resources, "DaisySizeExtraSmallLineHeight", 14d);
 
             // ---- Font sizes (secondary) ----
-            Ensure(resources, "DaisySizeExtraLargeSecondaryFontSize", 14d);
-            Ensure(resources, "DaisySizeLargeSecondaryFontSize", 12d);
-            Ensure(resources, "DaisySizeMediumSecondaryFontSize", 10d);
-            Ensure(resources, "DaisySizeSmallSecondaryFontSize", 9d);
-            Ensure(resources, "DaisySizeExtraSmallSecondaryFontSize", 8d);
+            Ensure(resources, "DaisySizeExtraLargeSecondaryFontSize", 16d);
+            Ensure(resources, "DaisySizeLargeSecondaryFontSize", 14d);
+            Ensure(resources, "DaisySizeMediumSecondaryFontSize", 12d);
+            Ensure(resources, "DaisySizeSmallSecondaryFontSize", 10d);
+            Ensure(resources, "DaisySizeExtraSmallSecondaryFontSize", 9d);
 
             // ---- Font sizes (tertiary) ----
-            Ensure(resources, "DaisySizeExtraLargeTertiaryFontSize", 12d);
-            Ensure(resources, "DaisySizeLargeTertiaryFontSize", 10d);
-            Ensure(resources, "DaisySizeMediumTertiaryFontSize", 9d);
-            Ensure(resources, "DaisySizeSmallTertiaryFontSize", 8d);
+            Ensure(resources, "DaisySizeExtraLargeTertiaryFontSize", 14d);
+            Ensure(resources, "DaisySizeLargeTertiaryFontSize", 12d);
+            Ensure(resources, "DaisySizeMediumTertiaryFontSize", 11d);
+            Ensure(resources, "DaisySizeSmallTertiaryFontSize", 9d);
             Ensure(resources, "DaisySizeExtraSmallTertiaryFontSize", 8d);
 
             // ---- Font sizes (section header) ----
-            Ensure(resources, "DaisySizeExtraLargeSectionHeaderFontSize", 17d);
-            Ensure(resources, "DaisySizeLargeSectionHeaderFontSize", 15d);
-            Ensure(resources, "DaisySizeMediumSectionHeaderFontSize", 13d);
-            Ensure(resources, "DaisySizeSmallSectionHeaderFontSize", 12d);
-            Ensure(resources, "DaisySizeExtraSmallSectionHeaderFontSize", 10d);
+            Ensure(resources, "DaisySizeExtraLargeSectionHeaderFontSize", 22d);
+            Ensure(resources, "DaisySizeLargeSectionHeaderFontSize", 20d);
+            Ensure(resources, "DaisySizeMediumSectionHeaderFontSize", 16d);
+            Ensure(resources, "DaisySizeSmallSectionHeaderFontSize", 14d);
+            Ensure(resources, "DaisySizeExtraSmallSectionHeaderFontSize", 12d);
 
             // ---- Font sizes (header) ----
-            Ensure(resources, "DaisySizeExtraLargeHeaderFontSize", 24d);
-            Ensure(resources, "DaisySizeLargeHeaderFontSize", 20d);
-            Ensure(resources, "DaisySizeMediumHeaderFontSize", 17d);
-            Ensure(resources, "DaisySizeSmallHeaderFontSize", 14d);
-            Ensure(resources, "DaisySizeExtraSmallHeaderFontSize", 12d);
+            Ensure(resources, "DaisySizeExtraLargeHeaderFontSize", 28d);
+            Ensure(resources, "DaisySizeLargeHeaderFontSize", 24d);
+            Ensure(resources, "DaisySizeMediumHeaderFontSize", 20d);
+            Ensure(resources, "DaisySizeSmallHeaderFontSize", 16d);
+            Ensure(resources, "DaisySizeExtraSmallHeaderFontSize", 14d);
 
             // ---- Corner radius ----
             Ensure(resources, "DaisySizeExtraLargeCornerRadius", new CornerRadius(12));
@@ -108,18 +108,18 @@ namespace Flowery.Theming
             Ensure(resources, "DaisyBadgeExtraSmallPadding", new Thickness(4, 0, 4, 0));
 
             // ---- Badge heights (sized for descenders like g, y, p) ----
-            Ensure(resources, "DaisyBadgeExtraLargeHeight", 28d);
-            Ensure(resources, "DaisyBadgeLargeHeight", 24d);
-            Ensure(resources, "DaisyBadgeMediumHeight", 20d);
-            Ensure(resources, "DaisyBadgeSmallHeight", 16d);
+            Ensure(resources, "DaisyBadgeExtraLargeHeight", 32d);
+            Ensure(resources, "DaisyBadgeLargeHeight", 28d);
+            Ensure(resources, "DaisyBadgeMediumHeight", 24d);
+            Ensure(resources, "DaisyBadgeSmallHeight", 20d);
             Ensure(resources, "DaisyBadgeExtraSmallHeight", 16d);
 
             // ---- Badge font sizes ----
-            Ensure(resources, "DaisyBadgeExtraLargeFontSize", 14d);
-            Ensure(resources, "DaisyBadgeLargeFontSize", 12d);
-            Ensure(resources, "DaisyBadgeMediumFontSize", 10d);
-            Ensure(resources, "DaisyBadgeSmallFontSize", 9d);
-            Ensure(resources, "DaisyBadgeExtraSmallFontSize", 7d);
+            Ensure(resources, "DaisyBadgeExtraLargeFontSize", 20d);
+            Ensure(resources, "DaisyBadgeLargeFontSize", 18d);
+            Ensure(resources, "DaisyBadgeMediumFontSize", 14d);
+            Ensure(resources, "DaisyBadgeSmallFontSize", 12d);
+            Ensure(resources, "DaisyBadgeExtraSmallFontSize", 10d);
 
             // ---- Card padding ----
             Ensure(resources, "DaisyCardLargePadding", new Thickness(24));
@@ -166,6 +166,25 @@ namespace Flowery.Theming
             Ensure(resources, "DaisyRadioMediumSize", 12d);
             Ensure(resources, "DaisyRadioSmallSize", 10d);
             Ensure(resources, "DaisyRadioExtraSmallSize", 8d);
+
+            // ---- Checkbox, radio and toggle label font sizes (Primary ladder) ----
+            Ensure(resources, "DaisyCheckboxExtraLargeFontSize", 20d);
+            Ensure(resources, "DaisyCheckboxLargeFontSize", 18d);
+            Ensure(resources, "DaisyCheckboxMediumFontSize", 14d);
+            Ensure(resources, "DaisyCheckboxSmallFontSize", 12d);
+            Ensure(resources, "DaisyCheckboxExtraSmallFontSize", 10d);
+
+            Ensure(resources, "DaisyRadioExtraLargeFontSize", 20d);
+            Ensure(resources, "DaisyRadioLargeFontSize", 18d);
+            Ensure(resources, "DaisyRadioMediumFontSize", 14d);
+            Ensure(resources, "DaisyRadioSmallFontSize", 12d);
+            Ensure(resources, "DaisyRadioExtraSmallFontSize", 10d);
+
+            Ensure(resources, "DaisyToggleExtraLargeFontSize", 20d);
+            Ensure(resources, "DaisyToggleLargeFontSize", 18d);
+            Ensure(resources, "DaisyToggleMediumFontSize", 14d);
+            Ensure(resources, "DaisyToggleSmallFontSize", 12d);
+            Ensure(resources, "DaisyToggleExtraSmallFontSize", 10d);
 
             // ---- Toggle switch sizes ----
             Ensure(resources, "DaisyToggleExtraLargeWidth", 32d);
@@ -247,18 +266,18 @@ namespace Flowery.Theming
             Ensure(resources, "DaisyMenuSmallPadding", new Thickness(8, 4, 8, 4));
             Ensure(resources, "DaisyMenuExtraSmallPadding", new Thickness(6, 3, 6, 3));
 
-            Ensure(resources, "DaisyMenuExtraLargeFontSize", 15d);
-            Ensure(resources, "DaisyMenuLargeFontSize", 13d);
-            Ensure(resources, "DaisyMenuMediumFontSize", 12d);
-            Ensure(resources, "DaisyMenuSmallFontSize", 10d);
-            Ensure(resources, "DaisyMenuExtraSmallFontSize", 9d);
+            Ensure(resources, "DaisyMenuExtraLargeFontSize", 20d);
+            Ensure(resources, "DaisyMenuLargeFontSize", 18d);
+            Ensure(resources, "DaisyMenuMediumFontSize", 14d);
+            Ensure(resources, "DaisyMenuSmallFontSize", 12d);
+            Ensure(resources, "DaisyMenuExtraSmallFontSize", 10d);
 
             // ---- Kbd sizing ----
-            Ensure(resources, "DaisyKbdExtraLargeHeight", 28d);
-            Ensure(resources, "DaisyKbdLargeHeight", 24d);
-            Ensure(resources, "DaisyKbdMediumHeight", 20d);
+            Ensure(resources, "DaisyKbdExtraLargeHeight", 40d);
+            Ensure(resources, "DaisyKbdLargeHeight", 32d);
+            Ensure(resources, "DaisyKbdMediumHeight", 24d);
             Ensure(resources, "DaisyKbdSmallHeight", 20d);
-            Ensure(resources, "DaisyKbdExtraSmallHeight", 20d);
+            Ensure(resources, "DaisyKbdExtraSmallHeight", 16d);
 
             Ensure(resources, "DaisyKbdExtraLargePadding", new Thickness(8, 0, 8, 0));
             Ensure(resources, "DaisyKbdLargePadding", new Thickness(6, 0, 6, 0));
@@ -266,11 +285,11 @@ namespace Flowery.Theming
             Ensure(resources, "DaisyKbdSmallPadding", new Thickness(3, 0, 3, 0));
             Ensure(resources, "DaisyKbdExtraSmallPadding", new Thickness(2, 0, 2, 0));
 
-            Ensure(resources, "DaisyKbdExtraLargeFontSize", 13d);
-            Ensure(resources, "DaisyKbdLargeFontSize", 12d);
-            Ensure(resources, "DaisyKbdMediumFontSize", 10d);
-            Ensure(resources, "DaisyKbdSmallFontSize", 7d);
-            Ensure(resources, "DaisyKbdExtraSmallFontSize", 6d);
+            Ensure(resources, "DaisyKbdExtraLargeFontSize", 20d);
+            Ensure(resources, "DaisyKbdLargeFontSize", 18d);
+            Ensure(resources, "DaisyKbdMediumFontSize", 14d);
+            Ensure(resources, "DaisyKbdSmallFontSize", 12d);
+            Ensure(resources, "DaisyKbdExtraSmallFontSize", 10d);
 
             Ensure(resources, "DaisyKbdExtraLargeCornerRadius", new CornerRadius(6));
             Ensure(resources, "DaisyKbdLargeCornerRadius", new CornerRadius(5));
@@ -279,11 +298,11 @@ namespace Flowery.Theming
             Ensure(resources, "DaisyKbdExtraSmallCornerRadius", new CornerRadius(2));
 
             // ---- TextArea sizing ----
-            Ensure(resources, "DaisyTextAreaExtraLargeMinHeight", 128d);
-            Ensure(resources, "DaisyTextAreaLargeMinHeight", 96d);
-            Ensure(resources, "DaisyTextAreaMediumMinHeight", 64d);
-            Ensure(resources, "DaisyTextAreaSmallMinHeight", 48d);
-            Ensure(resources, "DaisyTextAreaExtraSmallMinHeight", 40d);
+            Ensure(resources, "DaisyTextAreaExtraLargeMinHeight", 160d);
+            Ensure(resources, "DaisyTextAreaLargeMinHeight", 120d);
+            Ensure(resources, "DaisyTextAreaMediumMinHeight", 80d);
+            Ensure(resources, "DaisyTextAreaSmallMinHeight", 60d);
+            Ensure(resources, "DaisyTextAreaExtraSmallMinHeight", 48d);
 
             Ensure(resources, "DaisyTextAreaExtraLargePadding", new Thickness(18));
             Ensure(resources, "DaisyTextAreaLargePadding", new Thickness(14));
@@ -296,17 +315,17 @@ namespace Flowery.Theming
             Ensure(resources, "DaisyTextAreaVerticalContentAlignment", VerticalAlignment.Top);
 
             // ---- DateTimeline sizing ----
-            Ensure(resources, "DaisyDateTimelineExtraLargeHeight", 76d);
-            Ensure(resources, "DaisyDateTimelineLargeHeight", 64d);
-            Ensure(resources, "DaisyDateTimelineMediumHeight", 52d);
-            Ensure(resources, "DaisyDateTimelineSmallHeight", 44d);
-            Ensure(resources, "DaisyDateTimelineExtraSmallHeight", 36d);
+            Ensure(resources, "DaisyDateTimelineExtraLargeHeight", 130d);
+            Ensure(resources, "DaisyDateTimelineLargeHeight", 96d);
+            Ensure(resources, "DaisyDateTimelineMediumHeight", 80d);
+            Ensure(resources, "DaisyDateTimelineSmallHeight", 68d);
+            Ensure(resources, "DaisyDateTimelineExtraSmallHeight", 56d);
 
-            Ensure(resources, "DaisyDateTimelineExtraLargeItemWidth", 76d);
-            Ensure(resources, "DaisyDateTimelineLargeItemWidth", 64d);
-            Ensure(resources, "DaisyDateTimelineMediumItemWidth", 52d);
-            Ensure(resources, "DaisyDateTimelineSmallItemWidth", 44d);
-            Ensure(resources, "DaisyDateTimelineExtraSmallItemWidth", 36d);
+            Ensure(resources, "DaisyDateTimelineExtraLargeItemWidth", 96d);
+            Ensure(resources, "DaisyDateTimelineLargeItemWidth", 80d);
+            Ensure(resources, "DaisyDateTimelineMediumItemWidth", 64d);
+            Ensure(resources, "DaisyDateTimelineSmallItemWidth", 56d);
+            Ensure(resources, "DaisyDateTimelineExtraSmallItemWidth", 48d);
 
             Ensure(resources, "DaisyDateTimelineItemSpacing", 6d);
 
@@ -322,17 +341,17 @@ namespace Flowery.Theming
             Ensure(resources, "DaisyDateTimelineSmallCornerRadius", new CornerRadius(8));
             Ensure(resources, "DaisyDateTimelineExtraSmallCornerRadius", new CornerRadius(6));
 
-            Ensure(resources, "DaisyDateTimelineExtraLargeDayNumberFontSize", 16d);
-            Ensure(resources, "DaisyDateTimelineLargeDayNumberFontSize", 14d);
-            Ensure(resources, "DaisyDateTimelineMediumDayNumberFontSize", 12d);
-            Ensure(resources, "DaisyDateTimelineSmallDayNumberFontSize", 10d);
-            Ensure(resources, "DaisyDateTimelineExtraSmallDayNumberFontSize", 8d);
+            Ensure(resources, "DaisyDateTimelineExtraLargeDayNumberFontSize", 32d);
+            Ensure(resources, "DaisyDateTimelineLargeDayNumberFontSize", 26d);
+            Ensure(resources, "DaisyDateTimelineMediumDayNumberFontSize", 20d);
+            Ensure(resources, "DaisyDateTimelineSmallDayNumberFontSize", 16d);
+            Ensure(resources, "DaisyDateTimelineExtraSmallDayNumberFontSize", 14d);
 
-            Ensure(resources, "DaisyDateTimelineExtraLargeDayNameFontSize", 14d);
-            Ensure(resources, "DaisyDateTimelineLargeDayNameFontSize", 12d);
+            Ensure(resources, "DaisyDateTimelineExtraLargeDayNameFontSize", 15d);
+            Ensure(resources, "DaisyDateTimelineLargeDayNameFontSize", 13d);
             Ensure(resources, "DaisyDateTimelineMediumDayNameFontSize", 10d);
-            Ensure(resources, "DaisyDateTimelineSmallDayNameFontSize", 9d);
-            Ensure(resources, "DaisyDateTimelineExtraSmallDayNameFontSize", 8d);
+            Ensure(resources, "DaisyDateTimelineSmallDayNameFontSize", 10d);
+            Ensure(resources, "DaisyDateTimelineExtraSmallDayNameFontSize", 9d);
 
             Ensure(resources, "DaisyDateTimelineExtraLargeMonthNameFontSize", 14d);
             Ensure(resources, "DaisyDateTimelineLargeMonthNameFontSize", 12d);
@@ -340,11 +359,11 @@ namespace Flowery.Theming
             Ensure(resources, "DaisyDateTimelineSmallMonthNameFontSize", 9d);
             Ensure(resources, "DaisyDateTimelineExtraSmallMonthNameFontSize", 8d);
 
-            Ensure(resources, "DaisyDateTimelineExtraLargeHeaderFontSize", 18d);
-            Ensure(resources, "DaisyDateTimelineLargeHeaderFontSize", 16d);
-            Ensure(resources, "DaisyDateTimelineMediumHeaderFontSize", 14d);
-            Ensure(resources, "DaisyDateTimelineSmallHeaderFontSize", 12d);
-            Ensure(resources, "DaisyDateTimelineExtraSmallHeaderFontSize", 10d);
+            Ensure(resources, "DaisyDateTimelineExtraLargeHeaderFontSize", 20d);
+            Ensure(resources, "DaisyDateTimelineLargeHeaderFontSize", 18d);
+            Ensure(resources, "DaisyDateTimelineMediumHeaderFontSize", 16d);
+            Ensure(resources, "DaisyDateTimelineSmallHeaderFontSize", 14d);
+            Ensure(resources, "DaisyDateTimelineExtraSmallHeaderFontSize", 12d);
 
             // ---- Large display tokens ----
             Ensure(resources, "LargeDisplayFontSize", 36d);
@@ -399,11 +418,11 @@ namespace Flowery.Theming
 
             // ---- Divider sizing ----
             // Divider text font size
-            Ensure(resources, "DaisyDividerExtraLargeFontSize", 16d);
-            Ensure(resources, "DaisyDividerLargeFontSize", 14d);
-            Ensure(resources, "DaisyDividerMediumFontSize", 12d);
-            Ensure(resources, "DaisyDividerSmallFontSize", 10d);
-            Ensure(resources, "DaisyDividerExtraSmallFontSize", 9d);
+            Ensure(resources, "DaisyDividerExtraLargeFontSize", 20d);
+            Ensure(resources, "DaisyDividerLargeFontSize", 18d);
+            Ensure(resources, "DaisyDividerMediumFontSize", 14d);
+            Ensure(resources, "DaisyDividerSmallFontSize", 12d);
+            Ensure(resources, "DaisyDividerExtraSmallFontSize", 10d);
 
             // Divider text padding (horizontal divider: left/right, vertical: top/bottom)
             Ensure(resources, "DaisyDividerExtraLargeTextPadding", 18d);
