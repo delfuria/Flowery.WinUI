@@ -6,6 +6,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2026-10-16
+
+### Fixed
+
+- `DaisyColorPickerDialog` no longer cuts off its right side in windows that are wide but not very tall. The general dialog sizing ties the width to the window height (about 490 px in a 1392×943 window), which was too narrow for the color wheel, palette and color values side by side; the dialog now widens until its content fits, up to the window width.
+
 ## [1.3.1] - 2026-10-16
 
 ### Changed

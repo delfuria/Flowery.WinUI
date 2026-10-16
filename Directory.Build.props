@@ -4,9 +4,9 @@
     <BaseOutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\</BaseOutputPath>
     <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <OutputPath>$(BaseOutputPath)$(MSBuildProjectName)\</OutputPath>
-    <Version Condition="'$(Version)' == ''">1.3.1</Version>
-    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">1.3.1.0</AssemblyVersion>
-    <FileVersion Condition="'$(FileVersion)' == ''">1.3.1.0</FileVersion>
+    <Version Condition="'$(Version)' == ''">1.3.2</Version>
+    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">1.3.2.0</AssemblyVersion>
+    <FileVersion Condition="'$(FileVersion)' == ''">1.3.2.0</FileVersion>
     <Authors Condition="'$(Authors)' == ''">tobitege</Authors>
     <PackageProjectUrl Condition="'$(PackageProjectUrl)' == ''">https://github.com/tobitege/Flowery.WinUI</PackageProjectUrl>
     <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/tobitege/Flowery.WinUI</RepositoryUrl>

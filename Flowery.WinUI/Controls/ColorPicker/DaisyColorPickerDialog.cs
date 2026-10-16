@@ -118,6 +118,7 @@ namespace Flowery.Controls.ColorPicker
         private readonly DaisyColorEditor _colorEditor;
         private readonly FrameworkElement _colorEditorSection;
         private readonly FrameworkElement _leftPanel;
+        private readonly ScrollViewer _contentScroller;
         private readonly Border _colorPreview;
         private readonly Border _originalColorPreview;
         private readonly TextBlock _originalColorHexText;
@@ -301,7 +302,10 @@ namespace Flowery.Controls.ColorPicker
                 out _leftPanel,
                 out _screenColorPickerSection,
                 out _colorGridSection,
-                out _colorEditorSection);
+                out _colorEditorSection,
+                out _contentScroller);
+            _contentScroller.SizeChanged += (_, _) => FitWidthToContent();
+            ((FrameworkElement)_contentScroller.Content).SizeChanged += (_, _) => FitWidthToContent();
 
             CustomColors = ColorCollection.CreateCustom(ColorGridColumns);
             ApplyLayoutOptions();
@@ -542,6 +546,22 @@ namespace Flowery.Controls.ColorPicker
             _redoButton.IsEnabled = _colorHistory.CanRedo;
         }
 
+        /// <summary>
+        /// Smart sizing aims at narrow forms; widen the dialog until the side-by-side layout fits, within the window.
+        /// </summary>
+        private void FitWidthToContent()
+        {
+            if (_xamlRoot == null || _contentScroller.ScrollableWidth < 1) return;
+
+            var width = Math.Ceiling(DialogWidth + _contentScroller.ScrollableWidth);
+            var available = _xamlRoot.Size.Width - DialogMargin;
+            if (available > 0) width = Math.Min(width, available);
+            if (width <= DialogWidth) return;
+
+            DialogWidth = width;
+            SetDialogSize(width, double.NaN);
+        }
+
         private void OnIsOpenChanged(DependencyObject sender, DependencyProperty dp)
         {
             // Escape and outside clicks close the modal; treat that as Cancel.
@@ -623,7 +643,8 @@ namespace Flowery.Controls.ColorPicker
             out FrameworkElement leftPanel,
             out FrameworkElement screenSection,
             out FrameworkElement gridSection,
-            out FrameworkElement editorSection)
+            out FrameworkElement editorSection,
+            out ScrollViewer contentScroller)
         {
             var title = new TextBlock
             {
@@ -693,19 +714,21 @@ namespace Flowery.Controls.ColorPicker
 
             var root = new StackPanel { Padding = new Thickness(16) };
             root.Children.Add(title);
-            root.Children.Add(new ScrollViewer
+            var scroller = new ScrollViewer
             {
                 Content = main,
                 HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
                 VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
                 HorizontalScrollMode = ScrollMode.Auto
-            });
+            };
+            root.Children.Add(scroller);
             root.Children.Add(footer);
 
             leftPanel = left;
             screenSection = screen;
             gridSection = grid;
             editorSection = editor;
+            contentScroller = scroller;
             return root;
         }
     }
