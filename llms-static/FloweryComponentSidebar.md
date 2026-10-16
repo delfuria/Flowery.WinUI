@@ -32,7 +32,7 @@ FloweryComponentSidebar is a high-performance, navigational sidebar designed for
 The sidebar uses a hierarchy of model classes that support localizable display names via `FloweryLocalization`:
 
 - **`SidebarCategory`**: Contains `Name` (key), `IconKey`, `IsExpanded`, and `Items`.
-- **`SidebarItem`**: Basic clickable item. Includes `Id`, `Name` (key), `TabHeader`, `Badge`, and `IsFavorite`.
+- **`SidebarItem`**: Basic clickable item. Includes `Id`, `Name` (key), `TabHeader`, `Badge`, `IsFavorite`, and an optional `ControlName` (control class such as `DaisyTagPicker`; the search matches it in addition to the translated name, ignoring case, spaces and punctuation).
 - **Special Items**:
   - `SidebarLanguageSelectorItem`: Renders a localized language dropdown.
   - `SidebarThemeSelectorItem`: Renders a themed color/theme dropdown.

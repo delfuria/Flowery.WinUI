@@ -12,6 +12,20 @@ namespace Flowery.WinUI.Gallery
     /// </summary>
     public static class GallerySidebarData
     {
+        private static readonly Lazy<Dictionary<string, SidebarItem>> _itemsById = new(() =>
+            CreateCategories()
+                .SelectMany(category => category.Items)
+                .GroupBy(item => item.Id, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase));
+
+        /// <summary>
+        /// Finds the sidebar item with the given Id (e.g. a demo page's SectionId), or null if there is none.
+        /// </summary>
+        public static SidebarItem? FindItem(string? id)
+        {
+            return !string.IsNullOrEmpty(id) && _itemsById.Value.TryGetValue(id, out var item) ? item : null;
+        }
+
         /// <summary>
         /// Creates the default categories for the Gallery showcase sidebar.
         /// </summary>
@@ -39,17 +53,17 @@ namespace Flowery.WinUI.Gallery
                     IconKey = "DaisyIconActions",
                     Items = new()
                     {
-                        new() { Id = "button", Name = "Sidebar_Button", TabHeader = "Sidebar_Actions" },
-                        new() { Id = "button-group", Name = "Sidebar_ButtonGroup", TabHeader = "Sidebar_Actions" },
+                        new() { Id = "button", Name = "Sidebar_Button", ControlName = "DaisyButton", TabHeader = "Sidebar_Actions" },
+                        new() { Id = "button-group", Name = "Sidebar_ButtonGroup", ControlName = "DaisyButtonGroup", TabHeader = "Sidebar_Actions" },
                         new() { Id = "figma-comment", Name = "Sidebar_FigmaComment", TabHeader = "Sidebar_Actions" },
-                        new() { Id = "copybutton", Name = "Sidebar_CopyButton", TabHeader = "Sidebar_Actions" },
+                        new() { Id = "copybutton", Name = "Sidebar_CopyButton", ControlName = "DaisyCopyButton", TabHeader = "Sidebar_Actions" },
                         new() { Id = "dropdown", Name = "Sidebar_Dropdown", TabHeader = "Sidebar_Actions" },
-                        new() { Id = "dropdownmenu", Name = "Sidebar_DropdownMenu", TabHeader = "Sidebar_Actions" },
-                        new() { Id = "fab", Name = "Sidebar_FAB", TabHeader = "Sidebar_Actions" },
-                        new() { Id = "popover", Name = "Sidebar_Popover", TabHeader = "Sidebar_Actions" },
-                        new() { Id = "modal", Name = "Sidebar_Modal", TabHeader = "Sidebar_Actions" },
+                        new() { Id = "dropdownmenu", Name = "Sidebar_DropdownMenu", ControlName = "DaisyDropdown", TabHeader = "Sidebar_Actions" },
+                        new() { Id = "fab", Name = "Sidebar_FAB", ControlName = "DaisyFab", TabHeader = "Sidebar_Actions" },
+                        new() { Id = "popover", Name = "Sidebar_Popover", ControlName = "DaisyPopover", TabHeader = "Sidebar_Actions" },
+                        new() { Id = "modal", Name = "Sidebar_Modal", ControlName = "DaisyModal", TabHeader = "Sidebar_Actions" },
                         new() { Id = "modal-radii", Name = "Sidebar_ModalRadii", TabHeader = "Sidebar_Actions" },
-                        new() { Id = "swap", Name = "Sidebar_Swap", TabHeader = "Sidebar_Actions" }
+                        new() { Id = "swap", Name = "Sidebar_Swap", ControlName = "DaisySwap", TabHeader = "Sidebar_Actions" }
                     }
                 },
                 new()
@@ -58,14 +72,14 @@ namespace Flowery.WinUI.Gallery
                     IconKey = "DaisyIconCard",
                     Items = new()
                     {
-                        new() { Id = "card", Name = "Sidebar_Card", TabHeader = "Sidebar_Cards" },
+                        new() { Id = "card", Name = "Sidebar_Card", ControlName = "DaisyCard", TabHeader = "Sidebar_Cards" },
                         new() { Id = "card-stack", Name = "Sidebar_CardStack", TabHeader = "Sidebar_Cards" },
-                        new() { Id = "expandable-cards", Name = "Showcase_ExpandableCards_Title", TabHeader = "Sidebar_Cards" },
-                        new() { Id = "patterned-card", Name = "Sidebar_PatternedCard", TabHeader = "Sidebar_Cards" },
-                        new() { Id = "glass-card", Name = "Sidebar_GlassCard", TabHeader = "Sidebar_Cards" },
-                        new() { Id = "daisyglass-simulated", Name = "Sidebar_DaisyGlassSimulated", TabHeader = "Sidebar_Cards" },
-                        new() { Id = "daisyglass-bitmap-capture", Name = "Sidebar_DaisyGlassBitmapCapture", TabHeader = "Sidebar_Cards" },
-                        new() { Id = "daisyglass-full-width", Name = "Sidebar_DaisyGlassFullWidth", TabHeader = "Sidebar_Cards" }
+                        new() { Id = "expandable-cards", Name = "Showcase_ExpandableCards_Title", ControlName = "DaisyExpandableCard", TabHeader = "Sidebar_Cards" },
+                        new() { Id = "patterned-card", Name = "Sidebar_PatternedCard", ControlName = "DaisyPatternedCard", TabHeader = "Sidebar_Cards" },
+                        new() { Id = "glass-card", Name = "Sidebar_GlassCard", ControlName = "DaisyCard", TabHeader = "Sidebar_Cards" },
+                        new() { Id = "daisyglass-simulated", Name = "Sidebar_DaisyGlassSimulated", ControlName = "DaisyGlass", TabHeader = "Sidebar_Cards" },
+                        new() { Id = "daisyglass-bitmap-capture", Name = "Sidebar_DaisyGlassBitmapCapture", ControlName = "DaisyGlass", TabHeader = "Sidebar_Cards" },
+                        new() { Id = "daisyglass-full-width", Name = "Sidebar_DaisyGlassFullWidth", ControlName = "DaisyGlass", TabHeader = "Sidebar_Cards" }
                     }
                 },
                 new()
@@ -74,7 +88,7 @@ namespace Flowery.WinUI.Gallery
                     IconKey = "DaisyIconRepost",
                     Items = new()
                     {
-                        new() { Id = "carousel", Name = "Sidebar_Carousel", TabHeader = "Sidebar_Carousel" }
+                        new() { Id = "carousel", Name = "Sidebar_Carousel", ControlName = "DaisyCarousel", TabHeader = "Sidebar_Carousel" }
                     }
                 },
                 new()
@@ -95,23 +109,23 @@ namespace Flowery.WinUI.Gallery
                     IconKey = "DaisyIconDataDisplay",
                     Items = new()
                     {
-                        new() { Id = "accordion", Name = "Sidebar_Accordion", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "animatednumber", Name = "Sidebar_AnimatedNumber", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "avatar", Name = "Sidebar_Avatar", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "badge", Name = "Sidebar_Badge", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "chat-bubble", Name = "Sidebar_ChatBubble", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "collapse", Name = "Sidebar_Collapse", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "contributiongraph", Name = "Sidebar_ContributionGraph", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "clock", Name = "Sidebar_Clock", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "countdown", Name = "Sidebar_Countdown", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "diff", Name = "Sidebar_Diff", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "hover-gallery", Name = "Sidebar_HoverGallery", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "kbd", Name = "Sidebar_Kbd", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "list", Name = "Sidebar_List", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "numberflow", Name = "Sidebar_NumberFlow", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "stat", Name = "Sidebar_Stat", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "table", Name = "Sidebar_Table", TabHeader = "Sidebar_DataDisplay" },
-                        new() { Id = "text-rotate", Name = "Sidebar_TextRotate", TabHeader = "Sidebar_DataDisplay" }
+                        new() { Id = "accordion", Name = "Sidebar_Accordion", ControlName = "DaisyAccordion", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "animatednumber", Name = "Sidebar_AnimatedNumber", ControlName = "DaisyAnimatedNumber", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "avatar", Name = "Sidebar_Avatar", ControlName = "DaisyAvatar", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "badge", Name = "Sidebar_Badge", ControlName = "DaisyBadge", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "chat-bubble", Name = "Sidebar_ChatBubble", ControlName = "DaisyChatBubble", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "collapse", Name = "Sidebar_Collapse", ControlName = "DaisyCollapse", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "contributiongraph", Name = "Sidebar_ContributionGraph", ControlName = "DaisyContributionGraph", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "clock", Name = "Sidebar_Clock", ControlName = "DaisyClock", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "countdown", Name = "Sidebar_Countdown", ControlName = "DaisyCountdown", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "diff", Name = "Sidebar_Diff", ControlName = "DaisyDiff", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "hover-gallery", Name = "Sidebar_HoverGallery", ControlName = "DaisyHoverGallery", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "kbd", Name = "Sidebar_Kbd", ControlName = "DaisyKbd", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "list", Name = "Sidebar_List", ControlName = "DaisyList", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "numberflow", Name = "Sidebar_NumberFlow", ControlName = "DaisyNumberFlow", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "stat", Name = "Sidebar_Stat", ControlName = "DaisyStat", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "table", Name = "Sidebar_Table", ControlName = "DaisyTable", TabHeader = "Sidebar_DataDisplay" },
+                        new() { Id = "text-rotate", Name = "Sidebar_TextRotate", ControlName = "DaisyTextRotate", TabHeader = "Sidebar_DataDisplay" }
                     }
                 },
                 new()
@@ -120,8 +134,8 @@ namespace Flowery.WinUI.Gallery
                     IconKey = "DaisyIconDateDisplay",
                     Items = new()
                     {
-                        new() { Id = "date-timeline", Name = "Sidebar_DateTimeline", TabHeader = "Sidebar_DateDisplay" },
-                        new() { Id = "timeline", Name = "Sidebar_Timeline", TabHeader = "Sidebar_DateDisplay" }
+                        new() { Id = "date-timeline", Name = "Sidebar_DateTimeline", ControlName = "DaisyDateTimeline", TabHeader = "Sidebar_DateDisplay" },
+                        new() { Id = "timeline", Name = "Sidebar_Timeline", ControlName = "DaisyTimeline", TabHeader = "Sidebar_DateDisplay" }
                     }
                 },
                 new()
@@ -130,22 +144,22 @@ namespace Flowery.WinUI.Gallery
                     IconKey = "DaisyIconDataInput",
                     Items = new()
                     {
-                        new() { Id = "checkbox", Name = "Sidebar_Checkbox", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "file-input", Name = "Sidebar_FileInput", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "input", Name = "Sidebar_Input", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "calendar-date-picker", Name = "Sidebar_CalendarDatePicker", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "mask-input", Name = "Sidebar_MaskInput", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "numericupdown", Name = "Sidebar_NumericUpDown", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "otpinput", Name = "Sidebar_OtpInput", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "passwordbox", Name = "Sidebar_PasswordBox", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "radio", Name = "Sidebar_Radio", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "range", Name = "Sidebar_Range", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "rating", Name = "Sidebar_Rating", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "select", Name = "Sidebar_Select", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "slide-to-confirm", Name = "Sidebar_SlideToConfirm", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "tagpicker", Name = "Sidebar_TagPicker", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "textarea", Name = "Sidebar_TextArea", TabHeader = "Sidebar_DataInput" },
-                        new() { Id = "toggle", Name = "Sidebar_Toggle", TabHeader = "Sidebar_DataInput" }
+                        new() { Id = "checkbox", Name = "Sidebar_Checkbox", ControlName = "DaisyCheckBox", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "file-input", Name = "Sidebar_FileInput", ControlName = "DaisyFileInput", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "input", Name = "Sidebar_Input", ControlName = "DaisyInput", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "calendar-date-picker", Name = "Sidebar_CalendarDatePicker", ControlName = "DaisyCalendarDatePicker", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "mask-input", Name = "Sidebar_MaskInput", ControlName = "DaisyMaskInput", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "numericupdown", Name = "Sidebar_NumericUpDown", ControlName = "DaisyNumericUpDown", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "otpinput", Name = "Sidebar_OtpInput", ControlName = "DaisyOtpInput", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "passwordbox", Name = "Sidebar_PasswordBox", ControlName = "DaisyPasswordBox", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "radio", Name = "Sidebar_Radio", ControlName = "DaisyRadio", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "range", Name = "Sidebar_Range", ControlName = "DaisyRange", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "rating", Name = "Sidebar_Rating", ControlName = "DaisyRating", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "select", Name = "Sidebar_Select", ControlName = "DaisySelect", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "slide-to-confirm", Name = "Sidebar_SlideToConfirm", ControlName = "DaisySlideToConfirm", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "tagpicker", Name = "Sidebar_TagPicker", ControlName = "DaisyTagPicker", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "textarea", Name = "Sidebar_TextArea", ControlName = "DaisyTextArea", TabHeader = "Sidebar_DataInput" },
+                        new() { Id = "toggle", Name = "Sidebar_Toggle", ControlName = "DaisyToggle", TabHeader = "Sidebar_DataInput" }
                     }
                 },
                 new()
@@ -154,7 +168,7 @@ namespace Flowery.WinUI.Gallery
                     IconKey = "DaisyIconDivider",
                     Items = new()
                     {
-                        new() { Id = "divider", Name = "Sidebar_DividerItem", TabHeader = "Sidebar_Divider" }
+                        new() { Id = "divider", Name = "Sidebar_DividerItem", ControlName = "DaisyDivider", TabHeader = "Sidebar_Divider" }
                     }
                 },
                 new()
@@ -163,14 +177,14 @@ namespace Flowery.WinUI.Gallery
                     IconKey = "DaisyIconFeedback",
                     Items = new()
                     {
-                        new() { Id = "alert", Name = "Sidebar_Alert", TabHeader = "Sidebar_Feedback" },
-                        new() { Id = "loading", Name = "Sidebar_Loading", TabHeader = "Sidebar_Feedback" },
-                        new() { Id = "progress", Name = "Sidebar_Progress", TabHeader = "Sidebar_Feedback" },
-                        new() { Id = "radial-progress", Name = "Sidebar_RadialProgress", TabHeader = "Sidebar_Feedback" },
-                        new() { Id = "status", Name = "Sidebar_Status", TabHeader = "Sidebar_Feedback" },
-                        new() { Id = "skeleton", Name = "Sidebar_Skeleton", TabHeader = "Sidebar_Feedback" },
-                        new() { Id = "toast", Name = "Sidebar_Toast", TabHeader = "Sidebar_Feedback" },
-                        new() { Id = "tooltip", Name = "Sidebar_Tooltip", TabHeader = "Sidebar_Feedback" }
+                        new() { Id = "alert", Name = "Sidebar_Alert", ControlName = "DaisyAlert", TabHeader = "Sidebar_Feedback" },
+                        new() { Id = "loading", Name = "Sidebar_Loading", ControlName = "DaisyLoading", TabHeader = "Sidebar_Feedback" },
+                        new() { Id = "progress", Name = "Sidebar_Progress", ControlName = "DaisyProgress", TabHeader = "Sidebar_Feedback" },
+                        new() { Id = "radial-progress", Name = "Sidebar_RadialProgress", ControlName = "DaisyRadialProgress", TabHeader = "Sidebar_Feedback" },
+                        new() { Id = "status", Name = "Sidebar_Status", ControlName = "DaisyStatusIndicator", TabHeader = "Sidebar_Feedback" },
+                        new() { Id = "skeleton", Name = "Sidebar_Skeleton", ControlName = "DaisySkeleton", TabHeader = "Sidebar_Feedback" },
+                        new() { Id = "toast", Name = "Sidebar_Toast", ControlName = "DaisyToast", TabHeader = "Sidebar_Feedback" },
+                        new() { Id = "tooltip", Name = "Sidebar_Tooltip", ControlName = "DaisyTooltip", TabHeader = "Sidebar_Feedback" }
                     }
                 },
                 new()
@@ -179,14 +193,14 @@ namespace Flowery.WinUI.Gallery
                     IconKey = "DaisyIconLayout",
                     Items = new()
                     {
-                        new() { Id = "drawer", Name = "Sidebar_Drawer", TabHeader = "Sidebar_Layout" },
-                        new() { Id = "hero", Name = "Sidebar_Hero", TabHeader = "Sidebar_Layout" },
-                        new() { Id = "indicator", Name = "Sidebar_Indicator", TabHeader = "Sidebar_Layout" },
-                        new() { Id = "join", Name = "Sidebar_Join", TabHeader = "Sidebar_Layout" },
-                        new() { Id = "mask", Name = "Sidebar_Mask", TabHeader = "Sidebar_Layout" },
-                        new() { Id = "mockup", Name = "Sidebar_Mockup", TabHeader = "Sidebar_Layout" },
-                        new() { Id = "resizablecolumns", Name = "Sidebar_ResizableColumns", TabHeader = "Sidebar_Layout" },
-                        new() { Id = "stack", Name = "Sidebar_Stack", TabHeader = "Sidebar_Layout" }
+                        new() { Id = "drawer", Name = "Sidebar_Drawer", ControlName = "DaisyDrawer", TabHeader = "Sidebar_Layout" },
+                        new() { Id = "hero", Name = "Sidebar_Hero", ControlName = "DaisyHero", TabHeader = "Sidebar_Layout" },
+                        new() { Id = "indicator", Name = "Sidebar_Indicator", ControlName = "DaisyIndicator", TabHeader = "Sidebar_Layout" },
+                        new() { Id = "join", Name = "Sidebar_Join", ControlName = "DaisyJoin", TabHeader = "Sidebar_Layout" },
+                        new() { Id = "mask", Name = "Sidebar_Mask", ControlName = "DaisyMask", TabHeader = "Sidebar_Layout" },
+                        new() { Id = "mockup", Name = "Sidebar_Mockup", ControlName = "DaisyMockup", TabHeader = "Sidebar_Layout" },
+                        new() { Id = "resizablecolumns", Name = "Sidebar_ResizableColumns", ControlName = "DaisyResizableColumnsHost", TabHeader = "Sidebar_Layout" },
+                        new() { Id = "stack", Name = "Sidebar_Stack", ControlName = "DaisyStack", TabHeader = "Sidebar_Layout" }
                     }
                 },
                 new()
@@ -195,14 +209,14 @@ namespace Flowery.WinUI.Gallery
                     IconKey = "DaisyIconNavigation",
                     Items = new()
                     {
-                        new() { Id = "breadcrumbs", Name = "Sidebar_Breadcrumbs", TabHeader = "Sidebar_Navigation" },
-                        new() { Id = "breadcrumbbar", Name = "Sidebar_BreadcrumbBar", TabHeader = "Sidebar_Navigation" },
-                        new() { Id = "dock", Name = "Sidebar_Dock", TabHeader = "Sidebar_Navigation" },
-                        new() { Id = "menu", Name = "Sidebar_Menu", TabHeader = "Sidebar_Navigation" },
-                        new() { Id = "navbar", Name = "Sidebar_Navbar", TabHeader = "Sidebar_Navigation" },
-                        new() { Id = "pagination", Name = "Sidebar_Pagination", TabHeader = "Sidebar_Navigation" },
-                        new() { Id = "steps", Name = "Sidebar_Steps", TabHeader = "Sidebar_Navigation" },
-                        new() { Id = "tabs", Name = "Sidebar_Tabs", TabHeader = "Sidebar_Navigation" }
+                        new() { Id = "breadcrumbs", Name = "Sidebar_Breadcrumbs", ControlName = "DaisyBreadcrumbs", TabHeader = "Sidebar_Navigation" },
+                        new() { Id = "breadcrumbbar", Name = "Sidebar_BreadcrumbBar", ControlName = "DaisyBreadcrumbBar", TabHeader = "Sidebar_Navigation" },
+                        new() { Id = "dock", Name = "Sidebar_Dock", ControlName = "DaisyDock", TabHeader = "Sidebar_Navigation" },
+                        new() { Id = "menu", Name = "Sidebar_Menu", ControlName = "DaisyMenu", TabHeader = "Sidebar_Navigation" },
+                        new() { Id = "navbar", Name = "Sidebar_Navbar", ControlName = "DaisyNavbar", TabHeader = "Sidebar_Navigation" },
+                        new() { Id = "pagination", Name = "Sidebar_Pagination", ControlName = "DaisyPagination", TabHeader = "Sidebar_Navigation" },
+                        new() { Id = "steps", Name = "Sidebar_Steps", ControlName = "DaisySteps", TabHeader = "Sidebar_Navigation" },
+                        new() { Id = "tabs", Name = "Sidebar_Tabs", ControlName = "DaisyTabs", TabHeader = "Sidebar_Navigation" }
                     }
                 },
                 new()
@@ -211,9 +225,9 @@ namespace Flowery.WinUI.Gallery
                     IconKey = "DaisyIconTheme",
                     Items = new()
                     {
-                        new() { Id = "product-themes", Name = "Sidebar_ProductThemes", TabHeader = "Sidebar_ProductThemes" },
-                        new() { Id = "theme-controller", Name = "Sidebar_ThemeController", TabHeader = "Sidebar_Theming" },
-                        new() { Id = "theme-radio", Name = "Sidebar_ThemeRadio", TabHeader = "Sidebar_Theming" }
+                        new() { Id = "product-themes", Name = "Sidebar_ProductThemes", ControlName = "DaisyProductThemeDropdown", TabHeader = "Sidebar_ProductThemes" },
+                        new() { Id = "theme-controller", Name = "Sidebar_ThemeController", ControlName = "DaisyThemeController", TabHeader = "Sidebar_Theming" },
+                        new() { Id = "theme-radio", Name = "Sidebar_ThemeRadio", ControlName = "DaisyThemeRadio", TabHeader = "Sidebar_Theming" }
                     }
                 },
                 new()
@@ -246,14 +260,14 @@ namespace Flowery.WinUI.Gallery
                     IconKey = "DaisyIconSun",
                     Items = new()
                     {
-                        new() { Id = "flow-kanban", Name = "Sidebar_FlowKanban", TabHeader = "Sidebar_FlowKanban" },
+                        new() { Id = "flow-kanban", Name = "Sidebar_FlowKanban", ControlName = "FlowKanban", TabHeader = "Sidebar_FlowKanban" },
                         new() { Id = "scaling", Name = "Sidebar_ScalingItem", TabHeader = "Sidebar_Scaling" },
-                        new() { Id = "size-dropdown", Name = "Sidebar_SizeDropdown", TabHeader = "Sidebar_CustomControls" },
-                        new() { Id = "modifier-keys", Name = "Sidebar_ModifierKeys", TabHeader = "Sidebar_CustomControls" },
-                        new() { Id = "weather-card", Name = "Sidebar_WeatherCard", TabHeader = "Sidebar_CustomControls" },
-                        new() { Id = "current-weather", Name = "Sidebar_CurrentWeather", TabHeader = "Sidebar_CustomControls" },
-                        new() { Id = "weather-forecast", Name = "Sidebar_WeatherForecast", TabHeader = "Sidebar_CustomControls" },
-                        new() { Id = "weather-metrics", Name = "Sidebar_WeatherMetrics", TabHeader = "Sidebar_CustomControls" },
+                        new() { Id = "size-dropdown", Name = "Sidebar_SizeDropdown", ControlName = "DaisySizeDropdown", TabHeader = "Sidebar_CustomControls" },
+                        new() { Id = "modifier-keys", Name = "Sidebar_ModifierKeys", ControlName = "DaisyModifierKeys", TabHeader = "Sidebar_CustomControls" },
+                        new() { Id = "weather-card", Name = "Sidebar_WeatherCard", ControlName = "DaisyWeatherCard", TabHeader = "Sidebar_CustomControls" },
+                        new() { Id = "current-weather", Name = "Sidebar_CurrentWeather", ControlName = "DaisyWeatherCurrent", TabHeader = "Sidebar_CustomControls" },
+                        new() { Id = "weather-forecast", Name = "Sidebar_WeatherForecast", ControlName = "DaisyWeatherForecast", TabHeader = "Sidebar_CustomControls" },
+                        new() { Id = "weather-metrics", Name = "Sidebar_WeatherMetrics", ControlName = "DaisyWeatherMetrics", TabHeader = "Sidebar_CustomControls" },
                         new() { Id = "weather-conditions", Name = "Sidebar_WeatherConditions", TabHeader = "Sidebar_CustomControls" },
                         new() { Id = "service-integration", Name = "Sidebar_ServiceIntegration", TabHeader = "Sidebar_CustomControls" }
                     }
@@ -264,12 +278,12 @@ namespace Flowery.WinUI.Gallery
                     IconKey = "DaisyIconPalette",
                     Items = new()
                     {
-                        new() { Id = "colorwheel", Name = "Sidebar_ColorWheel", TabHeader = "Sidebar_ColorPicker" },
-                        new() { Id = "colorgrid", Name = "Sidebar_ColorGrid", TabHeader = "Sidebar_ColorPicker" },
-                        new() { Id = "colorslider", Name = "Sidebar_ColorSliders", TabHeader = "Sidebar_ColorPicker" },
-                        new() { Id = "coloreditor", Name = "Sidebar_ColorEditor", TabHeader = "Sidebar_ColorPicker" },
-                        new() { Id = "screenpicker", Name = "Sidebar_ScreenPicker", TabHeader = "Sidebar_ColorPicker" },
-                        new() { Id = "colorpickerdialog", Name = "Sidebar_ColorPickerDialog", TabHeader = "Sidebar_ColorPicker" }
+                        new() { Id = "colorwheel", Name = "Sidebar_ColorWheel", ControlName = "DaisyColorWheel", TabHeader = "Sidebar_ColorPicker" },
+                        new() { Id = "colorgrid", Name = "Sidebar_ColorGrid", ControlName = "DaisyColorGrid", TabHeader = "Sidebar_ColorPicker" },
+                        new() { Id = "colorslider", Name = "Sidebar_ColorSliders", ControlName = "DaisyColorSlider", TabHeader = "Sidebar_ColorPicker" },
+                        new() { Id = "coloreditor", Name = "Sidebar_ColorEditor", ControlName = "DaisyColorEditor", TabHeader = "Sidebar_ColorPicker" },
+                        new() { Id = "screenpicker", Name = "Sidebar_ScreenPicker", ControlName = "DaisyScreenColorPicker", TabHeader = "Sidebar_ColorPicker" },
+                        new() { Id = "colorpickerdialog", Name = "Sidebar_ColorPickerDialog", ControlName = "DaisyColorPickerDialog", TabHeader = "Sidebar_ColorPicker" }
                     }
                 }
             };

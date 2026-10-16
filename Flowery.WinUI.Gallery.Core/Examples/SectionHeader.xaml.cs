@@ -1,5 +1,7 @@
 using Flowery.Controls;
+using Flowery.Localization;
 using Flowery.Theming;
+using Flowery.WinUI.Gallery.Localization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -12,7 +14,7 @@ namespace Flowery.WinUI.Gallery.Examples
                 nameof(SectionId),
                 typeof(string),
                 typeof(SectionHeader),
-                new PropertyMetadata(string.Empty));
+                new PropertyMetadata(string.Empty, OnTitleSourceChanged));
 
         public string SectionId
         {
@@ -25,7 +27,7 @@ namespace Flowery.WinUI.Gallery.Examples
                 nameof(Title),
                 typeof(string),
                 typeof(SectionHeader),
-                new PropertyMetadata(string.Empty));
+                new PropertyMetadata(string.Empty, OnTitleSourceChanged));
 
         public string Title
         {
@@ -44,14 +46,56 @@ namespace Flowery.WinUI.Gallery.Examples
         {
             DaisyThemeManager.ThemeChanged += OnThemeChanged;
             FlowerySizeManager.SizeChanged += OnGlobalSizeChanged;
+            GalleryLocalization.CultureChanged += OnCultureChanged;
             ApplyTheme();
             ApplySize(FlowerySizeManager.CurrentSize);
+            UpdateTitleText();
         }
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
             DaisyThemeManager.ThemeChanged -= OnThemeChanged;
             FlowerySizeManager.SizeChanged -= OnGlobalSizeChanged;
+            GalleryLocalization.CultureChanged -= OnCultureChanged;
+        }
+
+        private static void OnTitleSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is SectionHeader header)
+            {
+                header.UpdateTitleText();
+            }
+        }
+
+        private void OnCultureChanged(object? sender, string cultureName)
+        {
+            if (DispatcherQueue is { } dispatcherQueue)
+            {
+                dispatcherQueue.TryEnqueue(UpdateTitleText);
+            }
+        }
+
+        private void UpdateTitleText()
+        {
+            TitleTextBlock.Text = GetDisplayTitle();
+        }
+
+        /// <summary>
+        /// Sections that match a sidebar entry show its translated name, followed by the control class
+        /// in parentheses when the entry represents a single control, e.g. "Tag-Auswahl (DaisyTagPicker)".
+        /// Other sections show <see cref="Title"/> unchanged.
+        /// </summary>
+        private string GetDisplayTitle()
+        {
+            if (GallerySidebarData.FindItem(SectionId) is not { } item)
+            {
+                return Title;
+            }
+
+            var name = FloweryLocalization.GetString(item.Name);
+            return item.ControlName is { Length: > 0 } controlName && !name.Contains(controlName, StringComparison.Ordinal)
+                ? $"{name} ({controlName})"
+                : name;
         }
 
         private void OnThemeChanged(object? sender, string themeName)

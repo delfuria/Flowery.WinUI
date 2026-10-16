@@ -6,7 +6,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.1] - 2026-10-16
+
+### Changed
+
+- `SidebarItem` has an optional `ControlName` and a `MatchesSearch` method. The `FloweryComponentSidebar` search matches the translated name and the control class name, ignoring case, spaces and punctuation (#9). In the German Gallery, "Tag-Auswahl", "DaisyTagPicker", "TagPicker" and "tag picker" all find the tag picker.
+- Gallery section headers show the translated sidebar name followed by the control class, e.g. `Tag-Auswahl (DaisyTagPicker)`, and follow language changes (#9).
 
 ### Fixed
 
@@ -53,7 +58,7 @@ First native WinUI 3 release. Package versions match the Flowery.Uno 1.2.0 basel
 
 The following entries describe the original source before the native WinUI migration.
 
-### Unreleased before the native migration
+### Final changes before the native migration
 
 - **Breaking:** Build: moved all Windows, Desktop (Skia), Browser and tooling target frameworks from net9.0 to net10.0 (Android was already net10.0); consumers must now target net10.0. Build/run scripts, CI build, runtime test runners and developer docs updated accordingly.
 - Historical Linux target: the original desktop Gallery resumed startup after removal of the incompatible `Tmds.DBus.Protocol` 0.93.0 pin. Its original framework resolved 0.21.3 transitively.
