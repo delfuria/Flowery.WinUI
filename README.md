@@ -25,7 +25,7 @@
 
 Flowery.WinUI is a native WinUI 3 control library for the Windows App SDK.
 Build themed Windows applications with Flowery controls and optional Kanban, Win2D, and authentication packages.
-Version [1.2.0](https://github.com/tobitege/Flowery.WinUI/releases/tag/v1.2.0) is available on NuGet.
+Version [1.2.1](https://github.com/tobitege/Flowery.WinUI/releases/tag/v1.2.1) is available on NuGet.
 
 ## Features
 
@@ -76,7 +76,7 @@ See [SDK selection](scripts/README.md#select-the-net-sdk) for exact-version and 
 1. Add the `Flowery.WinUI` NuGet package to a WinUI 3 application.
 
 ```powershell
-dotnet add package Flowery.WinUI --version 1.2.0
+dotnet add package Flowery.WinUI --version 1.2.1
 ```
 
 2. Merge the library resources after `XamlControlsResources` in the application resources.
