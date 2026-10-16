@@ -225,23 +225,35 @@ General spacing values for layouts.
 
 ## Checkbox/Radio Indicator Sizes
 
-Outer border size for checkboxes and radio buttons.
+Indicators are smaller than the label text of their size tier (compact indicators from Flowery.NET 3.3.0).
+
+### Checkbox Sizes
+
+Outer border size for checkboxes.
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyCheckbox{Size}Size` | 12 | 16 | 18 | 24 | 28 |
+| `DaisyCheckbox{Size}Size` | 8 | 10 | 12 | 14 | 16 |
 
 ### Checkmark Icon Sizes
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyCheckmark{Size}Size` | 7 | 10 | 12 | 16 | 18 |
+| `DaisyCheckmark{Size}Size` | 5 | 6 | 8 | 10 | 12 |
+
+### Radio Sizes
+
+Radio buttons use their own outer size tokens (independent of the checkbox sizes).
+
+| Token | XS | S | M | L | XL |
+| ----- | -- | -- | -- | -- | --- |
+| `DaisyRadio{Size}Size` | 8 | 10 | 12 | 14 | 16 |
 
 ### Radio Inner Dot Sizes
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyRadioDot{Size}Size` | 5 | 8 | 10 | 14 | 18 |
+| `DaisyRadioDot{Size}Size` | 4 | 5 | 6 | 7 | 8 |
 
 ---
 
