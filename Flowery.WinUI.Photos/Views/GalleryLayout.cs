@@ -30,6 +30,7 @@ namespace Flowery.WinUI.Photos.Views
     /// <summary>
     /// Builds justified ("Google Photos style") rows: every full row fills the available width while
     /// keeping each photo's aspect ratio. The last row of a group keeps the target height.
+    /// Square tiles use the same rows with an aspect ratio of 1, so square photos keep their size.
     /// </summary>
     public static class GalleryLayout
     {
@@ -63,9 +64,7 @@ namespace Flowery.WinUI.Photos.Views
                     top += HeaderHeight;
                 }
 
-                var groupRows = squareTiles
-                    ? BuildSquare(group.Items, width, targetHeight, gap)
-                    : BuildJustified(group.Items, width, targetHeight, gap);
+                var groupRows = BuildJustified(group.Items, width, targetHeight, gap, squareTiles);
 
                 foreach (var row in groupRows)
                 {
@@ -78,42 +77,70 @@ namespace Flowery.WinUI.Photos.Views
             return rows;
         }
 
-        private static List<GalleryPhotoRow> BuildJustified(List<PhotoItem> items, double width, double targetHeight, double gap)
+        /// <summary>
+        /// Fills each row to the full width. A row takes the photo count whose height is closest to the target
+        /// height; the last row of a group reuses the height of the row above (or the target height), so all
+        /// rows of a group look alike.
+        /// </summary>
+        private static List<GalleryPhotoRow> BuildJustified(List<PhotoItem> items, double width, double targetHeight, double gap, bool squareTiles)
         {
             List<GalleryPhotoRow> rows = [];
-            List<PhotoItem> pending = [];
-            var aspectSum = 0.0;
+            double? previousHeight = null;
+            var start = 0;
 
-            foreach (var item in items)
+            while (start < items.Count)
             {
-                pending.Add(item);
-                aspectSum += item.AspectRatio;
-                var rowWidth = aspectSum * targetHeight + gap * (pending.Count - 1);
-                if (rowWidth >= width)
+                var count = 0;
+                var aspectSum = 0.0;
+                var full = false;
+                while (start + count < items.Count)
                 {
-                    var height = (width - gap * (pending.Count - 1)) / aspectSum;
-                    rows.Add(CreateRow(pending, height, gap, width, stretch: true));
-                    pending = [];
-                    aspectSum = 0;
+                    aspectSum += Aspect(items[start + count], squareTiles);
+                    count++;
+                    if (aspectSum * targetHeight + gap * (count - 1) >= width)
+                    {
+                        full = true;
+                        break;
+                    }
                 }
-            }
 
-            if (pending.Count > 0)
-            {
-                rows.Add(CreateRow(pending, targetHeight, gap, width, stretch: false));
+                if (!full)
+                {
+                    var height = previousHeight is { } h && aspectSum * h + gap * (count - 1) <= width ? h : targetHeight;
+                    rows.Add(CreateRow(items.GetRange(start, count), height, gap, width, stretch: false, squareTiles));
+                    break;
+                }
+
+                var rowHeight = (width - gap * (count - 1)) / aspectSum;
+                if (count > 1)
+                {
+                    var sumWithout = aspectSum - Aspect(items[start + count - 1], squareTiles);
+                    var heightWithout = (width - gap * (count - 2)) / sumWithout;
+                    if (Math.Abs(heightWithout - targetHeight) < Math.Abs(rowHeight - targetHeight))
+                    {
+                        count--;
+                        rowHeight = heightWithout;
+                    }
+                }
+
+                rows.Add(CreateRow(items.GetRange(start, count), rowHeight, gap, width, stretch: true, squareTiles));
+                previousHeight = rowHeight;
+                start += count;
             }
 
             return rows;
         }
 
-        private static GalleryPhotoRow CreateRow(List<PhotoItem> items, double height, double gap, double width, bool stretch)
+        private static double Aspect(PhotoItem item, bool squareTiles) => squareTiles ? 1 : item.AspectRatio;
+
+        private static GalleryPhotoRow CreateRow(List<PhotoItem> items, double height, double gap, double width, bool stretch, bool squareTiles)
         {
             height = Math.Max(40, Math.Round(height));
             List<(PhotoItem, double)> tiles = [];
             var used = 0.0;
             for (var i = 0; i < items.Count; i++)
             {
-                var w = Math.Floor(items[i].AspectRatio * height);
+                var w = Math.Floor((squareTiles ? 1 : items[i].AspectRatio) * height);
                 if (stretch && i == items.Count - 1)
                     w = Math.Max(20, width - used);
                 tiles.Add((items[i], w));
@@ -127,25 +154,6 @@ namespace Flowery.WinUI.Photos.Views
                 Height = height + gap,
                 Date = items[0].SortDate
             };
-        }
-
-        private static List<GalleryPhotoRow> BuildSquare(List<PhotoItem> items, double width, double targetHeight, double gap)
-        {
-            var perRow = Math.Max(1, (int)Math.Floor((width + gap) / (targetHeight + gap)));
-            var side = Math.Floor((width - gap * (perRow - 1)) / perRow);
-            List<GalleryPhotoRow> rows = [];
-            for (var i = 0; i < items.Count; i += perRow)
-            {
-                var chunk = items.Skip(i).Take(perRow).ToList();
-                rows.Add(new GalleryPhotoRow
-                {
-                    Tiles = [.. chunk.Select(c => (c, side))],
-                    TileHeight = side,
-                    Height = side + gap,
-                    Date = chunk[0].SortDate
-                });
-            }
-            return rows;
         }
 
         private sealed record PhotoGroup(string? Title, DateTime Date, List<PhotoItem> Items);

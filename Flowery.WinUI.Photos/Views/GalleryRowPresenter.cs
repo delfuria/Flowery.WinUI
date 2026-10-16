@@ -44,7 +44,7 @@ namespace Flowery.WinUI.Photos.Views
             };
             _headerSelect = new DaisyButton
             {
-                Variant = DaisyButtonVariant.Neutral,
+                Variant = DaisyButtonVariant.Primary,
                 Size = DaisySize.ExtraSmall,
                 Margin = new Thickness(8, 0, 0, 0),
                 Opacity = 0,

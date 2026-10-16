@@ -110,19 +110,19 @@
                             <daisy:DaisyButton x:Name="GitHubButton"
                                                Content="GitHub"
                                                IconData="{StaticResource DaisyIconBrandGitHub}"
-                                               Variant="Neutral"
+                                               Variant="Primary"
                                                Size="Small"
                                                Click="GitHubButton_Click" />
                             <daisy:DaisyButton x:Name="DataFolderButton"
                                                Content="{Binding [Photos_Settings_OpenDataFolder]}"
                                                IconSymbol="Folder"
-                                               Variant="Neutral"
+                                               Variant="Primary"
                                                Size="Small"
                                                Click="DataFolderButton_Click" />
                             <daisy:DaisyButton x:Name="ClearCacheButton"
                                                Content="{Binding [Photos_Settings_ClearCache]}"
                                                IconSymbol="Delete"
-                                               Variant="Neutral"
+                                               Variant="Primary"
                                                Size="Small"
                                                Click="ClearCacheButton_Click" />
                         </StackPanel>

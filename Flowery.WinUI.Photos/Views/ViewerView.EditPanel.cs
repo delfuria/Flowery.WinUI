@@ -227,7 +227,7 @@ namespace Flowery.WinUI.Photos.Views
                 foreach (var (id, frame, _) in _filterTiles)
                 {
                     var selected = string.Equals(id, state.Filter, StringComparison.OrdinalIgnoreCase);
-                    frame.BorderBrush = selected ? DaisyResourceLookup.GetBrush("DaisyPrimaryBrush") : new SolidColorBrush(Colors.Transparent);
+                    frame.BorderBrush = selected ? WindowsAccent.Brush : new SolidColorBrush(Colors.Transparent);
                 }
 
                 foreach (var (aspect, button) in _aspectButtons)
@@ -333,7 +333,7 @@ namespace Flowery.WinUI.Photos.Views
             var reset = new DaisyButton
             {
                 Content = L("Photos_ResetCrop"),
-                Variant = DaisyButtonVariant.Neutral,
+                Variant = DaisyButtonVariant.Primary,
                 IconSymbol = Symbol.Refresh,
                 HorizontalAlignment = HorizontalAlignment.Left
             };
@@ -427,7 +427,7 @@ namespace Flowery.WinUI.Photos.Views
             var reset = new DaisyButton
             {
                 Content = L("Photos_ResetAdjustments"),
-                Variant = DaisyButtonVariant.Neutral,
+                Variant = DaisyButtonVariant.Primary,
                 IconSymbol = Symbol.Refresh,
                 HorizontalAlignment = HorizontalAlignment.Left
             };
@@ -689,7 +689,7 @@ namespace Flowery.WinUI.Photos.Views
             var actions = new Grid { ColumnSpacing = 6, Margin = new Thickness(0, 6, 0, 0) };
             actions.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             actions.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            var undoStroke = new DaisyButton { Content = L("Photos_UndoStroke"), IconSymbol = Symbol.Undo, Variant = DaisyButtonVariant.Neutral, HorizontalAlignment = HorizontalAlignment.Stretch };
+            var undoStroke = new DaisyButton { Content = L("Photos_UndoStroke"), IconSymbol = Symbol.Undo, Variant = DaisyButtonVariant.Primary, HorizontalAlignment = HorizontalAlignment.Stretch };
             undoStroke.Click += (_, _) =>
             {
                 if (!State.Strokes.IsEmpty)

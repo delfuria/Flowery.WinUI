@@ -43,6 +43,39 @@ namespace Flowery.WinUI.Photos.Views
             Margin = margin ?? new Thickness(0, 4, 0, 0)
         }, ResponsiveFontTier.Secondary);
 
+        /// <summary>
+        /// Flyout content is one size step below the global size, so captions, selects, toggles and menu items
+        /// share one font size (the caption size from Small to Large).
+        /// </summary>
+        public static DaisySize FlyoutSize => FlowerySizeManager.CurrentSize switch
+        {
+            DaisySize.ExtraLarge => DaisySize.Large,
+            DaisySize.Large => DaisySize.Medium,
+            DaisySize.Medium => DaisySize.Small,
+            _ => DaisySize.ExtraSmall
+        };
+
+        public static double FlyoutFontSize => FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.Primary, FlyoutSize);
+
+        public static TextBlock FlyoutCaption(string key, Thickness? margin = null) => new()
+        {
+            Text = L(key),
+            Style = (Style)Application.Current.Resources["PhotosCaptionTextStyle"],
+            FontSize = FlyoutFontSize,
+            Margin = margin ?? new Thickness(0, 4, 0, 0)
+        };
+
+        public static void ApplyFlyoutFont(IList<MenuFlyoutItemBase> items)
+        {
+            var fontSize = FlyoutFontSize;
+            foreach (var item in items)
+            {
+                item.FontSize = fontSize;
+                if (item is MenuFlyoutSubItem sub)
+                    ApplyFlyoutFont(sub.Items);
+            }
+        }
+
         public static MenuFlyoutItem MenuItem(string key, Symbol? symbol, Action onClick, string? iconData = null) =>
             MenuItemText(L(key), symbol, onClick, iconData);
 
@@ -73,7 +106,8 @@ namespace Flowery.WinUI.Photos.Views
 
         public static string? Icon(string resourceKey) => Application.Current.Resources[resourceKey] as string;
 
-        public static DaisySelect Select<T>(IEnumerable<(T Key, string TextKey)> options, T selected, Action<T> onChanged, double width = double.NaN)
+        public static DaisySelect Select<T>(IEnumerable<(T Key, string TextKey)> options, T selected, Action<T> onChanged,
+            double width = double.NaN, DaisySize? size = null)
             where T : notnull
         {
             var items = options.Select(o => new SelectOption(o.Key, L(o.TextKey))).ToList();
@@ -84,6 +118,11 @@ namespace Flowery.WinUI.Photos.Views
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 Width = width
             };
+            if (size is { } fixedSize)
+            {
+                FlowerySizeManager.SetIgnoreGlobalSize(select, true);
+                select.Size = fixedSize;
+            }
             select.SelectionChanged += (_, _) =>
             {
                 if (select.SelectedItem is SelectOption { Key: T key })
@@ -92,19 +131,25 @@ namespace Flowery.WinUI.Photos.Views
             return select;
         }
 
-        public static Grid ToggleRow(string key, bool isOn, Action<bool> onChanged)
+        public static Grid ToggleRow(string key, bool isOn, Action<bool> onChanged, DaisySize? size = null)
         {
             var grid = new Grid { ColumnSpacing = 12 };
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            var label = Responsive(new TextBlock
+            var label = new TextBlock
             {
                 Text = L(key),
                 TextWrapping = TextWrapping.Wrap,
                 VerticalAlignment = VerticalAlignment.Center,
                 Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
-            }, ResponsiveFontTier.Primary);
-            var toggle = new DaisyToggle { IsOn = isOn, Variant = DaisyToggleVariant.Primary, VerticalAlignment = VerticalAlignment.Center, Size = FlowerySizeManager.CurrentSize };
+            };
+            if (size is { } fixedSize)
+                label.FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.Primary, fixedSize);
+            else
+                Responsive(label, ResponsiveFontTier.Primary);
+            var toggle = new DaisyToggle { IsOn = isOn, Variant = DaisyToggleVariant.Primary, VerticalAlignment = VerticalAlignment.Center, Size = size ?? FlowerySizeManager.CurrentSize };
+            if (size != null)
+                FlowerySizeManager.SetIgnoreGlobalSize(toggle, true);
             // DaisyToggle also raises Toggled for programmatic IsOn changes; only forward real changes.
             var current = isOn;
             toggle.Toggled += (_, _) =>

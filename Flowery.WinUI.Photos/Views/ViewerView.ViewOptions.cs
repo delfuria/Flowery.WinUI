@@ -32,10 +32,10 @@ namespace Flowery.WinUI.Photos.Views
                 zoom.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             (string? Icon, Symbol? Symbol, string Text, Action Action)[] zoomButtons =
             [
-                (null, Symbol.ZoomOut, L("Photos_ZoomOut"), () => ZoomBy(1 / 1.25)),
+                (null, Symbol.ZoomOut, L("Photos_ZoomOut"), () => StepZoom(-1)),
                 ("PhotosIconFitScreen", null, L("Photos_ZoomFit"), ZoomToFit),
                 (null, null, "100 %", () => SetZoomPercent(100)),
-                (null, Symbol.ZoomIn, L("Photos_ZoomIn"), () => ZoomBy(1.25))
+                (null, Symbol.ZoomIn, L("Photos_ZoomIn"), () => StepZoom(1))
             ];
             for (var i = 0; i < zoomButtons.Length; i++)
             {
@@ -43,7 +43,7 @@ namespace Flowery.WinUI.Photos.Views
                 var button = new DaisyButton
                 {
                     Size = DaisySize.Small,
-                    Variant = DaisyButtonVariant.Neutral,
+                    Variant = DaisyButtonVariant.Primary,
                     HorizontalAlignment = HorizontalAlignment.Stretch
                 };
                 if (symbol is { } s)
@@ -99,7 +99,7 @@ namespace Flowery.WinUI.Photos.Views
             {
                 Content = L(_immersive ? "Photos_ExitFullScreen" : "Photos_FullScreen"),
                 IconSymbol = _immersive ? Symbol.BackToWindow : Symbol.FullScreen,
-                Variant = DaisyButtonVariant.Neutral,
+                Variant = DaisyButtonVariant.Primary,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 Margin = new Thickness(0, 4, 0, 0)
             };

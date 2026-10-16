@@ -34,7 +34,7 @@
                                   Margin="8,0"
                                   HorizontalAlignment="Stretch"
                                   VerticalAlignment="Center"
-                                  Variant="Filled"
+                                  Variant="Bordered"
                                   Size="Small"
                                   daisy:FlowerySizeManager.IgnoreGlobalSize="True"
                                   StartIconData="{StaticResource DaisyIconSearch}"
@@ -43,6 +43,17 @@
             </TitleBar.Content>
             <TitleBar.RightHeader>
                 <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,8,0" VerticalAlignment="Center">
+                    <!-- View options while the viewer's auto-hiding toolbar is hidden. -->
+                    <daisy:DaisyButton x:Name="TitleViewButton"
+                                       Variant="Ghost"
+                                       Shape="Square"
+                                       Size="Small"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center"
+                                       Visibility="Collapsed"
+                                       IconData="{StaticResource PhotosIconView}"
+                                       daisy:FlowerySizeManager.IgnoreGlobalSize="True"
+                                       Click="TitleViewButton_Click" />
                     <daisy:DaisyLoading x:Name="ScanIndicator"
                                         Size="ExtraSmall"
                                         Variant="Spinner"
@@ -77,7 +88,8 @@
                     BorderThickness="1,1,0,0"
                     CornerRadius="12,0,0,0">
                 <Grid x:Name="PageHost">
-                    <views:GalleryView x:Name="Gallery" />
+                    <views:HomeView x:Name="Home" />
+                    <views:GalleryView x:Name="Gallery" Visibility="Collapsed" />
                     <views:CollectionsView x:Name="Collections" Visibility="Collapsed" />
                 </Grid>
             </Border>
@@ -119,6 +131,9 @@
 
         <!-- Settings: cancellable modal dialog above whatever is shown (gallery, collections or viewer). -->
         <daisy:DaisyModal x:Name="SettingsDialog" Grid.RowSpan="2" IsOpen="False">
+            <!-- Accent frame at the dialog edge: DaisyModal pads its content by 24 and rounds its corners by 16;
+                 the negative margin puts this border exactly on the dialog outline. -->
+            <Border x:Name="SettingsDialogFrame" Margin="-24" Padding="24" CornerRadius="16" BorderThickness="1">
             <Grid x:Name="SettingsDialogContent" RowDefinitions="Auto,*,Auto" RowSpacing="12">
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBlock Text="{Binding [Photos_Nav_Settings]}"
@@ -145,10 +160,13 @@
                                        Click="SettingsOk_Click" />
                 </StackPanel>
             </Grid>
+            </Border>
         </daisy:DaisyModal>
 
         <daisy:DaisyModal x:Name="Dialog" Grid.RowSpan="2" IsOpen="False">
-            <StackPanel x:Name="DialogPanel" Spacing="14" MinWidth="320" MaxWidth="460" />
+            <Border x:Name="DialogFrame" Margin="-24" Padding="24" CornerRadius="16" BorderThickness="1">
+                <StackPanel x:Name="DialogPanel" Spacing="14" MinWidth="320" MaxWidth="460" />
+            </Border>
         </daisy:DaisyModal>
     </Grid>
 </UserControl>

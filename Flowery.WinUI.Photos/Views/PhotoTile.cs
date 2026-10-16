@@ -47,6 +47,7 @@ namespace Flowery.WinUI.Photos.Views
         {
             IsTabStop = true;
             UseSystemFocusVisuals = true;
+            FocusVisualPrimaryBrush = WindowsAccent.Brush;
             HorizontalContentAlignment = HorizontalAlignment.Stretch;
             VerticalContentAlignment = VerticalAlignment.Stretch;
             CornerRadius = new CornerRadius(6);
@@ -149,7 +150,7 @@ namespace Flowery.WinUI.Photos.Views
             {
                 CornerRadius = new CornerRadius(8),
                 BorderThickness = new Thickness(3),
-                BorderBrush = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush"),
+                BorderBrush = WindowsAccent.Brush,
                 IsHitTestVisible = false,
                 Visibility = Visibility.Collapsed
             };
@@ -255,14 +256,13 @@ namespace Flowery.WinUI.Photos.Views
             _favorite.Visibility = _item.IsFavorite ? Visibility.Visible : Visibility.Collapsed;
             _nameBar.Visibility = _host.ShowFileNames ? Visibility.Visible : Visibility.Collapsed;
             _ring.Visibility = selected ? Visibility.Visible : Visibility.Collapsed;
-            _ring.BorderBrush = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
             _image.Margin = selected ? new Thickness(6) : new Thickness(0);
 
             _check.Opacity = selected || selectionMode || _hover ? 1 : 0;
             _check.Background = selected
-                ? DaisyResourceLookup.GetBrush("DaisyPrimaryBrush")
+                ? WindowsAccent.Brush
                 : new SolidColorBrush(Color.FromArgb(60, 0, 0, 0));
-            _check.BorderBrush = selected ? DaisyResourceLookup.GetBrush("DaisyPrimaryBrush") : new SolidColorBrush(Colors.White);
+            _check.BorderBrush = selected ? WindowsAccent.Brush : new SolidColorBrush(Colors.White);
             _checkMark.Opacity = selected ? 1 : 0.55;
             _shade.Opacity = _hover || selectionMode ? 1 : 0;
 

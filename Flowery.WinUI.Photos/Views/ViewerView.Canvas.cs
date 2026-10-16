@@ -155,7 +155,45 @@ namespace Flowery.WinUI.Photos.Views
             SetZoom(percent / 100 / RasterScale, null);
         }
 
-        private void ZoomBy(double factor) => SetZoom(GetEffectiveZoom() * factor, null);
+        /// <summary>
+        /// Zooms one step in or out (wheel notch, +/- keys, zoom buttons) and lands on round percentages:
+        /// every 1 % below 10 %, every 10 % below 100 %, and from 100 % about 20 % per step rounded to 25 %.
+        /// </summary>
+        private void StepZoom(int direction, Point? anchor = null)
+        {
+            var current = GetEffectiveZoom() * RasterScale * 100;
+            var belowHundred = direction > 0 ? current < 100 - 0.01 : current <= 100 + 0.01;
+            var target = belowHundred
+                ? (direction > 0 ? NextZoomPercentUp(current) : NextZoomPercentDown(current))
+                : SnapZoomPercent(direction > 0 ? current * ZoomStepFactor : current / ZoomStepFactor);
+            if (direction > 0 && target <= current + 0.01)
+                target = NextZoomPercentUp(current);
+            else if (direction < 0 && target >= current - 0.01)
+                target = NextZoomPercentDown(current);
+            SetZoom(target / 100 / RasterScale, anchor);
+        }
+
+        private const double ZoomStepFactor = 1.2;
+
+        private static double ZoomGrid(double percent) => percent < 10 ? 1 : percent < 100 ? 10 : 25;
+
+        private static double SnapZoomPercent(double percent)
+        {
+            var grid = ZoomGrid(percent);
+            return Math.Max(1, Math.Round(percent / grid, MidpointRounding.AwayFromZero) * grid);
+        }
+
+        private static double NextZoomPercentUp(double percent)
+        {
+            var grid = ZoomGrid(percent);
+            return Math.Floor(percent / grid + 1e-6) * grid + grid;
+        }
+
+        private static double NextZoomPercentDown(double percent)
+        {
+            var grid = ZoomGrid(percent - 1e-6);
+            return Math.Max(1, Math.Ceiling(percent / grid - 1e-6) * grid - grid);
+        }
 
         /// <summary>
         /// Sets the zoom, keeping the image point under <paramref name="anchor"/> (screen DIPs) stationary.
@@ -234,9 +272,9 @@ namespace Flowery.WinUI.Photos.Views
 
         private void FitButton_Click(object sender, RoutedEventArgs e) => ZoomToFit();
 
-        private void ZoomInButton_Click(object sender, RoutedEventArgs e) => ZoomBy(1.25);
+        private void ZoomInButton_Click(object sender, RoutedEventArgs e) => StepZoom(1);
 
-        private void ZoomOutButton_Click(object sender, RoutedEventArgs e) => ZoomBy(1 / 1.25);
+        private void ZoomOutButton_Click(object sender, RoutedEventArgs e) => StepZoom(-1);
 
         #endregion
 
@@ -616,6 +654,8 @@ namespace Flowery.WinUI.Photos.Views
             Canvas.Invalidate();
         }
 
+        private int _wheelZoomDelta;
+
         private async void Canvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
         {
             if (_slideshow || IsCropMode)
@@ -632,8 +672,14 @@ namespace Flowery.WinUI.Photos.Views
                 return;
             }
 
-            var factor = Math.Pow(1.0015, delta);
-            SetZoom(GetEffectiveZoom() * factor, point.Position);
+            // One zoom step per wheel notch (120); precision touchpads send smaller deltas that add up.
+            _wheelZoomDelta += delta;
+            while (Math.Abs(_wheelZoomDelta) >= 120)
+            {
+                var direction = Math.Sign(_wheelZoomDelta);
+                _wheelZoomDelta -= direction * 120;
+                StepZoom(direction, point.Position);
+            }
         }
 
         private void Canvas_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)

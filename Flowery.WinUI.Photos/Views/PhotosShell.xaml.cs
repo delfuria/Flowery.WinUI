@@ -15,6 +15,7 @@ namespace Flowery.WinUI.Photos.Views
 {
     public enum PhotosPage
     {
+        Home,
         Gallery,
         Favorites,
         Albums,
@@ -36,7 +37,7 @@ namespace Flowery.WinUI.Photos.Views
     {
         private readonly Dictionary<PhotosPage, (Border Indicator, DaisyButton Button, string TooltipKey)> _railItems = [];
         private MainWindow? _window;
-        private PhotosPage _currentPage = PhotosPage.Gallery;
+        private PhotosPage _currentPage = PhotosPage.Home;
         private TaskCompletionSource<DialogResult>? _dialogTcs;
         private DaisyInput? _dialogInput;
         private long _dialogOpenToken;
@@ -75,6 +76,11 @@ namespace Flowery.WinUI.Photos.Views
             library.ScanningChanged += (_, scanning) => ScanIndicator.Visibility = scanning ? Visibility.Visible : Visibility.Collapsed;
             library.Changed += OnLibraryChanged;
 
+            // Focus frame of the search box follows the Windows accent color like the other frames.
+            SearchBox.BorderRingBrush = WindowsAccent.Brush;
+            SettingsDialogFrame.BorderBrush = WindowsAccent.Brush;
+            DialogFrame.BorderBrush = WindowsAccent.Brush;
+            Home.Initialize(this);
             Gallery.Initialize(this);
             Collections.Initialize(this);
             SettingsPage.Initialize(this);
@@ -100,7 +106,7 @@ namespace Flowery.WinUI.Photos.Views
                 a.Handled = true;
             }));
 
-            Navigate(PhotosPage.Gallery);
+            Navigate(PhotosPage.Home);
             UpdateLocalizedChrome();
             _ = library.RescanAsync();
 
@@ -126,6 +132,7 @@ namespace Flowery.WinUI.Photos.Views
 
         private void BuildRail()
         {
+            AddRailItem(RailTop, PhotosPage.Home, "PhotosIconHome", "Photos_Nav_Home");
             AddRailItem(RailTop, PhotosPage.Gallery, "PhotosIconGallery", "Photos_Nav_Gallery");
             AddRailItem(RailTop, PhotosPage.Favorites, "PhotosIconHeartOutline", "Photos_Nav_Favorites");
             AddRailItem(RailTop, PhotosPage.Albums, "PhotosIconAlbum", "Photos_Nav_Albums");
@@ -181,6 +188,10 @@ namespace Flowery.WinUI.Photos.Views
 
         private void UpdateLocalizedChrome()
         {
+            var viewText = PhotosLocalization.GetString("Photos_View");
+            ToolTipService.SetToolTip(TitleViewButton, viewText);
+            AutomationProperties.SetName(TitleViewButton, viewText);
+
             foreach (var (_, item) in _railItems)
             {
                 var text = PhotosLocalization.GetString(item.TooltipKey);
@@ -225,12 +236,16 @@ namespace Flowery.WinUI.Photos.Views
                 return;
 
             _currentPage = page;
+            Home.Visibility = page == PhotosPage.Home ? Visibility.Visible : Visibility.Collapsed;
             Gallery.Visibility = page is PhotosPage.Gallery or PhotosPage.Favorites ? Visibility.Visible : Visibility.Collapsed;
             Collections.Visibility = page is PhotosPage.Albums or PhotosPage.Folders ? Visibility.Visible : Visibility.Collapsed;
             SearchBox.Visibility = Visibility.Visible;
 
             switch (page)
             {
+                case PhotosPage.Home:
+                    Home.Refresh();
+                    break;
                 case PhotosPage.Gallery:
                     Gallery.ShowSource(PhotoSourceKind.All, null);
                     break;
@@ -253,10 +268,20 @@ namespace Flowery.WinUI.Photos.Views
         /// </summary>
         public void ShowCollection(PhotoSourceKind kind, string key)
         {
+            Home.Visibility = Visibility.Collapsed;
             Gallery.Visibility = Visibility.Visible;
             Collections.Visibility = Visibility.Collapsed;
             SearchBox.Visibility = Visibility.Visible;
             Gallery.ShowSource(kind, key);
+        }
+
+        /// <summary>
+        /// Opens an album or folder from outside its collection page (e.g. the home page); Back returns to that collection page.
+        /// </summary>
+        public void OpenCollection(PhotosPage page, PhotoSourceKind kind, string key)
+        {
+            Navigate(page);
+            ShowCollection(kind, key);
         }
 
         public void BackToCollections()
@@ -266,6 +291,8 @@ namespace Flowery.WinUI.Photos.Views
 
         private void OnLibraryChanged(object? sender, EventArgs e)
         {
+            if (Home.Visibility == Visibility.Visible)
+                Home.Refresh();
             if (Gallery.Visibility == Visibility.Visible)
                 Gallery.RefreshFromLibrary();
             if (Collections.Visibility == Visibility.Visible)
@@ -285,9 +312,12 @@ namespace Flowery.WinUI.Photos.Views
                 _searchTimer.IsRepeating = false;
                 _searchTimer.Tick += (_, _) =>
                 {
+                    // Searching from the home page shows the matching photos in the gallery.
+                    if (Home.Visibility == Visibility.Visible && !string.IsNullOrWhiteSpace(SearchText))
+                        Navigate(PhotosPage.Gallery);
                     if (Collections.Visibility == Visibility.Visible)
                         Collections.ApplySearch(SearchText);
-                    else
+                    else if (Gallery.Visibility == Visibility.Visible)
                         Gallery.ApplySearch(SearchText);
                 };
             }
@@ -324,6 +354,12 @@ namespace Flowery.WinUI.Photos.Views
             Viewer.StartSlideshow();
         }
 
+        /// <summary>Shows the view options button in the title bar (used while the viewer toolbar is hidden).</summary>
+        public void SetTitleViewButtonVisible(bool visible) =>
+            TitleViewButton.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+
+        private void TitleViewButton_Click(object sender, RoutedEventArgs e) => Viewer.ShowViewOptions(TitleViewButton);
+
         public void SetViewerTitle(string? subtitle)
         {
             AppTitleBar.Subtitle = subtitle ?? string.Empty;
@@ -332,6 +368,7 @@ namespace Flowery.WinUI.Photos.Views
         private void OnViewerClosed(object? sender, PhotoItem? lastItem)
         {
             Viewer.Visibility = Visibility.Collapsed;
+            SetTitleViewButtonVisible(false);
             Rail.Visibility = Visibility.Visible;
             PageSurface.Visibility = Visibility.Visible;
             AppTitleBar.IsBackButtonVisible = false;

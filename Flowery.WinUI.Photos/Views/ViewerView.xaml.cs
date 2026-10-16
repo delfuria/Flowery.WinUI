@@ -786,12 +786,12 @@ namespace Flowery.WinUI.Photos.Views
                 case VirtualKey.Add:
                 case (VirtualKey)187:
                     e.Handled = true;
-                    ZoomBy(1.25);
+                    StepZoom(1);
                     break;
                 case VirtualKey.Subtract:
                 case (VirtualKey)189:
                     e.Handled = true;
-                    ZoomBy(1 / 1.25);
+                    StepZoom(-1);
                     break;
                 case VirtualKey.Number0:
                 case VirtualKey.NumberPad0:

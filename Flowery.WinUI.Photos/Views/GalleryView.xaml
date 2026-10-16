@@ -66,7 +66,7 @@
                                    IconData="{StaticResource PhotosIconSlideshow}"
                                    Click="SlideshowButton_Click" />
                 <daisy:DaisyButton x:Name="FilterButton"
-                                   Variant="Neutral"
+                                   Variant="Primary"
                                    IconSymbol="Filter"
                                    Content="{Binding [Photos_Filter]}">
                     <daisy:DaisyButton.Flyout>
@@ -121,19 +121,19 @@
                 </StackPanel>
                 <StackPanel x:Name="SelectionActions" Grid.Column="2" Orientation="Horizontal" Spacing="4">
                     <daisy:DaisyButton x:Name="SelectAllButton"
-                                       Variant="Neutral"
+                                       Variant="Primary"
                                        Size="Small"
                                        IconSymbol="SelectAll"
                                        Content="{Binding [Photos_SelectAll]}"
                                        Click="SelectAllButton_Click" />
                     <daisy:DaisyButton x:Name="SelectionFavoriteButton"
-                                       Variant="Neutral"
+                                       Variant="Primary"
                                        Size="Small"
                                        IconData="{StaticResource PhotosIconHeartOutline}"
                                        Content="{Binding [Photos_Favorite]}"
                                        Click="SelectionFavoriteButton_Click" />
                     <daisy:DaisyButton x:Name="SelectionAlbumButton"
-                                       Variant="Neutral"
+                                       Variant="Primary"
                                        Size="Small"
                                        IconData="{StaticResource PhotosIconAlbum}"
                                        Content="{Binding [Photos_AddToAlbum]}">
@@ -142,14 +142,14 @@
                         </daisy:DaisyButton.Flyout>
                     </daisy:DaisyButton>
                     <daisy:DaisyButton x:Name="SelectionRemoveFromAlbumButton"
-                                       Variant="Neutral"
+                                       Variant="Primary"
                                        Size="Small"
                                        IconSymbol="Remove"
                                        Content="{Binding [Photos_RemoveFromAlbum]}"
                                        Visibility="Collapsed"
                                        Click="SelectionRemoveFromAlbumButton_Click" />
                     <daisy:DaisyButton x:Name="SelectionCopyButton"
-                                       Variant="Neutral"
+                                       Variant="Primary"
                                        Size="Small"
                                        IconSymbol="Copy"
                                        Content="{Binding [Photos_Copy]}"

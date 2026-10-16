@@ -14,6 +14,9 @@ namespace Flowery.WinUI.Photos
         private SUBCLASSPROC? _minSizeSubclassProc;
         private bool _isSystemMinSizeActive;
         private bool _suppressBoundsSave;
+        private bool _isActive;
+        private const int DwmwaBorderColor = 34;
+        private const uint DwmColorDefault = 0xFFFFFFFF;
 
         public MainWindow(string? startupFile)
         {
@@ -29,6 +32,10 @@ namespace Flowery.WinUI.Photos
 
             InitializeMinimumWindowSize();
             ApplyWindowBounds();
+
+            WindowsAccent.Initialize(DispatcherQueue);
+            WindowsAccent.Changed += OnAccentChanged;
+            Activated += OnWindowActivated;
 
             if (GetSafeAppWindow() is { } window)
             {
@@ -102,8 +109,30 @@ namespace Flowery.WinUI.Photos
             }
         }
 
+        private void OnWindowActivated(object sender, WindowActivatedEventArgs args)
+        {
+            _isActive = args.WindowActivationState != WindowActivationState.Deactivated;
+            ApplyBorderColor();
+        }
+
+        private void OnAccentChanged(object? sender, EventArgs e) => ApplyBorderColor();
+
+        /// <summary>
+        /// The active window frame uses the Windows accent color (also when the system setting draws it gray);
+        /// the inactive frame keeps the system default.
+        /// </summary>
+        private void ApplyBorderColor()
+        {
+            if (_windowHandle == IntPtr.Zero)
+                return;
+            var accent = WindowsAccent.Color;
+            var color = _isActive ? (uint)(accent.R | (accent.G << 8) | (accent.B << 16)) : DwmColorDefault;
+            DwmSetWindowAttribute(_windowHandle, DwmwaBorderColor, ref color, sizeof(uint));
+        }
+
         private void OnWindowClosed(object sender, WindowEventArgs args)
         {
+            WindowsAccent.Changed -= OnAccentChanged;
             DaisyThemeManager.ThemeChanged -= OnThemeChanged;
             Shell.Shutdown();
 
@@ -230,6 +259,9 @@ namespace Flowery.WinUI.Photos
 
         [DllImport("user32.dll")]
         private static extern uint GetDpiForWindow(IntPtr hWnd);
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(IntPtr hWnd, int attribute, ref uint value, int size);
 
         [DllImport("comctl32.dll", SetLastError = true)]
         private static extern bool SetWindowSubclass(IntPtr hWnd, SUBCLASSPROC pfnSubclass, IntPtr uIdSubclass, IntPtr dwRefData);

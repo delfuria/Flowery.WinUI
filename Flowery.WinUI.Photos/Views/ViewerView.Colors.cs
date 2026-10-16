@@ -273,7 +273,7 @@ namespace Flowery.WinUI.Photos.Views
                 {
                     Content = L(key),
                     Size = DaisySize.Small,
-                    Variant = DaisyButtonVariant.Neutral,
+                    Variant = DaisyButtonVariant.Primary,
                     HorizontalAlignment = HorizontalAlignment.Stretch
                 };
                 Tip(button, L(key));
@@ -354,7 +354,7 @@ namespace Flowery.WinUI.Photos.Views
 
         private void UpdateColorVisuals()
         {
-            var selectedBrush = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
+            var selectedBrush = WindowsAccent.Brush;
             var normalBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
             foreach (var (color, swatch) in _swatches)
                 swatch.BorderBrush = color == _penColor ? selectedBrush : normalBrush;

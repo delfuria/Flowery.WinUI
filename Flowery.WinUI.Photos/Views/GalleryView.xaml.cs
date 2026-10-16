@@ -48,7 +48,13 @@ namespace Flowery.WinUI.Photos.Views
             HeaderLeft.SizeChanged += (_, _) => QueueAdaptHeader();
             HeaderRight.SizeChanged += (_, _) => QueueAdaptHeader();
             PhotosLocalization.Instance.PropertyChanged += (_, _) => DispatcherQueue.TryEnqueue(OnLanguageChanged);
-            FlowerySizeManager.SizeChanged += (_, _) => DispatcherQueue.TryEnqueue(() => RebuildRows(keepPosition: true));
+            FlowerySizeManager.SizeChanged += (_, _) => DispatcherQueue.TryEnqueue(() =>
+            {
+                BuildMenus();
+                RebuildRows(keepPosition: true);
+            });
+            ImportMenu.Opening += (_, _) => ApplyFlyoutFont(ImportMenu.Items);
+            CollectionMenu.Opening += (_, _) => ApplyFlyoutFont(CollectionMenu.Items);
         }
 
         public PhotosLocalization Localization => PhotosLocalization.Instance;
@@ -147,9 +153,9 @@ namespace Flowery.WinUI.Photos.Views
 
             CountText.Text = PhotosLocalization.Format(_items.Count == 1 ? "Photos_ItemCountOne" : "Photos_ItemCount", _items.Count);
             FilterButton.Variant = _typeFilter != PhotoTypeFilter.All || _orientationFilter != PhotoOrientationFilter.Any
-                ? DaisyButtonVariant.Primary
-                : DaisyButtonVariant.Neutral;
-            // Active filters: filled primary; otherwise a filled neutral button.
+                ? DaisyButtonVariant.Accent
+                : DaisyButtonVariant.Primary;
+            // Active filters: filled accent; otherwise filled primary like the other text buttons.
             FilterButton.ButtonStyle = DaisyButtonStyle.Default;
             SlideshowButton.IsEnabled = _items.Count > 0;
 
@@ -569,6 +575,7 @@ namespace Flowery.WinUI.Photos.Views
             menu.Items.Add(new MenuFlyoutSeparator());
             menu.Items.Add(MenuItem("Photos_Delete", Symbol.Delete, () => _ = DeleteAsync(targets)));
 
+            ApplyFlyoutFont(menu.Items);
             menu.ShowAt(target, new FlyoutShowOptions { Position = position });
         }
 
@@ -655,6 +662,7 @@ namespace Flowery.WinUI.Photos.Views
         {
             SelectionAlbumMenu.Items.Clear();
             FillAlbumMenu(SelectionAlbumMenu.Items, SelectedInOrder());
+            ApplyFlyoutFont(SelectionAlbumMenu.Items);
         }
 
         private void SelectionRemoveFromAlbumButton_Click(object sender, RoutedEventArgs e) => RemoveFromCurrentAlbum(SelectedInOrder());
@@ -819,7 +827,7 @@ namespace Flowery.WinUI.Photos.Views
         private void BuildFilterPanel()
         {
             FilterPanel.Children.Clear();
-            FilterPanel.Children.Add(Caption("Photos_FileType", new Thickness(0)));
+            FilterPanel.Children.Add(FlyoutCaption("Photos_FileType", new Thickness(0)));
             FilterPanel.Children.Add(Select(
                 [
                     (PhotoTypeFilter.All, "Photos_Filter_AllTypes"),
@@ -832,9 +840,10 @@ namespace Flowery.WinUI.Photos.Views
                 {
                     _typeFilter = v;
                     Reload(scrollToTop: true);
-                }));
+                },
+                size: FlyoutSize));
 
-            FilterPanel.Children.Add(Caption("Photos_Orientation"));
+            FilterPanel.Children.Add(FlyoutCaption("Photos_Orientation"));
             FilterPanel.Children.Add(Select(
                 [
                     (PhotoOrientationFilter.Any, "Photos_Filter_AnyOrientation"),
@@ -847,16 +856,18 @@ namespace Flowery.WinUI.Photos.Views
                 {
                     _orientationFilter = v;
                     Reload(scrollToTop: true);
-                }));
+                },
+                size: FlyoutSize));
 
             var reset = new DaisyButton
             {
                 Content = L("Photos_ResetFilters"),
-                Variant = DaisyButtonVariant.Neutral,
-                Size = DaisySize.Small,
+                Variant = DaisyButtonVariant.Primary,
+                Size = FlyoutSize,
                 HorizontalAlignment = HorizontalAlignment.Right,
                 Margin = new Thickness(0, 4, 0, 0)
             };
+            FlowerySizeManager.SetIgnoreGlobalSize(reset, true);
             reset.Click += (_, _) =>
             {
                 _typeFilter = PhotoTypeFilter.All;
@@ -871,7 +882,7 @@ namespace Flowery.WinUI.Photos.Views
         private void BuildViewOptionsPanel()
         {
             ViewOptionsPanel.Children.Clear();
-            ViewOptionsPanel.Children.Add(Caption("Photos_SortBy", new Thickness(0)));
+            ViewOptionsPanel.Children.Add(FlyoutCaption("Photos_SortBy", new Thickness(0)));
             ViewOptionsPanel.Children.Add(Select(
                 [
                     (PhotoSortMode.DateTakenNewest, "Photos_Sort_DateNewest"),
@@ -887,9 +898,10 @@ namespace Flowery.WinUI.Photos.Views
                     PhotosSettings.SortMode = v;
                     PhotosSettings.SaveOptions();
                     Reload(scrollToTop: true);
-                }));
+                },
+                size: FlyoutSize));
 
-            ViewOptionsPanel.Children.Add(Caption("Photos_GroupBy"));
+            ViewOptionsPanel.Children.Add(FlyoutCaption("Photos_GroupBy"));
             ViewOptionsPanel.Children.Add(Select(
                 [
                     (PhotoGroupMode.Day, "Photos_Group_Day"),
@@ -903,9 +915,10 @@ namespace Flowery.WinUI.Photos.Views
                     PhotosSettings.GroupMode = v;
                     PhotosSettings.SaveOptions();
                     RebuildRows(keepPosition: true);
-                }));
+                },
+                size: FlyoutSize));
 
-            ViewOptionsPanel.Children.Add(Caption("Photos_TileSize"));
+            ViewOptionsPanel.Children.Add(FlyoutCaption("Photos_TileSize"));
             ViewOptionsPanel.Children.Add(Range(90, 420, PhotosSettings.TileHeight, 10, v =>
             {
                 PhotosSettings.TileHeight = v;
@@ -918,13 +931,13 @@ namespace Flowery.WinUI.Photos.Views
                 PhotosSettings.SquareTiles = v;
                 PhotosSettings.SaveOptions();
                 RebuildRows(keepPosition: true);
-            }));
+            }, FlyoutSize));
             ViewOptionsPanel.Children.Add(ToggleRow("Photos_ShowFileNames", PhotosSettings.ShowFileNames, v =>
             {
                 PhotosSettings.ShowFileNames = v;
                 PhotosSettings.SaveOptions();
                 RefreshVisibleStates();
-            }));
+            }, FlyoutSize));
         }
 
         private void BuildCollectionMenu()
@@ -1175,7 +1188,7 @@ namespace Flowery.WinUI.Photos.Views
 
             if (System.IO.Directory.Exists(PhotoLibrary.SamplesFolder))
             {
-                var samples = new DaisyButton { Content = L("Photos_UseSamples"), Variant = DaisyButtonVariant.Neutral, IconSymbol = Symbol.Pictures };
+                var samples = new DaisyButton { Content = L("Photos_UseSamples"), Variant = DaisyButtonVariant.Primary, IconSymbol = Symbol.Pictures };
                 samples.Click += (_, _) => PhotoLibrary.Instance.AddFolder(PhotoLibrary.SamplesFolder);
                 EmptyActions.Children.Add(samples);
             }

@@ -49,6 +49,7 @@ namespace Flowery.WinUI.Photos.Views
         {
             IsTabStop = true;
             UseSystemFocusVisuals = true;
+            FocusVisualPrimaryBrush = WindowsAccent.Brush;
             HorizontalContentAlignment = HorizontalAlignment.Stretch;
             VerticalContentAlignment = VerticalAlignment.Stretch;
 
@@ -112,7 +113,7 @@ namespace Flowery.WinUI.Photos.Views
             root.Children.Add(_subtitle);
             Content = root;
 
-            PointerEntered += (_, _) => _cover.BorderBrush = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
+            PointerEntered += (_, _) => _cover.BorderBrush = WindowsAccent.Brush;
             PointerExited += (_, _) => _cover.BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
             Tapped += (_, e) =>
             {

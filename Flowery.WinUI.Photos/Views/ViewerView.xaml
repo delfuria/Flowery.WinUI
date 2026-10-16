@@ -17,26 +17,6 @@
         <!-- Toolbar -->
         <Grid x:Name="Toolbar" Padding="8,2,8,6" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
             <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-                <daisy:DaisyButton x:Name="CompareButton"
-                                   Variant="Ghost"
-                                   Shape="Square"
-                                   IconData="{StaticResource PhotosIconCompare}"
-                                   Click="CompareButton_Click" />
-                <daisy:DaisyButton x:Name="RevertButton"
-                                   Variant="Neutral"
-                                   Content="{Binding [Photos_Revert]}"
-                                   Click="RevertButton_Click" />
-                <daisy:DaisyButton x:Name="UndoButton"
-                                   Variant="Ghost"
-                                   Shape="Square"
-                                   IconSymbol="Undo"
-                                   Click="UndoButton_Click" />
-                <daisy:DaisyButton x:Name="RedoButton"
-                                   Variant="Ghost"
-                                   Shape="Square"
-                                   IconSymbol="Redo"
-                                   Click="RedoButton_Click" />
-                <Border Width="1" Height="20" Margin="6,0" Opacity="0.25" Background="{ThemeResource DaisyBaseContentBrush}" />
                 <daisy:DaisyButton x:Name="RotateButton"
                                    Variant="Ghost"
                                    Shape="Square"
@@ -214,9 +194,40 @@
                     BorderBrush="{ThemeResource DaisyBase300Brush}"
                     BorderThickness="1"
                     Visibility="Collapsed">
-                <Grid RowDefinitions="Auto,*">
-                    <Grid x:Name="TabBar" Padding="6,8,6,0" />
-                    <ScrollViewer Grid.Row="1"
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <!-- Edit history: undo/redo, before/after compare and revert act only on the edits in this panel. -->
+                    <Grid x:Name="EditActions"
+                          Padding="8,8,10,6"
+                          ColumnDefinitions="Auto,Auto,Auto,*,Auto"
+                          ColumnSpacing="2"
+                          BorderBrush="{ThemeResource DaisyBase300Brush}"
+                          BorderThickness="0,0,0,1">
+                        <daisy:DaisyButton x:Name="UndoButton"
+                                           Variant="Ghost"
+                                           Shape="Square"
+                                           IconSymbol="Undo"
+                                           Click="UndoButton_Click" />
+                        <daisy:DaisyButton x:Name="RedoButton"
+                                           Grid.Column="1"
+                                           Variant="Ghost"
+                                           Shape="Square"
+                                           IconSymbol="Redo"
+                                           Click="RedoButton_Click" />
+                        <daisy:DaisyButton x:Name="CompareButton"
+                                           Grid.Column="2"
+                                           Margin="6,0,0,0"
+                                           Variant="Ghost"
+                                           Shape="Square"
+                                           IconData="{StaticResource PhotosIconCompare}"
+                                           Click="CompareButton_Click" />
+                        <daisy:DaisyButton x:Name="RevertButton"
+                                           Grid.Column="4"
+                                           Variant="Primary"
+                                           Content="{Binding [Photos_Revert]}"
+                                           Click="RevertButton_Click" />
+                    </Grid>
+                    <Grid x:Name="TabBar" Grid.Row="1" Padding="6,8,6,0" />
+                    <ScrollViewer Grid.Row="2"
                                   Padding="14,10,14,16"
                                   HorizontalScrollMode="Disabled"
                                   HorizontalScrollBarVisibility="Disabled">
