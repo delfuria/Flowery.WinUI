@@ -444,12 +444,12 @@ namespace Flowery.Theming
         {
             return size switch
             {
-                DaisySize.ExtraSmall => 32,
-                DaisySize.Small => 36,
-                DaisySize.Medium => 40,
-                DaisySize.Large => 44,
-                DaisySize.ExtraLarge => 48,
-                _ => 40
+                DaisySize.ExtraSmall => 36,
+                DaisySize.Small => 40,
+                DaisySize.Medium => 44,
+                DaisySize.Large => 48,
+                DaisySize.ExtraLarge => 50,
+                _ => 44
             };
         }
 
@@ -504,12 +504,12 @@ namespace Flowery.Theming
         /// </summary>
         public static double GetDefaultFontSize(DaisySize size) => size switch
         {
-            DaisySize.ExtraSmall => 8,
-            DaisySize.Small => 10,
-            DaisySize.Medium => 12,
-            DaisySize.Large => 14,
-            DaisySize.ExtraLarge => 16,
-            _ => 12
+            DaisySize.ExtraSmall => 10,
+            DaisySize.Small => 12,
+            DaisySize.Medium => 14,
+            DaisySize.Large => 18,
+            DaisySize.ExtraLarge => 20,
+            _ => 14
         };
 
         /// <summary>
@@ -517,12 +517,12 @@ namespace Flowery.Theming
         /// </summary>
         public static double GetDefaultLineHeight(DaisySize size) => size switch
         {
-            DaisySize.ExtraSmall => 12,
+            DaisySize.ExtraSmall => 14,
             DaisySize.Small => 16,
-            DaisySize.Medium => 16,
-            DaisySize.Large => 20,
-            DaisySize.ExtraLarge => 24,
-            _ => 16
+            DaisySize.Medium => 20,
+            DaisySize.Large => 24,
+            DaisySize.ExtraLarge => 28,
+            _ => 20
         };
 
         /// <summary>

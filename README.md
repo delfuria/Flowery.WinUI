@@ -17,7 +17,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/tobitege/Flowery.WinUI?style=flat-square&logo=github)](https://github.com/tobitege/Flowery.WinUI/stargazers) [![GitHub forks](https://img.shields.io/github/forks/tobitege/Flowery.WinUI?style=flat-square&logo=github)](https://github.com/tobitege/Flowery.WinUI/forks) [![Open issues](https://img.shields.io/github/issues/tobitege/Flowery.WinUI?style=flat-square)](https://github.com/tobitege/Flowery.WinUI/issues) [![Last commit](https://img.shields.io/github/last-commit/tobitege/Flowery.WinUI/main?style=flat-square)](https://github.com/tobitege/Flowery.WinUI/commits/main) [![Repository size](https://img.shields.io/github/repo-size/tobitege/Flowery.WinUI?style=flat-square)](https://github.com/tobitege/Flowery.WinUI)
 
-**[Documentation](https://tobitege.github.io/Flowery.WinUI/) · [Control reference](llms-static/README.md) · [Gallery](#build-and-run) · [Changelog](CHANGELOG.md)**
+**[Documentation](https://tobitege.github.io/Flowery.WinUI/) · [Control reference](llms-static/README.md) · [Demo apps](#demo-apps) · [Changelog](CHANGELOG.md)**
 
 **12 languages** · Native Windows controls · Runtime themes · Kanban · Win2D
 
@@ -25,7 +25,7 @@
 
 Flowery.WinUI is a native WinUI 3 control library for the Windows App SDK.
 Build themed Windows applications with Flowery controls and optional Kanban, Win2D, and authentication packages.
-Version [1.2.0](https://github.com/tobitege/Flowery.WinUI/releases/tag/v1.2.0) is available on NuGet.
+Version [1.2.1](https://github.com/tobitege/Flowery.WinUI/releases/tag/v1.2.1) is available on NuGet.
 
 ## Features
 
@@ -37,8 +37,24 @@ Version [1.2.0](https://github.com/tobitege/Flowery.WinUI/releases/tag/v1.2.0) i
 - Optional Win2D graphics support.
 - Shader-effect hosts through native WinUI 3 WebView2 controls.
 - A Windows Gallery with the existing control examples.
+- A Photos demo app for viewing photos and making basic edits.
 - A native Windows Kiosk with six showcase slides.
 - A native test host for the existing unit and runtime tests.
+
+## Demo apps
+
+The repository includes three Windows apps built with Flowery.WinUI.
+
+| App | What it shows |
+| --- | --- |
+| **Gallery** (`Flowery.WinUI.Gallery`) | Every control with live examples, themes, sizes and languages. It also hosts the runtime tests. |
+| **Photos** (`Flowery.WinUI.Photos`) | A complete everyday app: photo library, viewer and basic editor with Win2D. See the [Photos README](Flowery.WinUI.Photos/README.md). |
+| **Kiosk** (`Flowery.WinUI.Kiosk`) | A showcase slideshow with six slides. |
+
+![Flowery Photos home page](Flowery.WinUI.Photos/Screenies/02-home.png)
+
+More Photos screenshots are in [`Flowery.WinUI.Photos/Screenies`](Flowery.WinUI.Photos/Screenies).
+See [Build and run](#build-and-run) for the commands.
 
 ## Requirements
 
@@ -60,7 +76,7 @@ See [SDK selection](scripts/README.md#select-the-net-sdk) for exact-version and 
 1. Add the `Flowery.WinUI` NuGet package to a WinUI 3 application.
 
 ```powershell
-dotnet add package Flowery.WinUI --version 1.2.0
+dotnet add package Flowery.WinUI --version 1.2.1
 ```
 
 2. Merge the library resources after `XamlControlsResources` in the application resources.
@@ -103,6 +119,7 @@ pwsh -NoProfile -File ./scripts/run-windows.ps1 -Configuration Debug
 ```
 
 For the Gallery and its project references only, use `scripts/build_windows.ps1`.
+After a full build, start Photos with `./bin/Debug/Flowery.WinUI.Photos/net10.0-windows10.0.19041/win-x64/Flowery.WinUI.Photos.exe`.
 Build logs are in `logs/`.
 The scripts retain a separate log for each run.
 
@@ -132,6 +149,7 @@ Results and logs are in `TestResults/` and `logs/`.
 | `Flowery.WinUI.Gallery.Core` | Gallery views, examples, and assets |
 | `Flowery.WinUI.Gallery` | Native Windows application and test host |
 | `Flowery.WinUI.Kiosk` | Native showcase slideshow application |
+| `Flowery.WinUI.Photos` | Photos demo application (library, viewer, editor) |
 | `Flowery.WinUI.RuntimeTests` | Runtime tests and linked unit tests |
 | `Flowery.WinUI.RuntimeTests.WindowsRunner` | External process runner and result assertions |
 

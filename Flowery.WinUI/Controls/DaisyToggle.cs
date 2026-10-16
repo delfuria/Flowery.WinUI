@@ -305,7 +305,8 @@ namespace Flowery.Controls
 
             if (!_hasFontSizeOverride)
             {
-                SetFontSize(DaisyResourceLookup.GetDefaultFontSize(Size));
+                SetFontSize(DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggle", Size, "FontSize",
+                    DaisyResourceLookup.GetDefaultFontSize(Size)));
             }
 
             if (ReadLocalValue(MinHeightProperty) == DependencyProperty.UnsetValue)
