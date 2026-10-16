@@ -249,14 +249,14 @@ Outer border size for checkboxes and radio buttons.
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyToggle{Size}Width` | 24 | 28 | 36 | 42 | 48 |
-| `DaisyToggle{Size}Height` | 14 | 16 | 20 | 24 | 28 |
+| `DaisyToggle{Size}Width` | 16 | 20 | 24 | 28 | 32 |
+| `DaisyToggle{Size}Height` | 8 | 10 | 12 | 14 | 16 |
 
 ### Toggle Knob Sizes
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyToggleKnob{Size}Size` | 10 | 12 | 16 | 18 | 22 |
+| `DaisyToggleKnob{Size}Size` | 4 | 6 | 8 | 10 | 12 |
 
 ---
 

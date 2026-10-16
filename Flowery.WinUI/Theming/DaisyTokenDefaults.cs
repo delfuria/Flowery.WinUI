@@ -167,24 +167,24 @@ namespace Flowery.Theming
             Ensure(resources, "DaisyRadioSmallSize", 10d);
             Ensure(resources, "DaisyRadioExtraSmallSize", 8d);
 
-            // ---- Toggle switch sizes (match llms-static/DesignTokens.md and the DaisyToggle fallbacks) ----
-            Ensure(resources, "DaisyToggleExtraLargeWidth", 48d);
-            Ensure(resources, "DaisyToggleExtraLargeHeight", 28d);
-            Ensure(resources, "DaisyToggleLargeWidth", 42d);
-            Ensure(resources, "DaisyToggleLargeHeight", 24d);
-            Ensure(resources, "DaisyToggleMediumWidth", 36d);
-            Ensure(resources, "DaisyToggleMediumHeight", 20d);
-            Ensure(resources, "DaisyToggleSmallWidth", 28d);
-            Ensure(resources, "DaisyToggleSmallHeight", 16d);
-            Ensure(resources, "DaisyToggleExtraSmallWidth", 24d);
-            Ensure(resources, "DaisyToggleExtraSmallHeight", 14d);
+            // ---- Toggle switch sizes ----
+            Ensure(resources, "DaisyToggleExtraLargeWidth", 32d);
+            Ensure(resources, "DaisyToggleExtraLargeHeight", 16d);
+            Ensure(resources, "DaisyToggleLargeWidth", 28d);
+            Ensure(resources, "DaisyToggleLargeHeight", 14d);
+            Ensure(resources, "DaisyToggleMediumWidth", 24d);
+            Ensure(resources, "DaisyToggleMediumHeight", 12d);
+            Ensure(resources, "DaisyToggleSmallWidth", 20d);
+            Ensure(resources, "DaisyToggleSmallHeight", 10d);
+            Ensure(resources, "DaisyToggleExtraSmallWidth", 16d);
+            Ensure(resources, "DaisyToggleExtraSmallHeight", 8d);
 
             // ---- Toggle knob sizes ----
-            Ensure(resources, "DaisyToggleKnobExtraLargeSize", 22d);
-            Ensure(resources, "DaisyToggleKnobLargeSize", 18d);
-            Ensure(resources, "DaisyToggleKnobMediumSize", 16d);
-            Ensure(resources, "DaisyToggleKnobSmallSize", 12d);
-            Ensure(resources, "DaisyToggleKnobExtraSmallSize", 10d);
+            Ensure(resources, "DaisyToggleKnobExtraLargeSize", 12d);
+            Ensure(resources, "DaisyToggleKnobLargeSize", 10d);
+            Ensure(resources, "DaisyToggleKnobMediumSize", 8d);
+            Ensure(resources, "DaisyToggleKnobSmallSize", 6d);
+            Ensure(resources, "DaisyToggleKnobExtraSmallSize", 4d);
 
             // ---- Progress bar sizes ----
             Ensure(resources, "DaisyProgressLargeHeight", 16d);
