@@ -141,7 +141,20 @@
   "Common_Connected": "Connected",
   "Common_Delete": "削除",
   "Common_ConfirmDelete": "削除の確認",
-  "Weather_FeelsLike": "体感温度"
+  "Weather_FeelsLike": "体感温度",
+  "Common_Ok": "OK",
+  "ColorPicker_Title": "カラーピッカー",
+  "ColorPicker_Undo": "元に戻す",
+  "ColorPicker_Redo": "やり直し",
+  "ColorPicker_Lightness": "明度",
+  "ColorPicker_ScreenPicker": "画面スポイト",
+  "ColorPicker_Original": "元の色",
+  "ColorPicker_New": "新しい色",
+  "ColorPicker_Palette": "カラーパレット",
+  "ColorPicker_Values": "カラー値",
+  "ColorPicker_ClickAndDrag": "ドラッグで選択",
+  "ColorPicker_ReleaseToPick": "離すと選択",
+  "ColorPicker_ScreenPickerName": "画面スポイト {0}"
 }
 
 

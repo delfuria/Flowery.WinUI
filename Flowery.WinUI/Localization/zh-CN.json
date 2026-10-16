@@ -141,7 +141,20 @@
   "Common_Connected": "Connected",
   "Common_Delete": "删除",
   "Common_ConfirmDelete": "确认删除",
-  "Weather_FeelsLike": "体感"
+  "Weather_FeelsLike": "体感",
+  "Common_Ok": "确定",
+  "ColorPicker_Title": "颜色选择器",
+  "ColorPicker_Undo": "撤销",
+  "ColorPicker_Redo": "重做",
+  "ColorPicker_Lightness": "亮度",
+  "ColorPicker_ScreenPicker": "屏幕取色器",
+  "ColorPicker_Original": "原始颜色",
+  "ColorPicker_New": "新颜色",
+  "ColorPicker_Palette": "调色板",
+  "ColorPicker_Values": "颜色值",
+  "ColorPicker_ClickAndDrag": "单击并拖动以取色",
+  "ColorPicker_ReleaseToPick": "松开以取色",
+  "ColorPicker_ScreenPickerName": "屏幕取色器 {0}"
 }
 
 

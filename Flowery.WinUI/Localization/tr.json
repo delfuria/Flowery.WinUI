@@ -141,7 +141,20 @@
   "Common_Connected": "Connected",
   "Common_Delete": "Sil",
   "Common_ConfirmDelete": "Silme onayı",
-  "Weather_FeelsLike": "Hissedilen"
+  "Weather_FeelsLike": "Hissedilen",
+  "Common_Ok": "Tamam",
+  "ColorPicker_Title": "Renk Seçici",
+  "ColorPicker_Undo": "Geri al",
+  "ColorPicker_Redo": "Yinele",
+  "ColorPicker_Lightness": "Açıklık",
+  "ColorPicker_ScreenPicker": "Ekrandan Renk Seçici",
+  "ColorPicker_Original": "Orijinal",
+  "ColorPicker_New": "Yeni",
+  "ColorPicker_Palette": "Renk Paleti",
+  "ColorPicker_Values": "Renk Değerleri",
+  "ColorPicker_ClickAndDrag": "Tıklayıp sürükleyin",
+  "ColorPicker_ReleaseToPick": "Seçmek için bırakın",
+  "ColorPicker_ScreenPickerName": "Ekrandan renk seçici {0}"
 }
 
 

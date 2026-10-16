@@ -287,14 +287,14 @@ namespace Flowery.Controls.ColorPicker
             _originalColorPreview.Child = _originalColorHexText;
             _colorPreview = CreatePreviewBorder();
 
-            _undoButton = CreateHistoryButton(UndoButtonName, "Undo", mirrorIcon: true);
+            _undoButton = CreateHistoryButton(UndoButtonName, L("ColorPicker_Undo"), mirrorIcon: true);
             _undoButton.Click += (_, _) => Undo();
-            _redoButton = CreateHistoryButton(RedoButtonName, "Redo", mirrorIcon: false);
+            _redoButton = CreateHistoryButton(RedoButtonName, L("ColorPicker_Redo"), mirrorIcon: false);
             _redoButton.Click += (_, _) => Redo();
 
-            _okButton = new DaisyButton { Content = "OK", Variant = DaisyButtonVariant.Primary, Size = DaisySize.Small, MinWidth = ButtonWidth };
+            _okButton = new DaisyButton { Content = L("Common_Ok"), Variant = DaisyButtonVariant.Primary, Size = DaisySize.Small, MinWidth = ButtonWidth };
             _okButton.Click += (_, _) => Confirm();
-            _cancelButton = new DaisyButton { Content = "Cancel", Size = DaisySize.Small, MinWidth = ButtonWidth };
+            _cancelButton = new DaisyButton { Content = L("Common_Cancel"), Size = DaisySize.Small, MinWidth = ButtonWidth };
             _cancelButton.Click += (_, _) => Cancel();
 
             Content = BuildLayout(
@@ -607,6 +607,9 @@ namespace Flowery.Controls.ColorPicker
             return button;
         }
 
+        // Texts are resolved once per dialog; ShowAsync creates a new dialog, so it follows the current culture
+        private static string L(string key) => FloweryLocalization.GetStringInternal(key);
+
         private static TextBlock CreateLabel(string text, bool bold = false) => new()
         {
             Text = text,
@@ -624,7 +627,7 @@ namespace Flowery.Controls.ColorPicker
         {
             var title = new TextBlock
             {
-                Text = "Color Picker",
+                Text = L("ColorPicker_Title"),
                 FontWeight = FontWeights.SemiBold,
                 FontSize = 16,
                 Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
@@ -638,11 +641,11 @@ namespace Flowery.Controls.ColorPicker
             var left = new StackPanel { Spacing = PanelSpacing, VerticalAlignment = VerticalAlignment.Top };
             left.Children.Add(_colorWheel);
             var lightness = new StackPanel { Spacing = TinySpacing };
-            lightness.Children.Add(CreateLabel("Lightness"));
+            lightness.Children.Add(CreateLabel(L("ColorPicker_Lightness")));
             lightness.Children.Add(_lightnessSlider);
             left.Children.Add(lightness);
             var screen = new StackPanel { Spacing = TinySpacing, Margin = new Thickness(0, PanelSpacing, 0, 0) };
-            screen.Children.Add(CreateLabel("Screen Picker", bold: true));
+            screen.Children.Add(CreateLabel(L("ColorPicker_ScreenPicker"), bold: true));
             screen.Children.Add(_screenColorPicker);
             left.Children.Add(screen);
             main.Children.Add(left);
@@ -654,10 +657,10 @@ namespace Flowery.Controls.ColorPicker
             preview.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             preview.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             var originalStack = new StackPanel();
-            originalStack.Children.Add(CreateLabel("Original"));
+            originalStack.Children.Add(CreateLabel(L("ColorPicker_Original")));
             originalStack.Children.Add(_originalColorPreview);
             var newStack = new StackPanel();
-            newStack.Children.Add(CreateLabel("New"));
+            newStack.Children.Add(CreateLabel(L("ColorPicker_New")));
             newStack.Children.Add(_colorPreview);
             Grid.SetColumn(newStack, 1);
             preview.Children.Add(originalStack);
@@ -665,12 +668,12 @@ namespace Flowery.Controls.ColorPicker
             right.Children.Add(preview);
 
             var grid = new StackPanel();
-            grid.Children.Add(CreateLabel("Color Palette", bold: true));
+            grid.Children.Add(CreateLabel(L("ColorPicker_Palette"), bold: true));
             grid.Children.Add(_colorGrid);
             right.Children.Add(grid);
 
             var editor = new StackPanel { Margin = new Thickness(0, TinySpacing, 0, 0) };
-            editor.Children.Add(CreateLabel("Color Values", bold: true));
+            editor.Children.Add(CreateLabel(L("ColorPicker_Values"), bold: true));
             editor.Children.Add(_colorEditor);
             right.Children.Add(editor);
             main.Children.Add(right);
