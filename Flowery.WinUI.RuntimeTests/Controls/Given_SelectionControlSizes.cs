@@ -204,6 +204,20 @@ namespace Flowery.WinUI.RuntimeTests.Controls
             }
         }
 
+        [TestMethod]
+        public async Task When_ToggleHasNoHeader_ItIsExactlyAsWideAsItsTrack()
+        {
+            var bare = await LoadToggleAsync(DaisySize.Medium);
+            var (track, _) = GetToggleParts(bare);
+            Assert.AreEqual(track.Width, bare.ActualWidth, 0.01, "Toggle without Header must not reserve the header gap");
+
+            var labeled = await LoadToggleAsync(DaisySize.Medium);
+            labeled.Header = "Label";
+            await Task.Delay(100);
+            labeled.UpdateLayout();
+            Assert.IsTrue(labeled.ActualWidth > track.Width + 8, "Toggle with Header shows the label after the 8 px gap");
+        }
+
         private static async Task<DaisyToggle> LoadToggleAsync(DaisySize size)
         {
             // Top-left alignment keeps the host grid from stretching the toggle, so ActualWidth/Height are its own size.

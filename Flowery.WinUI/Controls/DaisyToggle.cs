@@ -17,6 +17,7 @@ namespace Flowery.Controls
         private Border? _switchArea;
         private Ellipse? _knob;
         private TranslateTransform? _knobTransform;
+        private ContentPresenter? _headerPresenter;
         private Storyboard? _knobStoryboard;
 
         private bool _isSyncing;
@@ -92,6 +93,7 @@ namespace Flowery.Controls
             _switchArea = GetTemplateChild("SwitchArea") as Border;
             _knob = GetTemplateChild("Knob") as Ellipse;
             _knobTransform = GetTemplateChild("KnobTransform") as TranslateTransform;
+            _headerPresenter = GetTemplateChild("HeaderPresenter") as ContentPresenter;
 
             EnsureForegroundOverrideInitialized();
             EnsureFontSizeOverrideInitialized();
@@ -200,7 +202,7 @@ namespace Flowery.Controls
                 nameof(Header),
                 typeof(object),
                 typeof(DaisyToggle),
-                new PropertyMetadata(null));
+                new PropertyMetadata(null, OnAppearanceChanged));
 
         /// <summary>
         /// Header content for the toggle.
@@ -288,6 +290,10 @@ namespace Flowery.Controls
             ApplySizing(resources);
             ApplyTheme(resources);
             ApplyKnobPosition(animateKnob);
+
+            // Without a header the presenter would still reserve its 8 px gap next to the track.
+            if (_headerPresenter != null)
+                _headerPresenter.Visibility = Header is null ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void ApplySizing(ResourceDictionary? resources)

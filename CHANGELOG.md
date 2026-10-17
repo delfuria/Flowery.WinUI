@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The checked `DaisyToggle` knob no longer overlaps the right track border. Its position ignored the 1 px border, so it sat flush with the right edge while the unchecked knob kept a gap on the left.
 - `DaisyToggle` no longer keeps the minimum width and height of its first size. It set `MinWidth` and `MinHeight` once, when its template was applied, and never updated them, so a toggle that follows the global size stayed at least 40×20 after switching to a smaller size, which kept table rows and lists from getting lower.
+- `DaisyButton` no longer keeps the corner radius of its first size. Like the toggle minimum size, it treated its own token radius as an app override once written, so a button that followed the global size kept the old radius (4/4/8/8/12 px per tier). Radii set by the app, `DaisyJoin` or `DaisyButtonGroup` are still respected.
+- A `DaisyToggle` without a `Header` no longer reserves the 8 px gap meant for the header text; it is exactly as wide as its track.
 - The `DaisyRadio` dot stays centered at fractional display scales such as 125 % and 175 %. Ring and dot no longer use layout rounding, like the WinUI `RadioButton`.
 
 ## [1.3.2] - 2026-10-16
