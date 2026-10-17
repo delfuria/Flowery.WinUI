@@ -6,6 +6,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-10-17
+
+### Added
+
+- `Flowery.WinUI.RuntimeTests/VisualChecks/indicator-sizes.html`, a browser page that draws `DaisyToggle`, `DaisyCheckBox` and `DaisyRadio` at their default token sizes in all five size tiers, in the Dark and Light palettes, at real effective pixels.
+- The Gallery Toggle and Radio sections show a small `DaisyTable` with the controls in its cells. It follows the global size, so the row height can be checked in every size tier.
+
+### Changed
+
+- **Breaking:** Visual: `DaisyCheckBox`, `DaisyRadio` and `DaisyToggle` indicators are as tall as the line height of their label text in the Windows type ramp, and Medium matches the WinUI defaults. The compact indicators were much smaller than their labels since the font ladder grew in 1.3.0. Checkbox and radio are 14/16/20/24/28 px (was 8/10/12/14/16), the radio dot 8/10/12/14/16 px and the checkmark 8/10/12/14/17 px. Toggle tracks are 28×14, 32×16, 40×20, 48×24 and 56×28 with 8/10/12/14/16 px knobs (was 16×8 to 32×16 with 4–12 px knobs), keeping the WinUI `ToggleSwitch` proportions. The checkbox corner radius is a fifth of the box (3/3/4/5/6 px), so it also follows overridden `DaisyCheckbox{Size}Size` tokens. Review fixed dimensions and style overrides that depend on the previous sizes.
+- The `DaisyToggle` track border uses the base content color at 50 % opacity, like DaisyUI's toggle, instead of the full color. The thin full-contrast outline looked jagged on its curves at 100 % display scaling. `DaisyToggleTrackBorderBrush` still overrides it.
+- `DaisyToggle.TogglePadding` defaults to `NaN`, which centers the knob with the same gap on every side, like the WinUI `ToggleSwitch` (3 px inside the border at Medium). Set a number to use a fixed horizontal gap as before.
+- `DaisyTableRow` reads its lightweight-styling brushes (`DaisyTableRowBorderBrush`, `DaisyTableRowHoverBackground` and the others) from the `Resources` of its `DaisyTable` when the row does not define them itself, so one definition on the table styles all rows.
+
+### Fixed
+
+- The checked `DaisyToggle` knob no longer overlaps the right track border. Its position ignored the 1 px border, so it sat flush with the right edge while the unchecked knob kept a gap on the left.
+- `DaisyToggle` no longer keeps the minimum width and height of its first size. It set `MinWidth` and `MinHeight` once, when its template was applied, and never updated them, so a toggle that follows the global size stayed at least 40×20 after switching to a smaller size, which kept table rows and lists from getting lower.
+- `DaisyButton` no longer keeps the corner radius of its first size. Like the toggle minimum size, it treated its own token radius as an app override once written, so a button that followed the global size kept the old radius (4/4/8/8/12 px per tier). Radii set by the app, `DaisyJoin` or `DaisyButtonGroup` are still respected.
+- A `DaisyToggle` without a `Header` no longer reserves the 8 px gap meant for the header text; it is exactly as wide as its track.
+- The `DaisyRadio` dot stays centered at fractional display scales such as 125 % and 175 %. Ring and dot no longer use layout rounding, like the WinUI `RadioButton`.
+
 ## [1.3.2] - 2026-10-16
 
 ### Fixed

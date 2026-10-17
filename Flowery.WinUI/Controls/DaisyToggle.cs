@@ -17,6 +17,7 @@ namespace Flowery.Controls
         private Border? _switchArea;
         private Ellipse? _knob;
         private TranslateTransform? _knobTransform;
+        private ContentPresenter? _headerPresenter;
         private Storyboard? _knobStoryboard;
 
         private bool _isSyncing;
@@ -92,6 +93,7 @@ namespace Flowery.Controls
             _switchArea = GetTemplateChild("SwitchArea") as Border;
             _knob = GetTemplateChild("Knob") as Ellipse;
             _knobTransform = GetTemplateChild("KnobTransform") as TranslateTransform;
+            _headerPresenter = GetTemplateChild("HeaderPresenter") as ContentPresenter;
 
             EnsureForegroundOverrideInitialized();
             EnsureFontSizeOverrideInitialized();
@@ -181,10 +183,11 @@ namespace Flowery.Controls
                 nameof(TogglePadding),
                 typeof(double),
                 typeof(DaisyToggle),
-                new PropertyMetadata(1.0, OnAppearanceChanged));
+                new PropertyMetadata(double.NaN, OnAppearanceChanged));
 
         /// <summary>
-        /// The internal padding of the toggle knob area.
+        /// The horizontal gap between the knob and the track border.
+        /// <see cref="double.NaN"/> (the default) centers the knob with the same gap on every side.
         /// </summary>
         public double TogglePadding
         {
@@ -199,7 +202,7 @@ namespace Flowery.Controls
                 nameof(Header),
                 typeof(object),
                 typeof(DaisyToggle),
-                new PropertyMetadata(null));
+                new PropertyMetadata(null, OnAppearanceChanged));
 
         /// <summary>
         /// Header content for the toggle.
@@ -287,6 +290,10 @@ namespace Flowery.Controls
             ApplySizing(resources);
             ApplyTheme(resources);
             ApplyKnobPosition(animateKnob);
+
+            // Without a header the presenter would still reserve its 8 px gap next to the track.
+            if (_headerPresenter != null)
+                _headerPresenter.Visibility = Header is null ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void ApplySizing(ResourceDictionary? resources)
@@ -294,11 +301,11 @@ namespace Flowery.Controls
             if (_switchArea == null || _knob == null)
                 return;
 
-            _switchArea.Width = DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggle", Size, "Width", fallback: 36d);
+            _switchArea.Width = DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggle", Size, "Width", fallback: 40d);
             _switchArea.Height = DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggle", Size, "Height", fallback: 20d);
             _switchArea.CornerRadius = new CornerRadius(_switchArea.Height / 2);
 
-            _knob.Width = DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggleKnob", Size, "Size", fallback: 16d);
+            _knob.Width = DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggleKnob", Size, "Size", fallback: 12d);
             _knob.Height = _knob.Width;
             // No margin needed - vertical centering via VerticalAlignment="Center" in XAML,
             // horizontal positioning via TranslateTransform.X
@@ -307,16 +314,6 @@ namespace Flowery.Controls
             {
                 SetFontSize(DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggle", Size, "FontSize",
                     DaisyResourceLookup.GetDefaultFontSize(Size)));
-            }
-
-            if (ReadLocalValue(MinHeightProperty) == DependencyProperty.UnsetValue)
-            {
-                MinHeight = _switchArea.Height;
-            }
-
-            if (ReadLocalValue(MinWidthProperty) == DependencyProperty.UnsetValue)
-            {
-                MinWidth = _switchArea.Width;
             }
         }
 
@@ -342,9 +339,11 @@ namespace Flowery.Controls
             var trackBgOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyToggle", "TrackBackground");
             var trackBorderOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyToggle", "TrackBorderBrush");
 
-            // Track uses Base300 for background, BaseContent for border to ensure visibility
+            // Track uses Base300 for background and half of BaseContent for the border, like DaisyUI's --input-color
             _switchArea.Background = trackBgOverride ?? DaisyResourceLookup.GetBrush(resources, "DaisyBase300Brush", fallback: new SolidColorBrush(Microsoft.UI.Colors.Gray));
-            _switchArea.BorderBrush = trackBorderOverride ?? DaisyResourceLookup.GetBrush(resources, "DaisyBaseContentBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.Gray));
+            var contentBrush = DaisyResourceLookup.GetBrush(resources, "DaisyBaseContentBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.Gray));
+            _switchArea.BorderBrush = trackBorderOverride
+                ?? (contentBrush is SolidColorBrush solid ? new SolidColorBrush(solid.Color) { Opacity = 0.5 } : contentBrush);
             _switchArea.BorderThickness = new Thickness(1);
 
             if (IsChecked == true)
@@ -395,11 +394,15 @@ namespace Flowery.Controls
             if (_switchArea == null || _knob == null || _knobTransform == null)
                 return;
 
-            var padding = GetEffectivePadding();
+            // The knob moves inside the track border, so the travel excludes the border thickness.
             // Unchecked: knob left edge at padding offset from left
             // Checked: knob right edge at padding offset from right
+            var border = _switchArea.BorderThickness;
+            var innerWidth = _switchArea.Width - border.Left - border.Right;
+            var innerHeight = _switchArea.Height - border.Top - border.Bottom;
+            var padding = GetEffectivePadding(innerHeight, _knob.Width);
             var targetX = IsChecked == true
-                ? Math.Max(padding, _switchArea.Width - _knob.Width - padding)
+                ? Math.Max(padding, innerWidth - _knob.Width - padding)
                 : padding;
 
             _knobStoryboard?.Stop();
@@ -430,9 +433,13 @@ namespace Flowery.Controls
             if (!Flowery.Services.DaisyMotion.AnimationsEnabled) ApplyKnobPosition(animate: false);
         }
 
-        private double GetEffectivePadding()
+        private double GetEffectivePadding(double innerHeight, double knobSize)
         {
-            return TogglePadding;
+            if (!double.IsNaN(TogglePadding))
+                return TogglePadding;
+
+            // Automatic: the same gap beside the knob as above and below it.
+            return Math.Max(0, (innerHeight - knobSize) / 2);
         }
 
 

@@ -163,6 +163,8 @@ namespace Flowery.Controls
         protected const string ShadowContainerPartName = "PART_ShadowContainer";
         private bool _isPointerOver;
         private bool _isPressed;
+        private bool _hasCornerRadiusOverride;
+        private bool _isApplyingCornerRadius;
 
         private DaisyShadowContainer? _shadowContainer;
         private Border? _buttonBorder;
@@ -225,6 +227,7 @@ namespace Flowery.Controls
 
             // Watch for Height changes to keep Width in sync for Circle/Square shapes
             RegisterPropertyChangedCallback(HeightProperty, OnHeightPropertyChanged);
+            RegisterPropertyChangedCallback(CornerRadiusProperty, OnCornerRadiusPropertyChanged);
             RegisterPropertyChangedCallback(ContentProperty, OnIconLayoutPropertyChanged);
             RegisterPropertyChangedCallback(DaisyControlExtensions.IconProperty, OnIconLayoutPropertyChanged);
             RegisterPropertyChangedCallback(DaisyControlExtensions.IconPlacementProperty, OnIconLayoutPropertyChanged);
@@ -551,7 +554,7 @@ namespace Flowery.Controls
 
                 if (Shape == DaisyButtonShape.Circle)
                 {
-                    CornerRadius = new CornerRadius(Height / 2);
+                    SetCornerRadius(new CornerRadius(Height / 2));
                 }
             }
         }
@@ -922,15 +925,35 @@ namespace Flowery.Controls
             }
 
             // Respect local CornerRadius overrides (e.g. DaisyButtonGroup joined corners).
-            if (ReadLocalValue(CornerRadiusProperty) == DependencyProperty.UnsetValue)
+            if (!_hasCornerRadiusOverride)
             {
-                CornerRadius = DaisyResourceLookup.GetSizeCornerRadius(resources, "DaisySize", size, "CornerRadius",
-                    DaisyResourceLookup.GetDefaultCornerRadius(size));
+                SetCornerRadius(DaisyResourceLookup.GetSizeCornerRadius(resources, "DaisySize", size, "CornerRadius",
+                    DaisyResourceLookup.GetDefaultCornerRadius(size)));
             }
 
             ApplyShape();
             ApplyIconSizing();
             ApplyContentLineHeight(resources);
+        }
+
+        // The control's own writes must not count as an override, or the radius of the first size would stick.
+        private void SetCornerRadius(CornerRadius value)
+        {
+            _isApplyingCornerRadius = true;
+            try
+            {
+                CornerRadius = value;
+            }
+            finally
+            {
+                _isApplyingCornerRadius = false;
+            }
+        }
+
+        private void OnCornerRadiusPropertyChanged(DependencyObject sender, DependencyProperty dp)
+        {
+            if (!_isApplyingCornerRadius)
+                _hasCornerRadiusOverride = ReadLocalValue(CornerRadiusProperty) != DependencyProperty.UnsetValue;
         }
 
         private void ApplyContentLineHeight(ResourceDictionary? resources)
@@ -1005,7 +1028,7 @@ namespace Flowery.Controls
 
                     if (Shape == DaisyButtonShape.Circle)
                     {
-                        CornerRadius = new CornerRadius(Height / 2);
+                        SetCornerRadius(new CornerRadius(Height / 2));
                     }
                 }
 

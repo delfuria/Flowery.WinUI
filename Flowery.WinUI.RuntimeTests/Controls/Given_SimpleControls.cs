@@ -450,7 +450,7 @@ namespace Flowery.WinUI.RuntimeTests.Controls
             Assert.IsFalse(toggle.IsOn);
             Assert.AreEqual(DaisyToggleVariant.Default, toggle.Variant);
             Assert.AreEqual(DaisySize.Medium, toggle.Size);
-            Assert.AreEqual(1.0, toggle.TogglePadding);
+            Assert.IsTrue(double.IsNaN(toggle.TogglePadding), "TogglePadding defaults to automatic (NaN)");
         }
 
         [TestMethod]
@@ -481,6 +481,7 @@ namespace Flowery.WinUI.RuntimeTests.Controls
             Assert.AreEqual(new Thickness(3), outerBorder.BorderThickness);
             Assert.AreNotSame(userBorderBrush, switchArea.BorderBrush);
             Assert.AreEqual(new Thickness(1), switchArea.BorderThickness);
+            Assert.AreEqual(0.5, switchArea.BorderBrush.Opacity, "Track border uses half of the base content color (DaisyUI)");
             Assert.AreEqual(23, presenter.FontSize);
             Assert.AreEqual(FontWeights.Bold.Weight, presenter.FontWeight.Weight);
         }

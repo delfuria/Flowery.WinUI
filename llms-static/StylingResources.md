@@ -406,6 +406,19 @@ DaisyTableRowHeaderBackground             ← Header row background
 DaisyTableRowHoverBackground              ← Row hover background
 ```
 
+A row looks these keys up in its own `Resources` first, then in the `Resources` of the `DaisyTable` that contains it, then in the application resources. Define them once on the table to style all of its rows:
+
+```xml
+<daisy:DaisyTable>
+    <daisy:DaisyTable.Resources>
+        <SolidColorBrush x:Key="DaisyTableRowBorderBrush" Color="#808080" />
+    </daisy:DaisyTable.Resources>
+    <StackPanel>
+        <!-- DaisyTableRow items -->
+    </StackPanel>
+</daisy:DaisyTable>
+```
+
 ### DaisyNumericUpDown Resources
 
 ```xml
