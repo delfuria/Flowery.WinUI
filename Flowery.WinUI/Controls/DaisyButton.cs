@@ -350,7 +350,9 @@ namespace Flowery.Controls
             var intensity = GetEffectiveNeumorphicIntensity();
             var elevation = DaisyResourceLookup.GetDefaultElevation(Size);
 
-            if (!isEnabled)
+            // Only an opaque face can be raised. Outline, dash, ghost, link and soft buttons would show the
+            // shadows through their face (#12).
+            if (!isEnabled || _normalBackground is SolidColorBrush { Color.A: < 255 })
             {
                 ClearNeumorphicShadows();
                 return;

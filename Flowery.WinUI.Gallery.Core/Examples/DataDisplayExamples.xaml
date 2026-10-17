@@ -1065,7 +1065,7 @@ scheduler.Dismiss(alarm); // Stop
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
-                <daisy:DaisyTable Zebra="True" Size="Medium" Width="620" HorizontalAlignment="Left">
+                <daisy:DaisyTable Zebra="True" Size="Medium" Width="670" HorizontalAlignment="Left">
                     <StackPanel>
                         <daisy:DaisyTableRow IsHeader="True">
                             <StackPanel Orientation="Horizontal">

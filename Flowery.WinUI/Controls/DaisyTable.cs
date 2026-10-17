@@ -178,7 +178,8 @@ namespace Flowery.Controls
             }
 
             _rootBorder.Child = _rowsPanel;
-            Content = _rootBorder;
+            // The neumorphic helper puts the table's surface next to its host inside a parent Grid (#12).
+            Content = new Grid { Children = { _rootBorder } };
         }
 
         #endregion
@@ -351,10 +352,10 @@ namespace Flowery.Controls
             Size = size;
         }
 
-        protected override FrameworkElement? GetNeumorphicHostElement()
-        {
-            return _rootBorder ?? base.GetNeumorphicHostElement();
-        }
+        /// <summary>
+        /// Rows never draw their own neumorphic surface; the table is the one raised surface (#12).
+        /// </summary>
+        protected override bool IsNeumorphicEffectivelyEnabled() => false;
 
         private void OnPointerEntered(object sender, PointerRoutedEventArgs e)
         {
@@ -552,6 +553,11 @@ namespace Flowery.Controls
             VerticalAlignment = VerticalAlignment.Center;
             IsTabStop = false;
         }
+
+        /// <summary>
+        /// Cells never draw their own neumorphic surface; the table is the one raised surface (#12).
+        /// </summary>
+        protected override bool IsNeumorphicEffectivelyEnabled() => false;
 
         #region Dependency Properties
 

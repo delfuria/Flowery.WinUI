@@ -123,6 +123,41 @@ namespace Flowery.WinUI.RuntimeTests.Controls
             Assert.AreEqual(large.CornerRadius, resized.CornerRadius, "ExtraSmall -> ExtraLarge");
         }
 
+        [TestMethod]
+        public async Task When_ButtonFaceIsNotOpaque_RaisedModeDrawsNoShadows()
+        {
+            // Outline, dash, ghost, link and soft buttons would show the raised shadows through their face (#12).
+            var previousMode = DaisyBaseContentControl.GlobalNeumorphicMode;
+            var previousEnabled = DaisyBaseContentControl.GlobalNeumorphicEnabled;
+            DaisyBaseContentControl.GlobalNeumorphicEnabled = true;
+            try
+            {
+                var solid = await LoadButtonAsync(DaisyButtonStyle.Default);
+                solid.RefreshNeumorphicEffect();
+                Assert.IsTrue(ShadowCount(solid) > 0, "A solid button is raised");
+
+                var outline = await LoadButtonAsync(DaisyButtonStyle.Outline);
+                outline.RefreshNeumorphicEffect();
+                Assert.AreEqual(0, ShadowCount(outline), "An outline button is not raised");
+            }
+            finally
+            {
+                DaisyBaseContentControl.GlobalNeumorphicMode = previousMode;
+                DaisyBaseContentControl.GlobalNeumorphicEnabled = previousEnabled;
+            }
+        }
+
+        private static int ShadowCount(DaisyButton button) =>
+            Find<DaisyShadowContainer>(button, "PART_ShadowContainer")?.Shadows.Count ?? -1;
+
+        private static async Task<DaisyButton> LoadButtonAsync(DaisyButtonStyle style)
+        {
+            var button = new DaisyButton { Content = "Save", ButtonStyle = style, Size = DaisySize.Medium };
+            RuntimeTestHelpers.AttachToHost(button);
+            await RuntimeTestHelpers.EnsureLoadedAsync(button);
+            return button;
+        }
+
         private static async Task<DaisyButton> LoadButtonAsync(DaisySize size)
         {
             var button = new DaisyButton { Content = "Save", Size = size };
