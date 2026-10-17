@@ -57,6 +57,80 @@ namespace Flowery.WinUI.RuntimeTests.Controls
             Assert.AreSame(rowBrush, (localRow.Content as Border)?.BorderBrush, "Row resource wins over the table resource");
         }
 
+        [TestMethod]
+        public void When_GlobalNeumorphicIsOn_OnlyTheTableTakesPart()
+        {
+            // Rows and cells opt out, so a table reads as one raised surface instead of one box per row and cell (#12).
+            // The probes are not attached: WinUI cannot apply the cell and row styles to subclasses without XAML metadata.
+            var previousMode = DaisyBaseContentControl.GlobalNeumorphicMode;
+            var previousEnabled = DaisyBaseContentControl.GlobalNeumorphicEnabled;
+            DaisyBaseContentControl.GlobalNeumorphicEnabled = true;
+            try
+            {
+                Assert.IsTrue(new ProbeTable().IsEffectivelyNeumorphicEnabled(), "Table");
+                Assert.IsFalse(new ProbeRow().IsEffectivelyNeumorphicEnabled(), "Row");
+                Assert.IsFalse(new ProbeCell().IsEffectivelyNeumorphicEnabled(), "Cell");
+            }
+            finally
+            {
+                DaisyBaseContentControl.GlobalNeumorphicMode = previousMode;
+                DaisyBaseContentControl.GlobalNeumorphicEnabled = previousEnabled;
+            }
+        }
+
+        [TestMethod]
+        public async Task When_GlobalNeumorphicIsOn_OnlyTheTableGetsASurface()
+        {
+            // The helper injects a Grid tagged DaisyNeumorphicContainer next to its host: one for the table, none inside a row (#12).
+            var previousMode = DaisyBaseContentControl.GlobalNeumorphicMode;
+            var previousEnabled = DaisyBaseContentControl.GlobalNeumorphicEnabled;
+            DaisyBaseContentControl.GlobalNeumorphicEnabled = true;
+            try
+            {
+                var rows = new[] { CreateRow("First"), CreateRow("Second") };
+                var table = new DaisyTable { Content = new StackPanel { Children = { rows[0], rows[1] } } };
+
+                RuntimeTestHelpers.AttachToHost(table);
+                await RuntimeTestHelpers.EnsureLoadedAsync(table);
+                await Task.Delay(200); // the table moves the rows into its own panel after Loaded; they load again there
+                table.UpdateLayout();
+
+                // Refresh now instead of waiting for the queued refresh timer.
+                table.RefreshNeumorphicEffect();
+                foreach (var row in rows)
+                {
+                    row.RefreshNeumorphicEffect();
+                    foreach (var cell in Descendants<DaisyTableCell>(row))
+                        cell.RefreshNeumorphicEffect();
+                }
+                table.UpdateLayout();
+
+                Assert.AreEqual(1, Descendants<Grid>(table).Count(g => g.Tag is "DaisyNeumorphicContainer"), "The table has one surface");
+                foreach (var row in rows)
+                    Assert.IsFalse(Descendants<Grid>(row).Any(g => g.Tag is "DaisyNeumorphicContainer"), "A row or cell drew its own neumorphic surface");
+            }
+            finally
+            {
+                DaisyBaseContentControl.GlobalNeumorphicMode = previousMode;
+                DaisyBaseContentControl.GlobalNeumorphicEnabled = previousEnabled;
+            }
+        }
+
+        private sealed class ProbeTable : DaisyTable
+        {
+            public bool IsEffectivelyNeumorphicEnabled() => IsNeumorphicEffectivelyEnabled();
+        }
+
+        private sealed class ProbeRow : DaisyTableRow
+        {
+            public bool IsEffectivelyNeumorphicEnabled() => IsNeumorphicEffectivelyEnabled();
+        }
+
+        private sealed class ProbeCell : DaisyTableCell
+        {
+            public bool IsEffectivelyNeumorphicEnabled() => IsNeumorphicEffectivelyEnabled();
+        }
+
         // Same shape as XAML content: a horizontal StackPanel of cells.
         private static DaisyTableRow CreateRow(string text)
         {

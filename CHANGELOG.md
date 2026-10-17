@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `DaisyTableRow` and `DaisyTableCell` no longer draw their own neumorphic surface when the global neumorphic mode is on; a table showed one raised box per row (#12). `DaisyTable` now gets the one surface it was meant to have: its root border sits in a `Grid`, so the neumorphic helper can place the surface next to it. Before, the helper put the surface into the row panel, where it had no height.
+- Gallery: the Table example is 670 px wide instead of 620, so the `Message` button in its last column is no longer clipped.
+- `DaisyButton` draws no neumorphic shadows when its face is not opaque. Outline, dash, ghost, link and soft buttons showed the raised shadows through their face as a grey shimmer, most visibly in table cells, where the cell also clipped the halo to a box (#12).
+
 ## [1.4.0] - 2026-10-17
 
 ### Added
