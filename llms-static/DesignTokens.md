@@ -229,7 +229,7 @@ General spacing values for layouts.
 
 ## Checkbox/Radio Indicator Sizes
 
-Indicators are smaller than the label text of their size tier (compact indicators from Flowery.NET 3.3.0).
+Each indicator is as tall as the line height of its label text in the Windows type ramp (Caption 12/16, Body 14/20, Body Large 18/24, Subtitle 20/28; 14 for 10 px text), so it never sticks out of the text line. Medium matches the WinUI defaults (`CheckBoxSize` 20 with a 12 px glyph, `RadioButton` 20 with a 12 px glyph); checkmarks and radio dots keep the WinUI ratio of about 0.6.
 
 ### Checkbox Sizes
 
@@ -237,13 +237,13 @@ Outer border size for checkboxes.
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyCheckbox{Size}Size` | 8 | 10 | 12 | 14 | 16 |
+| `DaisyCheckbox{Size}Size` | 14 | 16 | 20 | 24 | 28 |
 
 ### Checkmark Icon Sizes
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyCheckmark{Size}Size` | 5 | 6 | 8 | 10 | 12 |
+| `DaisyCheckmark{Size}Size` | 8 | 10 | 12 | 14 | 17 |
 
 ### Radio Sizes
 
@@ -251,13 +251,13 @@ Radio buttons use their own outer size tokens (independent of the checkbox sizes
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyRadio{Size}Size` | 8 | 10 | 12 | 14 | 16 |
+| `DaisyRadio{Size}Size` | 14 | 16 | 20 | 24 | 28 |
 
 ### Radio Inner Dot Sizes
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyRadioDot{Size}Size` | 4 | 5 | 6 | 7 | 8 |
+| `DaisyRadioDot{Size}Size` | 8 | 10 | 12 | 14 | 16 |
 
 ### Label Font Sizes
 
@@ -275,14 +275,18 @@ Checkbox, radio and toggle labels use the primary font ladder.
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyToggle{Size}Width` | 16 | 20 | 24 | 28 | 32 |
-| `DaisyToggle{Size}Height` | 8 | 10 | 12 | 14 | 16 |
+| `DaisyToggle{Size}Width` | 28 | 32 | 40 | 48 | 56 |
+| `DaisyToggle{Size}Height` | 14 | 16 | 20 | 24 | 28 |
+
+The track is as tall as the checkbox of its tier. Medium uses the WinUI `ToggleSwitch` track (40×20) and knob (12 px); all tiers keep its proportions (width = 2 × height, knob about 0.6 × height).
 
 ### Toggle Knob Sizes
 
+With the automatic default `TogglePadding`, the knob is centered with the same gap on every side.
+
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyToggleKnob{Size}Size` | 4 | 6 | 8 | 10 | 12 |
+| `DaisyToggleKnob{Size}Size` | 8 | 10 | 12 | 14 | 16 |
 
 ---
 

@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Indicator Sizes</title>
+<style>
+/* Visual check for DaisyToggle, DaisyCheckBox and DaisyRadio at their default token sizes.
+   Layout: one row per size tier; each row renders the controls on a stage in the app's Daisy palette at real pixel size. */
+:root {
+  color-scheme: light;
+  --bg: #f3f3f7;
+  --surface: #ffffff;
+  --ink: #1c1d29;
+  --muted: #5d6077;
+  --line: #dcdde9;
+  --accent: #4844d2;
+  --accent-ink: #ffffff;
+  --font-ui: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Cascadia Mono", Consolas, "Courier New", monospace;
+  --font-app: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #0f1118;
+    --surface: #171a23;
+    --ink: #e6e7f0;
+    --muted: #999cb3;
+    --line: #2a2e3c;
+    --accent: #8f8cff;
+    --accent-ink: #12131b;
+  }
+}
+
+/* Stage palettes: Flowery.WinUI "Dark" and "Light" themes (DaisyPaletteFactory). */
+.stage-dark { --b100: #1d232a; --b300: #374151; --bc: #ecf9ff; --pr: #605dff; --prc: #edf1fe; }
+.stage-light { --b100: #ffffff; --b300: #d1d5db; --bc: #18181b; --pr: #422ad5; --prc: #e0e7ff; }
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 16px 64px;
+  display: grid;
+  gap: 24px;
+}
+header { display: grid; gap: 6px; }
+h1 { font-size: 28px; font-weight: 600; margin: 0; }
+.lead { color: var(--muted); max-width: 80ch; margin: 0; }
+code { font-family: var(--font-mono); font-size: 0.86em; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; }
+.field { display: flex; align-items: center; gap: 10px; }
+.field-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 2px; gap: 2px; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label { padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.seg input:checked + label { background: var(--accent); color: var(--accent-ink); }
+.seg input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dpr { font-family: var(--font-mono); font-size: 14px; font-variant-numeric: tabular-nums; }
+.field select, .field input[type="number"] {
+  font: inherit; font-size: 14px; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px;
+}
+.field input[type="number"] { width: 72px; font-family: var(--font-mono); }
+.field select:focus-visible, .field input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.unit { font-size: 14px; color: var(--muted); }
+
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.tiers { display: grid; grid-template-columns: 128px minmax(560px, 1fr); }
+.rh { padding: 14px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; align-content: center; }
+.rh b { font-family: var(--font-mono); font-size: 16px; font-weight: 600; }
+.rh span { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cell { border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--b100); padding: 14px 18px; display: grid; gap: 10px; align-content: center; }
+.tiers > :nth-last-child(-n+2) { border-bottom: 0; }
+.cap { font-family: var(--font-mono); font-size: 11px; color: var(--bc); opacity: 0.6; font-variant-numeric: tabular-nums; }
+
+/* App-rendered controls */
+.app { font-family: var(--font-app); color: var(--bc); }
+.line { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; }
+.pair { display: inline-flex; align-items: center; gap: 16px; }
+.ctl { display: inline-flex; align-items: center; gap: 8px; line-height: 1.33; }
+.box { flex: none; display: grid; place-items: center; border-style: solid; border-width: 2px; }
+.box svg { display: block; overflow: visible; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Indicator Sizes</h1>
+    <p class="lead">DaisyToggle, DaisyCheckBox and DaisyRadio at their default token sizes in every size tier. Each indicator is as tall as the line height of its label text in the Windows type ramp, and Medium matches the WinUI defaults. At 100&nbsp;% browser zoom one pixel here is one effective pixel in the app, because the browser and WinUI use the same Windows display scaling. The values mirror <code>Flowery.WinUI/Theming/DaisyTokenDefaults.cs</code>; update both together.</p>
+    <p class="lead">To match the app exactly, enter the Windows display scale (Settings › System › Display › Scale) and text size (Settings › Accessibility › Text size). The page then cancels any extra browser scaling, such as a browser that applies the Windows text size to the whole page, and enlarges only the labels with the WinUI text scaling formula, as WinUI does.</p>
+  </header>
+
+  <div class="toolbar" role="group" aria-label="Display">
+    <div class="field">
+      <span class="field-label" id="lbl-theme">Theme</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lbl-theme">
+        <input type="radio" name="theme" id="theme-dark" value="dark" checked><label for="theme-dark">Dark</label>
+        <input type="radio" name="theme" id="theme-light" value="light"><label for="theme-light">Light</label>
+      </div>
+    </div>
+    <div class="field">
+      <span class="field-label" id="lbl-zoom">Magnifier</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lbl-zoom">
+        <input type="radio" name="zoom" id="zoom-1" value="1" checked><label for="zoom-1">100 %</label>
+        <input type="radio" name="zoom" id="zoom-125" value="1.25"><label for="zoom-125">125 %</label>
+        <input type="radio" name="zoom" id="zoom-15" value="1.5"><label for="zoom-15">150 %</label>
+        <input type="radio" name="zoom" id="zoom-2" value="2"><label for="zoom-2">200 %</label>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="display-scale">Windows scale</label>
+      <select id="display-scale">
+        <option value="">Same as this window</option>
+        <option value="100">100 %</option>
+        <option value="125">125 %</option>
+        <option value="150">150 %</option>
+        <option value="175">175 %</option>
+        <option value="200">200 %</option>
+        <option value="225">225 %</option>
+        <option value="250">250 %</option>
+        <option value="300">300 %</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="field-label" for="text-size">Windows text size</label>
+      <input type="number" id="text-size" min="100" max="225" step="1" value="100">
+      <span class="unit">%</span>
+    </div>
+    <div class="field">
+      <span class="field-label">This window</span>
+      <span class="dpr" id="dpr" title="Windows display scaling × browser zoom (window.devicePixelRatio)"></span>
+    </div>
+  </div>
+
+  <div class="scroll stage-dark" id="stage"><div class="tiers" id="tiers"></div></div>
+</div>
+
+<script>
+(function () {
+  // Keep in sync with DaisyTokenDefaults.cs (checkbox, radio and toggle tokens) and DaisyCheckBox.ApplySizing (corner radius).
+  var TIERS = ["ExtraSmall", "Small", "Medium", "Large", "ExtraLarge"];
+  var FONT = [10, 12, 14, 18, 20];          // Daisy{Checkbox|Radio|Toggle}{Size}FontSize
+  var CONTROL = [24, 28, 32, 36, 40];       // DaisySize{Size}Height
+  var SIZES = {
+    toggleWidth: [28, 32, 40, 48, 56],      // DaisyToggle{Size}Width
+    toggleHeight: [14, 16, 20, 24, 28],     // DaisyToggle{Size}Height
+    knob: [8, 10, 12, 14, 16],              // DaisyToggleKnob{Size}Size
+    checkbox: [14, 16, 20, 24, 28],         // DaisyCheckbox{Size}Size
+    checkmark: [8, 10, 12, 14, 17],         // DaisyCheckmark{Size}Size
+    checkboxRadius: [3, 3, 4, 5, 6],
+    radio: [14, 16, 20, 24, 28],            // DaisyRadio{Size}Size
+    radioDot: [8, 10, 12, 14, 16]           // DaisyRadioDot{Size}Size
+  };
+
+  var zoom = 1;
+  var displayScale = null; // percent; null = trust the browser's devicePixelRatio
+  var textSize = 100;      // percent, Windows "Text size"
+
+  try {
+    var saved = JSON.parse(localStorage.getItem("flowery-indicator-sizes") || "null");
+    if (saved) {
+      if (typeof saved.displayScale === "number") displayScale = saved.displayScale;
+      if (typeof saved.textSize === "number") textSize = saved.textSize;
+    }
+  } catch (e) { /* storage unavailable; keep defaults */ }
+
+  function save() {
+    try {
+      localStorage.setItem("flowery-indicator-sizes", JSON.stringify({ displayScale: displayScale, textSize: textSize }));
+    } catch (e) { /* storage unavailable */ }
+  }
+
+  // WinUI text scaling (TextFormatting.cpp): s_o = s_i + max(-e * ln(s_i) + 18, 0) * (f - 1).
+  // Smaller text grows more than larger text; only text scales, indicator sizes stay as they are.
+  function scaledFontSize(size, factor) {
+    if (factor <= 1) return size;
+    var s = Math.max(size, 1);
+    return s + Math.max(-Math.E * Math.log(s) + 18, 0) * (factor - 1);
+  }
+
+  // Factor that turns CSS pixels into the app's effective pixels on this screen.
+  function correction() {
+    return displayScale ? displayScale / 100 / window.devicePixelRatio : 1;
+  }
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function px(n) { return n + "px"; }
+
+  // Ring/dot and track/knob are drawn as one SVG each, so both parts share one coordinate system.
+  // Separate boxes get snapped to device pixels independently when the page is drawn below 100 %.
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  function svgEl(tag, attrs, fill, stroke) {
+    var e = document.createElementNS(SVG_NS, tag);
+    Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    e.style.fill = fill || "none";
+    if (stroke) e.style.stroke = stroke;
+    return e;
+  }
+  function svgRoot(w, h) {
+    var svg = svgEl("svg", { width: w, height: h, viewBox: "0 0 " + w + " " + h });
+    svg.style.flex = "none";
+    svg.setAttribute("aria-hidden", "true");
+    return svg;
+  }
+
+  // DaisyToggle: 1 px track border; the automatic TogglePadding centers the knob with the same gap on every side.
+  function toggle(i, on) {
+    var w = SIZES.toggleWidth[i], h = SIZES.toggleHeight[i], k = SIZES.knob[i], border = 1;
+    var innerW = w - 2 * border, innerH = h - 2 * border;
+    var pad = (innerH - k) / 2;
+    var x = border + (on ? innerW - k - pad : pad);
+    var svg = svgRoot(w, h);
+    svg.appendChild(svgEl("rect", { x: 0.5, y: 0.5, width: w - 1, height: h - 1, rx: (h - 1) / 2, "stroke-width": border },
+      "var(--b300)", "var(--bc)"));
+    svg.appendChild(svgEl("circle", { cx: x + k / 2, cy: h / 2, r: k / 2 }, on ? "var(--pr)" : "var(--b100)"));
+    return svg;
+  }
+
+  // DaisyCheckBox: 2 px border, checkmark path (2,6)-(5,9)-(10,2) stretched uniformly with a 2 px stroke.
+  function checkbox(i, on) {
+    var b = el("span", "box");
+    var s = SIZES.checkbox[i];
+    b.style.width = px(s); b.style.height = px(s); b.style.borderRadius = px(SIZES.checkboxRadius[i]);
+    b.style.borderColor = on ? "var(--pr)" : "var(--b300)";
+    b.style.background = on ? "var(--pr)" : "transparent";
+    if (on) {
+      var ns = "http://www.w3.org/2000/svg";
+      var svg = document.createElementNS(ns, "svg");
+      svg.setAttribute("viewBox", "2 2 8 7");
+      svg.setAttribute("width", SIZES.checkmark[i]); svg.setAttribute("height", SIZES.checkmark[i]);
+      var path = document.createElementNS(ns, "path");
+      path.setAttribute("d", "M2 6 L5 9 L10 2");
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", "var(--prc)");
+      path.setAttribute("stroke-width", "2");
+      path.setAttribute("vector-effect", "non-scaling-stroke");
+      svg.appendChild(path);
+      b.appendChild(svg);
+    }
+    b.setAttribute("aria-hidden", "true");
+    return b;
+  }
+
+  // DaisyRadio: 2 px ring with a filled dot when checked.
+  function radio(i, on) {
+    var s = SIZES.radio[i], ring = 2, c = s / 2;
+    var svg = svgRoot(s, s);
+    svg.appendChild(svgEl("circle", { cx: c, cy: c, r: (s - ring) / 2, "stroke-width": ring },
+      null, on ? "var(--pr)" : "var(--b300)"));
+    if (on) svg.appendChild(svgEl("circle", { cx: c, cy: c, r: SIZES.radioDot[i] / 2 }, "var(--pr)"));
+    return svg;
+  }
+
+  function withLabel(indicator, text, i) {
+    var c = el("span", "ctl");
+    c.appendChild(indicator);
+    var l = el("span", null, text);
+    l.style.fontSize = px(scaledFontSize(FONT[i], textSize / 100));
+    c.appendChild(l);
+    return c;
+  }
+
+  function pair(onWithLabel, off) {
+    var p = el("span", "pair");
+    p.appendChild(onWithLabel);
+    p.appendChild(off);
+    return p;
+  }
+
+  function render() {
+    var host = document.getElementById("tiers");
+    host.textContent = "";
+    TIERS.forEach(function (name, i) {
+      var rh = el("div", "rh");
+      rh.appendChild(el("b", null, name));
+      var scaled = scaledFontSize(FONT[i], textSize / 100);
+      rh.appendChild(el("span", null, textSize > 100
+        ? "Text " + FONT[i] + " → " + scaled.toFixed(1) + " px"
+        : "Text " + FONT[i] + " px"));
+      rh.appendChild(el("span", null, "Controls " + CONTROL[i] + " px"));
+      host.appendChild(rh);
+
+      var cell = el("div", "cell app");
+      cell.style.zoom = zoom * correction();
+      var line = el("div", "line");
+      line.appendChild(pair(withLabel(toggle(i, true), "Live preview", i), toggle(i, false)));
+      line.appendChild(pair(withLabel(checkbox(i, true), "Gradients", i), checkbox(i, false)));
+      line.appendChild(pair(withLabel(radio(i, true), "PNG", i), radio(i, false)));
+      cell.appendChild(line);
+      cell.appendChild(el("div", "cap",
+        "Toggle " + SIZES.toggleWidth[i] + "×" + SIZES.toggleHeight[i] + ", knob " + SIZES.knob[i] +
+        " · CheckBox " + SIZES.checkbox[i] + ", check " + SIZES.checkmark[i] +
+        " · Radio " + SIZES.radio[i] + ", dot " + SIZES.radioDot[i]));
+      host.appendChild(cell);
+    });
+  }
+
+  function updateDpr() {
+    var text = Math.round(window.devicePixelRatio * 100) + " % scaling";
+    var c = correction();
+    if (Math.abs(c - 1) > 0.005) text += " · drawn at " + Math.round(c * 100) + " %";
+    document.getElementById("dpr").textContent = text;
+  }
+
+  var scaleSelect = document.getElementById("display-scale");
+  var textInput = document.getElementById("text-size");
+  scaleSelect.value = displayScale ? String(displayScale) : "";
+  textInput.value = textSize;
+  scaleSelect.addEventListener("change", function () {
+    displayScale = scaleSelect.value ? parseInt(scaleSelect.value, 10) : null;
+    save(); updateDpr(); render();
+  });
+  textInput.addEventListener("input", function () {
+    var v = parseInt(textInput.value, 10);
+    if (!isFinite(v) || v < 100 || v > 225) return;
+    textSize = v;
+    save(); render();
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="theme"]'), function (inp) {
+    inp.addEventListener("change", function () {
+      var stage = document.getElementById("stage");
+      stage.classList.toggle("stage-dark", inp.value === "dark");
+      stage.classList.toggle("stage-light", inp.value === "light");
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="zoom"]'), function (inp) {
+    inp.addEventListener("change", function () { zoom = parseFloat(inp.value); render(); });
+  });
+  // A browser zoom or monitor change alters devicePixelRatio, and with it the correction.
+  window.addEventListener("resize", function () { updateDpr(); render(); });
+
+  updateDpr();
+  render();
+})();
+</script>
+</body>
+</html>

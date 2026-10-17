@@ -256,18 +256,13 @@ namespace Flowery.Controls
 
             // Get sizing from tokens (guaranteed by EnsureDefaults)
             var sizeKey = DaisyResourceLookup.GetSizeKeyFull(Size);
-            double boxSize = DaisyResourceLookup.GetDouble($"DaisyCheckbox{sizeKey}Size", 18);
+            double boxSize = DaisyResourceLookup.GetDouble($"DaisyCheckbox{sizeKey}Size", 20);
             double checkmarkSize = DaisyResourceLookup.GetDouble($"DaisyCheckmark{sizeKey}Size", 12);
 
             _checkboxBorder.Width = boxSize;
             _checkboxBorder.Height = boxSize;
-            // The compact indicator needs small radii, otherwise the box renders as a circle (Flowery.NET 3.3.0).
-            _checkboxBorder.CornerRadius = new CornerRadius(Size switch
-            {
-                DaisySize.ExtraSmall => 1,
-                DaisySize.ExtraLarge => 3,
-                _ => 2
-            });
+            // Keep the radius at about a fifth of the box, otherwise small boxes render as circles.
+            _checkboxBorder.CornerRadius = new CornerRadius(Math.Round(boxSize / 5));
 
             _checkmark.Width = checkmarkSize;
             _checkmark.Height = checkmarkSize;

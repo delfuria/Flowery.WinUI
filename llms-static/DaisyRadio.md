@@ -17,11 +17,13 @@ DaisyRadio is a styled `RadioButton` with **8 color variants** and **5 size pres
 
 | Size | Outer | Inner | Use Case |
 | --- | --- | --- | --- |
-| ExtraSmall | 8px | 4px | Dense tables/toolbars. |
-| Small | 10px | 5px | Compact forms. |
-| Medium (default) | 12px | 6px | General usage. |
-| Large | 14px | 7px | Spacious layouts or touch targets. |
-| ExtraLarge | 16px | 8px | Hero sections or large touch targets. |
+| ExtraSmall | 14px | 8px | Dense tables/toolbars. |
+| Small | 16px | 10px | Compact forms. |
+| Medium (default) | 20px | 12px | General usage. |
+| Large | 24px | 14px | Spacious layouts or touch targets. |
+| ExtraLarge | 28px | 16px | Hero sections or large touch targets. |
+
+The circle is as tall as the line height of the label text. Medium follows the WinUI `RadioButton` (20 px circle, 12 px glyph).
 
 ## Quick Examples
 

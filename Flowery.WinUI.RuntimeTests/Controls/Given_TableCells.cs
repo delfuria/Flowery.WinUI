@@ -35,6 +35,37 @@ namespace Flowery.WinUI.RuntimeTests.Controls
             }
         }
 
+        [TestMethod]
+        public async Task When_TableDefinesRowBorderBrush_RowsUseItAndRowLocalBrushWins()
+        {
+            const string key = "DaisyTableRowBorderBrush";
+            var tableBrush = new SolidColorBrush(Colors.Red);
+            var rowBrush = new SolidColorBrush(Colors.Blue);
+            var inheritingRow = CreateRow("Inherits");
+            var localRow = CreateRow("Local");
+            localRow.Resources[key] = rowBrush;
+            var table = new DaisyTable { Content = new StackPanel { Children = { inheritingRow, localRow } } };
+            table.Resources[key] = tableBrush;
+
+            RuntimeTestHelpers.AttachToHost(table);
+            await RuntimeTestHelpers.EnsureLoadedAsync(table);
+            await Task.Delay(200); // the table moves the rows into its own panel after Loaded; they load again there
+            table.UpdateLayout();
+
+            // After load a row's content is its root border, whose BorderBrush is the row separator.
+            Assert.AreSame(tableBrush, (inheritingRow.Content as Border)?.BorderBrush, "Row without its own brush uses the table resource");
+            Assert.AreSame(rowBrush, (localRow.Content as Border)?.BorderBrush, "Row resource wins over the table resource");
+        }
+
+        // Same shape as XAML content: a horizontal StackPanel of cells.
+        private static DaisyTableRow CreateRow(string text)
+        {
+            var cells = new StackPanel { Orientation = Orientation.Horizontal };
+            cells.Children.Add(new DaisyTableCell { Content = text });
+            cells.Children.Add(new DaisyTableCell { Content = "Value" });
+            return new DaisyTableRow { Content = cells };
+        }
+
         private static System.Collections.Generic.IEnumerable<T> Descendants<T>(DependencyObject root) where T : DependencyObject
         {
             for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)

@@ -1,4 +1,4 @@
-<local:ScrollableExamplePage
+﻿<local:ScrollableExamplePage
     x:Class="Flowery.WinUI.Gallery.Examples.DataInputExamples"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -389,6 +389,40 @@
                         <daisy:DaisyRadio Content="Large" Size="Large" Variant="Primary" GroupName="RadioSizes" />
                         <daisy:DaisyRadio Content="Extra Large" Size="ExtraLarge" Variant="Primary" GroupName="RadioSizes" />
                     </StackPanel>
+
+                    <StackPanel Spacing="10" MinWidth="180">
+                        <TextBlock Text="{Binding [Sidebar_Table]}" FontWeight="SemiBold" Opacity="0.8"
+                                   Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                        <daisy:DaisyTable Zebra="True" HorizontalAlignment="Left">
+                            <daisy:DaisyTable.Resources>
+                                <!-- Visible frame and row lines to judge the row height -->
+                                <SolidColorBrush x:Key="DaisyTableBorderBrush" Color="#808080" />
+                                <SolidColorBrush x:Key="DaisyTableRowBorderBrush" Color="#808080" />
+                            </daisy:DaisyTable.Resources>
+                            <StackPanel>
+                                <daisy:DaisyTableRow>
+                                    <StackPanel Orientation="Horizontal">
+                                        <daisy:DaisyTableCell ColumnWidth="160">
+                                            <TextBlock Text="PNG" />
+                                        </daisy:DaisyTableCell>
+                                        <daisy:DaisyTableCell>
+                                            <daisy:DaisyRadio Variant="Primary" GroupName="RadioTable" IsChecked="True" />
+                                        </daisy:DaisyTableCell>
+                                    </StackPanel>
+                                </daisy:DaisyTableRow>
+                                <daisy:DaisyTableRow>
+                                    <StackPanel Orientation="Horizontal">
+                                        <daisy:DaisyTableCell ColumnWidth="160">
+                                            <TextBlock Text="JPEG" />
+                                        </daisy:DaisyTableCell>
+                                        <daisy:DaisyTableCell>
+                                            <daisy:DaisyRadio Variant="Primary" GroupName="RadioTable" />
+                                        </daisy:DaisyTableCell>
+                                    </StackPanel>
+                                </daisy:DaisyTableRow>
+                            </StackPanel>
+                        </daisy:DaisyTable>
+                    </StackPanel>
                 </daisy:WrapPanel>
             </StackPanel>
 
@@ -714,8 +748,42 @@
                         <daisy:DaisyToggle Header="Medium" Size="Medium" Variant="Info" IsOn="True" />
                         <daisy:DaisyToggle Header="Large" Size="Large" Variant="Info" IsOn="True" />
                         <daisy:DaisyToggle Header="Extra Large" Size="ExtraLarge" Variant="Info" IsOn="True" />
-                        <daisy:DaisyToggle Header="Default Padding (1)" Variant="Warning" IsOn="True" />
-                        <daisy:DaisyToggle Header="Loose Padding (2)" Variant="Warning" TogglePadding="2" IsOn="True" />
+                        <daisy:DaisyToggle Header="Default Padding (auto)" Variant="Warning" IsOn="True" />
+                        <daisy:DaisyToggle Header="Tight Padding (1)" Variant="Warning" TogglePadding="1" IsOn="True" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="10" MinWidth="180">
+                        <TextBlock Text="{Binding [Sidebar_Table]}" FontWeight="SemiBold" Opacity="0.8"
+                                   Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                        <daisy:DaisyTable Zebra="True" HorizontalAlignment="Left">
+                            <daisy:DaisyTable.Resources>
+                                <!-- Visible frame and row lines to judge the row height -->
+                                <SolidColorBrush x:Key="DaisyTableBorderBrush" Color="#808080" />
+                                <SolidColorBrush x:Key="DaisyTableRowBorderBrush" Color="#808080" />
+                            </daisy:DaisyTable.Resources>
+                            <StackPanel>
+                                <daisy:DaisyTableRow>
+                                    <StackPanel Orientation="Horizontal">
+                                        <daisy:DaisyTableCell ColumnWidth="160">
+                                            <TextBlock Text="Live preview" />
+                                        </daisy:DaisyTableCell>
+                                        <daisy:DaisyTableCell>
+                                            <daisy:DaisyToggle Variant="Primary" IsOn="True" />
+                                        </daisy:DaisyTableCell>
+                                    </StackPanel>
+                                </daisy:DaisyTableRow>
+                                <daisy:DaisyTableRow>
+                                    <StackPanel Orientation="Horizontal">
+                                        <daisy:DaisyTableCell ColumnWidth="160">
+                                            <TextBlock Text="Open folder" />
+                                        </daisy:DaisyTableCell>
+                                        <daisy:DaisyTableCell>
+                                            <daisy:DaisyToggle Variant="Primary" />
+                                        </daisy:DaisyTableCell>
+                                    </StackPanel>
+                                </daisy:DaisyTableRow>
+                            </StackPanel>
+                        </daisy:DaisyTable>
                     </StackPanel>
                 </daisy:WrapPanel>
             </StackPanel>
