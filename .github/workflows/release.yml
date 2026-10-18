@@ -1,6 +1,6 @@
 name: Flowery.WinUI Release
 
-# MANUAL TRIGGER ONLY - Creates a new release with NuGet package and Gallery app
+# MANUAL TRIGGER ONLY - Creates a new release with NuGet package, Gallery, Kiosk and Photos apps
 # Go to Actions → Flowery.WinUI Release → Run workflow → Enter version (e.g., 0.1.0)
 
 on:
@@ -60,9 +60,9 @@ jobs:
       run:
         shell: pwsh
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: |
             10.0.402
@@ -106,9 +106,9 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: |
             10.0.402
@@ -148,17 +148,60 @@ jobs:
           name: Flowery.WinUI.Kiosk-Windows-x64
           path: ./Flowery.WinUI.Kiosk-Windows-x64.zip
 
+  build-photos:
+    needs: [validate, build-library]
+    runs-on: windows-2025-vs2026
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            10.0.402
+            ${{ inputs.sdk_version }}
+
+      - name: Publish Photos App (Windows)
+        run: ./scripts/publish_windows.ps1 -Application Photos -Configuration Release -OutputDir publish-photos -SdkVersion '${{ inputs.sdk_version }}'
+
+      - name: Zip Photos artifact
+        run: |
+          New-Item -ItemType Directory -Path ./final -Force | Out-Null
+          Compress-Archive -Path ./publish-photos/* -DestinationPath ./final/Flowery.WinUI.Photos-Windows-x64.zip
+
+      - name: Build Photos NSIS installer
+        run: |
+          $nsis = ./scripts/get_nsis.ps1 -Directory "$env:RUNNER_TEMP/Flowery/Tools"
+          ./scripts/build_photos_installer.ps1 -AppDirectory publish-photos -OutputDirectory final -NsisPath $nsis -Version '${{ needs.validate.outputs.version }}'
+
+      - name: Test Photos per-user installer
+        run: ./scripts/test_photos_installer.ps1 -InstallerPath 'final/Flowery.WinUI.Photos-Setup-${{ needs.validate.outputs.version }}-x64.exe' -AppDirectory publish-photos -OutputDirectory "$env:RUNNER_TEMP/Flowery/Tests/PhotosInstaller" -ExpectedVersion '${{ needs.validate.outputs.version }}'
+
+      - name: Upload Photos artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Flowery.WinUI.Photos-Windows-x64
+          path: |
+            ./final/Flowery.WinUI.Photos-Windows-x64.zip
+            ./final/Flowery.WinUI.Photos-Setup-*-x64.exe
+          if-no-files-found: error
+
   publish:
-    needs: [validate, build-library, build-gallery]
+    needs: [validate, build-library, build-gallery, build-photos]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
       id-token: write
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: |
             10.0.402
@@ -174,6 +217,7 @@ jobs:
           mkdir -p ./final
           find ./release-artifacts -name "*.nupkg" -exec cp {} ./final/ \; || true
           find ./release-artifacts -name "*.zip" -exec cp {} ./final/ \;
+          find ./release-artifacts -name "Flowery.WinUI.Photos-Setup-*-x64.exe" -exec cp {} ./final/ \;
           echo "=== Release artifacts ==="
           ls -la ./final/
 
@@ -275,6 +319,19 @@ jobs:
           | Windows x64 | `Flowery.WinUI.Gallery-Windows-x64.zip` |
           | Windows x64 Kiosk | `Flowery.WinUI.Kiosk-Windows-x64.zip` |
           GALLERY
+
+          cat >> release_notes.md << 'PHOTOS'
+
+          ## 🖼️ Flowery Photos
+
+          Photo viewer and editor built with Flowery.WinUI (no .NET or Windows App SDK install required). The per-user installer adds a Start menu entry and an uninstaller. Alternatively, extract the portable ZIP and keep all its files together.
+
+          | Asset | Description |
+          |-------|-------------|
+          PHOTOS
+
+          echo "| \`Flowery.WinUI.Photos-Setup-${{ needs.validate.outputs.version }}-x64.exe\` | Per-user installer (Windows x64) |" >> release_notes.md
+          echo "| \`Flowery.WinUI.Photos-Windows-x64.zip\` | Portable app (Windows x64); run \`Flowery.WinUI.Photos.exe\` |" >> release_notes.md
 
           echo "=== Release Notes ==="
           cat release_notes.md

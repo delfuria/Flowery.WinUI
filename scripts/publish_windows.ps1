@@ -2,7 +2,7 @@
 param(
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Release',
     [ValidateSet('win-x64')][string]$RuntimeIdentifier = 'win-x64',
-    [ValidateSet('Gallery', 'Kiosk')][string]$Application = 'Gallery',
+    [ValidateSet('Gallery', 'Kiosk', 'Photos')][string]$Application = 'Gallery',
     [bool]$SelfContained = $true,
     [string]$OutputDir = 'publish',
     [switch]$VerboseOutput,
