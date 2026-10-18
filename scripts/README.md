@@ -140,18 +140,39 @@ After a successful build of the same configuration, use `-SkipBuild` to package 
 ```powershell
 ./scripts/publish_windows.ps1 -Configuration Release
 ./scripts/publish_windows.ps1 -Configuration Release -Application Kiosk -OutputDir publish-kiosk
+./scripts/publish_windows.ps1 -Configuration Release -Application Photos -OutputDir publish-photos
 ```
 
-`-Application` accepts `Gallery` and `Kiosk`; the default is `Gallery`.
+`-Application` accepts `Gallery`, `Kiosk` and `Photos`; the default is `Gallery`.
 The default Gallery output is `publish/`.
 The Kiosk example writes native Windows x64 output to `publish-kiosk/`.
 The default output includes the .NET runtime and the Windows App SDK runtime.
 The publish script uses the native XAML and PRI resource pipeline.
 
+## Build the Photos installer
+
+```powershell
+$nsis = ./scripts/get_nsis.ps1 -Directory "$env:LOCALAPPDATA/Flowery/Tools"
+./scripts/build_photos_installer.ps1 -AppDirectory publish-photos -OutputDirectory final -NsisPath $nsis
+./scripts/test_photos_installer.ps1 -InstallerPath final/Flowery.WinUI.Photos-Setup-1.4.1-x64.exe -AppDirectory publish-photos
+```
+
+`get_nsis.ps1` downloads the pinned NSIS 3.13 archive, checks its SHA-256 hash and returns the path of `makensis.exe`.
+`build_photos_installer.ps1` compiles `installer/Flowery.WinUI.Photos.nsi` with the published Photos files.
+Without `-Version`, it uses the version from `Directory.Build.props`.
+The installer installs per user to `%LOCALAPPDATA%\Programs\Flowery Photos`, without administrator rights.
+It creates a Start menu shortcut with the application icon and an entry in the Windows app list.
+An update replaces the files in one transaction and restores the previous files if a file is locked.
+The uninstaller removes only the files that the installer recorded; user files and settings remain.
+
+`test_photos_installer.ps1` installs, updates and uninstalls into `TestResults/PhotosInstaller/<run>`.
+It refuses to run if Flowery Photos is already installed for the current user.
+Use `-LaunchGui` to also start the installed application once.
+
 ## Continuous integration
 
 The CI workflow is configured to build and check Gallery and Kiosk in Debug and Release with SDK `10.0.402` and `11.0.100-rc.2.26504.105`.
-The release workflow creates the native packages, Gallery output, and `Flowery.WinUI.Kiosk-Windows-x64.zip`.
+The release workflow creates the native packages, Gallery output, `Flowery.WinUI.Kiosk-Windows-x64.zip`, `Flowery.WinUI.Photos-Windows-x64.zip` and the Photos installer `Flowery.WinUI.Photos-Setup-<version>-x64.exe`.
 Release publication remains a manual workflow action, with SDK `10.0.402` selected by default and SDK 11 RC2 available as an option.
 
 The supported projects and scripts target native Windows only.

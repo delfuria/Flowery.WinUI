@@ -27,6 +27,7 @@ namespace Flowery.WinUI.Photos
             SetTitleBar(Shell.TitleBarElement);
             if (GetSafeAppWindow() is { } appWindow)
             {
+                appWindow.SetIcon(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "app_icon.ico"));
                 appWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
             }
 
