@@ -16,10 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The GitHub workflows use `actions/checkout@v7` and `actions/setup-dotnet@v6`.
+- The Kiosk window is at most 1920 × 1080 physical pixels, also when maximized. On larger displays, the slides used scale factors up to 200 %, and the layout broke.
 
 ### Fixed
 
-- The published Gallery, Kiosk and Photos apps start. `dotnet publish` left out the resource index of the app itself (`Flowery.WinUI.Gallery.pri`, `Flowery.WinUI.Kiosk.pri`, `Flowery.WinUI.Photos.pri`), so the release ZIPs stopped at startup with a XAML parse error or "Cannot locate resource from 'ms-appx:///…'". The app projects now set `EnableMsixTooling`, which adds the file to the publish output; the apps stay unpackaged.
+- The published Gallery, Kiosk and Photos apps start. `dotnet publish` left out the resource index of the app itself (`Flowery.WinUI.Gallery.pri`, `Flowery.WinUI.Kiosk.pri`, `Flowery.WinUI.Photos.pri`), so the release ZIPs stopped at startup with a XAML parse error or "Cannot locate resource from 'ms-appx:///…'". The Gallery and Kiosk projects now add their PRI file to the publish output with a small publish target. The Photos project sets `EnableMsixTooling`, which adds the file. All apps stay unpackaged.
 - `DaisyTableRow` and `DaisyTableCell` no longer draw their own neumorphic surface when the global neumorphic mode is on; a table showed one raised box per row (#12). `DaisyTable` now gets the one surface it was meant to have: its root border sits in a `Grid`, so the neumorphic helper can place the surface next to it. Before, the helper put the surface into the row panel, where it had no height.
 - Gallery: the Table example is 670 px wide instead of 620, so the `Message` button in its last column is no longer clipped.
 - `DaisyButton` draws no neumorphic shadows when its face is not opaque. Outline, dash, ghost, link and soft buttons showed the raised shadows through their face as a grey shimmer, most visibly in table cells, where the cell also clipped the halo to a box (#12).
