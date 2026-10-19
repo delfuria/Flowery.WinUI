@@ -184,8 +184,8 @@ namespace Flowery.WinUI.RuntimeTests.Controls
                     sibling.Opacity = 0;
                 }
                 await renderTarget.RenderAsync(parent,
-                    (int)Math.Ceiling(parent.ActualWidth * scale),
-                    (int)Math.Ceiling(parent.ActualHeight * scale));
+                    (int)Math.Ceiling(parent.ActualWidth),
+                    (int)Math.Ceiling(parent.ActualHeight));
                 var buffer = await renderTarget.GetPixelsAsync();
                 var pixels = buffer.ToArray();
                 Assert.IsTrue(renderTarget.PixelWidth > 0 && renderTarget.PixelHeight > 0, $"Native render returned no pixels. {state}");
