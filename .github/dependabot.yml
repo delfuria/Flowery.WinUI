@@ -33,6 +33,11 @@ updates:
         group-by: dependency-name
         patterns:
           - "*"
+        exclude-patterns:
+          - "MSTest"
+          - "MSTest.*"
+          - "Microsoft.Testing.*"
+          - "SkiaSharp*"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
