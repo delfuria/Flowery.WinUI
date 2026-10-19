@@ -59,6 +59,7 @@ public class Given_HighContrastGallery
             var container = (StackPanel)page.FindName("FormContainer");
             var form = container.Children.Single();
             var input = Descendants(form).OfType<DaisyInput>().First();
+            await RuntimeTestHelpers.EnsureLoadedAsync(input).WaitAsync(TimeSpan.FromSeconds(5));
             input.Text = "Retain this value";
             var labels = Descendants(form).OfType<TextBlock>()
                 .Where(label => DaisyHighContrast.GetContentOpacity(label) < 1).ToArray();
@@ -98,13 +99,18 @@ public class Given_HighContrastGallery
             Assert.AreEqual(1d, caption.Opacity);
             AssertColor("DaisyBaseContentBrush", caption.Foreground);
             var button = elements.OfType<DaisyButton>().Single(control => Equals(control.Content, "Custom Colors"));
+            await RuntimeTestHelpers.EnsureLoadedAsync(button).WaitAsync(TimeSpan.FromSeconds(5));
             AssertColor("DaisyBase100Brush", button.Background);
             AssertColor("DaisyBaseContentBrush", button.Foreground);
             Assert.IsNull(DaisyResourceLookup.TryGetControlBrush(button, "DaisyButton", "PrimaryBackground"));
             var input = elements.OfType<DaisyInput>().Single(control => control.Watermark == "Custom border...");
+            await RuntimeTestHelpers.EnsureLoadedAsync(input).WaitAsync(TimeSpan.FromSeconds(5));
             AssertColor("DaisyBase100Brush", Part<Border>(input, "_inputBorder").Background);
             AssertColor("DaisyBorderBrush", Part<Border>(input, "_inputBorder").BorderBrush);
             var tabs = (DaisyTabs)page.FindName("StyledTabs");
+            await RuntimeTestHelpers.EnsureLoadedAsync(tabs).WaitAsync(TimeSpan.FromSeconds(5));
+            await RuntimeTestHelpers.EnsureLoadedAsync(Part<Grid>(tabs, "_rootGrid")).WaitAsync(TimeSpan.FromSeconds(5));
+            tabs.UpdateLayout();
             Assert.HasCount(3, tabs.Items);
             Assert.IsTrue(Descendants(tabs).OfType<Button>().Any(static control => control.Tag is int));
             var styledCardText = elements.OfType<TextBlock>().Single(text => text.Text == "Dark blue card");
@@ -236,7 +242,8 @@ public class Given_HighContrastGallery
     private static async Task Flush(FrameworkElement element)
     {
         var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        Assert.IsTrue(element.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () => completion.TrySetResult()));
+        // Wait for preceding UI work, without requiring an idle dispatcher.
+        Assert.IsTrue(element.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Normal, () => completion.TrySetResult()));
         await completion.Task.WaitAsync(TimeSpan.FromSeconds(5));
         element.UpdateLayout();
     }
