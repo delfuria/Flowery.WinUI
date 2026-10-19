@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.UI.Xaml.Media.Imaging;
 using SkiaSharp;
+using Flowery.Composition;
 
 namespace Flowery.Controls;
 
@@ -18,12 +19,12 @@ public sealed partial class DaisyShadowContainer : ContentControl
         new PropertyMetadata(null, OnShadowsChanged));
 
     private readonly List<DaisyShadow> _observedShadows = [];
-    private readonly List<IDisposable> _compositionResources = [];
+    private readonly List<OuterShadowVisual> _outerShadows = [];
     private DaisyShadowCollection? _observedCollection;
     private Canvas? _outerHost;
     private Image? _innerImage;
-    private ContainerVisual? _outerVisual;
-    private XamlRoot? _observedRoot;
+    private CompositionVisualScope? _compositionScope;
+    private CompositionElementTracker? _layoutTracker;
     private bool _updateQueued;
 
     public DaisyShadowContainer()
@@ -35,7 +36,6 @@ public sealed partial class DaisyShadowContainer : ContentControl
         VerticalContentAlignment = VerticalAlignment.Stretch;
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
-        SizeChanged += OnSizeChanged;
         RegisterPropertyChangedCallback(CornerRadiusProperty, OnSurfaceChanged);
         RegisterPropertyChangedCallback(BackgroundProperty, OnSurfaceChanged);
     }
@@ -56,6 +56,7 @@ public sealed partial class DaisyShadowContainer : ContentControl
         base.OnApplyTemplate();
         _outerHost = GetTemplateChild("PART_OuterShadows") as Canvas;
         _innerImage = GetTemplateChild("PART_InnerShadows") as Image;
+        ObserveLayout();
         QueueUpdate();
     }
 
@@ -69,25 +70,27 @@ public sealed partial class DaisyShadowContainer : ContentControl
     private void OnLoaded(object sender, RoutedEventArgs args)
     {
         ObserveShadows();
-        if (_observedRoot != null)
-            _observedRoot.Changed -= OnRootChanged;
-        _observedRoot = XamlRoot;
-        if (_observedRoot != null)
-            _observedRoot.Changed += OnRootChanged;
+        ObserveLayout();
         QueueUpdate();
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs args)
     {
         StopObservingShadows();
-        if (_observedRoot != null)
-            _observedRoot.Changed -= OnRootChanged;
-        _observedRoot = null;
+        _layoutTracker?.Dispose();
+        _layoutTracker = null;
         ReleaseVisuals();
     }
 
-    private void OnRootChanged(XamlRoot sender, XamlRootChangedEventArgs args) => QueueUpdate();
-    private void OnSizeChanged(object sender, SizeChangedEventArgs args) => QueueUpdate();
+    private void ObserveLayout()
+    {
+        _layoutTracker?.Dispose();
+        _layoutTracker = IsLoaded && _outerHost is not null
+            ? new CompositionElementTracker(this, _outerHost, OnLayoutChanged)
+            : null;
+    }
+
+    private void OnLayoutChanged(CompositionElementBounds? bounds) => UpdateShadows();
     private void OnSurfaceChanged(DependencyObject sender, DependencyProperty property) => QueueUpdate();
     private void OnShadowChanged(object? sender, EventArgs args) => QueueUpdate();
 
@@ -135,73 +138,91 @@ public sealed partial class DaisyShadowContainer : ContentControl
         _updateQueued = false;
         if (!IsLoaded || _outerHost == null || _innerImage == null)
             return;
-        ReleaseVisuals();
         var width = (float)ActualWidth;
         var height = (float)ActualHeight;
         if (width <= 0 || height <= 0 || Shadows.Count == 0)
-            return;
-
-        var compositor = ElementCompositionPreview.GetElementVisual(_outerHost).Compositor;
-        _outerVisual = Track(compositor.CreateContainerVisual());
-        _outerVisual.Size = new Vector2(width, height);
-        foreach (var shadow in Shadows)
         {
-            if (!shadow.IsInner && shadow.Opacity > 0 && shadow.Color.A > 0)
-                AddOuterShadow(compositor, shadow, width, height);
+            ReleaseVisuals();
+            return;
         }
-        ElementCompositionPreview.SetElementChildVisual(_outerHost, _outerVisual);
+
+        var descriptions = Shadows.Where(static shadow => !shadow.IsInner && shadow.Opacity > 0 && shadow.Color.A > 0).ToArray();
+        if (_compositionScope is { IsAttached: false } || _outerShadows.Count != descriptions.Length)
+            ReleaseVisuals();
+
+        _compositionScope ??= CompositionVisualScope.TryAttach(_outerHost);
+        if (_compositionScope is { } scope)
+        {
+            scope.Root.Size = new Vector2(width, height);
+            while (_outerShadows.Count < descriptions.Length)
+                _outerShadows.Add(new OuterShadowVisual(scope));
+            for (var index = 0; index < descriptions.Length; index++)
+                _outerShadows[index].Update(descriptions[index], width, height, CornerRadius);
+        }
+
+        _innerImage.Source = null;
         RenderInsetShadows(width, height);
     }
 
-    private T Track<T>(T value) where T : IDisposable
+    private sealed class OuterShadowVisual
     {
-        _compositionResources.Add(value);
-        return value;
-    }
+        private readonly ContainerVisual _mask;
+        private readonly CompositionVectorVisual[] _corners = new CompositionVectorVisual[4];
+        private readonly InsetClip[] _clips = new InsetClip[4];
+        private readonly CompositionVisualSurface _surface;
+        private readonly DropShadow _shadow;
+        private readonly SpriteVisual _visual;
 
-    private void AddOuterShadow(Compositor compositor, DaisyShadow description, float width, float height)
-    {
-        var spread = (float)Math.Max(description.Spread, -Math.Min(width, height) / 2 + 0.01);
-        var maskWidth = width + 2 * spread;
-        var maskHeight = height + 2 * spread;
-        var mask = Track(compositor.CreateContainerVisual());
-        mask.Size = new Vector2(maskWidth, maskHeight);
-        var radii = new[] { CornerRadius.TopLeft, CornerRadius.TopRight, CornerRadius.BottomRight, CornerRadius.BottomLeft };
-        for (var corner = 0; corner < radii.Length; corner++)
+        internal OuterShadowVisual(CompositionVisualScope scope)
         {
-            var shapeVisual = Track(compositor.CreateShapeVisual());
-            shapeVisual.Size = mask.Size;
-            var geometry = Track(compositor.CreateRoundedRectangleGeometry());
-            geometry.Size = mask.Size;
-            var radius = (float)Math.Clamp(radii[corner] + spread, 0, Math.Min(maskWidth, maskHeight) / 2);
-            geometry.CornerRadius = new Vector2(radius);
-            var shape = Track(compositor.CreateSpriteShape(geometry));
-            shape.FillBrush = Track(compositor.CreateColorBrush(Colors.White));
-            shapeVisual.Shapes.Add(shape);
-            var right = corner is 1 or 2;
-            var bottom = corner is 2 or 3;
-            shapeVisual.Clip = Track(compositor.CreateInsetClip(
-                right ? maskWidth / 2 : 0,
-                bottom ? maskHeight / 2 : 0,
-                right ? 0 : maskWidth / 2,
-                bottom ? 0 : maskHeight / 2));
-            mask.Children.InsertAtTop(shapeVisual);
+            var compositor = scope.Compositor;
+            _mask = scope.Track(compositor.CreateContainerVisual());
+            for (var corner = 0; corner < _corners.Length; corner++)
+            {
+                var vector = new CompositionVectorVisual(scope, compositor.CreateRoundedRectangleGeometry(), Colors.White);
+                _corners[corner] = vector;
+                _clips[corner] = scope.Track(compositor.CreateInsetClip());
+                vector.Visual.Clip = _clips[corner];
+                _mask.Children.InsertAtTop(vector.Visual);
+            }
+            _surface = scope.Track(compositor.CreateVisualSurface());
+            _surface.SourceVisual = _mask;
+            _shadow = scope.Track(compositor.CreateDropShadow());
+            _shadow.Mask = scope.Track(compositor.CreateSurfaceBrush(_surface));
+            _visual = scope.Track(compositor.CreateSpriteVisual());
+            _visual.Shadow = _shadow;
+            scope.Root.Children.InsertAtTop(_visual);
         }
 
-        var surface = Track(compositor.CreateVisualSurface());
-        surface.SourceVisual = mask;
-        surface.SourceSize = mask.Size;
-        var dropShadow = Track(compositor.CreateDropShadow());
-        dropShadow.Mask = Track(compositor.CreateSurfaceBrush(surface));
-        dropShadow.BlurRadius = (float)Math.Max(0, description.BlurRadius);
-        dropShadow.Color = Color.FromArgb(255, description.Color.R, description.Color.G, description.Color.B);
-        dropShadow.Opacity = (float)(Math.Clamp(description.Opacity, 0, 1) * description.Color.A / 255);
-        dropShadow.Offset = new Vector3((float)description.OffsetX, (float)description.OffsetY, 0);
-        var visual = Track(compositor.CreateSpriteVisual());
-        visual.Size = mask.Size;
-        visual.Offset = new Vector3(-spread, -spread, 0);
-        visual.Shadow = dropShadow;
-        _outerVisual!.Children.InsertAtTop(visual);
+        internal void Update(DaisyShadow description, float width, float height, CornerRadius corners)
+        {
+            var spread = (float)Math.Max(description.Spread, -Math.Min(width, height) / 2 + 0.01);
+            var size = new Vector2(width + 2 * spread, height + 2 * spread);
+            _mask.Size = size;
+            Span<double> radii = [corners.TopLeft, corners.TopRight, corners.BottomRight, corners.BottomLeft];
+            for (var corner = 0; corner < _corners.Length; corner++)
+            {
+                var vector = _corners[corner];
+                vector.SetSize(size);
+                var geometry = (CompositionRoundedRectangleGeometry)vector.Geometry;
+                geometry.Size = size;
+                geometry.CornerRadius = new Vector2((float)Math.Clamp(radii[corner] + spread, 0, Math.Min(size.X, size.Y) / 2));
+                var clip = _clips[corner];
+                var right = corner is 1 or 2;
+                var bottom = corner is 2 or 3;
+                clip.LeftInset = right ? size.X / 2 : 0;
+                clip.TopInset = bottom ? size.Y / 2 : 0;
+                clip.RightInset = right ? 0 : size.X / 2;
+                clip.BottomInset = bottom ? 0 : size.Y / 2;
+            }
+            _surface.SourceSize = size;
+            _shadow.BlurRadius = (float)Math.Max(0, description.BlurRadius);
+            _shadow.Color = Color.FromArgb(255, description.Color.R, description.Color.G, description.Color.B);
+            _shadow.Opacity = (float)(Math.Clamp(description.Opacity, 0, 1) * description.Color.A / 255);
+            _shadow.Offset = new Vector3((float)description.OffsetX, (float)description.OffsetY, 0);
+            _visual.Size = size;
+            _visual.Offset = new Vector3(-spread, -spread, 0);
+        }
     }
 
     private void RenderInsetShadows(float width, float height)
@@ -265,13 +286,10 @@ public sealed partial class DaisyShadowContainer : ContentControl
 
     private void ReleaseVisuals()
     {
-        if (_outerHost != null && _outerVisual != null)
-            ElementCompositionPreview.SetElementChildVisual(_outerHost, null);
-        _outerVisual = null;
+        _compositionScope?.Dispose();
+        _compositionScope = null;
+        _outerShadows.Clear();
         if (_innerImage != null)
             _innerImage.Source = null;
-        for (var index = _compositionResources.Count - 1; index >= 0; index--)
-            _compositionResources[index].Dispose();
-        _compositionResources.Clear();
     }
 }

@@ -170,11 +170,13 @@
                                              CornerRadius="10"
                                              MinWidth="140"
                                              Padding="12,8">
-                            <TextBlock Text="D"
-                                       FontWeight="SemiBold"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Foreground="{StaticResource ShowcaseButtonForegroundBrush}" />
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="WinUI + Composition"
+                                           Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                                <daisy:DaisyInput Text="Composition"
+                                                  AutomationProperties.AutomationId="CompositionFoundationInput"
+                                                  AutomationProperties.Name="Composition" />
+                            </StackPanel>
                         </daisy:DaisyShadowContainer>
                     </StackPanel>
                 </Border>
