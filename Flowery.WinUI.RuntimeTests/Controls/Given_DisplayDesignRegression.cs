@@ -327,7 +327,17 @@ namespace Flowery.WinUI.RuntimeTests.Controls
                 card.IsGlass = true;
                 card.EnableBackdropBlur = true;
                 card.BlurMode = GlassBlurMode.SkiaSharp;
-                await LoadAsync(card);
+                // Capture hides glass surfaces. Keep a real backdrop in the rendered scene.
+                var scene = new Grid
+                {
+                    Width = 200,
+                    Height = 140,
+                    Background = new SolidColorBrush(Microsoft.UI.Colors.Coral),
+                    Children = { card }
+                };
+                await LoadAsync(scene);
+                await RuntimeTestHelpers.EnsureLoadedAsync(card).WaitAsync(TimeSpan.FromSeconds(10));
+                scene.UpdateLayout();
                 var image = Field<Image>(card, "_blurredBackdrop");
                 Assert.IsNotNull(image, card.GetType().Name);
                 if (new Windows.UI.ViewManagement.AccessibilitySettings().HighContrast)
@@ -351,6 +361,11 @@ namespace Flowery.WinUI.RuntimeTests.Controls
                     {
                         card.RefreshBackdrop();
                         await captured.Task.WaitAsync(TimeSpan.FromSeconds(15));
+                    }
+                    catch (TimeoutException error)
+                    {
+                        throw new TimeoutException(
+                            $"{card.GetType().Name} did not publish its backdrop: Loaded={card.IsLoaded}, Size={card.ActualWidth}x{card.ActualHeight}, Source={image.Source}, Visibility={image.Visibility}.", error);
                     }
                     finally
                     {
