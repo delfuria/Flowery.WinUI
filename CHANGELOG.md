@@ -6,6 +6,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-10-19
+
+### Added
+
+- Weekly Dependabot updates for GitHub Actions (#16).
+- A NuGet security audit for all 13 C# projects and their transitive dependencies (#16). GitHub Actions runs the audit on pull requests, on `main`, and weekly. The script also supports local audits.
+- A Windows workflow reports resolved direct and transitive NuGet dependencies for all 13 C# projects to the GitHub dependency graph (#16).
+
+### Changed
+
+- Dependabot now covers the unit-test and generator projects outside the solution. Shared packages update across projects, with dedicated MSTest and SkiaSharp groups (#16, #21).
+- **Breaking dependency update:** Review direct SkiaSharp use before the update. SkiaSharp and its native Win32 assets change from `3.119.2` to `4.153.1` (#22). SkiaSharp `4.153.1` disables RAW/DNG decoding. See the [migration notes](https://mono.github.io/SkiaSharp/docs/releases/4.148.0.html) and [release notes](https://mono.github.io/SkiaSharp/docs/releases/4.153.1.html).
+- Updated `Microsoft.Windows.SDK.BuildTools` from `10.0.28000.1839` to `10.0.28000.2705` (#20).
+- The documentation workflow uses supported Python and GitHub Pages actions. CodeQL and documentation workflows now grant write permissions only to the required jobs (#16).
+
+### Fixed
+
+- Glass backdrop capture no longer applies DPI scaling twice. Captures keep the correct pixel size at fractional display scales, including 125% (#16).
+
 ## [1.4.1] - 2026-10-18
 
 ### Added
