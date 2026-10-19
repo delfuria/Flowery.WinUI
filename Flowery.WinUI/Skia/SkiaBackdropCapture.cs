@@ -172,11 +172,11 @@ namespace Flowery.Skia
         {
             double width = element.ActualWidth;
             double height = element.ActualHeight;
-            double scale = element.XamlRoot?.RasterizationScale ?? 1;
             if (width <= 0 || height <= 0)
                 return null;
             var renderTarget = new RenderTargetBitmap();
-            await renderTarget.RenderAsync(element, (int)Math.Ceiling(width * scale), (int)Math.Ceiling(height * scale));
+            // RenderAsync applies the XamlRoot rasterization scale itself.
+            await renderTarget.RenderAsync(element, (int)Math.Ceiling(width), (int)Math.Ceiling(height));
             int pixelWidth = renderTarget.PixelWidth;
             int pixelHeight = renderTarget.PixelHeight;
             if (pixelWidth <= 0 || pixelHeight <= 0)

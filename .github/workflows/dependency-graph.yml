@@ -1,4 +1,4 @@
-name: Flowery.WinUI Dependency Submission
+name: Flowery.WinUI Dependency Graph
 
 on:
   push:
@@ -15,7 +15,8 @@ permissions:
   contents: read
 
 jobs:
-  submit:
+  update-graph:
+    name: Update GitHub dependency graph
     if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: windows-2025-vs2026
     permissions:
@@ -31,7 +32,7 @@ jobs:
         shell: pwsh
         run: |
           . ./scripts/build_core.ps1
-          Initialize-BuildEnvironment -HeadName 'dependency submission' -LogFileName 'dependency-restore' -Configuration Release -SdkVersion '10.0.402'
+          Initialize-BuildEnvironment -HeadName 'dependency graph' -LogFileName 'dependency-restore' -Configuration Release -SdkVersion '10.0.402'
           $gitArguments = @('ls-files', '--', '*.csproj')
           $projects = @(& git @gitArguments)
           if ($LASTEXITCODE -ne 0 -or $projects.Count -eq 0) {
@@ -48,7 +49,7 @@ jobs:
               }
           }
           Write-BuildSummary
-      - name: Submit resolved direct and transitive NuGet dependencies
+      - name: Update GitHub dependency graph with resolved NuGet dependencies
         uses: advanced-security/component-detection-dependency-submission-action@v0.2.0
         with:
           detectorsCategories: NuGet

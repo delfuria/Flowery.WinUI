@@ -185,8 +185,9 @@ It has read-only repository access.
 Dependabot checks NuGet and GitHub Actions weekly, with a limit of ten version-update PRs per ecosystem.
 Related MSTest packages and their test-platform extensions update together.
 Other package families and unrelated major upgrades remain separate.
-The Dependency Submission workflow restores all C# projects on Windows and submits resolved NuGet dependencies from the default branch.
-Only its submission job has repository write access; it does not run for pull requests.
+The Dependency Graph workflow restores all C# projects on Windows and reports resolved NuGet dependencies from the default branch.
+Only its graph update job has repository write access. The workflow does not run for pull requests.
+This workflow does not publish NuGet packages. Only the manually started Release workflow publishes packages.
 The repository's built-in automatic submission remains disabled because its Linux restore fails for these native Windows projects.
 
 The CI workflow is configured to build and check Gallery and Kiosk in Debug and Release with SDK `10.0.402` and `11.0.100-rc.2.26504.105`.
