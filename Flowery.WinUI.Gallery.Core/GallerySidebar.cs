@@ -415,6 +415,7 @@ namespace Flowery.WinUI.Gallery
             foreach (var label in _selectorLabels)
             {
                 label.Foreground = baseContentBrush;
+                label.Opacity = DaisyResourceLookup.GetContentOpacity(0.7);
             }
         }
 
@@ -433,7 +434,7 @@ namespace Flowery.WinUI.Gallery
                 Margin = metrics.SelectorLabelMargin,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 FontWeight = FontWeights.SemiBold,
-                Opacity = 0.7,
+                Opacity = DaisyResourceLookup.GetContentOpacity(0.7),
                 Foreground = GetBrush(Application.Current?.Resources, "DaisyBaseContentBrush", new SolidColorBrush(Colors.White)),
                 TextTrimming = TextTrimming.CharacterEllipsis,
                 TextWrapping = TextWrapping.NoWrap

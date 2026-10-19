@@ -124,6 +124,18 @@ The test script uses the matching Gallery and runner executables from the normal
 It sets `FLOWERY_GALLERY_EXE_PATH` and a separate `FLOWERY_TEST_RESULTS_ROOT` for the runner.
 The script writes test reports under `TestResults/` and process logs under `logs/`.
 
+To run one group of native tests, pass a name substring with `-TestFilter`:
+
+```powershell
+./scripts/test_windows.ps1 -Configuration Release -SkipBuild -TestFilter Given_HighContrast -Monitor 2 -WindowRegion LowerHalf
+```
+
+The filter matches the full class and method name, without case sensitivity.
+A filter with no matches fails the run.
+Omit the filter to run the complete suite.
+For contrast-theme acceptance, apply each Windows contrast theme before the focused run.
+The focused run does not replace the complete suite in the normal Windows theme.
+
 ## Create NuGet packages
 
 ```powershell

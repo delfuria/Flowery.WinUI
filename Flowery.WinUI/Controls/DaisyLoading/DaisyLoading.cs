@@ -221,6 +221,7 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyLoading);
             IsTabStop = false;
+            RegisterPropertyChangedCallback(IsEnabledProperty, static (sender, _) => ((DaisyLoading)sender).RebuildVisual());
         }
 
         private static void OnAppearanceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -281,6 +282,13 @@ namespace Flowery.Controls
                 Width = size,
                 Height = size
             };
+
+            if (DaisySystemAppearance.HighContrast)
+            {
+                BuildSpinnerVisual(size);
+                Content = _rootGrid;
+                return;
+            }
 
             switch (Variant)
             {
@@ -569,6 +577,9 @@ namespace Flowery.Controls
 
         private Brush GetColorBrush()
         {
+            if (DaisySystemAppearance.HighContrast)
+                return DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+
             var resourceKey = Color switch
             {
                 DaisyColor.Primary => "DaisyPrimaryBrush",

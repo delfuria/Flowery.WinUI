@@ -11,60 +11,60 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="date-timeline" Title="Date Timeline" />
                 <TextBlock Text="A horizontal scrollable date picker inspired by easy_date_timeline."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Basic (MonthYear Header)" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Basic (MonthYear Header)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyDateTimeline Width="420" />
 
-                    <TextBlock Text="Switcher Header (Navigate Months)" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="Switcher Header (Navigate Months)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyDateTimeline Width="420" HeaderType="Switcher" />
 
-                    <TextBlock Text="No Header" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="No Header" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyDateTimeline Width="420" HeaderType="None" />
 
-                    <TextBlock Text="Sizes" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="Sizes" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}"
                                daisy:FlowerySizeManager.IgnoreGlobalSize="True" />
                     <daisy:WrapPanel Orientation="Horizontal" Spacing="16"
                                daisy:FlowerySizeManager.IgnoreGlobalSize="True">
                         <StackPanel Spacing="6">
-                            <TextBlock Text="XS" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                            <TextBlock Text="XS" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:DaisyDateTimeline AutoWidth="True" VisibleDaysCount="7"
                                                      Size="ExtraSmall"
                                                      HeaderType="None" />
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="S" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                            <TextBlock Text="S" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:DaisyDateTimeline AutoWidth="True" VisibleDaysCount="7"
                                                      Size="Small"
                                                      HeaderType="None" />
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="M" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                            <TextBlock Text="M" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:DaisyDateTimeline AutoWidth="True" VisibleDaysCount="7"
                                                      Size="Medium"
                                                      HeaderType="None" />
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="L" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                            <TextBlock Text="L" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:DaisyDateTimeline AutoWidth="True" VisibleDaysCount="7"
                                                      Size="Large"
                                                      HeaderType="None" />
                         </StackPanel>
                     </daisy:WrapPanel>
 
-                    <TextBlock Text="Disable Strategies" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="Disable Strategies" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:WrapPanel Orientation="Horizontal" Spacing="24">
-                        <Border BorderBrush="{ThemeResource DaisyBase300Brush}" BorderThickness="0,0,1,0" Padding="0,0,24,0">
+                        <Border BorderBrush="{ThemeResource DaisyBorderBrush}" BorderThickness="0,0,1,0" Padding="0,0,24,0">
                             <StackPanel Spacing="6">
-                                <TextBlock Text="Before Today" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                                <TextBlock Text="Before Today" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <daisy:DaisyDateTimeline Width="340" HeaderType="None"
                                                          FirstDate="{x:Bind Today}"
                                                          LastDate="{x:Bind OneMonthAhead}"
@@ -72,7 +72,7 @@
                             </StackPanel>
                         </Border>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="After Today" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                            <TextBlock Text="After Today" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:DaisyDateTimeline Width="340" HeaderType="None"
                                                      FirstDate="{x:Bind OneMonthAgo}"
                                                      LastDate="{x:Bind Today}"
@@ -80,25 +80,25 @@
                         </StackPanel>
                     </daisy:WrapPanel>
 
-                    <TextBlock Text="Display Elements" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="Display Elements" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:WrapPanel Orientation="Horizontal" Spacing="24">
-                        <Border BorderBrush="{ThemeResource DaisyBase300Brush}" BorderThickness="0,0,1,0" Padding="0,0,24,0">
+                        <Border BorderBrush="{ThemeResource DaisyBorderBrush}" BorderThickness="0,0,1,0" Padding="0,0,24,0">
                             <StackPanel Spacing="6">
-                                <TextBlock Text="Default" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                                <TextBlock Text="Default" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <daisy:DaisyDateTimeline Width="300" HeaderType="None"
                                                          DisplayElements="Default" />
                             </StackPanel>
                         </Border>
-                        <Border BorderBrush="{ThemeResource DaisyBase300Brush}" BorderThickness="0,0,1,0" Padding="0,0,24,0">
+                        <Border BorderBrush="{ThemeResource DaisyBorderBrush}" BorderThickness="0,0,1,0" Padding="0,0,24,0">
                             <StackPanel Spacing="6">
-                                <TextBlock Text="Compact" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                                <TextBlock Text="Compact" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <daisy:DaisyDateTimeline Width="300" HeaderType="None"
                                                          DisplayElements="Compact" />
                             </StackPanel>
                         </Border>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Number Only" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                            <TextBlock Text="Number Only" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:DaisyDateTimeline Width="240" HeaderType="None"
                                                      DisplayElements="NumberOnly"
                                                      FirstDate="{x:Bind CurrentMonthStart}"
@@ -108,11 +108,11 @@
                         </StackPanel>
                     </daisy:WrapPanel>
 
-                    <TextBlock Text="Item Layout" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="Item Layout" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:WrapPanel Orientation="Horizontal" Spacing="24">
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Inline" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                            <TextBlock Text="Inline" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:DaisyDateTimeline AutoWidth="True" VisibleDaysCount="5"
                                                      HeaderType="None"
                                                      ItemLayout="Horizontal" />
@@ -126,14 +126,14 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="timeline" Title="Timeline" />
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Vertical Timeline" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Vertical Timeline" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                daisy:FlowerySizeManager.ResponsiveFont="SectionHeader"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyTimeline HorizontalAlignment="Left">
                         <StackPanel>
                             <daisy:DaisyTimelineItem IsActive="True">
                                 <daisy:DaisyTimelineItem.StartContent>
-                                    <TextBlock Text="1984" FontWeight="SemiBold" Opacity="0.7"
+                                    <TextBlock Text="1984" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}"
                                                daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 </daisy:DaisyTimelineItem.StartContent>
@@ -142,7 +142,7 @@
                                         <TextBlock Text="First Macintosh" FontWeight="Bold"
                                                    daisy:FlowerySizeManager.ResponsiveFont="Primary"
                                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                                        <TextBlock Text="The Macintosh was revolutionary." Opacity="0.7"
+                                        <TextBlock Text="The Macintosh was revolutionary." Opacity="{ThemeResource GalleryOpacity70}"
                                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                                    Foreground="{ThemeResource DaisyBaseContentBrush}" TextWrapping="Wrap" />
                                     </StackPanel>
@@ -150,7 +150,7 @@
                             </daisy:DaisyTimelineItem>
                             <daisy:DaisyTimelineItem IsActive="True">
                                 <daisy:DaisyTimelineItem.StartContent>
-                                    <TextBlock Text="1998" FontWeight="SemiBold" Opacity="0.7"
+                                    <TextBlock Text="1998" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}"
                                                daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 </daisy:DaisyTimelineItem.StartContent>
@@ -159,7 +159,7 @@
                                         <TextBlock Text="iMac" FontWeight="Bold"
                                                    daisy:FlowerySizeManager.ResponsiveFont="Primary"
                                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                                        <TextBlock Text="The colorful iMac changed computing aesthetics." Opacity="0.7"
+                                        <TextBlock Text="The colorful iMac changed computing aesthetics." Opacity="{ThemeResource GalleryOpacity70}"
                                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                                    Foreground="{ThemeResource DaisyBaseContentBrush}" TextWrapping="Wrap" />
                                     </StackPanel>
@@ -167,7 +167,7 @@
                             </daisy:DaisyTimelineItem>
                             <daisy:DaisyTimelineItem>
                                 <daisy:DaisyTimelineItem.StartContent>
-                                    <TextBlock Text="2007" FontWeight="SemiBold" Opacity="0.7"
+                                    <TextBlock Text="2007" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}"
                                                daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 </daisy:DaisyTimelineItem.StartContent>
@@ -176,7 +176,7 @@
                                         <TextBlock Text="iPhone" FontWeight="Bold"
                                                    daisy:FlowerySizeManager.ResponsiveFont="Primary"
                                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                                        <TextBlock Text="The iPhone redefined mobile computing." Opacity="0.7"
+                                        <TextBlock Text="The iPhone redefined mobile computing." Opacity="{ThemeResource GalleryOpacity70}"
                                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                                    Foreground="{ThemeResource DaisyBaseContentBrush}" TextWrapping="Wrap" />
                                     </StackPanel>
@@ -185,7 +185,7 @@
                         </StackPanel>
                     </daisy:DaisyTimeline>
 
-                    <TextBlock Text="Horizontal Timeline" FontWeight="SemiBold" Opacity="0.8" Margin="0,16,0,0"
+                    <TextBlock Text="Horizontal Timeline" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,16,0,0"
                                daisy:FlowerySizeManager.ResponsiveFont="SectionHeader"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyTimeline Orientation="Horizontal" HorizontalAlignment="Left">

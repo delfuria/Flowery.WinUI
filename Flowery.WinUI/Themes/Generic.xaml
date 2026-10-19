@@ -17,10 +17,17 @@
             <SolidColorBrush x:Key="DaisyNeutralBrush" Color="#2A323C" />
             <SolidColorBrush x:Key="DaisyNeutralFocusBrush" Color="#1D232A" />
             <SolidColorBrush x:Key="DaisyNeutralContentBrush" Color="#A6ADBB" />
+            <SolidColorBrush x:Key="DaisyNeutralForegroundBrush" Color="#2A323C" />
             <SolidColorBrush x:Key="DaisyBase100Brush" Color="#1D232A" />
             <SolidColorBrush x:Key="DaisyBase200Brush" Color="#191E24" />
             <SolidColorBrush x:Key="DaisyBase300Brush" Color="#15191E" />
             <SolidColorBrush x:Key="DaisyBaseContentBrush" Color="#A6ADBB" />
+            <SolidColorBrush x:Key="DaisyBorderBrush" Color="#15191E" />
+            <SolidColorBrush x:Key="DaisyFocusBrush" Color="#570DF8" />
+            <SolidColorBrush x:Key="DaisyLinkBrush" Color="#570DF8" />
+            <SolidColorBrush x:Key="DaisyComboBoxItemHighlightBrush" Color="#15191E" />
+            <SolidColorBrush x:Key="DaisyComboBoxItemHighlightForegroundBrush" Color="#A6ADBB" />
+            <x:Double x:Key="DaisyDisabledOpacity">0.5</x:Double>
             <SolidColorBrush x:Key="DaisyInfoBrush" Color="#00B5FF" />
             <SolidColorBrush x:Key="DaisyInfoContentBrush" Color="#002B3D" />
             <SolidColorBrush x:Key="DaisySuccessBrush" Color="#00A96E" />
@@ -43,10 +50,17 @@
             <SolidColorBrush x:Key="DaisyNeutralBrush" Color="#09090B" />
             <SolidColorBrush x:Key="DaisyNeutralFocusBrush" Color="#070708" />
             <SolidColorBrush x:Key="DaisyNeutralContentBrush" Color="#E4E4E7" />
+            <SolidColorBrush x:Key="DaisyNeutralForegroundBrush" Color="#09090B" />
             <SolidColorBrush x:Key="DaisyBase100Brush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="DaisyBase200Brush" Color="#F2F2F2" />
             <SolidColorBrush x:Key="DaisyBase300Brush" Color="#D1D5DB" />
             <SolidColorBrush x:Key="DaisyBaseContentBrush" Color="#18181B" />
+            <SolidColorBrush x:Key="DaisyBorderBrush" Color="#D1D5DB" />
+            <SolidColorBrush x:Key="DaisyFocusBrush" Color="#422AD5" />
+            <SolidColorBrush x:Key="DaisyLinkBrush" Color="#422AD5" />
+            <SolidColorBrush x:Key="DaisyComboBoxItemHighlightBrush" Color="#D1D5DB" />
+            <SolidColorBrush x:Key="DaisyComboBoxItemHighlightForegroundBrush" Color="#18181B" />
+            <x:Double x:Key="DaisyDisabledOpacity">0.5</x:Double>
             <SolidColorBrush x:Key="DaisyInfoBrush" Color="#00BAFE" />
             <SolidColorBrush x:Key="DaisyInfoContentBrush" Color="#000000" />
             <SolidColorBrush x:Key="DaisySuccessBrush" Color="#00D390" />
@@ -69,10 +83,17 @@
             <SolidColorBrush x:Key="DaisyNeutralBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="DaisyNeutralFocusBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="DaisyNeutralContentBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyNeutralForegroundBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
             <SolidColorBrush x:Key="DaisyBase100Brush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="DaisyBase200Brush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="DaisyBase300Brush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="DaisyBaseContentBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyFocusBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="DaisyLinkBrush" Color="{ThemeResource SystemColorHotlightColor}" />
+            <SolidColorBrush x:Key="DaisyComboBoxItemHighlightBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="DaisyComboBoxItemHighlightForegroundBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
+            <x:Double x:Key="DaisyDisabledOpacity">1</x:Double>
             <SolidColorBrush x:Key="DaisyInfoBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <SolidColorBrush x:Key="DaisyInfoContentBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
             <SolidColorBrush x:Key="DaisySuccessBrush" Color="{ThemeResource SystemColorHighlightColor}" />

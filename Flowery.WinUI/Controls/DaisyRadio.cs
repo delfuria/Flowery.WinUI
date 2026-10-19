@@ -16,6 +16,7 @@ namespace Flowery.Controls
     {
         private Border? _indicatorBorder;
         private Ellipse? _innerDot;
+        private ContentPresenter? _labelPresenter;
         private readonly DaisyControlLifecycle _lifecycle;
         private long _foregroundCallbackToken;
         private long _fontSizeCallbackToken;
@@ -44,6 +45,7 @@ namespace Flowery.Controls
             Unchecked += (s, e) => ApplyAll();
             GotFocus += (s, e) => ApplyAll();
             LostFocus += (s, e) => ApplyAll();
+            IsEnabledChanged += (s, e) => ApplyAll();
         }
 
         #region Dependency Properties
@@ -121,6 +123,7 @@ namespace Flowery.Controls
 
             _indicatorBorder = GetTemplateChild("PART_IndicatorBorder") as Border;
             _innerDot = GetTemplateChild("PART_InnerDot") as Ellipse;
+            _labelPresenter = GetTemplateChild("PART_LabelPresenter") as ContentPresenter;
 
             EnsureForegroundOverrideInitialized();
             EnsureFontSizeOverrideInitialized();
@@ -204,12 +207,20 @@ namespace Flowery.Controls
             var borderOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyRadio", "BorderBrush");
 
             var accentBrush = accentOverride ?? DaisyResourceLookup.GetBrush(accentBrushKey);
-            var borderBrush = borderOverride ?? DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var borderBrush = borderOverride ?? DaisyResourceLookup.GetBorderBrush();
             var focusBrush = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
 
-            var labelBrush = _hasForegroundOverride
+            var labelBrush = _hasForegroundOverride && !DaisySystemAppearance.HighContrast
                 ? Foreground
                 : GetAppBrush("DaisyBaseContentBrush");
+
+            if (DaisySystemAppearance.HighContrast)
+            {
+                accentBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyPrimaryBrush" : "DaisyDisabledForegroundBrush");
+                borderBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush");
+                labelBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+                if (!IsEnabled) focusBrush = borderBrush;
+            }
 
             if (isChecked)
             {
@@ -231,6 +242,7 @@ namespace Flowery.Controls
             {
                 SetForeground(labelBrush);
             }
+            if (_labelPresenter != null) _labelPresenter.Foreground = labelBrush;
         }
 
         #endregion

@@ -13,7 +13,7 @@
                         Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="drawer" Title="Drawer" />
                 <TextBlock Text="A sliding sidebar panel for navigation menus or auxiliary content. Toggle between overlay mode (content is covered) and inline mode (content is pushed aside). The drawer automatically opens in responsive layouts when sufficient width is available."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
@@ -28,7 +28,7 @@
                               Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                     <!-- Responsive drawer - auto-opens/closes based on available width -->
-                    <Border BorderBrush="{ThemeResource DaisyBase300Brush}"
+                    <Border BorderBrush="{ThemeResource DaisyBorderBrush}"
                             BorderThickness="1"
                             CornerRadius="8"
                             HorizontalAlignment="Stretch"
@@ -71,7 +71,7 @@
                                                    HorizontalAlignment="Center"
                                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                         <TextBlock Text="Resize window to see drawer auto-open/close."
-                                                   Opacity="0.7"
+                                                   Opacity="{ThemeResource GalleryOpacity70}"
                                                    TextWrapping="Wrap"
                                                    HorizontalAlignment="Center"
                                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
@@ -90,7 +90,7 @@
                         Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="hero" Title="Hero" />
                 <TextBlock Text="A full-width hero container with centered content and optional overlay."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
@@ -102,7 +102,7 @@
                                        FontSize="22"
                                        FontWeight="SemiBold" />
                             <TextBlock x:Name="HeroDescText" Text="Hero is a simple, centered layout container. Compose any content inside."
-                                       Opacity="0.85"
+                                       Opacity="{ThemeResource GalleryOpacity85}"
                                        TextWrapping="Wrap" />
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <daisy:DaisyButton Content="Get started" Variant="Default" />
@@ -119,7 +119,7 @@
                         Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="indicator" Title="Indicator" />
                 <TextBlock Text="Badge overlay that can be aligned to any corner/edge."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
@@ -176,12 +176,12 @@
                         Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="join" Title="Join" />
                 <TextBlock Text="Groups controls together with shared borders and rounded corners on the ends."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <StackPanel Spacing="10">
-                    <TextBlock Text="Buttons" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Buttons" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyJoin>
                         <StackPanel Orientation="Horizontal">
@@ -191,7 +191,7 @@
                         </StackPanel>
                     </daisy:DaisyJoin>
 
-                    <TextBlock Text="Inputs" FontWeight="SemiBold" Opacity="0.8" Margin="0,6,0,0"
+                    <TextBlock Text="Inputs" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,6,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyJoin>
                         <StackPanel Orientation="Horizontal">
@@ -205,7 +205,7 @@
                         </StackPanel>
                     </daisy:DaisyJoin>
 
-                    <TextBlock Text="Vertical" FontWeight="SemiBold" Opacity="0.8" Margin="0,6,0,0"
+                    <TextBlock Text="Vertical" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,6,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyJoin Orientation="Vertical">
                         <StackPanel>
@@ -224,13 +224,13 @@
                         Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="mask" Title="Mask" />
                 <TextBlock Text="Native clipping for simple shapes and Win2D geometry for Heart, Hexagon, Diamond, and Triangle."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <daisy:WrapPanel Spacing="12">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Squircle" Opacity="0.7"
+                        <TextBlock Text="Squircle" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyMask Variant="Squircle" Width="110" Height="110">
                             <Border x:Name="MaskSquircleBorder" Background="{ThemeResource DaisyPrimaryBrush}">
@@ -245,7 +245,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Circle" Opacity="0.7"
+                        <TextBlock Text="Circle" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyMask Variant="Circle" Width="110" Height="110">
                             <Border x:Name="MaskCircleBorder" Background="{ThemeResource DaisySecondaryBrush}">
@@ -260,7 +260,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Square" Opacity="0.7"
+                        <TextBlock Text="Square" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyMask Variant="Square" Width="110" Height="110">
                             <Border x:Name="MaskSquareBorder" Background="{ThemeResource DaisyAccentBrush}">
@@ -275,7 +275,7 @@
                     </StackPanel>
 
                     <StackPanel x:Name="MaskHeartExample" Spacing="6">
-                        <TextBlock Text="Heart" Opacity="0.7"
+                        <TextBlock Text="Heart" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyMask Variant="Heart" Width="110" Height="110">
                             <Border Background="{ThemeResource DaisyErrorBrush}">
@@ -290,7 +290,7 @@
                     </StackPanel>
 
                     <StackPanel x:Name="MaskHexagonExample" Spacing="6">
-                        <TextBlock Text="Hexagon" Opacity="0.7"
+                        <TextBlock Text="Hexagon" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyMask Variant="Hexagon" Width="110" Height="110">
                             <Border Background="{ThemeResource DaisyInfoBrush}">
@@ -305,7 +305,7 @@
                     </StackPanel>
 
                     <StackPanel x:Name="MaskDiamondExample" Spacing="6">
-                        <TextBlock Text="Diamond" Opacity="0.7"
+                        <TextBlock Text="Diamond" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyMask Variant="Diamond" Width="110" Height="110">
                             <Border Background="{ThemeResource DaisyWarningBrush}">
@@ -320,7 +320,7 @@
                     </StackPanel>
 
                     <StackPanel x:Name="MaskTriangleExample" Spacing="6">
-                        <TextBlock Text="Triangle" Opacity="0.7"
+                        <TextBlock Text="Triangle" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyMask Variant="Triangle" Width="110" Height="110">
                             <Border Background="{ThemeResource DaisySuccessBrush}">
@@ -343,7 +343,7 @@
                         Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="mockup" Title="Mockup (Code)" />
                 <TextBlock Text="Mockup frames for code, windows, and browser previews. Supports Mac, Windows, and Linux chrome styles."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
@@ -368,7 +368,7 @@
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <TextBlock Text="Traffic light buttons on the left."
                                            TextWrapping="Wrap"
-                                           Opacity="0.7"
+                                           Opacity="{ThemeResource GalleryOpacity70}"
                                            daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
@@ -384,7 +384,7 @@
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <TextBlock Text="Minimize/maximize/close on the right."
                                            TextWrapping="Wrap"
-                                           Opacity="0.7"
+                                           Opacity="{ThemeResource GalleryOpacity70}"
                                            daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
@@ -400,7 +400,7 @@
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <TextBlock Text="Circular buttons on the right."
                                            TextWrapping="Wrap"
-                                           Opacity="0.7"
+                                           Opacity="{ThemeResource GalleryOpacity70}"
                                            daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
@@ -410,7 +410,7 @@
                     <!-- Browser variant - Mac chrome (default) -->
                     <daisy:DaisyMockup Variant="Browser" ChromeStyle="Mac" Url="https://floweryui.dev" Width="300" Height="160">
                         <Border Padding="14" Background="{ThemeResource DaisyBase200Brush}">
-                            <TextBlock Text="macOS Browser" Opacity="0.7"
+                            <TextBlock Text="macOS Browser" Opacity="{ThemeResource GalleryOpacity70}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </Border>
@@ -419,7 +419,7 @@
                     <!-- Browser variant - Windows chrome -->
                     <daisy:DaisyMockup Variant="Browser" ChromeStyle="Windows" Url="https://microsoft.com" Width="300" Height="160">
                         <Border Padding="14" Background="{ThemeResource DaisyBase200Brush}">
-                            <TextBlock Text="Windows Browser (Edge style)" Opacity="0.7"
+                            <TextBlock Text="Windows Browser (Edge style)" Opacity="{ThemeResource GalleryOpacity70}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </Border>
@@ -428,7 +428,7 @@
                     <!-- Browser variant - Linux chrome -->
                     <daisy:DaisyMockup Variant="Browser" ChromeStyle="Linux" Url="https://gnome.org" Width="300" Height="160">
                         <Border Padding="14" Background="{ThemeResource DaisyBase200Brush}">
-                            <TextBlock Text="Linux Browser (GNOME style)" Opacity="0.7"
+                            <TextBlock Text="Linux Browser (GNOME style)" Opacity="{ThemeResource GalleryOpacity70}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </Border>
@@ -444,7 +444,7 @@
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyPrimaryContentBrush}" />
                                 <TextBlock Text="Themed controls for WinUI 3"
-                                           Opacity="0.85"
+                                           Opacity="{ThemeResource GalleryOpacity85}"
                                            daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyPrimaryContentBrush}" />
@@ -466,7 +466,7 @@
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <TextBlock Text="Windows chrome with a Wi-Fi icon."
                                            TextWrapping="Wrap"
-                                           Opacity="0.7"
+                                           Opacity="{ThemeResource GalleryOpacity70}"
                                            daisy:FlowerySizeManager.ResponsiveFont="Secondary"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
@@ -481,7 +481,7 @@
                         Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="resizablecolumns" Title="Resizable Columns Host" />
                 <TextBlock Text="A multi-column host that provides a shared resize grip between all columns. Supports global resizing (all columns share the same width) with min/max constraints."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
@@ -495,29 +495,29 @@
                                                      Height="300">
                         <Border Width="{Binding ColumnWidth, ElementName=DemoResizableHost}"
                                 Background="{ThemeResource DaisyBase200Brush}"
-                                BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                BorderBrush="{ThemeResource DaisyBorderBrush}"
                                 BorderThickness="1" CornerRadius="8" Padding="12">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="Column 1" FontWeight="Bold" Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                                <TextBlock Text="Hover the gap on the right to resize." Opacity="0.7" TextWrapping="Wrap" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                                <TextBlock Text="Hover the gap on the right to resize." Opacity="{ThemeResource GalleryOpacity70}" TextWrapping="Wrap" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                         </Border>
                         <Border Width="{Binding ColumnWidth, ElementName=DemoResizableHost}"
                                 Background="{ThemeResource DaisyBase200Brush}"
-                                BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                BorderBrush="{ThemeResource DaisyBorderBrush}"
                                 BorderThickness="1" CornerRadius="8" Padding="12">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="Column 2" FontWeight="Bold" Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                                <TextBlock Text="Resizing this column resizes all others." Opacity="0.7" TextWrapping="Wrap" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                                <TextBlock Text="Resizing this column resizes all others." Opacity="{ThemeResource GalleryOpacity70}" TextWrapping="Wrap" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                         </Border>
                         <Border Width="{Binding ColumnWidth, ElementName=DemoResizableHost}"
                                 Background="{ThemeResource DaisyBase200Brush}"
-                                BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                BorderBrush="{ThemeResource DaisyBorderBrush}"
                                 BorderThickness="1" CornerRadius="8" Padding="12">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="Column 3" FontWeight="Bold" Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                                <TextBlock Text="Shared width logic." Opacity="0.7" TextWrapping="Wrap" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                                <TextBlock Text="Shared width logic." Opacity="{ThemeResource GalleryOpacity70}" TextWrapping="Wrap" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                         </Border>
                     </daisy:DaisyResizableColumnsHost>
@@ -531,13 +531,13 @@
                         Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="stack" Title="Stack" />
                 <TextBlock Text="Stacked items with optional navigation arrows and counter."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <daisy:WrapPanel Spacing="16">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Static stack" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Static stack" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyStack Width="260" Height="160">
                             <StackPanel>
@@ -555,7 +555,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Navigation + counter" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Navigation + counter" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyStack Width="260"
                                           Height="160"
@@ -564,15 +564,15 @@
                                           NavigationColor="Primary">
                             <StackPanel>
                                 <Border CornerRadius="12" Background="{ThemeResource DaisyBase200Brush}" Padding="12">
-                                    <TextBlock Text="Page 1" Opacity="0.8"
+                                    <TextBlock Text="Page 1" Opacity="{ThemeResource GalleryOpacity80}"
                                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 </Border>
                                 <Border CornerRadius="12" Background="{ThemeResource DaisyBase200Brush}" Padding="12">
-                                    <TextBlock Text="Page 2" Opacity="0.8"
+                                    <TextBlock Text="Page 2" Opacity="{ThemeResource GalleryOpacity80}"
                                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 </Border>
                                 <Border CornerRadius="12" Background="{ThemeResource DaisyBase200Brush}" Padding="12">
-                                    <TextBlock Text="Page 3" Opacity="0.8"
+                                    <TextBlock Text="Page 3" Opacity="{ThemeResource GalleryOpacity80}"
                                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 </Border>
                             </StackPanel>

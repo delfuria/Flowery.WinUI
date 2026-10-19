@@ -34,6 +34,7 @@ namespace Flowery.Controls
 
             Items.CollectionChanged += OnItemsCollectionChanged;
             SizeChanged += OnSizeChanged;
+            IsEnabledChanged += (_, _) => UpdateDividers();
         }
 
         /// <summary>
@@ -301,8 +302,10 @@ namespace Flowery.Controls
             var columnCount = count;
             var columnWidth = width / columnCount;
 
-            var brush = DividerBrush ?? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
-            var opacity = DividerBrush == null ? 0.25 : 1.0;
+            var brush = DaisyResourceLookup.IsHighContrast
+                ? DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush")
+                : DividerBrush ?? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+            var opacity = DaisyResourceLookup.GetContentOpacity(DividerBrush == null ? 0.25 : 1.0);
             var thickness = ValueCoercion.StrokeThickness(DividerThickness, min: 0.5);
 
             for (int i = 1; i < columnCount; i++)

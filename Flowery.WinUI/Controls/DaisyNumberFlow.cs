@@ -54,7 +54,9 @@ namespace Flowery.Controls
             DecrementCommand = new SimpleCommand(_ => DecrementSelected(), _ => CanDecrement);
 
             IsTabStop = true;
+            UseSystemFocusVisuals = true;
             TabIndex = 0;
+            IsEnabledChanged += (sender, args) => ApplyAll();
 
             AutomationProperties.SetName(this, GetDefaultAccessibleText());
         }
@@ -391,6 +393,8 @@ namespace Flowery.Controls
                 _incrementButton.IsEnabled = CanIncrementValue;
             if (_decrementButton != null)
                 _decrementButton.IsEnabled = CanDecrementValue;
+            if (DaisySystemAppearance.HighContrast)
+                ApplyControlsSizing(Application.Current?.Resources);
         }
 
         #endregion
@@ -572,7 +576,7 @@ namespace Flowery.Controls
             if (ShowControls)
             {
                 _outerContainer.Background = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-                _outerContainer.BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+                _outerContainer.BorderBrush = DaisyResourceLookup.GetBorderBrush();
                 _outerContainer.BorderThickness = resources != null
                     ? DaisyResourceLookup.GetThickness(resources, "DaisyBorderThicknessThin", new Thickness(1))
                     : new Thickness(1);
@@ -594,7 +598,8 @@ namespace Flowery.Controls
 
         private void ApplyTypography(ResourceDictionary? resources)
         {
-            var foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+            var foreground = DaisyResourceLookup.GetBrush(DaisySystemAppearance.HighContrast && !IsEnabled
+                ? "DaisyDisabledForegroundBrush" : "DaisyBaseContentBrush");
 
             if (_prefixText != null) _prefixText.Foreground = foreground;
             if (_suffixText != null) _suffixText.Foreground = foreground;
@@ -641,6 +646,12 @@ namespace Flowery.Controls
                 b.Height = buttonSize;
                 b.MinWidth = buttonSize;
                 b.MinHeight = buttonSize;
+                foreach (var state in new[] { "PointerOver", "Pressed" })
+                {
+                    var key = "ButtonBackground" + state;
+                    if (DaisySystemAppearance.HighContrast) b.Resources[key] = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                    else b.Resources.Remove(key);
+                }
             }
 
             // Apply icon sizing to viewboxes
@@ -658,9 +669,11 @@ namespace Flowery.Controls
             // Apply chevron foreground color
             var iconBrush = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
             if (_incrementIconPath != null)
-                _incrementIconPath.Stroke = iconBrush;
+                _incrementIconPath.Stroke = DaisySystemAppearance.HighContrast && (!IsEnabled || !CanIncrement)
+                    ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush") : iconBrush;
             if (_decrementIconPath != null)
-                _decrementIconPath.Stroke = iconBrush;
+                _decrementIconPath.Stroke = DaisySystemAppearance.HighContrast && (!IsEnabled || !CanDecrement)
+                    ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush") : iconBrush;
         }
 
         private void ApplyPartSizing(ResourceDictionary? resources)
@@ -1292,6 +1305,10 @@ namespace Flowery.Controls
             public void ApplyTypography()
             {
                 var fg = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+                _digitBox.Background = DaisyResourceLookup.GetBrush("DaisyNeutralBrush");
+                _digitBox.BorderBrush = DaisySystemAppearance.HighContrast ? DaisyResourceLookup.GetBorderBrush() : null;
+                _digitBox.BorderThickness = new Thickness(DaisySystemAppearance.HighContrast ? 1 : 0);
+                _selectionIndicator.BorderBrush = DaisyResourceLookup.GetBrush("DaisyAccentBrush");
                 if (_owner.ShowDigitBoxes)
                 {
                     if (_digitBox.Background is SolidColorBrush boxBrush)
@@ -1312,7 +1329,8 @@ namespace Flowery.Controls
                     tb.FontSize = _owner.FontSize;
                     tb.FontWeight = _owner.FontWeight;
                     tb.FontFamily = _owner.FontFamily;
-                    tb.Foreground = fg;
+                    tb.Foreground = DaisySystemAppearance.HighContrast && !_owner.IsEnabled
+                        ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush") : fg;
                     tb.TextAlignment = Microsoft.UI.Xaml.TextAlignment.Center;
                 }
             }

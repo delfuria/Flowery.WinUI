@@ -424,7 +424,8 @@ namespace Flowery.Controls
             // Check for lightweight styling overrides
             var borderOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyListRow", "BorderBrush");
 
-            _rootBorder.BorderBrush = borderOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush");
+            _rootBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush(
+                borderOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush"));
             ApplyHoverState();
         }
 
@@ -435,6 +436,15 @@ namespace Flowery.Controls
 
             // Check for lightweight styling overrides
             var hoverBgOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyListRow", "HoverBackground");
+            if (DaisyResourceLookup.IsHighContrast)
+            {
+                _rootBorder.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                _rootBorder.BorderBrush = _isHovering
+                    ? DaisyResourceLookup.GetBrush("DaisyFocusBrush")
+                    : DaisyResourceLookup.GetBorderBrush();
+                return;
+            }
+
 
             _rootBorder.Background = _isHovering
                 ? hoverBgOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush")

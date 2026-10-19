@@ -3,6 +3,139 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Flowery.WinUI.Gallery">
 
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="HighContrast">
+            <SolidColorBrush x:Key="GalleryGlassComparisonBackdropBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GallerySimulatedGlassBackdropBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GalleryCapturedGlassBackdropBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GalleryFullWidthGlassBackdropBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GalleryMatrixGlassBackdropBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GalleryHoverFrontBackdropBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GalleryHoverSideBackdropBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GalleryHoverBackBackdropBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GalleryHoverDetailBackdropBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GalleryHeaderBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GalleryHeaderTitleBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryHeaderSubtitleBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryHeaderCaptionBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryHeaderLinkBrush" Color="{ThemeResource SystemColorHotlightColor}" />
+            <SolidColorBrush x:Key="GalleryHeaderAccentBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryShowcaseForegroundBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryMediaTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryMediaMutedTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryMediaAccentTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryMediaGoldTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryGlassTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryTerminalBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GalleryTerminalBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryTerminalCaptionBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryTerminalTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryProductPreviewBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GalleryProductPreviewSecondaryBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GalleryProductPreviewTertiaryBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="GalleryProductTagBackgroundBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="GalleryProductTagForegroundBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
+            <SolidColorBrush x:Key="GalleryProductIconBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryProductSecondaryIconBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="GalleryProductTertiaryIconBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <x:Double x:Key="GalleryHeaderOrbOpacity">0</x:Double>
+            <x:Double x:Key="GalleryHeaderSmallOrbOpacity">0</x:Double>
+            <x:Double x:Key="GalleryOpacity40">1</x:Double>
+            <x:Double x:Key="GalleryOpacity50">1</x:Double>
+            <x:Double x:Key="GalleryOpacity60">1</x:Double>
+            <x:Double x:Key="GalleryOpacity70">1</x:Double>
+            <x:Double x:Key="GalleryOpacity80">1</x:Double>
+            <x:Double x:Key="GalleryOpacity85">1</x:Double>
+            <x:Double x:Key="GalleryOpacity90">1</x:Double>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Default">
+            <LinearGradientBrush x:Key="GalleryHeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Offset="0" Color="#0F172A" />
+                <GradientStop Offset="0.5" Color="#1E293B" />
+                <GradientStop Offset="1" Color="#0F172A" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="GalleryHeaderTitleBrush" Color="#F8FAFC" />
+            <SolidColorBrush x:Key="GalleryHeaderSubtitleBrush" Color="#94A3B8" />
+            <SolidColorBrush x:Key="GalleryHeaderCaptionBrush" Color="#64748B" />
+            <SolidColorBrush x:Key="GalleryHeaderLinkBrush" Color="#38BDF8" />
+            <LinearGradientBrush x:Key="GalleryHeaderAccentBrush" StartPoint="0,0.5" EndPoint="1,0.5">
+                <GradientStop Offset="0" Color="#0EA5E9" />
+                <GradientStop Offset="0.3" Color="#2DD4BF" />
+                <GradientStop Offset="0.6" Color="#38BDF8" />
+                <GradientStop Offset="1" Color="#14B8A6" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="GalleryShowcaseForegroundBrush" Color="White" />
+            <SolidColorBrush x:Key="GalleryMediaTextBrush" Color="White" />
+            <SolidColorBrush x:Key="GalleryMediaMutedTextBrush" Color="#40FFFFFF" />
+            <SolidColorBrush x:Key="GalleryMediaAccentTextBrush" Color="Yellow" />
+            <SolidColorBrush x:Key="GalleryMediaGoldTextBrush" Color="#FFD700" />
+            <SolidColorBrush x:Key="GalleryGlassTextBrush" Color="#172033" />
+            <SolidColorBrush x:Key="GalleryTerminalBackgroundBrush" Color="#1a1a1a" />
+            <SolidColorBrush x:Key="GalleryTerminalBorderBrush" Color="#333" />
+            <SolidColorBrush x:Key="GalleryTerminalCaptionBrush" Color="#666" />
+            <SolidColorBrush x:Key="GalleryTerminalTextBrush" Color="#4ade80" />
+            <SolidColorBrush x:Key="GalleryProductPreviewBackgroundBrush" Color="#1a1a2e" />
+            <SolidColorBrush x:Key="GalleryProductPreviewSecondaryBackgroundBrush" Color="#16213e" />
+            <SolidColorBrush x:Key="GalleryProductPreviewTertiaryBackgroundBrush" Color="#0f3460" />
+            <SolidColorBrush x:Key="GalleryProductTagBackgroundBrush" Color="#eab308" />
+            <SolidColorBrush x:Key="GalleryProductTagForegroundBrush" Color="#1a1a2e" />
+            <SolidColorBrush x:Key="GalleryProductIconBrush" Color="#eab308" />
+            <SolidColorBrush x:Key="GalleryProductSecondaryIconBrush" Color="#60a5fa" />
+            <SolidColorBrush x:Key="GalleryProductTertiaryIconBrush" Color="#34d399" />
+            <x:Double x:Key="GalleryHeaderOrbOpacity">0.1</x:Double>
+            <x:Double x:Key="GalleryHeaderSmallOrbOpacity">0.05</x:Double>
+            <!-- Keep captions readable when Windows replaces the application palette. -->
+            <x:Double x:Key="GalleryOpacity40">0.4</x:Double>
+            <x:Double x:Key="GalleryOpacity50">0.5</x:Double>
+            <x:Double x:Key="GalleryOpacity60">0.6</x:Double>
+            <x:Double x:Key="GalleryOpacity70">0.7</x:Double>
+            <x:Double x:Key="GalleryOpacity80">0.8</x:Double>
+            <x:Double x:Key="GalleryOpacity85">0.85</x:Double>
+            <x:Double x:Key="GalleryOpacity90">0.9</x:Double>
+
+            <!-- Gallery decorative backdrops -->
+            <LinearGradientBrush x:Key="GalleryGlassComparisonBackdropBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#667eea" Offset="0"/>
+                <GradientStop Color="#764ba2" Offset="0.5"/>
+                <GradientStop Color="#f093fb" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="GallerySimulatedGlassBackdropBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#4facfe" Offset="0"/>
+                <GradientStop Color="#00f2fe" Offset="0.5"/>
+                <GradientStop Color="#43e97b" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="GalleryCapturedGlassBackdropBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#667eea" Offset="0"/>
+                <GradientStop Color="#f093fb" Offset="0.5"/>
+                <GradientStop Color="#f5576c" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="GalleryFullWidthGlassBackdropBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#11998e" Offset="0"/>
+                <GradientStop Color="#38ef7d" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="GalleryMatrixGlassBackdropBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#11998e" Offset="0"/>
+                <GradientStop Color="#38ef7d" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="GalleryHoverFrontBackdropBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#667eea" Offset="0" />
+                <GradientStop Color="#764ba2" Offset="1" />
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="GalleryHoverSideBackdropBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#f093fb" Offset="0" />
+                <GradientStop Color="#f5576c" Offset="1" />
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="GalleryHoverBackBackdropBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#4facfe" Offset="0" />
+                <GradientStop Color="#00f2fe" Offset="1" />
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="GalleryHoverDetailBackdropBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#43e97b" Offset="0" />
+                <GradientStop Color="#38f9d7" Offset="1" />
+            </LinearGradientBrush>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
     <!-- Gallery Layout Tokens -->
     <x:Double x:Key="GallerySectionSpacing">14</x:Double>
     <x:Double x:Key="GallerySubsectionTopMargin">12</x:Double>

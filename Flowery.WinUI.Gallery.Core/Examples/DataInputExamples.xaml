@@ -17,7 +17,7 @@
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="10" MinWidth="180">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyCheckBox Content="Default" />
                         <daisy:DaisyCheckBox Content="Primary" Variant="Primary" IsChecked="True" />
@@ -30,7 +30,7 @@
 
                     <StackPanel Spacing="10" MinWidth="180"
                                 daisy:FlowerySizeManager.IgnoreGlobalSize="True">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyCheckBox Content="Extra Small" Size="ExtraSmall" Variant="Primary" IsChecked="True" />
                         <daisy:DaisyCheckBox Content="Small" Size="Small" Variant="Primary" IsChecked="True" />
@@ -47,7 +47,7 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="file-input" Title="File Input" />
                 <TextBlock Text="{Binding [Gallery_DataInput_Description_FileInput]}"
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
@@ -68,7 +68,7 @@
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="420">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyInput PlaceholderText="Bordered (default)" Variant="Bordered" HorizontalAlignment="Stretch" />
                         <daisy:DaisyInput PlaceholderText="Ghost" Variant="Ghost" HorizontalAlignment="Stretch" />
@@ -78,7 +78,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="420">
-                        <TextBlock Text="{Binding [Gallery_DataInput_LabelsHelper]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_LabelsHelper]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyInput Label="{Binding [Gallery_DataInput_Email]}"
                                          IsRequired="True"
@@ -95,7 +95,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="420">
-                        <TextBlock Text="{Binding [Gallery_DataInput_FloatingLabel]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_FloatingLabel]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyInput Label="{Binding [Gallery_DataInput_Email]}"
                                          LabelPosition="Floating"
@@ -114,7 +114,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="420">
-                        <TextBlock Text="{Binding [Gallery_DataInput_WithIcons]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_WithIcons]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyInput StartIcon="{StaticResource DaisyIconHome}"
                                          HorizontalAlignment="Stretch"
@@ -131,7 +131,7 @@
 
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="420"
                                 daisy:FlowerySizeManager.IgnoreGlobalSize="True">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyInput Size="ExtraSmall" PlaceholderText="Extra Small" HorizontalAlignment="Stretch" />
                         <daisy:DaisyInput Size="Small" PlaceholderText="Small" HorizontalAlignment="Stretch" />
@@ -149,7 +149,7 @@
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="320">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyCalendarDatePicker PlaceholderText="Bordered (default)" Variant="Bordered" HorizontalAlignment="Stretch" />
                         <daisy:DaisyCalendarDatePicker PlaceholderText="Ghost" Variant="Ghost" HorizontalAlignment="Stretch" />
@@ -159,7 +159,7 @@
 
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="320"
                                 daisy:FlowerySizeManager.IgnoreGlobalSize="True">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyCalendarDatePicker Size="ExtraSmall" PlaceholderText="Extra Small" HorizontalAlignment="Stretch" />
                         <daisy:DaisyCalendarDatePicker Size="Small" PlaceholderText="Small" HorizontalAlignment="Stretch" />
@@ -175,50 +175,50 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="mask-input" Title="Mask Input" />
                 <TextBlock Text="{Binding [Gallery_DataInput_Description_MaskInput]}"
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="8" MinWidth="320" MaxWidth="360">
-                        <TextBlock Text="{Binding [Gallery_DataInput_WithMask]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_WithMask]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <custom:DaisyMaskInput Mode="AlphaNumericCode" HorizontalAlignment="Stretch" />
-                        <TextBlock Text="{Binding [Gallery_DataInput_ExampleAlpha]}" Opacity="0.7"
+                        <TextBlock Text="{Binding [Gallery_DataInput_ExampleAlpha]}" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     </StackPanel>
 
                     <StackPanel Spacing="8" MinWidth="320" MaxWidth="360">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Time]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Time]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <custom:DaisyMaskInput Mode="Timer" HorizontalAlignment="Stretch" />
-                        <TextBlock Text="{Binding [Gallery_DataInput_ExampleTime]}" Opacity="0.7"
+                        <TextBlock Text="{Binding [Gallery_DataInput_ExampleTime]}" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     </StackPanel>
 
                     <StackPanel Spacing="8" MinWidth="320" MaxWidth="360">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Card]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Card]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <custom:DaisyMaskInput Mode="CreditCardNumber"
                                                EndIcon="{StaticResource DaisyIconCard}"
                                                HorizontalAlignment="Stretch" />
-                        <TextBlock Text="{Binding [Gallery_DataInput_ExampleCard]}" Opacity="0.7"
+                        <TextBlock Text="{Binding [Gallery_DataInput_ExampleCard]}" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     </StackPanel>
 
                     <StackPanel Spacing="8" MinWidth="320" MaxWidth="360">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Expiry]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Expiry]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <custom:DaisyMaskInput Mode="ExpiryDate" HorizontalAlignment="Stretch" />
-                        <TextBlock Text="{Binding [Gallery_DataInput_ExampleExpiry]}" Opacity="0.7"
+                        <TextBlock Text="{Binding [Gallery_DataInput_ExampleExpiry]}" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     </StackPanel>
 
                     <StackPanel Spacing="8" MinWidth="320" MaxWidth="360">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Cvc]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Cvc]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <custom:DaisyMaskInput Mode="Cvc" HorizontalAlignment="Stretch" />
-                        <TextBlock Text="{Binding [Gallery_DataInput_ExampleCvc]}" Opacity="0.7"
+                        <TextBlock Text="{Binding [Gallery_DataInput_ExampleCvc]}" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     </StackPanel>
                 </daisy:WrapPanel>
@@ -230,25 +230,25 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="numericupdown" Title="NumericUpDown" />
                 <TextBlock Text="{Binding [Gallery_DataInput_Description_NumericUpDown]}"
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="8" MinWidth="320" MaxWidth="360">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Decimal]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Decimal]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyNumericUpDown x:Name="NumericUpDownDecimalDemo"
                                                   HorizontalAlignment="Stretch"
                                                   ShowClearButton="True" />
                         <TextBlock Text="{Binding [Gallery_DataInput_TryExponent]}"
-                                   Opacity="0.7"
+                                   Opacity="{ThemeResource GalleryOpacity70}"
                                    TextWrapping="Wrap"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     </StackPanel>
 
                     <StackPanel Spacing="8" MinWidth="320" MaxWidth="360">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Currency]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Currency]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyNumericUpDown x:Name="NumericUpDownCurrencyDemo"
                                                   HorizontalAlignment="Stretch"
@@ -256,17 +256,17 @@
                                                   FormatString="F2"
                                                   ShowButtons="True" />
                         <TextBlock Text="{Binding [Gallery_DataInput_PrefixFormatting]}"
-                                   Opacity="0.7"
+                                   Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     </StackPanel>
 
                     <StackPanel Spacing="10" MinWidth="320" MaxWidth="360">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Bases]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Bases]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                         <StackPanel Spacing="8">
                             <StackPanel Spacing="6">
-                                <TextBlock Text="Hex" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                                <TextBlock Text="Hex" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <daisy:DaisyNumericUpDown x:Name="NumericUpDownHexDemo"
                                     Width="180"
                                     HorizontalAlignment="Left"
@@ -276,7 +276,7 @@
                             </StackPanel>
 
                             <StackPanel Spacing="6">
-                                <TextBlock Text="Binary" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                                <TextBlock Text="Binary" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <daisy:DaisyNumericUpDown x:Name="NumericUpDownBinaryDemo"
                                     Width="180"
                                     HorizontalAlignment="Left"
@@ -285,7 +285,7 @@
                             </StackPanel>
 
                             <StackPanel Spacing="6">
-                                <TextBlock Text="ColorHex" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                                <TextBlock Text="ColorHex" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <StackPanel Orientation="Horizontal" Spacing="12">
                                     <daisy:DaisyNumericUpDown x:Name="NumericUpDownColorHexDemo"
                                         Width="140"
@@ -303,7 +303,7 @@
                             </StackPanel>
 
                             <StackPanel Spacing="6">
-                                <TextBlock Text="IPv4" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                                <TextBlock Text="IPv4" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <daisy:DaisyNumericUpDown x:Name="NumericUpDownIpv4Demo"
                                     Width="180"
                                     HorizontalAlignment="Left"
@@ -313,7 +313,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="8" MinWidth="320" MaxWidth="360">
-                        <TextBlock Text="{Binding [Gallery_DataInput_VariantsSizes]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_VariantsSizes]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <StackPanel Spacing="10" daisy:FlowerySizeManager.IgnoreGlobalSize="True">
                             <daisy:DaisyNumericUpDown x:Name="NumericUpDownVariantSmall" HorizontalAlignment="Stretch" Size="Small" Variant="Bordered" />
@@ -331,27 +331,27 @@
                 <local:SectionHeader SectionId="otpinput" Title="OTP Input" />
                 <TextBlock
                     Text="{Binding [Gallery_DataInput_Description_OtpInput]}"
-                    Opacity="0.7"
+                    Opacity="{ThemeResource GalleryOpacity70}"
                     TextWrapping="Wrap"
                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <daisy:WrapPanel Spacing="32">
                     <StackPanel Spacing="8">
                         <TextBlock Text="{Binding [Gallery_DataInput_6Digits]}" FontWeight="SemiBold"
-                            Opacity="0.8"
+                            Opacity="{ThemeResource GalleryOpacity80}"
                             Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyOtpInput Length="6" SeparatorInterval="3" />
                     </StackPanel>
 
                     <StackPanel Spacing="8">
-                        <TextBlock Text="{Binding [Gallery_DataInput_4Digits]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_4Digits]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                             Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyOtpInput Length="4" IsJoined="False" />
                     </StackPanel>
 
                     <StackPanel Spacing="8"
                                 daisy:FlowerySizeManager.IgnoreGlobalSize="True">
-                        <TextBlock Text="{Binding [Gallery_DataInput_SizesJoined]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_SizesJoined]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                             Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyOtpInput Length="4" Size="ExtraSmall" />
                         <daisy:DaisyOtpInput Length="4" Size="Small" />
@@ -369,7 +369,7 @@
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="10" MinWidth="180">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyRadio Content="Default" GroupName="RadioDemo1" />
                         <daisy:DaisyRadio Content="Primary" Variant="Primary" GroupName="RadioDemo1" IsChecked="True" />
@@ -381,7 +381,7 @@
 
                     <StackPanel Spacing="10" MinWidth="180"
                                 daisy:FlowerySizeManager.IgnoreGlobalSize="True">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyRadio Content="Extra Small" Size="ExtraSmall" Variant="Primary" GroupName="RadioSizes" />
                         <daisy:DaisyRadio Content="Small" Size="Small" Variant="Primary" GroupName="RadioSizes" />
@@ -391,7 +391,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="10" MinWidth="180">
-                        <TextBlock Text="{Binding [Sidebar_Table]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Sidebar_Table]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyTable Zebra="True" HorizontalAlignment="Left">
                             <daisy:DaisyTable.Resources>
@@ -434,7 +434,7 @@
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="300">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                             Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyRange Value="40" Variant="Default" HorizontalAlignment="Stretch" />
                         <daisy:DaisyRange Value="50" Variant="Primary" HorizontalAlignment="Stretch" />
@@ -445,7 +445,7 @@
 
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="300"
                         daisy:FlowerySizeManager.IgnoreGlobalSize="True">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                             Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyRange Value="50" Size="ExtraSmall" Variant="Primary" HorizontalAlignment="Stretch" />
                         <daisy:DaisyRange Value="50" Size="Small" Variant="Primary" HorizontalAlignment="Stretch" />
@@ -463,7 +463,7 @@
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="10" MinWidth="180">
-                        <TextBlock Text="{Binding [Gallery_DataInput_StarRatings]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_StarRatings]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                             Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyRating Value="3" Maximum="5" FilledColor="Warning" />
                         <daisy:DaisyRating Value="4" Maximum="5" FilledColor="Primary" />
@@ -475,7 +475,7 @@
 
                     <StackPanel Spacing="10" MinWidth="180"
                         daisy:FlowerySizeManager.IgnoreGlobalSize="True">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                             Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyRating Value="4" Size="ExtraSmall" />
                         <daisy:DaisyRating Value="4" Size="Small" />
@@ -484,7 +484,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="10" MinWidth="180">
-                        <TextBlock Text="{Binding [Gallery_DataInput_ReadOnly]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_ReadOnly]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                             Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyRating Value="3.5" Maximum="5" IsReadOnly="True"
                             FilledColor="Accent" />
@@ -499,7 +499,7 @@
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="320">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySelect PlaceholderText="Bordered (default)" HorizontalAlignment="Stretch">
                             <x:String>Apple</x:String>
@@ -518,7 +518,7 @@
 
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="320"
                                 daisy:FlowerySizeManager.IgnoreGlobalSize="True">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySelect Size="ExtraSmall" PlaceholderText="Extra Small" HorizontalAlignment="Stretch">
                             <x:String>XS</x:String>
@@ -546,13 +546,13 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="slide-to-confirm" Title="Slide to Confirm" />
                 <TextBlock Text="{Binding [Gallery_DataInput_Description_SlideToConfirm]}"
-                           Opacity="0.7" FontSize="12"
+                           Opacity="{ThemeResource GalleryOpacity70}" FontSize="12"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="10" MinWidth="220">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySlideToConfirm
                             Text="{Binding [Gallery_DataInput_PowerOff]}"
@@ -581,7 +581,7 @@
 
                     <StackPanel Spacing="10" MinWidth="220"
                                 daisy:FlowerySizeManager.IgnoreGlobalSize="True">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySlideToConfirm Size="ExtraSmall" Variant="Primary" AutoReset="True"
                             Text="SLIDE" ConfirmingText="OK" />
@@ -594,7 +594,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="10" MinWidth="220">
-                        <TextBlock Text="Depth Styles" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Depth Styles" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySlideToConfirm Variant="Success" DepthStyle="Flat" AutoReset="True"
                             Text="FLAT" ConfirmingText="CONFIRMED" />
@@ -614,7 +614,7 @@
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="420">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyPasswordBox PlaceholderText="Bordered (default)" Variant="Bordered" HorizontalAlignment="Stretch" />
                         <daisy:DaisyPasswordBox PlaceholderText="Ghost" Variant="Ghost" HorizontalAlignment="Stretch" />
@@ -624,7 +624,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="420">
-                        <TextBlock Text="Floating Labels &amp; Icons" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Floating Labels &amp; Icons" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyPasswordBox Label="Password"
                                          LabelPosition="Floating"
@@ -639,7 +639,7 @@
 
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="420"
                                 daisy:FlowerySizeManager.IgnoreGlobalSize="True">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Sizes]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyPasswordBox Size="ExtraSmall" PlaceholderText="Extra Small" HorizontalAlignment="Stretch" />
                         <daisy:DaisyPasswordBox Size="Small" PlaceholderText="Small" HorizontalAlignment="Stretch" />
@@ -648,7 +648,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="10" MinWidth="220" MaxWidth="420">
-                         <TextBlock Text="Customization" FontWeight="SemiBold" Opacity="0.8"
+                         <TextBlock Text="Customization" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyPasswordBox PasswordChar="*" PlaceholderText="Custom mask char (*)" HorizontalAlignment="Stretch" />
                         <daisy:DaisyPasswordBox IsPasswordRevealButtonEnabled="False" PlaceholderText="Reveal button disabled" HorizontalAlignment="Stretch" />
@@ -664,20 +664,20 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="tagpicker" Title="Tag Picker" />
                 <TextBlock Text="{Binding [Gallery_DataInput_Description_TagPicker]}"
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="8" MinWidth="320" MaxWidth="420">
-                        <TextBlock Text="Selection (default)" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Selection (default)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyTagPicker x:Name="TagPicker"
                                               Title="{Binding [Gallery_DataInput_SelectedTags]}" />
                     </StackPanel>
 
                     <StackPanel Spacing="8" MinWidth="320" MaxWidth="420">
-                        <TextBlock Text="Library mode" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Library mode" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyTagPicker x:Name="TagPickerLibrary"
                                               Mode="Library"
@@ -698,25 +698,25 @@
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="8" Width="320">
-                        <TextBlock Text="{Binding [Gallery_DataInput_BasicTextArea]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_BasicTextArea]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyTextArea PlaceholderText="{Binding [Gallery_DataInput_PlaceholderMessage]}" MinRows="3" />
                     </StackPanel>
 
                     <StackPanel Spacing="8" Width="320">
-                        <TextBlock Text="{Binding [Gallery_DataInput_PrimaryVariant]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_PrimaryVariant]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyTextArea PlaceholderText="Primary variant" Variant="Primary" MinRows="3" />
                     </StackPanel>
 
                     <StackPanel Spacing="8" Width="320">
-                        <TextBlock Text="{Binding [Gallery_DataInput_AutoGrow]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_AutoGrow]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyTextArea PlaceholderText="{Binding [Gallery_DataInput_TypeToExpand]}" IsAutoGrow="True" MinRows="2" MaxRows="8" />
                     </StackPanel>
 
                     <StackPanel Spacing="8" Width="320">
-                        <TextBlock Text="{Binding [Gallery_DataInput_CharacterCount]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_CharacterCount]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyTextArea PlaceholderText="{Binding [Gallery_DataInput_TypeHere]}" ShowCharacterCount="True" MaxLength="200" MinRows="3" />
                     </StackPanel>
@@ -731,7 +731,7 @@
 
                 <daisy:WrapPanel Spacing="24">
                     <StackPanel Spacing="10" MinWidth="180">
-                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_Variants]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyToggle Header="Default" IsOn="True" />
                         <daisy:DaisyToggle Header="Primary" Variant="Primary" IsOn="True" />
@@ -741,7 +741,7 @@
 
                     <StackPanel Spacing="10" MinWidth="180"
                                 daisy:FlowerySizeManager.IgnoreGlobalSize="True">
-                        <TextBlock Text="{Binding [Gallery_DataInput_SizesPadding]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Gallery_DataInput_SizesPadding]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyToggle Header="Extra Small" Size="ExtraSmall" Variant="Info" IsOn="True" />
                         <daisy:DaisyToggle Header="Small" Size="Small" Variant="Info" IsOn="True" />
@@ -753,7 +753,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="10" MinWidth="180">
-                        <TextBlock Text="{Binding [Sidebar_Table]}" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="{Binding [Sidebar_Table]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyTable Zebra="True" HorizontalAlignment="Left">
                             <daisy:DaisyTable.Resources>

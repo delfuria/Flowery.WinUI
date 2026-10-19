@@ -47,6 +47,7 @@ namespace Flowery.Controls
             IsTabStop = true;
             UseSystemFocusVisuals = true;
             Unloaded += OnUnloaded;
+            IsEnabledChanged += (sender, args) => ApplyAll();
         }
 
         protected override void OnLoaded()
@@ -458,7 +459,7 @@ namespace Flowery.Controls
 
             // Style the container
             _containerBorder.Background = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            _containerBorder.BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            _containerBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush();
             _containerBorder.BorderThickness = new Thickness(1);
 
             var showAvailable = Mode == DaisyTagPickerMode.Selection;
@@ -466,6 +467,8 @@ namespace Flowery.Controls
             if (_dividerBorder != null)
             {
                 _dividerBorder.Visibility = showAvailable ? Visibility.Visible : Visibility.Collapsed;
+                _dividerBorder.Background = DaisyResourceLookup.GetBorderBrush();
+                _dividerBorder.Opacity = DaisyResourceLookup.GetContentOpacity(0.35);
             }
 
             UpdateListsAndRebuild();
@@ -476,8 +479,8 @@ namespace Flowery.Controls
             if (_outerBorder == null)
                 return;
 
-            _outerBorder.Background = Background;
-            _outerBorder.BorderBrush = BorderBrush;
+            _outerBorder.Background = DaisySystemAppearance.HighContrast ? DaisyResourceLookup.GetBrush("DaisyBase100Brush") : Background;
+            _outerBorder.BorderBrush = DaisySystemAppearance.HighContrast ? DaisyResourceLookup.GetBorderBrush() : BorderBrush;
             _outerBorder.BorderThickness = BorderThickness;
             _outerBorder.Padding = Padding;
         }
@@ -488,6 +491,7 @@ namespace Flowery.Controls
                 return;
 
             _titleText.Foreground = GetEffectiveBaseContentBrush();
+            _titleText.Opacity = DaisyResourceLookup.GetContentOpacity(0.8);
             _titleText.FontFamily = FontFamily;
             _titleText.FontSize = GetEffectiveTextFontSize();
             _titleText.FontStyle = FontStyle;
@@ -649,7 +653,7 @@ namespace Flowery.Controls
                 // Selected tags: filled background with X close button
                 var chipBorder = new Border
                 {
-                    Background = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush"),
+                    Background = DaisyResourceLookup.GetBrush(DaisySystemAppearance.HighContrast && !IsEnabled ? "DaisyBase100Brush" : "DaisyPrimaryBrush"),
                     CornerRadius = new CornerRadius(cornerRadius),
                     Padding = new Thickness(paddingValue.Left, paddingValue.Top, paddingValue.Left / 2, paddingValue.Top),
                     Margin = new Thickness(4)
@@ -664,7 +668,8 @@ namespace Flowery.Controls
                 var tagText = new TextBlock
                 {
                     Text = tag,
-                    Foreground = HasLocalOverride(ForegroundProperty)
+                    Foreground = DaisySystemAppearance.HighContrast && !IsEnabled ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush")
+                        : HasLocalOverride(ForegroundProperty) && !DaisySystemAppearance.HighContrast
                         ? Foreground
                         : DaisyResourceLookup.GetBrush("DaisyPrimaryContentBrush"),
                     VerticalAlignment = VerticalAlignment.Center,
@@ -689,7 +694,8 @@ namespace Flowery.Controls
                 var closeIcon = FloweryPathHelpers.CreateClose(
                     size: iconSize,
                     strokeThickness: 1.5,
-                    stroke: HasLocalOverride(ForegroundProperty)
+                    stroke: DaisySystemAppearance.HighContrast && !IsEnabled ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush")
+                        : HasLocalOverride(ForegroundProperty) && !DaisySystemAppearance.HighContrast
                         ? Foreground
                         : DaisyResourceLookup.GetBrush("DaisyPrimaryContentBrush"));
                 closeButton.Content = closeIcon;
@@ -709,7 +715,7 @@ namespace Flowery.Controls
                 var chipBorder = new Border
                 {
                     Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent),
-                    BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush"),
+                    BorderBrush = DaisyResourceLookup.GetBorderBrush(),
                     BorderThickness = new Thickness(1),
                     CornerRadius = new CornerRadius(cornerRadius),
                     Padding = paddingValue,
@@ -914,12 +920,18 @@ namespace Flowery.Controls
             var showFocus = FocusState != FocusState.Unfocused;
             var focusBrushSelected = DaisyResourceLookup.GetBrush("DaisyPrimaryContentBrush");
             var focusBrushUnselected = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
-            var defaultBorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var defaultBorderBrush = DaisyResourceLookup.GetBorderBrush();
 
             for (int i = 0; i < _chipInfos.Count; i++)
             {
                 var info = _chipInfos[i];
                 var border = info.Border;
+                if (DaisySystemAppearance.HighContrast && !IsEnabled)
+                {
+                    border.BorderThickness = new Thickness(1);
+                    border.BorderBrush = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
+                    continue;
+                }
 
                 if (showFocus && i == _focusedIndex)
                 {
@@ -957,6 +969,9 @@ namespace Flowery.Controls
 
         private Brush GetEffectiveBaseContentBrush()
         {
+            if (DaisySystemAppearance.HighContrast)
+                return DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+
             return HasLocalOverride(ForegroundProperty)
                 ? Foreground
                 : DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");

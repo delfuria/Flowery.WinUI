@@ -59,6 +59,7 @@ namespace Flowery.Controls
 
         private readonly HashSet<Button> _hoveredButtons = [];
         private readonly HashSet<Button> _pressedButtons = [];
+        private readonly Dictionary<Button, long> _pressedStateTokens = [];
 
         private Brush? _segmentNormalBackground;
         private Brush? _segmentHoverBackground;
@@ -69,6 +70,7 @@ namespace Flowery.Controls
         {
             IsTabStop = false;
             _selectedIndices.CollectionChanged += OnSelectedIndicesChanged;
+            IsEnabledChanged += (sender, args) => UpdateSegmentVisuals();
         }
 
         private void OnSelectedIndicesChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -85,17 +87,20 @@ namespace Flowery.Controls
 
             if (_itemsPanel != null)
             {
+                ObservePressedStates();
                 ApplyTheme();
                 return;
             }
 
             CollectAndDisplay();
+            ObservePressedStates();
         }
 
         protected override void OnUnloaded()
         {
             base.OnUnloaded();
             DaisyBaseContentControl.GlobalNeumorphicChanged -= OnGlobalNeumorphicChanged;
+            ReleasePressedStates();
         }
 
         private void OnGlobalNeumorphicChanged(object? sender, EventArgs e)
@@ -321,6 +326,7 @@ namespace Flowery.Controls
 
         private void CollectAndDisplay()
         {
+            ReleasePressedStates();
             RestoreUniformSegmentWidths();
             var resources = Application.Current?.Resources;
             if (resources != null)
@@ -341,6 +347,7 @@ namespace Flowery.Controls
                 oldButton.PointerPressed -= OnButtonPointerPressed;
                 oldButton.PointerReleased -= OnButtonPointerReleased;
                 oldButton.PointerCaptureLost -= OnButtonPointerCaptureLost;
+                oldButton.IsEnabledChanged -= OnButtonIsEnabledChanged;
             }
 
             _buttonItems.Clear();
@@ -378,6 +385,7 @@ namespace Flowery.Controls
                             button.PointerPressed += OnButtonPointerPressed;
                             button.PointerReleased += OnButtonPointerReleased;
                             button.PointerCaptureLost += OnButtonPointerCaptureLost;
+                            button.IsEnabledChanged += OnButtonIsEnabledChanged;
                             _buttonItems.Add(button);
 
                             // Tell DaisyButton not to manage its own visuals; the group will do it.
@@ -416,6 +424,7 @@ namespace Flowery.Controls
                     button.PointerPressed += OnButtonPointerPressed;
                     button.PointerReleased += OnButtonPointerReleased;
                     button.PointerCaptureLost += OnButtonPointerCaptureLost;
+                    button.IsEnabledChanged += OnButtonIsEnabledChanged;
                     _buttonItems.Add(button);
 
                     // Tell DaisyButton not to manage its own visuals; the group will do it.
@@ -521,6 +530,24 @@ namespace Flowery.Controls
             UpdateSegmentVisuals();
         }
 
+        private void OnButtonIsEnabledChanged(object sender, DependencyPropertyChangedEventArgs args) => UpdateSegmentVisuals();
+
+        private void ObservePressedStates()
+        {
+            foreach (var button in _buttonItems)
+                if (!_pressedStateTokens.ContainsKey(button))
+                    _pressedStateTokens.Add(button, button.RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, OnNativePressedChanged));
+        }
+
+        private void ReleasePressedStates()
+        {
+            foreach (var pair in _pressedStateTokens)
+                pair.Key.UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, pair.Value);
+            _pressedStateTokens.Clear();
+        }
+
+        private void OnNativePressedChanged(DependencyObject sender, DependencyProperty property) => UpdateSegmentVisuals();
+
         private void UpdateSegmentVisuals()
         {
             if (_segmentNormalBackground == null || _segmentForeground == null || _segmentBorderBrush == null)
@@ -539,7 +566,7 @@ namespace Flowery.Controls
                     isSelected = AutoSelect && SelectedIndex >= 0 && index == SelectedIndex;
                 }
                 var isHovered = _hoveredButtons.Contains(button);
-                var isPressed = _pressedButtons.Contains(button);
+                var isPressed = button.IsPressed || _pressedButtons.Contains(button);
 
                 var bg = isPressed
                     ? (_segmentHoverBackground ?? _segmentNormalBackground)
@@ -552,6 +579,16 @@ namespace Flowery.Controls
                 button.Foreground = _segmentForeground;
                 button.BorderBrush = _segmentBorderBrush;
                 button.BorderThickness = new Thickness(1);
+                if (DaisySystemAppearance.HighContrast)
+                {
+                    var active = button.IsEnabled && (isSelected || isHovered || isPressed);
+                    button.Background = DaisyResourceLookup.GetBrush(active ? "DaisyPrimaryBrush" : "DaisyBase100Brush");
+                    button.Foreground = DaisyResourceLookup.GetBrush(!button.IsEnabled ? "DaisyDisabledForegroundBrush"
+                        : active ? "DaisyPrimaryContentBrush" : "DaisyBaseContentBrush");
+                    button.BorderBrush = DaisyResourceLookup.GetBrush(button.IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush");
+                }
+                if (button.Content is DaisyIconText iconText) iconText.Foreground = button.Foreground;
+                if (button.Content is IconElement icon) icon.Foreground = button.Foreground;
 
                 // IMPORTANT: Keep neumorphic disabled on child buttons during visual updates.
                 // See collection phase comments for full explanation: the GROUP is the single
@@ -803,6 +840,13 @@ namespace Flowery.Controls
             _segmentHoverBackground = hoverBg;
             _segmentForeground = fgOverride ?? fg;
             _segmentBorderBrush = borderOverride ?? dividerBorder;
+            if (DaisySystemAppearance.HighContrast)
+            {
+                _segmentNormalBackground = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                _segmentHoverBackground = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
+                _segmentForeground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+                _segmentBorderBrush = DaisyResourceLookup.GetBorderBrush();
+            }
 
             ApplyJoinCorners();
             ApplyUniformSegmentWidth();

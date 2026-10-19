@@ -40,20 +40,20 @@
 
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="carousel-gl" Title="{Binding [Gallery_CarouselGL_Title]}" />
-                <TextBlock Text="{Binding [Gallery_CarouselGL_Description]}" TextWrapping="Wrap" Opacity="0.7"
+                <TextBlock Text="{Binding [Gallery_CarouselGL_Description]}" TextWrapping="Wrap" Opacity="{ThemeResource GalleryOpacity70}"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <TextBlock x:Name="DebugDefinesText"
                            FontSize="11"
-                           Opacity="0.6"
+                           Opacity="{ThemeResource GalleryOpacity60}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                <TextBlock Text="{Binding [Gallery_CarouselGL_Config_Subtitle]}" FontWeight="SemiBold" Opacity="0.85"
+                <TextBlock Text="{Binding [Gallery_CarouselGL_Config_Subtitle]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity85}"
                            Margin="0,12,0,0" Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                <TextBlock Text="{Binding [Gallery_CarouselGL_Config_Description]}" TextWrapping="Wrap" Opacity="0.7"
+                <TextBlock Text="{Binding [Gallery_CarouselGL_Config_Description]}" TextWrapping="Wrap" Opacity="{ThemeResource GalleryOpacity70}"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,4">
-                    <TextBlock Text="{Binding [Gallery_Carousel_OnOff]}" FontSize="11" Opacity="0.6"
+                    <TextBlock Text="{Binding [Gallery_Carousel_OnOff]}" FontSize="11" Opacity="{ThemeResource GalleryOpacity60}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}"
                                VerticalAlignment="Center" />
                     <daisy:DaisyToggle x:Name="GlPreviewEnabledToggle" IsOn="True"
@@ -62,7 +62,7 @@
                 </StackPanel>
 
                 <Border x:Name="GlPreviewBorder"
-                        Background="{ThemeResource DaisyBase200Brush}" BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        Background="{ThemeResource DaisyBase200Brush}" BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="1" CornerRadius="12" Height="220" MaxWidth="520"
                         HorizontalAlignment="Stretch">
                     <effects:CarouselGlEffectHost x:Name="GlPreviewHost" Effect="Fade"
@@ -71,7 +71,7 @@
 
                 <daisy:WrapPanel Orientation="Horizontal" Spacing="16" Margin="0,8,0,0">
                     <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding [Gallery_Carousel_Mode_Label]}" FontSize="12" Opacity="0.7"
+                        <TextBlock Text="{Binding [Gallery_Carousel_Mode_Label]}" FontSize="12" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySelect x:Name="GlModeSelect" Width="150" SelectedIndex="1"
                                            LocalizationSource="{x:Bind Localization, Mode=OneWay}"
@@ -89,7 +89,7 @@
                         </daisy:DaisySelect>
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding [Gallery_Carousel_Transition_Label]}" FontSize="12" Opacity="0.7"
+                        <TextBlock Text="{Binding [Gallery_Carousel_Transition_Label]}" FontSize="12" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySelect x:Name="GlTransitionSelect" Width="180" SelectedIndex="1"
                                            LocalizationSource="{x:Bind Localization, Mode=OneWay}"
@@ -142,7 +142,7 @@
                         </daisy:DaisySelect>
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding [Gallery_Carousel_Duration_Label]}" FontSize="12" Opacity="0.7"
+                        <TextBlock Text="{Binding [Gallery_Carousel_Duration_Label]}" FontSize="12" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySelect x:Name="GlDurationSelect" Width="110" SelectedIndex="2"
                                            LocalizationSource="{x:Bind Localization, Mode=OneWay}"
@@ -161,7 +161,7 @@
                         </daisy:DaisySelect>
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding [Gallery_Carousel_Effect_Label]}" FontSize="12" Opacity="0.7"
+                        <TextBlock Text="{Binding [Gallery_Carousel_Effect_Label]}" FontSize="12" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySelect x:Name="GlEffectSelect" Width="150" SelectedIndex="0"
                                            LocalizationSource="{x:Bind Localization, Mode=OneWay}"
@@ -188,7 +188,7 @@
                         </daisy:DaisySelect>
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding [Gallery_Carousel_Interval_Label]}" FontSize="12" Opacity="0.7"
+                        <TextBlock Text="{Binding [Gallery_Carousel_Interval_Label]}" FontSize="12" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyNumericUpDown x:Name="GlIntervalBox" Width="90" />
                     </StackPanel>
@@ -198,38 +198,38 @@
                                        Unchecked="GlInfiniteToggle_Changed" />
                 </daisy:WrapPanel>
 
-                <TextBlock Text="{Binding [Gallery_CarouselGL_Config_Note]}" FontSize="11" Opacity="0.6"
+                <TextBlock Text="{Binding [Gallery_CarouselGL_Config_Note]}" FontSize="11" Opacity="{ThemeResource GalleryOpacity60}"
                            Margin="0,6,0,0" Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <daisy:WrapPanel Orientation="Horizontal" Spacing="16" Margin="0,8,0,0">
                     <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding [Gallery_Carousel_Param_SlicesGrid]}" FontSize="11" Opacity="0.6"
+                        <TextBlock Text="{Binding [Gallery_Carousel_Param_SlicesGrid]}" FontSize="11" Opacity="{ThemeResource GalleryOpacity60}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyNumericUpDown x:Name="GlSliceCountBox" Width="90" />
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding [Gallery_Carousel_Param_Stagger]}" FontSize="11" Opacity="0.6"
+                        <TextBlock Text="{Binding [Gallery_Carousel_Param_Stagger]}" FontSize="11" Opacity="{ThemeResource GalleryOpacity60}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyToggle x:Name="GlStaggerToggle" IsChecked="True" />
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding [Gallery_Carousel_Param_StaggerDelay]}" FontSize="11" Opacity="0.6"
+                        <TextBlock Text="{Binding [Gallery_Carousel_Param_StaggerDelay]}" FontSize="11" Opacity="{ThemeResource GalleryOpacity60}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyNumericUpDown x:Name="GlStaggerMsBox" Width="90" />
                     </StackPanel>
 
                     <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding [Gallery_Carousel_Param_PixelSize]}" FontSize="11" Opacity="0.6"
+                        <TextBlock Text="{Binding [Gallery_Carousel_Param_PixelSize]}" FontSize="11" Opacity="{ThemeResource GalleryOpacity60}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyNumericUpDown x:Name="GlPixelateSizeBox" Width="90" />
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding [Gallery_Carousel_Param_DissolveDensity]}" FontSize="11" Opacity="0.6"
+                        <TextBlock Text="{Binding [Gallery_Carousel_Param_DissolveDensity]}" FontSize="11" Opacity="{ThemeResource GalleryOpacity60}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyNumericUpDown x:Name="GlDissolveDensityBox" Width="100" />
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding [Gallery_Carousel_Param_FlipAngle]}" FontSize="11" Opacity="0.6"
+                        <TextBlock Text="{Binding [Gallery_Carousel_Param_FlipAngle]}" FontSize="11" Opacity="{ThemeResource GalleryOpacity60}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyNumericUpDown x:Name="GlFlipAngleBox" Width="90" />
                     </StackPanel>
@@ -238,32 +238,32 @@
                 <daisy:DaisyCard Variant="Compact" Size="Small" Margin="0,12,0,0">
                     <StackPanel Spacing="6">
                         <TextBlock Text="{Binding [Gallery_Carousel_Guide_Title]}" FontWeight="Bold"
-                                   Foreground="{ThemeResource DaisyPrimaryBrush}" Opacity="0.9"/>
+                                   Foreground="{ThemeResource DaisyPrimaryBrush}" Opacity="{ThemeResource GalleryOpacity90}"/>
 
                         <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding [Gallery_Carousel_Guide_GridLabel]}"
                                        FontWeight="SemiBold" Width="100"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding [Gallery_Carousel_Guide_GridDesc]}" Opacity="0.8"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding [Gallery_Carousel_Guide_GridDesc]}" Opacity="{ThemeResource GalleryOpacity80}"/>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding [Gallery_Carousel_Guide_StaggerMsLabel]}"
                                        FontWeight="SemiBold" Width="100"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding [Gallery_Carousel_Guide_StaggerMsDesc]}" Opacity="0.8"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding [Gallery_Carousel_Guide_StaggerMsDesc]}" Opacity="{ThemeResource GalleryOpacity80}"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding [Gallery_Carousel_Guide_StaggerToggleLabel]}"
                                        FontWeight="SemiBold" Width="100"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding [Gallery_Carousel_Guide_StaggerToggleDesc]}" Opacity="0.8"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding [Gallery_Carousel_Guide_StaggerToggleDesc]}" Opacity="{ThemeResource GalleryOpacity80}"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding [Gallery_Carousel_Guide_PixelSizeLabel]}"
                                        FontWeight="SemiBold" Width="100"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding [Gallery_Carousel_Guide_PixelSizeDesc]}" Opacity="0.8"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding [Gallery_Carousel_Guide_PixelSizeDesc]}" Opacity="{ThemeResource GalleryOpacity80}"/>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Text="{Binding [Gallery_Carousel_Guide_DissolveDensityLabel]}"
                                        FontWeight="SemiBold" Width="100"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding [Gallery_Carousel_Guide_DissolveDensityDesc]}" Opacity="0.8"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding [Gallery_Carousel_Guide_DissolveDensityDesc]}" Opacity="{ThemeResource GalleryOpacity80}"/>
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Text="{Binding [Gallery_Carousel_Guide_FlipAngleLabel]}"
                                        FontWeight="SemiBold" Width="100"/>
-                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding [Gallery_Carousel_Guide_FlipAngleDesc]}" Opacity="0.8"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding [Gallery_Carousel_Guide_FlipAngleDesc]}" Opacity="{ThemeResource GalleryOpacity80}"/>
                         </Grid>
                     </StackPanel>
                 </daisy:DaisyCard>
@@ -272,12 +272,12 @@
             <daisy:DaisyDivider />
 
             <StackPanel Style="{StaticResource GallerySectionStyle}">
-                <TextBlock Text="{Binding [Gallery_CarouselGL_Mask_Title]}" FontWeight="SemiBold" Opacity="0.85"
+                <TextBlock Text="{Binding [Gallery_CarouselGL_Mask_Title]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity85}"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <TextBlock Text="{Binding [Gallery_CarouselGL_Mask_Description]}"
-                           Opacity="0.7" TextWrapping="Wrap" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                           Opacity="{ThemeResource GalleryOpacity70}" TextWrapping="Wrap" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <Border x:Name="GlMaskPreviewBorder"
-                        Background="{ThemeResource DaisyBase200Brush}" BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        Background="{ThemeResource DaisyBase200Brush}" BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="1" CornerRadius="12" Height="220" MaxWidth="480"
                         HorizontalAlignment="Stretch">
                     <effects:CarouselGlEffectHost Effect="MaskTransition" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
@@ -287,12 +287,12 @@
             <daisy:DaisyDivider />
 
             <StackPanel Style="{StaticResource GallerySectionStyle}">
-                <TextBlock Text="{Binding [Gallery_CarouselGL_Flip_Title]}" FontWeight="SemiBold" Opacity="0.85"
+                <TextBlock Text="{Binding [Gallery_CarouselGL_Flip_Title]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity85}"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <TextBlock Text="{Binding [Gallery_CarouselGL_Flip_Description]}"
-                           Opacity="0.7" TextWrapping="Wrap" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                           Opacity="{ThemeResource GalleryOpacity70}" TextWrapping="Wrap" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <Border x:Name="GlFlipPreviewBorder"
-                        Background="{ThemeResource DaisyBase200Brush}" BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        Background="{ThemeResource DaisyBase200Brush}" BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="1" CornerRadius="12" Height="220" MaxWidth="520"
                         HorizontalAlignment="Stretch">
                     <effects:CarouselGlEffectHost Effect="FlipPlane" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
@@ -302,12 +302,12 @@
             <daisy:DaisyDivider />
 
             <StackPanel Style="{StaticResource GallerySectionStyle}">
-                <TextBlock Text="{Binding [Gallery_CarouselGL_TextFill_Title]}" FontWeight="SemiBold" Opacity="0.85"
+                <TextBlock Text="{Binding [Gallery_CarouselGL_TextFill_Title]}" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity85}"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <TextBlock Text="{Binding [Gallery_CarouselGL_TextFill_Description]}"
-                           Opacity="0.7" TextWrapping="Wrap" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                           Opacity="{ThemeResource GalleryOpacity70}" TextWrapping="Wrap" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <Border x:Name="GlTextPreviewBorder"
-                        Background="{ThemeResource DaisyBase200Brush}" BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        Background="{ThemeResource DaisyBase200Brush}" BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="1" CornerRadius="12" Height="200" MaxWidth="520"
                         HorizontalAlignment="Stretch">
                     <effects:CarouselGlEffectHost Effect="TextFill" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />

@@ -12,39 +12,39 @@
                 <local:SectionHeader SectionId="theme-controller" Title="Theme Controller" />
 
                 <StackPanel Spacing="6" MaxWidth="350" HorizontalAlignment="Left">
-                    <TextBlock Text="Standard and product themes" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Standard and product themes" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <TextBlock Text="All standard themes, plus the TheaterCinema product theme as DarkAndRed. Corporate is shown as Office. DarkAndRed and Office appear first as preferred themes."
-                               TextWrapping="Wrap" Opacity="0.7"
+                               TextWrapping="Wrap" Opacity="{ThemeResource GalleryOpacity70}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyThemeDropdown x:Name="MixedThemeDropdown" Width="300" HorizontalAlignment="Left" />
                 </StackPanel>
 
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="16">
                     <StackPanel Grid.Row="0" Grid.Column="0" Spacing="6">
-                        <TextBlock Text="Toggle" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Toggle" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyThemeController Mode="Toggle" UncheckedTheme="Light" CheckedTheme="Dark" />
                     </StackPanel>
                     <StackPanel Grid.Row="0" Grid.Column="1" Spacing="6">
-                        <TextBlock Text="Checkbox" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Checkbox" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyThemeController Mode="Checkbox" UncheckedTheme="Light" CheckedTheme="Dark" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="1" Grid.Column="0" Spacing="6">
-                        <TextBlock Text="Swap" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Swap" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyThemeController Mode="Swap" UncheckedTheme="Light" CheckedTheme="Dark" />
                     </StackPanel>
                     <StackPanel Grid.Row="1" Grid.Column="1" Spacing="6">
-                        <TextBlock Text="Toggle with icons" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Toggle with icons" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyThemeController Mode="ToggleWithIcons" UncheckedTheme="Light" CheckedTheme="Dark" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Spacing="6">
-                        <TextBlock Text="Toggle with text" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Toggle with text" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyThemeController Mode="ToggleWithText"
                                                     UncheckedTheme="Light"
@@ -62,10 +62,10 @@
 
                 <StackPanel Orientation="Horizontal" Spacing="24">
                     <StackPanel Spacing="10" Width="220">
-                        <TextBlock Text="Radio Input Mode" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Radio Input Mode" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <TextBlock Text="Select a theme using radio buttons"
-                                   Opacity="0.7"
+                                   Opacity="{ThemeResource GalleryOpacity70}"
                                    TextWrapping="Wrap"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <StackPanel Spacing="8">
@@ -79,10 +79,10 @@
                     </StackPanel>
 
                     <StackPanel Spacing="10" Width="220">
-                        <TextBlock Text="Button Mode" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Button Mode" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <TextBlock Text="Joined button style"
-                                   Opacity="0.7"
+                                   Opacity="{ThemeResource GalleryOpacity70}"
                                    TextWrapping="Wrap"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyJoin Orientation="Vertical">

@@ -47,6 +47,7 @@ namespace Flowery.Controls
             Unloaded += OnUnloaded;
             Checked += OnCheckedChanged;
             Unchecked += OnCheckedChanged;
+            IsEnabledChanged += (s, e) => ApplyAll(animateKnob: false);
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
@@ -380,13 +381,24 @@ namespace Flowery.Controls
                 _knob.Fill = uncheckedKnobOverride ?? DaisyResourceLookup.GetBrush(resources, "DaisyBase100Brush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White));
             }
 
-            var labelBrush = _hasForegroundOverride
+            var labelBrush = _hasForegroundOverride && !DaisySystemAppearance.HighContrast
                 ? Foreground
                 : GetAppBrush("DaisyBaseContentBrush");
+
+            if (DaisySystemAppearance.HighContrast)
+            {
+                var checkedAndEnabled = IsChecked == true && IsEnabled;
+                _switchArea.Background = DaisyResourceLookup.GetBrush(checkedAndEnabled ? "DaisyPrimaryBrush" : "DaisyBase100Brush");
+                _switchArea.BorderBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush");
+                _knob.Fill = DaisyResourceLookup.GetBrush(!IsEnabled ? "DaisyDisabledForegroundBrush"
+                    : checkedAndEnabled ? "DaisyPrimaryContentBrush" : "DaisyBaseContentBrush");
+                labelBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+            }
             if (!_hasForegroundOverride)
             {
                 SetForeground(labelBrush);
             }
+            if (_headerPresenter != null) _headerPresenter.Foreground = labelBrush;
         }
 
         private void ApplyKnobPosition(bool animate)

@@ -652,7 +652,8 @@ namespace Flowery.Controls
             _rootGrid = new Grid
             {
                 // Enable focus and keyboard navigation
-                IsTabStop = true
+                IsTabStop = true,
+                UseSystemFocusVisuals = true
             };
 
             // Content container with clipping
@@ -1204,15 +1205,24 @@ namespace Flowery.Controls
 
             _previousButton.Variant = DaisyButtonVariant.Neutral;
             _nextButton.Variant = DaisyButtonVariant.Neutral;
+            _previousButton.Opacity = _nextButton.Opacity = DaisyResourceLookup.GetContentOpacity(0.8);
 
             // Style the chevron paths
             if (_previousButton.Content is Microsoft.UI.Xaml.Shapes.Path prevPath)
             {
-                prevPath.Stroke = neutralContentBrush;
+                if (DaisySystemAppearance.HighContrast)
+                    prevPath.SetBinding(Microsoft.UI.Xaml.Shapes.Shape.StrokeProperty,
+                        new Microsoft.UI.Xaml.Data.Binding { Source = _previousButton, Path = new PropertyPath(nameof(Foreground)) });
+                else
+                    prevPath.Stroke = neutralContentBrush;
             }
             if (_nextButton.Content is Microsoft.UI.Xaml.Shapes.Path nextPath)
             {
-                nextPath.Stroke = neutralContentBrush;
+                if (DaisySystemAppearance.HighContrast)
+                    nextPath.SetBinding(Microsoft.UI.Xaml.Shapes.Shape.StrokeProperty,
+                        new Microsoft.UI.Xaml.Data.Binding { Source = _nextButton, Path = new PropertyPath(nameof(Foreground)) });
+                else
+                    nextPath.Stroke = neutralContentBrush;
             }
         }
 

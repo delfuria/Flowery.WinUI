@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Flowery.Controls;
 using Flowery.Localization;
+using Flowery.Theming;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -15,6 +16,7 @@ namespace Flowery.WinUI.Gallery.Examples
         private readonly SidebarCategory _category;
         private readonly Dictionary<string, FrameworkElement> _sections;
         private readonly List<(SidebarItem item, TextBlock title)> _sectionTitles;
+        private readonly List<TextBlock> _bodyTexts = [];
         private readonly TextBlock _header;
 
         public CategoryPlaceholderView(SidebarCategory category)
@@ -62,7 +64,7 @@ namespace Flowery.WinUI.Gallery.Examples
 
             UpdateLocalizedText();
 
-            FloweryLocalization.CultureChanged += OnCultureChanged;
+            Loaded += OnLoaded;
             Unloaded += OnUnloaded;
         }
 
@@ -95,14 +97,38 @@ namespace Flowery.WinUI.Gallery.Examples
             var body = new TextBlock
             {
                 Text = $"Placeholder for {item.Id}",
-                Opacity = 0.7,
+                Opacity = DaisyResourceLookup.GetContentOpacity(0.7),
                 TextWrapping = TextWrapping.Wrap,
                 Foreground = TryGetBrush("DaisyBaseContentBrush")
             };
 
             container.Children.Add(title);
             container.Children.Add(body);
+            _bodyTexts.Add(body);
             return container;
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            FloweryLocalization.CultureChanged += OnCultureChanged;
+            DaisyThemeManager.ThemeChanged += OnThemeChanged;
+            UpdateLocalizedText();
+            ApplyTheme();
+        }
+
+        private void OnThemeChanged(object? sender, string themeName) => ApplyTheme();
+
+        private void ApplyTheme()
+        {
+            var brush = TryGetBrush("DaisyBaseContentBrush");
+            _header.Foreground = brush;
+            foreach (var (_, title) in _sectionTitles)
+                title.Foreground = brush;
+            foreach (var body in _bodyTexts)
+            {
+                body.Foreground = brush;
+                body.Opacity = DaisyResourceLookup.GetContentOpacity(0.7);
+            }
         }
 
         private void UpdateLocalizedText()
@@ -131,8 +157,8 @@ namespace Flowery.WinUI.Gallery.Examples
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
+            DaisyThemeManager.ThemeChanged -= OnThemeChanged;
             FloweryLocalization.CultureChanged -= OnCultureChanged;
-            Unloaded -= OnUnloaded;
         }
     }
 }

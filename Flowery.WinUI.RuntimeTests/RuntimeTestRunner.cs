@@ -39,12 +39,21 @@ namespace Flowery.WinUI.RuntimeTests
                 StateStorageProvider.Configure(new InMemoryStateStorage());
                 FlowKanban.DefaultUserProvider = null;
 
+                // The test launch skips persisted Gallery settings, so initialize
+                // the shared palette before controls or contrast changes use it.
+                Assert.IsTrue(DaisyThemeManager.ApplyTheme(DaisyThemeManager.BaseThemeName));
+
                 var host = PrepareHost(window);
                 RuntimeTestContext.Initialize(window, host);
                 await EnsureLoadedAsync(host);
             }).ConfigureAwait(false);
 
-            var testCases = DiscoverTests();
+            var filter = Environment.GetEnvironmentVariable("FLOWERY_RUNTIME_TEST_FILTER");
+            var testCases = DiscoverTests()
+                .Where(test => string.IsNullOrWhiteSpace(filter) || test.Name.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            if (testCases.Length == 0)
+                throw new InvalidOperationException($"No native runtime tests match '{filter}'.");
             using var progress = new StreamWriter(System.IO.Path.ChangeExtension(resultPath, ".progress.log")) { AutoFlush = true };
             foreach (var testCase in testCases)
             {

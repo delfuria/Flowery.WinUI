@@ -635,6 +635,21 @@ namespace Flowery.Controls
         {
             if (button.Tag is not int index || index < 0 || index >= _items.Count) return;
 
+            if (DaisyResourceLookup.IsHighContrast)
+            {
+                button.Background = DaisyResourceLookup.GetBrush(isSelected ? "DaisyPrimaryBrush" : "DaisyBase100Brush");
+                ApplyForeground(button, DaisyResourceLookup.GetBrush(isSelected ? "DaisyPrimaryContentBrush" : "DaisyBaseContentBrush"));
+                // Native Button states provide the matching text color, including disabled content.
+                if (button.Content is TextBlock text)
+                    text.ClearValue(TextBlock.ForegroundProperty);
+                button.BorderBrush = DaisyResourceLookup.GetBorderBrush();
+                button.BorderThickness = new Thickness(1);
+                button.FontWeight = isSelected ? Microsoft.UI.Text.FontWeights.SemiBold : Microsoft.UI.Text.FontWeights.Normal;
+                button.Margin = new Thickness(0);
+                SyncButtonStateResources(button);
+                return;
+            }
+
             var tabColor = GetTabColor(button);
             var paletteColor = GetTabPaletteColor(button);
             GetPaletteBrushes(paletteColor, out var paletteBackground, out var paletteForeground);
@@ -799,6 +814,23 @@ namespace Flowery.Controls
 
         private static void SyncButtonStateResources(Button button)
         {
+            if (DaisyResourceLookup.IsHighContrast)
+            {
+                var selected = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
+                var selectedText = DaisyResourceLookup.GetBrush("DaisyPrimaryContentBrush");
+                var disabled = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
+                button.Resources["ButtonBackgroundPointerOver"] = selected;
+                button.Resources["ButtonBackgroundPressed"] = selected;
+                button.Resources["ButtonForegroundPointerOver"] = selectedText;
+                button.Resources["ButtonForegroundPressed"] = selectedText;
+                button.Resources["ButtonBorderBrushPointerOver"] = selectedText;
+                button.Resources["ButtonBorderBrushPressed"] = selectedText;
+                button.Resources["ButtonBackgroundDisabled"] = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                button.Resources["ButtonForegroundDisabled"] = disabled;
+                button.Resources["ButtonBorderBrushDisabled"] = disabled;
+                RefreshButtonVisualState(button);
+                return;
+            }
             var background = button.Background ?? new SolidColorBrush(Colors.Transparent);
             var foreground = button.Foreground ?? new SolidColorBrush(Colors.Transparent);
             var borderBrush = button.BorderBrush ?? new SolidColorBrush(Colors.Transparent);
@@ -813,7 +845,7 @@ namespace Flowery.Controls
             button.Resources["ButtonForegroundDisabled"] = foreground;
             button.Resources["ButtonBorderBrushDisabled"] = borderBrush;
 
-            if (button.IsPointerOver || button.IsPressed)
+            if (!button.IsEnabled || button.IsPointerOver || button.IsPressed)
             {
                 RefreshButtonVisualState(button);
             }
@@ -852,7 +884,7 @@ namespace Flowery.Controls
                 {
                     case DaisyTabVariant.Boxed:
                         _tabStripBorder.Background = bgOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-                        _tabStripBorder.BorderBrush = borderBrushOverride ?? DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+                        _tabStripBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush(borderBrushOverride);
                         _tabStripBorder.BorderThickness = new Thickness(1); // Give Boxed some definition
                         _tabStripBorder.Padding = new Thickness(2); // Keep small padding for the pill look
                         _tabStripBorder.CornerRadius = new CornerRadius(12);
@@ -863,7 +895,7 @@ namespace Flowery.Controls
                         _tabStripBorder.Background = new SolidColorBrush(Colors.Transparent);
                         var baselineThickness = DaisyResourceLookup.GetDouble("DaisyBorderThicknessMedium", 2);
                         _tabStripBorder.BorderThickness = new Thickness(0, 0, 0, baselineThickness);
-                        _tabStripBorder.BorderBrush = borderBrushOverride ?? DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+                        _tabStripBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush(borderBrushOverride);
                         _tabStripBorder.Padding = new Thickness(0);
                         _tabStripBorder.CornerRadius = new CornerRadius(0);
                         if (_contentPresenter != null) _contentPresenter.Margin = new Thickness(0);
@@ -873,7 +905,7 @@ namespace Flowery.Controls
                         _tabStripBorder.Background = new SolidColorBrush(Colors.Transparent);
                         var baselineThicknessLifted = DaisyResourceLookup.GetDouble("DaisyBorderThicknessMedium", 2);
                         _tabStripBorder.BorderThickness = new Thickness(0, 0, 0, baselineThicknessLifted);
-                        _tabStripBorder.BorderBrush = borderBrushOverride ?? DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+                        _tabStripBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush(borderBrushOverride);
                         _tabStripBorder.Padding = new Thickness(0);
                         _tabStripBorder.CornerRadius = new CornerRadius(0);
                         if (_contentPresenter != null) _contentPresenter.Margin = new Thickness(0);

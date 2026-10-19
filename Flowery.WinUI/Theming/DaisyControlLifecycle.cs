@@ -49,6 +49,7 @@ namespace Flowery.Controls
         /// </summary>
         public void HandleLoaded()
         {
+            Flowery.Services.DaisySystemAppearance.Initialize(_owner.XamlRoot);
             DaisyThemeManager.ThemeChanged += OnThemeChanged;
             if (_subscribeSizeChanges)
             {

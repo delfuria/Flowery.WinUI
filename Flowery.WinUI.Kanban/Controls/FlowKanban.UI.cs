@@ -766,6 +766,8 @@ namespace Flowery.WinUI.Kanban.Controls
             Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
             ApplySidebarAndStatusBarTheme();
             ApplySwimlaneLaneHeaderTheme();
+            if (_isBoardHeaderPointerOver || _isBoardHeaderFocused)
+                ShowBoardHeaderButtons();
             ScheduleThemeRefresh();
         }
 
@@ -1807,7 +1809,7 @@ namespace Flowery.WinUI.Kanban.Controls
         private void ApplySidebarAndStatusBarTheme()
         {
             var base100 = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
-            var base300 = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var base300 = DaisyResourceLookup.GetBorderBrush();
 
             if (_sidebarBorder != null)
             {
@@ -1834,7 +1836,7 @@ namespace Flowery.WinUI.Kanban.Controls
                 return;
 
             var base200 = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            var base300 = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var base300 = DaisyResourceLookup.GetBorderBrush();
             var baseContent = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
 
             var count = _laneRowsHost.Items.Count;
@@ -1931,7 +1933,7 @@ namespace Flowery.WinUI.Kanban.Controls
             if (_renameBoardButton != null)
             {
                 _renameBoardButton.IsHitTestVisible = true;
-                _renameBoardButton.Opacity = targetOpacity;
+                _renameBoardButton.Opacity = DaisyResourceLookup.GetContentOpacity(targetOpacity);
             }
         }
 

@@ -347,6 +347,7 @@ namespace Flowery.Controls
             if (_titleBlock != null)
             {
                 _titleBlock.Foreground = titleFgOverride ?? baseContent;
+                _titleBlock.Opacity = DaisyResourceLookup.GetContentOpacity(0.6);
                 _titleBlock.FontSize = secondaryFontSize;
             }
 
@@ -364,12 +365,15 @@ namespace Flowery.Controls
                 _descriptionBlock.FontSize = secondaryFontSize;
 
                 // Full opacity for non-default description variant
-                _descriptionBlock.Opacity = DescriptionVariant == DaisyStatVariant.Default ? 0.6 : 1.0;
+                _descriptionBlock.Opacity = DaisyResourceLookup.GetContentOpacity(DescriptionVariant == DaisyStatVariant.Default ? 0.6 : 1.0);
             }
         }
 
         private static Brush GetVariantBrush(ResourceDictionary? resources, DaisyStatVariant variant, Brush fallback)
         {
+            if (DaisySystemAppearance.HighContrast)
+                return fallback;
+
             return variant switch
             {
                 DaisyStatVariant.Primary => DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryBrush"),
@@ -517,7 +521,7 @@ namespace Flowery.Controls
                 return;
 
             var resources = Application.Current?.Resources;
-            var dividerBrush = DaisyResourceLookup.GetBrush(resources, "DaisyBase300Brush");
+            var dividerBrush = DaisyResourceLookup.GetBorderBrush(DaisyResourceLookup.GetBrush(resources, "DaisyBase300Brush"));
             var isHorizontal = Orientation == Orientation.Horizontal;
 
             for (int i = 0; i < _itemsPanel.Children.Count; i++)

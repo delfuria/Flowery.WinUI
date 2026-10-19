@@ -21,26 +21,32 @@ namespace Flowery.WinUI.RuntimeTests.Controls
             var original = (bool)appearance.GetProperty("AnimationsEnabled", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
             var loader = new DaisyLoading { Variant = DaisyLoadingVariant.PrinterOutput };
             var indicator = new DaisyStatusIndicator { Variant = DaisyStatusIndicatorVariant.Pulse };
+            var spin = new DaisyStatusIndicator { Variant = DaisyStatusIndicatorVariant.Spin };
             var progress = new DaisyProgress { Shimmer = true, Value = 50, Width = 100 };
             var radial = new DaisyRadialProgress { Shimmer = true, Value = 50 };
             var skeleton = new DaisySkeleton { Width = 100, Height = 20 };
             var panel = new StackPanel();
-            FrameworkElement[] controls = [loader, indicator, progress, radial, skeleton];
+            FrameworkElement[] controls = [loader, indicator, spin, progress, radial, skeleton];
             foreach (var control in controls) panel.Children.Add(control);
             try
             {
                 setMotion.Invoke(null, new object[] { true });
                 RuntimeTestHelpers.AttachToHost(panel);
                 foreach (var control in controls) await RuntimeTestHelpers.EnsureLoadedAsync(control);
+                await RuntimeTestHelpers.EnsureLoadedAsync((FrameworkElement)GetField(spin, "_animatedContainer")!);
                 await DrainDispatcherAsync(panel);
                 Assert.IsTrue((bool)GetField(loader, "_isAnimating")!);
                 Assert.IsTrue(((ICollection)GetField(loader, "_activeTimers")!).Count > 0);
+                Assert.AreEqual(2, ((ICollection)GetField(spin, "_spinSatelliteVisuals")!).Count);
+                Assert.IsNotNull(GetField(spin, "_spinContainerVisual"));
 
                 setMotion.Invoke(null, new object[] { false });
                 await DrainDispatcherAsync(panel);
                 Assert.IsFalse((bool)GetField(loader, "_isAnimating")!);
                 Assert.AreEqual(0, ((ICollection)GetField(loader, "_activeTimers")!).Count);
                 Assert.IsFalse((bool)GetField(indicator, "_isAnimating")!);
+                Assert.AreEqual(0, ((ICollection)GetField(spin, "_spinSatelliteVisuals")!).Count);
+                Assert.IsNull(GetField(spin, "_spinContainerVisual"));
                 Assert.IsFalse((bool)GetField(skeleton, "_isAnimating")!);
                 Assert.IsNull(GetField(progress, "_shimmerAnimation"));
                 Assert.IsNull(GetField(radial, "_shimmerAnimation"));
@@ -55,10 +61,13 @@ namespace Flowery.WinUI.RuntimeTests.Controls
                 Assert.IsFalse((bool)GetField(indicator, "_isAnimating")!);
 
                 setMotion.Invoke(null, new object[] { true });
+                await RuntimeTestHelpers.EnsureLoadedAsync((FrameworkElement)GetField(spin, "_animatedContainer")!);
                 await DrainDispatcherAsync(panel);
                 Assert.IsTrue((bool)GetField(loader, "_isAnimating")!);
                 Assert.IsTrue(((ICollection)GetField(loader, "_activeTimers")!).Count > 0);
                 Assert.IsTrue((bool)GetField(indicator, "_isAnimating")!);
+                Assert.AreEqual(2, ((ICollection)GetField(spin, "_spinSatelliteVisuals")!).Count);
+                Assert.IsNotNull(GetField(spin, "_spinContainerVisual"));
                 Assert.IsTrue((bool)GetField(skeleton, "_isAnimating")!);
                 Assert.IsNotNull(GetField(progress, "_shimmerAnimation"));
                 Assert.IsNotNull(GetField(radial, "_shimmerAnimation"));

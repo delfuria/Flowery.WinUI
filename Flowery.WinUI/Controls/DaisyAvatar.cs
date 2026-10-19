@@ -30,6 +30,7 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyAvatar);
             IsTabStop = false;
+            IsEnabledChanged += (sender, args) => ApplyAll();
 
             BuildVisualTree();
         }
@@ -430,6 +431,13 @@ namespace Flowery.Controls
             // 3. Fallback to Neutral theme colors
             var bgBrush = Background ?? DaisyResourceLookup.TryGetControlBrush(this, "DaisyAvatar", "Background") ?? DaisyResourceLookup.GetBrush("DaisyNeutralBrush");
             var fgBrush = Foreground ?? DaisyResourceLookup.TryGetControlBrush(this, "DaisyAvatar", "Foreground") ?? DaisyResourceLookup.GetBrush("DaisyNeutralContentBrush");
+            if (DaisySystemAppearance.HighContrast)
+            {
+                bgBrush = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                fgBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+            }
+            _innerBorder.BorderBrush = DaisySystemAppearance.HighContrast ? fgBrush : null;
+            _innerBorder.BorderThickness = new Thickness(DaisySystemAppearance.HighContrast ? 1 : 0);
 
             _innerBorder.Background = bgBrush;
             _placeholderText.Foreground = fgBrush;
@@ -535,6 +543,15 @@ namespace Flowery.Controls
             }
 
             _statusIndicator.Visibility = Visibility.Visible;
+            _statusIndicator.Stroke = DaisySystemAppearance.HighContrast
+                ? DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush") : null;
+            _statusIndicator.StrokeThickness = DaisySystemAppearance.HighContrast ? 2 : 0;
+            if (DaisySystemAppearance.HighContrast)
+            {
+                _statusIndicator.Fill = DaisyResourceLookup.GetBrush(Status == DaisyStatus.Online && IsEnabled
+                    ? "DaisyPrimaryBrush" : "DaisyBase100Brush");
+                return;
+            }
             _statusIndicator.Fill = Status switch
             {
                 DaisyStatus.Online => DaisyResourceLookup.GetBrush("DaisySuccessBrush"),
@@ -566,7 +583,9 @@ namespace Flowery.Controls
                 };
 
                 var fallbackBrush = new SolidColorBrush(fallbackColor);
-                var brush = DaisyResourceLookup.GetBrush(ringBrushKey, fallbackBrush);
+                var brush = DaisySystemAppearance.HighContrast
+                    ? DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush")
+                    : DaisyResourceLookup.GetBrush(ringBrushKey, fallbackBrush);
                 _outerBorder.BorderBrush = brush;
                 _outerBorder.BorderThickness = new Thickness(GetRingThickness());
             }

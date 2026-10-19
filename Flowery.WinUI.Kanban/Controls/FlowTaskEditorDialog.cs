@@ -331,13 +331,12 @@ namespace Flowery.WinUI.Kanban.Controls
             };
 
             var headerStack = new StackPanel { Spacing = 4, Margin = new Thickness(0, 0, 0, 12) };
-            headerStack.Children.Add(new TextBlock
+            headerStack.Children.Add(DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = FloweryLocalization.GetStringInternal("Kanban_Editor_Subtitle"),
                 FontSize = 12,
-                Opacity = 0.7,
                 Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
-            });
+            }, 0.7));
             Grid.SetRow(headerStack, 0);
             outerContainer.Children.Add(headerStack);
 
@@ -369,7 +368,7 @@ namespace Flowery.WinUI.Kanban.Controls
             outerContainer.Children.Add(tabs);
 
             var sectionBackground = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            var sectionBorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var sectionBorderBrush = DaisyResourceLookup.GetBorderBrush();
             var buttonPanel = FloweryDialogBase.CreateStandardButtonFooter(
                 out saveButton,
                 out cancelButton);
@@ -617,15 +616,14 @@ namespace Flowery.WinUI.Kanban.Controls
 
             var blockedSinceStack = new StackPanel { Spacing = 4 };
             blockedSinceStack.Children.Add(CreateSectionLabel(FloweryLocalization.GetStringInternal("Kanban_BlockedSince")));
-            var blockedSinceText = new TextBlock
+            var blockedSinceText = DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = editState.BlockedSince.HasValue
                     ? editState.BlockedSince.Value.ToString("g", CultureInfo.CurrentUICulture)
                     : FloweryLocalization.GetStringInternal("Kanban_BlockedSinceEmpty"),
                 Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
-                Opacity = 0.7,
                 TextWrapping = TextWrapping.Wrap
-            };
+            }, 0.7);
             blockedSinceStack.Children.Add(blockedSinceText);
             contentStack.Children.Add(blockedSinceStack);
 
@@ -745,7 +743,7 @@ namespace Flowery.WinUI.Kanban.Controls
             overdueWarning.Child = CreateIconLabel(
                 "DaisyIconWarning",
                 FloweryLocalization.GetStringInternal("Kanban_Editor_OverdueWarning"),
-                new SolidColorBrush(Microsoft.UI.Colors.White),
+                DaisyResourceLookup.GetBrush("DaisyWarningContentBrush"),
                 FontWeights.SemiBold);
 
             if (editState.PlannedEndDate.HasValue &&
@@ -826,18 +824,17 @@ namespace Flowery.WinUI.Kanban.Controls
 
             contentStack.Children.Add(effortGrid);
 
-            var tipBorder = new Border
+            var tipBorder = DaisyHighContrast.WithContentOpacity(new Border
             {
                 Background = DaisyResourceLookup.GetBrush("DaisyInfoBrush"),
                 CornerRadius = new CornerRadius(6),
                 Padding = new Thickness(12, 8, 12, 8),
-                Opacity = 0.8,
                 Margin = new Thickness(0, 4, 0, 0)
-            };
+            }, 0.8);
             tipBorder.Child = CreateIconLabel(
                 "DaisyIconInfo",
                 FloweryLocalization.GetStringInternal("Kanban_Editor_EffortTip"),
-                new SolidColorBrush(Microsoft.UI.Colors.White));
+                DaisyResourceLookup.GetBrush("DaisyInfoContentBrush"));
             contentStack.Children.Add(tipBorder);
 
             return contentStack;
@@ -1042,14 +1039,13 @@ namespace Flowery.WinUI.Kanban.Controls
 
         private static TextBlock CreateSectionLabel(string text)
         {
-            return new TextBlock
+            return DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = text,
                 FontSize = 12,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
-                Opacity = 0.85
-            };
+                Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
+            }, 0.85);
         }
 
         private static ObservableCollection<string> BuildAvailableTags(
@@ -1113,13 +1109,12 @@ namespace Flowery.WinUI.Kanban.Controls
         private static StackPanel CreateDatePickerWithLabel(string label, DateTime? initialValue, Action<DateTime?> onChanged)
         {
             var stack = new StackPanel { Spacing = 4 };
-            var labelText = new TextBlock
+            var labelText = DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = label,
                 FontSize = 11,
-                Opacity = 0.7,
                 Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
-            };
+            }, 0.7);
             stack.Children.Add(labelText);
 
             var datePicker = new DaisyCalendarDatePicker
@@ -1140,13 +1135,12 @@ namespace Flowery.WinUI.Kanban.Controls
         private static StackPanel CreateNumericInputWithLabel(string label, double? initialValue, Action<double?> onChanged)
         {
             var stack = new StackPanel { Spacing = 4 };
-            var labelText = new TextBlock
+            var labelText = DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = label,
                 FontSize = 11,
-                Opacity = 0.7,
                 Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
-            };
+            }, 0.7);
             stack.Children.Add(labelText);
 
             var numBox = new DaisyNumericUpDown
@@ -1199,12 +1193,13 @@ namespace Flowery.WinUI.Kanban.Controls
                     Padding = new Thickness(0)
                 };
                 AutomationProperties.SetName(swatch, color.ToString());
+                ToolTipService.SetToolTip(swatch, color.ToString());
                 AutomationProperties.SetItemStatus(swatch, color == editState.Palette
                     ? FloweryLocalization.GetStringInternal("Common_Selected", "Selected") : string.Empty);
 
                 if (color == editState.Palette)
                 {
-                    swatch.Content = CreateIconPath("DaisyIconCheck", new SolidColorBrush(Microsoft.UI.Colors.White), 12);
+                    swatch.Content = CreateIconPath("DaisyIconCheck", GetColorContentBrush(color), 12);
                 }
 
                 swatch.Click += (s, e) =>
@@ -1216,7 +1211,7 @@ namespace Flowery.WinUI.Kanban.Controls
                         button.BorderBrush = isSelected ? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
                             : new SolidColorBrush(Microsoft.UI.Colors.Transparent);
                         button.Content = isSelected
-                            ? CreateIconPath("DaisyIconCheck", new SolidColorBrush(Microsoft.UI.Colors.White), 12) : null;
+                            ? CreateIconPath("DaisyIconCheck", GetColorContentBrush(colorCopy), 12) : null;
                         AutomationProperties.SetItemStatus(button, isSelected
                             ? FloweryLocalization.GetStringInternal("Common_Selected", "Selected") : string.Empty);
                     }
@@ -1312,7 +1307,7 @@ namespace Flowery.WinUI.Kanban.Controls
                     row.Children.Add(titleText);
                 }
 
-                var deleteBtn = new DaisyButton
+                var deleteBtn = DaisyHighContrast.WithContentOpacity(new DaisyButton
                 {
                     Content = new DaisyIconText
                     {
@@ -1320,9 +1315,8 @@ namespace Flowery.WinUI.Kanban.Controls
                         IconSize = 14
                     },
                     Variant = DaisyButtonVariant.Error,
-                    Size = Enums.DaisySize.ExtraSmall,
-                    Opacity = 0.7
-                };
+                    Size = Enums.DaisySize.ExtraSmall
+                }, 0.7);
                 AutomationProperties.SetName(deleteBtn, FloweryLocalization.GetStringInternal("Common_Delete"));
                 deleteBtn.Click += (s, e) =>
                 {
@@ -1351,6 +1345,9 @@ namespace Flowery.WinUI.Kanban.Controls
                 _ => DaisyResourceLookup.GetBrush("DaisyBase300Brush")
             };
         }
+
+        private static Brush GetColorContentBrush(DaisyColor color) => DaisyResourceLookup.GetBrush(
+            color == DaisyColor.Default ? "DaisyBaseContentBrush" : $"Daisy{color}ContentBrush");
 
         private static FrameworkElement CreateIconLabel(
             string iconKey,

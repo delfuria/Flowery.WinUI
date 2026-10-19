@@ -473,6 +473,8 @@ The Showcase page combines this container with a normal editable `DaisyInput`.
 Consumers supply theme and appearance changes through their dependency properties.
 XAML layout supplies size changes; animated controls use the existing `DaisyMotion` policy.
 The shared helpers do not subscribe to theme or motion settings themselves.
+`DaisyShadowContainer` observes Windows contrast themes and releases its decorative outer and inset graphics while contrast mode is active.
+It retains the shadow descriptions and restores the graphics when contrast mode ends.
 
 Layout and wrapping still run through XAML on the UI thread.
 Hardware composition does not calculate control relationships or replace those layout updates.

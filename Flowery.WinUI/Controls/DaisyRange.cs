@@ -32,6 +32,8 @@ namespace Flowery.Controls
 
             // Make the control focusable for keyboard navigation
             IsTabStop = true;
+            UseSystemFocusVisuals = true;
+            IsEnabledChanged += (sender, args) => ApplyColors();
         }
 
         #region Dependency Properties
@@ -423,6 +425,17 @@ namespace Flowery.Controls
             _trackBorder.Background = trackOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush");
             _fillBorder.Background = ShowProgress ? (fillOverride ?? accentBrush) : new SolidColorBrush(Microsoft.UI.Colors.Transparent);
             _thumb.Fill = thumbOverride ?? accentBrush;
+            _trackBorder.BorderBrush = DaisySystemAppearance.HighContrast
+                ? DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush") : null;
+            _trackBorder.BorderThickness = new Thickness(DaisySystemAppearance.HighContrast ? 1 : 0);
+            _thumb.Stroke = _trackBorder.BorderBrush;
+            _thumb.StrokeThickness = DaisySystemAppearance.HighContrast ? 1 : 0;
+            if (DaisySystemAppearance.HighContrast)
+            {
+                var activeBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyPrimaryBrush" : "DaisyDisabledForegroundBrush");
+                _fillBorder.Background = ShowProgress ? activeBrush : new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                _thumb.Fill = activeBrush;
+            }
         }
 
         private void UpdateThumbPosition()

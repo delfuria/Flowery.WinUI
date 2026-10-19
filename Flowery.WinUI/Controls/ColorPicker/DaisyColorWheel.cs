@@ -211,7 +211,20 @@ namespace Flowery.Controls.ColorPicker
             PointerCaptureLost += OnPointerCaptureLost;
             IsTabStop = true;
             UseSystemFocusVisuals = true;
+            RegisterPropertyChangedCallback(IsEnabledProperty, static (sender, _) => ((DaisyColorWheel)sender).UpdateSelectionMarker());
             UpdateAutomationProperties();
+        }
+
+        protected override void OnLoaded()
+        {
+            base.OnLoaded();
+            UpdateSelectionMarker();
+        }
+
+        protected override void OnThemeChanged(string themeName)
+        {
+            base.OnThemeChanged(themeName);
+            UpdateSelectionMarker();
         }
 
         private static void OnColorPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -537,7 +550,17 @@ namespace Flowery.Controls.ColorPicker
             _markerOuter.Height = outerSize;
             Canvas.SetLeft(_markerOuter, markerX - outerSize / 2);
             Canvas.SetTop(_markerOuter, markerY - outerSize / 2);
-            _markerOuter.Stroke = new SolidColorBrush(SelectionOutlineColor);
+            _markerOuter.Stroke = DaisySystemAppearance.HighContrast
+                ? DaisyResourceLookup.GetBrush("DaisyBase100Brush") : new SolidColorBrush(SelectionOutlineColor);
+            _markerInner.Stroke = DaisySystemAppearance.HighContrast
+                ? DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush") : new SolidColorBrush(Colors.Black);
+            if (_centerLineHorizontal != null && _centerLineVertical != null)
+            {
+                var stroke = DaisySystemAppearance.HighContrast ? DaisyResourceLookup.GetBorderBrush()
+                    : new SolidColorBrush(Color.FromArgb(128, 128, 128, 128));
+                _centerLineHorizontal.Stroke = stroke;
+                _centerLineVertical.Stroke = stroke;
+            }
 
             _markerInner.Width = innerSize;
             _markerInner.Height = innerSize;

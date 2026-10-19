@@ -19,7 +19,7 @@
             <StackPanel>
                 <!-- <local:SectionHeader SectionId="flow-kanban" Title="Flow Kanban" /> -->
                 <TextBlock Text="A feature-rich and flexible Kanban board for task management with drag-and-drop support, column reordering, and JSON persistence. Each task card can be styled with palette colors."
-                           Opacity="0.8"
+                           Opacity="{ThemeResource GalleryOpacity80}"
                            TextWrapping="Wrap"
                            daisy:FlowerySizeManager.ResponsiveFont="Primary"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
@@ -29,7 +29,7 @@
                     Background="{ThemeResource DaisyBase200Brush}"
                     CornerRadius="12"
                     Padding="0"
-                    BorderBrush="{ThemeResource DaisyBase300Brush}"
+                    BorderBrush="{ThemeResource DaisyBorderBrush}"
                     BorderThickness="1"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch">

@@ -194,7 +194,7 @@ namespace Flowery.Controls.Weather
             var group = GetAnimationGroup(Condition);
             UpdateAuxVisibility(group);
 
-            if (!IsAnimated || !Flowery.Services.DaisyMotion.AnimationsEnabled || group == WeatherAnimationGroup.None)
+            if (DaisySystemAppearance.HighContrast || !IsAnimated || !Flowery.Services.DaisyMotion.AnimationsEnabled || group == WeatherAnimationGroup.None)
             {
                 StopAnimations();
                 return;

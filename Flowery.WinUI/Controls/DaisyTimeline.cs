@@ -629,8 +629,8 @@ namespace Flowery.Controls
 
             var primaryBrush = activeOverride ?? DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryBrush");
             var base200Brush = boxBgOverride ?? DaisyResourceLookup.GetBrush(resources, "DaisyBase200Brush");
-            var base300Brush = DaisyResourceLookup.GetBrush(resources, "DaisyBase300Brush");
-            var labelBrush = _hasForegroundOverride
+            var base300Brush = DaisyResourceLookup.GetBorderBrush();
+            var labelBrush = _hasForegroundOverride && !DaisyResourceLookup.IsHighContrast
                 ? Foreground
                 : GetAppBrush("DaisyBaseContentBrush");
 
@@ -643,13 +643,18 @@ namespace Flowery.Controls
             var indicatorBrush = IsActive ? primaryBrush : (indicatorOverride ?? connectorOverride ?? base300Brush);
             if (_indicator != null)
             {
-                _indicator.Fill = indicatorBrush;
+                _indicator.Fill = DaisyResourceLookup.IsHighContrast && !IsActive
+                    ? DaisyResourceLookup.GetBrush(resources, "DaisyBase100Brush") : indicatorBrush;
+                _indicator.Stroke = DaisyResourceLookup.IsHighContrast ? indicatorBrush : null;
+                _indicator.StrokeThickness = DaisyResourceLookup.IsHighContrast ? 2 : 0;
             }
 
             // Icon
             if (_iconPresenter != null)
             {
                 _iconPresenter.Content = MiddleContent;
+                _iconPresenter.Foreground = DaisyResourceLookup.IsHighContrast && IsActive
+                    ? DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryContentBrush") : labelBrush;
                 _iconPresenter.Visibility = MiddleContent != null ? Visibility.Visible : Visibility.Collapsed;
             }
 

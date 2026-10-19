@@ -196,7 +196,8 @@ namespace Flowery.Controls
             var borderOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyTable", "BorderBrush");
 
             _rootBorder.Background = bgOverride ?? DaisyResourceLookup.GetBrush("DaisyBase100Brush");
-            _rootBorder.BorderBrush = borderOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush");
+            _rootBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush(
+                borderOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush"));
             _rootBorder.BorderThickness = new Thickness(1);
 
             // Apply size and zebra to rows
@@ -242,6 +243,7 @@ namespace Flowery.Controls
 
             PointerEntered += OnPointerEntered;
             PointerExited += OnPointerExited;
+            IsEnabledChanged += (_, _) => ApplyAll();
         }
 
         #region Dependency Properties
@@ -491,7 +493,16 @@ namespace Flowery.Controls
             var headerBgOverride = TryGetRowBrush("HeaderBackground");
             var fgOverride = TryGetRowBrush("Foreground");
 
-            _rootBorder.BorderBrush = borderOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush");
+            _rootBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush(
+                borderOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush"));
+
+            if (DaisyResourceLookup.IsHighContrast && !IsEnabled)
+            {
+                Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                Foreground = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
+                _rootBorder.BorderBrush = Foreground;
+                return;
+            }
 
             if (IsActive)
             {
@@ -512,11 +523,19 @@ namespace Flowery.Controls
 
         private void ApplyHoverState()
         {
-            if (_rootBorder == null || IsActive)
+            if (_rootBorder == null || IsActive || !IsEnabled)
                 return;
 
             // Check for lightweight styling overrides
             var hoverBgOverride = TryGetRowBrush("HoverBackground");
+            if (DaisyResourceLookup.IsHighContrast)
+            {
+                Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                _rootBorder.BorderBrush = _isHovering
+                    ? DaisyResourceLookup.GetBrush("DaisyFocusBrush")
+                    : DaisyResourceLookup.GetBorderBrush();
+                return;
+            }
 
             Background = _isHovering
                 ? hoverBgOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush")
@@ -529,6 +548,9 @@ namespace Flowery.Controls
         /// </summary>
         private Brush? TryGetRowBrush(string suffix)
         {
+            if (DaisyResourceLookup.IsHighContrast)
+                return null;
+
             var key = "DaisyTableRow" + suffix;
             foreach (var resources in new[] { Resources, OwnerTable?.Resources, Application.Current?.Resources })
             {

@@ -5,7 +5,8 @@
                     xmlns:kanban="using:Flowery.WinUI.Kanban.Controls"
                     xmlns:kanbanConverters="using:Flowery.WinUI.Kanban.Converters"
                     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
-                    xmlns:services="using:Flowery.Services">
+                    xmlns:services="using:Flowery.Services"
+                    xmlns:theming="using:Flowery.Theming">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/DaisyShared.xaml" />
         <ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/DaisyIcons.xaml" />
@@ -50,7 +51,7 @@
         <Setter Property="Foreground"
                 Value="{ThemeResource DaisyBaseContentBrush}" />
         <Setter Property="BorderBrush"
-                Value="{ThemeResource DaisyBase300Brush}" />
+                Value="{ThemeResource DaisyBorderBrush}" />
         <Setter Property="BorderThickness"
                 Value="1" />
         <Setter Property="Padding"
@@ -112,7 +113,7 @@
                                         <Border Width="1"
                                                 Height="12"
                                                 Background="{ThemeResource DaisyInfoContentBrush}"
-                                                Opacity="0.4" />
+                                                theming:DaisyHighContrast.ContentOpacity="0.4" />
                                     </StackPanel>
                                     <TextBlock x:Name="PART_TitleText"
                                                Grid.Column="1"
@@ -209,7 +210,7 @@
                                 <controls:DaisyBadge Variant="Ghost"
                                                      Size="Small"
                                                      Padding="4,0"
-                                                     Opacity="0.85"
+                                                     theming:DaisyHighContrast.ContentOpacity="0.85"
                                                      HorizontalContentAlignment="Left"
                                                      HorizontalAlignment="Left"
                                                      Visibility="{Binding HasPriority, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -223,7 +224,7 @@
                                 <controls:DaisyBadge Variant="Ghost"
                                                      Size="Small"
                                                      Padding="4,0"
-                                                     Opacity="0.85"
+                                                     theming:DaisyHighContrast.ContentOpacity="0.85"
                                                      HorizontalContentAlignment="Left"
                                                      HorizontalAlignment="Left"
                                                      Visibility="{Binding HasSubtaskSummary, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -277,7 +278,7 @@
                                     <Border Width="1"
                                             Height="12"
                                             Background="{TemplateBinding Foreground}"
-                                            Opacity="0.35"
+                                            theming:DaisyHighContrast.ContentOpacity="0.35"
                                             Visibility="{Binding HasDateRange, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                     <controls:DaisyIconText IconData="{StaticResource DaisyIconDateDisplay}"
                                                             IconSize="12"
@@ -378,7 +379,7 @@
         <Setter Property="Background"
                 Value="{ThemeResource DaisyBase200Brush}" />
         <Setter Property="BorderBrush"
-                Value="{ThemeResource DaisyBase300Brush}" />
+                Value="{ThemeResource DaisyBorderBrush}" />
         <Setter Property="BorderThickness"
                 Value="1" />
         <Setter Property="Padding"
@@ -487,7 +488,7 @@
                                     </controls:WrapPanel>
                                     <Border x:Uid="KanbanHome.Empty.State"
                                             Background="{ThemeResource DaisyBase200Brush}"
-                                            BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                            BorderBrush="{ThemeResource DaisyBorderBrush}"
                                             BorderThickness="1"
                                             CornerRadius="16"
                                             Padding="20"
@@ -545,7 +546,7 @@
                                             <DataTemplate>
                                                 <controls:DaisyCard Variant="Compact"
                                                                     BodyPadding="0"
-                                                                    BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                                    BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                                     BorderThickness="1"
                                                                     HorizontalAlignment="Stretch"
                                                                     VerticalAlignment="Stretch">
@@ -721,7 +722,7 @@
                                                                             Variant="Compact"
                                                                             ColorVariant="Base200"
                                                                             BodyPadding="12"
-                                                                            BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                                            BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                                             BorderThickness="1"
                                                                             CornerRadius="12">
                                                             <StackPanel Orientation="Vertical"
@@ -821,7 +822,7 @@
                                                 </controls:DaisyButton>
                                             </Grid>
                                             <Border Background="{ThemeResource DaisyBase200Brush}"
-                                                    BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                    BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                     BorderThickness="1"
                                                     CornerRadius="12"
                                                     Padding="12"
@@ -877,7 +878,7 @@
                                         <Border x:Name="PART_UserDetailsPanel"
                                                 Grid.Row="0"
                                                 Background="{ThemeResource DaisyBase200Brush}"
-                                                BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                 BorderThickness="1"
                                                 CornerRadius="12"
                                                 Padding="12">
@@ -889,7 +890,7 @@
                                                            Text="{Binding [Kanban_Users_Details_Title]}" />
                                                 <Border x:Name="PART_UserDetailsCard"
                                                         Background="{ThemeResource DaisyBase100Brush}"
-                                                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                         BorderThickness="1"
                                                         CornerRadius="12"
                                                         Padding="12"
@@ -960,7 +961,7 @@
                                                 <Border x:Name="PART_UserDetailsEmptyCard"
                                                         x:Uid="KanbanUsers.Details.Empty"
                                                         Background="{ThemeResource DaisyBase100Brush}"
-                                                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                         BorderThickness="1"
                                                         CornerRadius="12"
                                                         Padding="12"
@@ -982,7 +983,7 @@
                                         <Border x:Name="PART_UserListPanel"
                                                 Grid.Row="1"
                                                 Background="{ThemeResource DaisyBase200Brush}"
-                                                BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                 BorderThickness="1"
                                                 CornerRadius="12"
                                                 Padding="12">
@@ -1022,7 +1023,7 @@
                                                             <controls:DaisyCard x:Name="UserCard"
                                                                                 Variant="Compact"
                                                                                 BodyPadding="12"
-                                                                                BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                                                BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                                                 BorderThickness="1"
                                                                                 CornerRadius="12"
                                                                                 MinWidth="224"
@@ -1053,7 +1054,7 @@
                                                 <Border x:Uid="KanbanUsers.Empty.State"
                                                         Grid.Row="1"
                                                         Background="{ThemeResource DaisyBase100Brush}"
-                                                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                         BorderThickness="1"
                                                         CornerRadius="12"
                                                         Padding="12"
@@ -1073,7 +1074,7 @@
                                                 <Border x:Uid="KanbanUsers.Search.Empty"
                                                         Grid.Row="1"
                                                         Background="{ThemeResource DaisyBase100Brush}"
-                                                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                         BorderThickness="1"
                                                         CornerRadius="12"
                                                         Padding="12"
@@ -1368,7 +1369,7 @@
                                 Margin="16,0,16,8"
                                 Padding="12"
                                 Background="{ThemeResource DaisyBase200Brush}"
-                                BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                BorderBrush="{ThemeResource DaisyBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="8"
                                 Visibility="{Binding Tag.IsFilterExpanded, ElementName=PART_BoardRoot, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -1508,7 +1509,7 @@
                                         <controls:DaisyPopover.Resources>
                                             <ResourceDictionary>
                                                 <StaticResource x:Key="DaisyPopoverBackground" ResourceKey="DaisyBase100Brush" />
-                                                <StaticResource x:Key="DaisyPopoverBorderBrush" ResourceKey="DaisyBase300Brush" />
+                                                <StaticResource x:Key="DaisyPopoverBorderBrush" ResourceKey="DaisyBorderBrush" />
                                             </ResourceDictionary>
                                         </controls:DaisyPopover.Resources>
                                         <controls:DaisyPopover.TriggerContent>
@@ -1607,7 +1608,7 @@
                                                                          CornerRadius="12"
                                                                          Padding="2"
                                                                          Margin="2"
-                                                                         BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                                         BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                                          BorderThickness="1"
                                                                          MaxHeight="{Binding Tag.CompactColumnMaxHeight, ElementName=PART_BoardRoot}"
                                                                          Visibility="{Binding IsArchiveColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -1882,7 +1883,7 @@
                                                                          CornerRadius="12"
                                                                          Padding="2"
                                                                          Margin="2"
-                                                                         BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                                         BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                                          BorderThickness="1"
                                                                          MaxHeight="{Binding Tag.CompactColumnMaxHeight, ElementName=PART_BoardRoot}">
                                                     <Grid>
@@ -2128,7 +2129,7 @@
                                                                                  CornerRadius="12"
                                                                                  Padding="2"
                                                                                  Margin="2"
-                                                                                 BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                                                 BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                                                  BorderThickness="1"
                                                                                  ShowColumnHeader="True"
                                                                                  ShowTasks="False"
@@ -2381,7 +2382,7 @@
                                                     <Border x:Name="PART_LaneHeaderBorder"
                                                             Grid.Column="0"
                                                             Background="{ThemeResource DaisyBase200Brush}"
-                                                            BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                            BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                             BorderThickness="1"
                                                             CornerRadius="12"
                                                             Padding="12"
@@ -2390,7 +2391,7 @@
                                                                    Text="{Binding Lane.Title}"
                                                                    Style="{ThemeResource CaptionTextBlockStyle}"
                                                                    Foreground="{ThemeResource DaisyBaseContentBrush}"
-                                                                   Opacity="0.85"
+                                                                   theming:DaisyHighContrast.ContentOpacity="0.85"
                                                                    TextWrapping="Wrap" />
                                                     </Border>
                                                     <ItemsControl Grid.Column="1"
@@ -2424,7 +2425,7 @@
                                                                                          CornerRadius="12"
                                                                                          Padding="2"
                                                                                          Margin="2"
-                                                                                         BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                                                                         BorderBrush="{ThemeResource DaisyBorderBrush}"
                                                                                          BorderThickness="1"
                                                                                          Visibility="{Binding Column.IsArchiveColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                                     <Grid DataContext="{Binding Column}">
@@ -2668,7 +2669,7 @@
                                 Grid.RowSpan="3"
                                 Grid.Column="1"
                                 Background="{ThemeResource DaisyBase100Brush}"
-                                BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                BorderBrush="{ThemeResource DaisyBorderBrush}"
                                 BorderThickness="1,0,0,0"
                                 Padding="12"
                                 Width="56">
@@ -2827,7 +2828,7 @@
                                 Grid.Row="3"
                                 Grid.Column="0"
                                 Background="{ThemeResource DaisyBase100Brush}"
-                                BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                BorderBrush="{ThemeResource DaisyBorderBrush}"
                                 BorderThickness="0,1,0,0"
                                 Padding="12,8"
                                 Visibility="{Binding IsBoardStatusBarVisible, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -2851,7 +2852,7 @@
                                     </StackPanel>
                                     <!-- Separator -->
                                     <Border Width="1"
-                                            Background="{ThemeResource DaisyBase300Brush}" />
+                                            Background="{ThemeResource DaisyBorderBrush}" />
                                     <!-- Zoom Level -->
                                     <StackPanel Orientation="Horizontal"
                                                 Spacing="6">
@@ -2868,7 +2869,7 @@
                                     </StackPanel>
                                     <!-- Separator -->
                                     <Border Width="1"
-                                            Background="{ThemeResource DaisyBase300Brush}"
+                                            Background="{ThemeResource DaisyBorderBrush}"
                                             Visibility="{Binding HasArchiveColumnToggle, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                     <!-- Archive Toggle -->
                                     <StackPanel Orientation="Horizontal"
@@ -2905,7 +2906,7 @@
                                     </StackPanel>
                                     <!-- Separator -->
                                     <Border Width="1"
-                                            Background="{ThemeResource DaisyBase300Brush}"
+                                            Background="{ThemeResource DaisyBorderBrush}"
                                             Visibility="{Binding HasStatusMessage, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                     <!-- Status Message -->
                                     <StackPanel Orientation="Horizontal"
@@ -2933,7 +2934,7 @@
                                         <Run Text="{Binding DataContext[Kanban_Selection_Selected], ElementName=PART_BoardRoot}" />
                                     </TextBlock>
                                     <Border Width="1"
-                                            Background="{ThemeResource DaisyBase300Brush}" />
+                                            Background="{ThemeResource DaisyBorderBrush}" />
                                     <StackPanel Orientation="Horizontal"
                                                 Spacing="6">
                                         <controls:DaisySelect Style="{StaticResource KanbanFocusSelectStyle}"

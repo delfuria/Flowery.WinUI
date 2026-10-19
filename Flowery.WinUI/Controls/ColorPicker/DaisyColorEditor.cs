@@ -418,9 +418,9 @@ namespace Flowery.Controls.ColorPicker
             var header = new TextBlock
             {
                 Text = "RGB",
-                FontWeight = FontWeights.SemiBold,
-                Opacity = 0.8
+                FontWeight = FontWeights.SemiBold
             };
+            DaisyHighContrast.SetContentOpacity(header, 0.8);
             FlowerySizeManager.SetResponsiveFont(header, ResponsiveFontTier.Primary);
             panel.Children.Add(header);
 
@@ -450,9 +450,9 @@ namespace Flowery.Controls.ColorPicker
             var header = new TextBlock
             {
                 Text = "HSL",
-                FontWeight = FontWeights.SemiBold,
-                Opacity = 0.8
+                FontWeight = FontWeights.SemiBold
             };
+            DaisyHighContrast.SetContentOpacity(header, 0.8);
             FlowerySizeManager.SetResponsiveFont(header, ResponsiveFontTier.Primary);
             panel.Children.Add(header);
 

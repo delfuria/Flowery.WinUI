@@ -23,6 +23,7 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyOtpInput);
             IsTabStop = false;
+            IsEnabledChanged += (sender, args) => ApplyColors();
 
             // Apply global size early if allowed and not explicitly ignored.
             if (FlowerySizeManager.UseGlobalSizeByDefault && !FlowerySizeManager.GetIgnoreGlobalSize(this))
@@ -308,6 +309,7 @@ namespace Flowery.Controls
                     slot.TextChanged -= OnSlotTextChanged;
                     slot.KeyDown -= OnSlotKeyDown;
                     slot.GotFocus -= OnSlotGotFocus;
+                    slot.LostFocus -= OnSlotLostFocus;
                 slot.Paste -= OnSlotPaste;
                 }
 
@@ -473,6 +475,7 @@ namespace Flowery.Controls
             SetSlotAccessibilityName(box, index);
             box.KeyDown += OnSlotKeyDown;
             box.GotFocus += OnSlotGotFocus;
+            box.LostFocus += OnSlotLostFocus;
             box.Paste += OnSlotPaste;
 
             return box;
@@ -484,7 +487,10 @@ namespace Flowery.Controls
             {
                 box.SelectAll();
             }
+            ApplyColors();
         }
+
+        private void OnSlotLostFocus(object sender, RoutedEventArgs e) => ApplyColors();
 
         private async void OnSlotPaste(object sender, TextControlPasteEventArgs e)
         {
@@ -788,15 +794,27 @@ namespace Flowery.Controls
             var bgOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyOtpInput", "Background");
             var fgOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyOtpInput", "Foreground");
 
-            var borderBrush = borderOverride ?? DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var borderBrush = borderOverride ?? DaisyResourceLookup.GetBorderBrush();
             var bgBrush = bgOverride ?? DaisyResourceLookup.GetBrush("DaisyBase100Brush");
             var fgBrush = fgOverride ?? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+            if (DaisySystemAppearance.HighContrast && !IsEnabled)
+                borderBrush = fgBrush = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
             var transparent = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
 
-            // Style wrapper borders
-            foreach (var border in _slotBorders)
+            foreach (var separator in _slotsPanel.Children)
             {
-                border.BorderBrush = borderBrush;
+                if (separator is TextBlock text)
+                    text.Foreground = fgBrush;
+                else if (separator is Viewbox { Child: Path path })
+                    path.Fill = fgBrush;
+            }
+
+            // Style wrapper borders
+            for (var index = 0; index < _slotBorders.Count; index++)
+            {
+                var border = _slotBorders[index];
+                border.BorderBrush = DaisySystemAppearance.HighContrast && IsEnabled && _slots[index].FocusState != FocusState.Unfocused
+                    ? DaisyResourceLookup.GetBrush("DaisyFocusBrush") : borderBrush;
                 border.Background = bgBrush;
             }
 

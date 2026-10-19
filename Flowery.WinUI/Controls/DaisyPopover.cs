@@ -404,8 +404,12 @@ namespace Flowery.Controls
             var borderOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyPopover", "BorderBrush");
 
             _popupBorder.Background = bgOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            _popupBorder.BorderBrush = borderOverride ?? DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            _popupBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush(borderOverride);
             _popupBorder.BorderThickness = new Thickness(1);
+            if (_popupPresenter is not null)
+                _popupPresenter.Foreground = DaisyResourceLookup.IsHighContrast
+                    ? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
+                    : Foreground;
         }
 
 

@@ -75,6 +75,7 @@ namespace Flowery.Controls
                     CornerRadius = new CornerRadius(barCorner),
                     Opacity = i < fillBars ? activeOpacity : inactiveOpacity
                 };
+                ApplyContrastState(bar, i < fillBars);
                 barsPanel.Children.Add(bar);
             }
 
@@ -135,6 +136,8 @@ namespace Flowery.Controls
             var borderBrush = DaisyResourceLookup.GetBrush(
                 "DaisyBaseContentBrush",
                 new SolidColorBrush(Windows.UI.Color.FromArgb(255, 230, 230, 230)));
+            if (DaisySystemAppearance.HighContrast)
+                borderBrush = GetColorBrush();
 
             var redBrush = new SolidColorBrush(Colors.IndianRed);
             var yellowBrush = new SolidColorBrush(Colors.Gold);
@@ -174,6 +177,9 @@ namespace Flowery.Controls
             red.Opacity = TrafficLightActive == DaisyTrafficLightState.Red ? activeOpacity : inactiveOpacity;
             yellow.Opacity = TrafficLightActive == DaisyTrafficLightState.Yellow ? activeOpacity : inactiveOpacity;
             green.Opacity = TrafficLightActive == DaisyTrafficLightState.Green ? activeOpacity : inactiveOpacity;
+            ApplyContrastState(red, TrafficLightActive == DaisyTrafficLightState.Red);
+            ApplyContrastState(yellow, TrafficLightActive == DaisyTrafficLightState.Yellow);
+            ApplyContrastState(green, TrafficLightActive == DaisyTrafficLightState.Green);
 
             Grid.SetRow(red, 0);
             Grid.SetRow(yellow, 1);
@@ -240,6 +246,7 @@ namespace Flowery.Controls
                 Fill = brush,
                 Opacity = signalLevel > 0 ? activeOpacity : inactiveOpacity
             };
+            ApplyContrastState(centerDot, signalLevel > 0);
             Canvas.SetLeft(centerDot, centerX - centerDotRadius);
             Canvas.SetTop(centerDot, centerY - centerDotRadius);
             canvas.Children.Add(centerDot);
@@ -291,6 +298,7 @@ namespace Flowery.Controls
                     }
                 };
 
+                ApplyContrastState(arcPath, (i + 1) <= signalLevel);
                 canvas.Children.Add(arcPath);
             }
 
@@ -342,11 +350,33 @@ namespace Flowery.Controls
                     CornerRadius = new CornerRadius(barCorner, barCorner, 0, 0),
                     Opacity = (i + 1) <= signalLevel ? activeOpacity : inactiveOpacity
                 };
+                ApplyContrastState(bar, (i + 1) <= signalLevel);
 
                 barsPanel.Children.Add(bar);
             }
 
             _rootGrid.Children.Add(barsPanel);
+        }
+
+        private void ApplyContrastState(FrameworkElement element, bool active)
+        {
+            if (!DaisySystemAppearance.HighContrast)
+                return;
+            var stroke = DaisyResourceLookup.GetBrush(active && IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+            var fill = active ? stroke : DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+            element.Opacity = 1;
+            if (element is Border border)
+            {
+                border.Background = fill;
+                border.BorderBrush = stroke;
+                border.BorderThickness = new Thickness(1);
+            }
+            else if (element is Microsoft.UI.Xaml.Shapes.Shape shape)
+            {
+                shape.Fill = element is Path ? new SolidColorBrush(Colors.Transparent) : fill;
+                shape.Stroke = stroke;
+                shape.StrokeThickness = Math.Max(1, shape.StrokeThickness);
+            }
         }
 
         private static Ellipse CreateFillRing(double size, Brush brush, double opacity)

@@ -113,8 +113,10 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyCollapse);
             IsTabStop = true;
+            UseSystemFocusVisuals = true;
             GotFocus += OnControlGotFocus;
             LostFocus += OnControlLostFocus;
+            IsEnabledChanged += (sender, args) => ApplyAll();
 
             BuildLayout();
         }
@@ -424,6 +426,8 @@ namespace Flowery.Controls
                 return;
 
             _iconPath.Fill = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+            if (DaisySystemAppearance.HighContrast && _headerButton != null)
+                _iconPath.SetBinding(Shape.FillProperty, new Binding { Source = _headerButton, Path = new PropertyPath(nameof(Foreground)) });
         }
 
         private void ApplySizing()
@@ -486,8 +490,22 @@ namespace Flowery.Controls
             _outerBorder.Background = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
             _outerBorder.BorderBrush = _isFocused
                 ? DaisyResourceLookup.GetBrush("DaisyAccentBrush")
-                : DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+                : DaisyResourceLookup.GetBorderBrush();
             _outerBorder.BorderThickness = new Thickness(1);
+            if (DaisySystemAppearance.HighContrast)
+            {
+                if (!IsEnabled) _outerBorder.BorderBrush = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
+                if (_headerPresenter != null && _headerButton != null)
+                    _headerPresenter.SetBinding(ContentPresenter.ForegroundProperty,
+                        new Binding { Source = _headerButton, Path = new PropertyPath(nameof(Foreground)) });
+                if (_contentPresenter != null)
+                    _contentPresenter.Foreground = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+            }
+            else
+            {
+                _headerPresenter?.ClearValue(ContentPresenter.ForegroundProperty);
+                _contentPresenter?.ClearValue(ContentPresenter.ForegroundProperty);
+            }
         }
 
         private void UpdateAutomationProperties()

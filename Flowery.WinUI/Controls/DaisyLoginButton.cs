@@ -158,7 +158,7 @@ namespace Flowery.Controls
             ApplyBrandResources();
             BuildContent();
             RefreshButtonVisuals();
-            if (!UseBrandColors)
+            if (!UseBrandColors || DaisySystemAppearance.HighContrast)
             {
                 OnForegroundPropertyChanged(this, ForegroundProperty);
             }
@@ -179,9 +179,6 @@ namespace Flowery.Controls
 
         private void OnThemeChanged(object? sender, string themeName)
         {
-            if (UseBrandColors)
-                return;
-
             UpdateBrandPresentation();
         }
 
@@ -200,6 +197,9 @@ namespace Flowery.Controls
                 ClearBrandResources();
                 return;
             }
+
+            if (DaisySystemAppearance.HighContrast)
+                return;
 
             var definition = GetBrandDefinition(Brand);
 
@@ -226,7 +226,14 @@ namespace Flowery.Controls
 
         private void SetBrandBrush(string resourceKey, Color color)
         {
-            Resources[resourceKey] = new SolidColorBrush(color);
+            if (Resources.TryGetValue(resourceKey, out var resource) && resource is SolidColorBrush brush)
+            {
+                brush.Color = color;
+            }
+            else
+            {
+                Resources[resourceKey] = new SolidColorBrush(color);
+            }
         }
 
         private void BuildContent()
@@ -295,7 +302,7 @@ namespace Flowery.Controls
 
         private Brush GetEffectiveForegroundBrush(BrandDefinition definition)
         {
-            if (UseBrandColors)
+            if (UseBrandColors && !DaisySystemAppearance.HighContrast)
                 return new SolidColorBrush(definition.Foreground);
 
             return Foreground
@@ -354,10 +361,11 @@ namespace Flowery.Controls
             var path = new Path
             {
                 Data = FloweryPathHelpers.ParseGeometry(pathData),
+                StrokeThickness = part.StrokeThickness,
                 IsHitTestVisible = false
             };
 
-            if (UseBrandColors && part.Fill is { } fillColor)
+            if (UseBrandColors && !DaisySystemAppearance.HighContrast && part.Fill is { } fillColor)
             {
                 path.Fill = new SolidColorBrush(fillColor);
             }
@@ -368,8 +376,7 @@ namespace Flowery.Controls
 
             if (part.StrokeThickness > 0)
             {
-                path.StrokeThickness = part.StrokeThickness;
-                path.Stroke = UseBrandColors && part.Stroke is { } strokeColor
+                path.Stroke = UseBrandColors && !DaisySystemAppearance.HighContrast && part.Stroke is { } strokeColor
                     ? new SolidColorBrush(strokeColor)
                     : foregroundBrush;
 
@@ -415,7 +422,7 @@ namespace Flowery.Controls
 
         private void OnForegroundPropertyChanged(DependencyObject sender, DependencyProperty dp)
         {
-            if (UseBrandColors)
+            if (UseBrandColors && !DaisySystemAppearance.HighContrast)
                 return;
 
             var definition = GetBrandDefinition(Brand);

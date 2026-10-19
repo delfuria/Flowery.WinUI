@@ -82,6 +82,8 @@ namespace Flowery.Controls
         private Visual? _dotVisual;
         private bool _isAnimating;
         private readonly List<Visual> _activeVisuals = [];
+        private readonly List<Visual> _spinSatelliteVisuals = [];
+        private Visual? _spinContainerVisual;
 
         // Track animated elements for restart support
         private readonly List<RingAnimationData> _ringAnimations = [];
@@ -162,6 +164,7 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyStatusIndicator);
             IsTabStop = false;
+            RegisterPropertyChangedCallback(IsEnabledProperty, static (sender, _) => ((DaisyStatusIndicator)sender).RebuildVisual());
         }
 
         private static void OnAppearanceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -282,7 +285,8 @@ namespace Flowery.Controls
             _isAnimating = DaisyMotion.AnimationsEnabled && IsLoaded;
 
             // Build variant-specific overlay visuals
-            BuildVariantOverlay(dot, size, brush);
+            if (!DaisySystemAppearance.HighContrast || Variant is DaisyStatusIndicatorVariant.Spin or DaisyStatusIndicatorVariant.Orbit)
+                BuildVariantOverlay(dot, size, brush);
 
             // Set up animation for dot variants
             dot.Loaded += (s, e) =>

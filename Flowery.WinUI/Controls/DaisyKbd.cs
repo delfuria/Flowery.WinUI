@@ -94,8 +94,33 @@ namespace Flowery.Controls
             ApplyKbdStyle();
         }
 
+        protected override void OnApplyTemplate()
+        {
+            base.OnApplyTemplate();
+            ApplyTheme();
+        }
+
         protected override void ApplyTheme()
         {
+            foreach (var name in new[] { "PART_OuterRim", "PART_FacePolish", "PART_InnerBezel" })
+            {
+                if (GetTemplateChild(name) is Border decoration)
+                    decoration.Visibility = DaisySystemAppearance.HighContrast ? Visibility.Collapsed : Visibility.Visible;
+            }
+
+            if (DaisySystemAppearance.HighContrast)
+            {
+                Background = KbdStyle == DaisyKbdStyle.Ghost
+                    ? new SolidColorBrush(Microsoft.UI.Colors.Transparent)
+                    : DaisyResourceLookup.GetBrush(Variant is DaisyBadgeVariant.Default or DaisyBadgeVariant.Neutral or DaisyBadgeVariant.Ghost
+                        ? "DaisyBase100Brush" : "DaisyPrimaryBrush");
+                BorderBrush = KbdStyle == DaisyKbdStyle.Ghost
+                    ? new SolidColorBrush(Microsoft.UI.Colors.Transparent)
+                    : DaisyResourceLookup.GetBorderBrush();
+                base.ApplyTheme();
+                return;
+            }
+
             if (KbdStyle == DaisyKbdStyle.Ghost)
             {
                 Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent);

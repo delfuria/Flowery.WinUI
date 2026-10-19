@@ -39,6 +39,7 @@ namespace Flowery.Controls.ColorPicker
         private TextBlock? _rgbText;
         private TextBlock? _statusText;
         private FrameworkElement? _eyedropperIcon;
+        private readonly SolidColorBrush _eyedropperStroke = new(Color.FromArgb(255, 150, 150, 150));
 
         /// <inheritdoc/>
         public void ApplyScaleFactor(double scaleFactor)
@@ -147,6 +148,7 @@ namespace Flowery.Controls.ColorPicker
             KeyDown += OnKeyDown;
             IsTabStop = true;
             UseSystemFocusVisuals = true;
+            RegisterPropertyChangedCallback(IsEnabledProperty, static (sender, _) => ((DaisyScreenColorPicker)sender).UpdateDisplay());
             UpdateAutomationProperties();
         }
 
@@ -169,6 +171,12 @@ namespace Flowery.Controls.ColorPicker
         }
 
         private void OnCultureChanged(object? sender, string cultureName) => UpdateDisplay();
+
+        protected override void OnThemeChanged(string themeName)
+        {
+            base.OnThemeChanged(themeName);
+            UpdateDisplay();
+        }
 
         private static void OnColorPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -277,7 +285,7 @@ namespace Flowery.Controls.ColorPicker
             rootGrid.Children.Add(topGrid);
             rootGrid.Children.Add(_statusText);
 
-            _eyedropperIcon = BuildEyedropperIcon();
+            _eyedropperIcon = BuildEyedropperIcon(_eyedropperStroke);
 
             rootGrid.Children.Add(_eyedropperIcon);
 
@@ -287,9 +295,8 @@ namespace Flowery.Controls.ColorPicker
             UpdateDisplay();
         }
 
-        private static Canvas BuildEyedropperIcon()
+        private static Canvas BuildEyedropperIcon(Brush stroke)
         {
-            var stroke = new SolidColorBrush(Color.FromArgb(255, 150, 150, 150));
             const double size = 16;
             const double half = size / 2;
             const double strokeThickness = 1.5;
@@ -367,11 +374,27 @@ namespace Flowery.Controls.ColorPicker
             _rgbText.Text = $"R:{displayColor.R} G:{displayColor.G} B:{displayColor.B}";
 
             _statusText.Text = FloweryLocalization.GetStringInternal(_isCapturing ? "ColorPicker_ReleaseToPick" : "ColorPicker_ClickAndDrag");
-            _statusText.Foreground = new SolidColorBrush(_isCapturing ? Color.FromArgb(255, 100, 200, 100) : Color.FromArgb(255, 150, 150, 150));
-
-            if (_rootBorder.BorderBrush is SolidColorBrush borderBrush)
+            if (DaisySystemAppearance.HighContrast)
             {
-                borderBrush.Color = _isCapturing ? Color.FromArgb(255, 100, 200, 100) : Color.FromArgb(255, 80, 80, 80);
+                var foreground = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+                _rootBorder.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                _rootBorder.BorderBrush = DaisyResourceLookup.GetBrush(!IsEnabled ? "DaisyDisabledForegroundBrush"
+                    : _isCapturing ? "DaisyFocusBrush" : "DaisyBorderBrush");
+                _previewBorder!.BorderBrush = DaisyResourceLookup.GetBorderBrush();
+                _hexText.Foreground = foreground;
+                _rgbText.Foreground = foreground;
+                _statusText.Foreground = foreground;
+                _eyedropperStroke.Color = ((SolidColorBrush)foreground).Color;
+            }
+            else
+            {
+                _rootBorder.Background = new SolidColorBrush(Color.FromArgb(255, 45, 45, 48));
+                _rootBorder.BorderBrush = new SolidColorBrush(_isCapturing ? Color.FromArgb(255, 100, 200, 100) : Color.FromArgb(255, 80, 80, 80));
+                _previewBorder!.BorderBrush = new SolidColorBrush(Color.FromArgb(255, 100, 100, 100));
+                _hexText.Foreground = new SolidColorBrush(Colors.White);
+                _rgbText.Foreground = new SolidColorBrush(Color.FromArgb(255, 180, 180, 180));
+                _statusText.Foreground = new SolidColorBrush(_isCapturing ? Color.FromArgb(255, 100, 200, 100) : Color.FromArgb(255, 150, 150, 150));
+                _eyedropperStroke.Color = Color.FromArgb(255, 150, 150, 150);
             }
 
             if (_eyedropperIcon != null)

@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using Flowery.Controls;
 using Flowery.Helpers;
+using Flowery.Theming;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Hosting;
@@ -92,13 +93,17 @@ namespace Flowery.WinUI.Gallery.Examples
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
+            DaisyThemeManager.ThemeChanged += OnGalleryThemeChanged;
             ApplyTech();
         }
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
+            DaisyThemeManager.ThemeChanged -= OnGalleryThemeChanged;
             ClearTech();
         }
+
+        private void OnGalleryThemeChanged(object? sender, string themeName) => ApplyTech();
 
         private void OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -119,6 +124,12 @@ namespace Flowery.WinUI.Gallery.Examples
 
         private void ApplyTech()
         {
+            if (DaisyResourceLookup.IsHighContrast)
+            {
+                ClearTech();
+                return;
+            }
+
             if (!IsLoaded || _buttonBorder is null || ActualWidth <= 0 || ActualHeight <= 0)
             {
                 _pendingApplyTech = true;

@@ -11,7 +11,7 @@
             <!-- Introduction -->
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="styling-intro" Title="Lightweight Styling" />
-                <TextBlock TextWrapping="Wrap" Opacity="0.9" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                <TextBlock TextWrapping="Wrap" Opacity="{ThemeResource GalleryOpacity90}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                            daisy:FlowerySizeManager.ResponsiveFont="Primary">
                     Flowery.WinUI controls support lightweight styling through control-specific resource keys.
                     Override colors at the instance or application level without creating custom styles.
@@ -22,7 +22,7 @@
                                    daisy:FlowerySizeManager.ResponsiveFont="Primary">Resource Naming Convention:</TextBlock>
                         <TextBlock FontFamily="Consolas" Foreground="{ThemeResource DaisyPrimaryBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Primary">Daisy{Control}{Variant?}{Part?}{State?}{Property}</TextBlock>
-                        <TextBlock Opacity="0.8" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Opacity="{ThemeResource GalleryOpacity80}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary">Examples: DaisyButtonBackground, DaisyInputPrimaryBorderBrush, DaisyTableRowHoverBackground</TextBlock>
                     </StackPanel>
                 </daisy:DaisyCard>
@@ -33,7 +33,7 @@
             <!-- Actions Controls -->
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="styling-actions" Title="Actions" />
-                <TextBlock Opacity="0.8" Foreground="{ThemeResource DaisyBaseContentBrush}" Margin="0,0,0,12"
+                <TextBlock Opacity="{ThemeResource GalleryOpacity80}" Foreground="{ThemeResource DaisyBaseContentBrush}" Margin="0,0,0,12"
                            daisy:FlowerySizeManager.ResponsiveFont="Primary">
                     Button, Modal, Swap, CopyButton - all support background, foreground, and border overrides.
                 </TextBlock>
@@ -41,14 +41,14 @@
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
                     <!-- Default Button -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Default Button" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Default Button" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyButton Content="Primary" Variant="Primary" HorizontalAlignment="Left" />
                     </StackPanel>
 
                     <!-- Styled Button -->
                     <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
-                        <TextBlock Text="Custom Styled Button" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Custom Styled Button" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyButton Content="Custom Colors" Variant="Primary" HorizontalAlignment="Left">
                             <daisy:DaisyButton.Resources>
@@ -60,17 +60,17 @@
 
                     <!-- Default Modal Backdrop -->
                     <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Modal Backdrop (default)" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Modal Backdrop (default)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
-                        <TextBlock Text="DaisyModalBackdropBrush: Semi-transparent black" Opacity="0.6" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="DaisyModalBackdropBrush: Semi-transparent black" Opacity="{ThemeResource GalleryOpacity60}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Tertiary" />
                     </StackPanel>
 
                     <!-- Custom Modal Colors -->
                     <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
-                        <TextBlock Text="Custom Modal Colors" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Custom Modal Colors" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
-                        <TextBlock Text="Override DaisyModalBackground, DaisyModalBorderBrush" Opacity="0.6" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Override DaisyModalBackground, DaisyModalBorderBrush" Opacity="{ThemeResource GalleryOpacity60}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Tertiary" />
                     </StackPanel>
                 </Grid>
@@ -81,7 +81,7 @@
             <!-- Data Input Controls -->
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="styling-input" Title="Data Input" />
-                <TextBlock Opacity="0.8" Foreground="{ThemeResource DaisyBaseContentBrush}" Margin="0,0,0,12"
+                <TextBlock Opacity="{ThemeResource GalleryOpacity80}" Foreground="{ThemeResource DaisyBaseContentBrush}" Margin="0,0,0,12"
                            daisy:FlowerySizeManager.ResponsiveFont="Primary">
                     Input, Select, Toggle, Checkbox, Radio, Range, NumericUpDown, OtpInput, FileInput
                 </TextBlock>
@@ -89,14 +89,14 @@
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="16">
                     <!-- Default Input -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Default Input" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Default Input" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyInput Watermark="Default styling..." />
                     </StackPanel>
 
                     <!-- Styled Input -->
                     <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
-                        <TextBlock Text="Custom Styled Input" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Custom Styled Input" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyInput Watermark="Custom border...">
                             <daisy:DaisyInput.Resources>
@@ -108,14 +108,14 @@
 
                     <!-- Default Toggle -->
                     <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Default Toggle" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Default Toggle" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyToggle Content="Toggle me" IsChecked="True" Variant="Primary" HorizontalAlignment="Left" />
                     </StackPanel>
 
                     <!-- Styled Toggle -->
                     <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
-                        <TextBlock Text="Custom Toggle Knob" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Custom Toggle Knob" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyToggle Content="Custom knob" IsChecked="True" Variant="Primary" HorizontalAlignment="Left">
                             <daisy:DaisyToggle.Resources>
@@ -126,14 +126,14 @@
 
                     <!-- Default Range -->
                     <StackPanel Grid.Row="2" Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Default Range" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Default Range" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyRange Value="50" Minimum="0" Maximum="100" Variant="Primary" />
                     </StackPanel>
 
                     <!-- Styled Range -->
                     <StackPanel Grid.Row="2" Grid.Column="1" Spacing="4">
-                        <TextBlock Text="Custom Range Track" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Custom Range Track" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyRange Value="50" Minimum="0" Maximum="100" Variant="Primary">
                             <daisy:DaisyRange.Resources>
@@ -145,14 +145,14 @@
 
                     <!-- Default Checkbox -->
                     <StackPanel Grid.Row="3" Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Default Checkbox" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Default Checkbox" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyCheckBox Content="Check me" IsChecked="True" Variant="Primary" HorizontalAlignment="Left" />
                     </StackPanel>
 
                     <!-- Styled Checkbox -->
                     <StackPanel Grid.Row="3" Grid.Column="1" Spacing="4">
-                        <TextBlock Text="Custom Checkbox" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Custom Checkbox" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyCheckBox Content="Custom colors" IsChecked="True" Variant="Primary" HorizontalAlignment="Left">
                             <daisy:DaisyCheckBox.Resources>
@@ -169,7 +169,7 @@
             <!-- Data Display Controls -->
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="styling-display" Title="Data Display" />
-                <TextBlock Opacity="0.8" Foreground="{ThemeResource DaisyBaseContentBrush}" Margin="0,0,0,12"
+                <TextBlock Opacity="{ThemeResource GalleryOpacity80}" Foreground="{ThemeResource DaisyBaseContentBrush}" Margin="0,0,0,12"
                            daisy:FlowerySizeManager.ResponsiveFont="Primary">
                     Badge, Card, Avatar, Stat, Countdown, Table, List, Kbd, ChatBubble
                 </TextBlock>
@@ -177,14 +177,14 @@
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="16">
                     <!-- Default Badge -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Default Badge" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Default Badge" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyBadge Content="Primary" Variant="Primary" HorizontalAlignment="Left" />
                     </StackPanel>
 
                     <!-- Styled Badge -->
                     <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
-                        <TextBlock Text="Custom Badge" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Custom Badge" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyBadge Content="Custom" Variant="Primary" HorizontalAlignment="Left">
                             <daisy:DaisyBadge.Resources>
@@ -196,7 +196,7 @@
 
                     <!-- Default Card -->
                     <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Default Card" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Default Card" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyCard Width="200" Variant="Compact" HorizontalAlignment="Left">
                             <TextBlock Text="Card content" Foreground="{ThemeResource DaisyBaseContentBrush}"
@@ -206,30 +206,30 @@
 
                     <!-- Styled Card -->
                     <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
-                        <TextBlock Text="Custom Card Background" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Custom Card Background" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyCard Width="200" Variant="Compact" HorizontalAlignment="Left">
                             <daisy:DaisyCard.Resources>
                                 <SolidColorBrush x:Key="DaisyCardBackground" Color="#1E3A5F" />
                             </daisy:DaisyCard.Resources>
-                            <TextBlock Text="Dark blue card" Foreground="White"
+                            <TextBlock Text="Dark blue card" Foreground="{ThemeResource GalleryMediaTextBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                         </daisy:DaisyCard>
                     </StackPanel>
 
                     <!-- Default Kbd -->
                     <StackPanel Grid.Row="2" Grid.Column="0" Spacing="4" Orientation="Horizontal">
-                        <TextBlock Text="Default Kbd:" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" VerticalAlignment="Center"
+                        <TextBlock Text="Default Kbd:" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" VerticalAlignment="Center"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyKbd Content="Ctrl" />
-                        <TextBlock Text="+" Opacity="0.5" Foreground="{ThemeResource DaisyBaseContentBrush}" VerticalAlignment="Center" Margin="4,0"
+                        <TextBlock Text="+" Opacity="{ThemeResource GalleryOpacity50}" Foreground="{ThemeResource DaisyBaseContentBrush}" VerticalAlignment="Center" Margin="4,0"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyKbd Content="S" />
                     </StackPanel>
 
                     <!-- Styled Kbd -->
                     <StackPanel Grid.Row="2" Grid.Column="1" Spacing="4" Orientation="Horizontal">
-                        <TextBlock Text="Custom Kbd:" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}" VerticalAlignment="Center"
+                        <TextBlock Text="Custom Kbd:" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}" VerticalAlignment="Center"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyKbd Content="Esc">
                             <daisy:DaisyKbd.Resources>
@@ -246,7 +246,7 @@
             <!-- Feedback Controls -->
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="styling-feedback" Title="Feedback" />
-                <TextBlock Opacity="0.8" Foreground="{ThemeResource DaisyBaseContentBrush}" Margin="0,0,0,12"
+                <TextBlock Opacity="{ThemeResource GalleryOpacity80}" Foreground="{ThemeResource DaisyBaseContentBrush}" Margin="0,0,0,12"
                            daisy:FlowerySizeManager.ResponsiveFont="Primary">
                     Alert, Progress, RadialProgress, Tooltip
                 </TextBlock>
@@ -254,14 +254,14 @@
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
                     <!-- Default Progress -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Default Progress" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Default Progress" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyProgress Value="60" Variant="Primary" />
                     </StackPanel>
 
                     <!-- Styled Progress -->
                     <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
-                        <TextBlock Text="Custom Progress Fill" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Custom Progress Fill" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyProgress Value="60" Variant="Primary">
                             <daisy:DaisyProgress.Resources>
@@ -272,14 +272,14 @@
 
                     <!-- Default Alert -->
                     <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Default Alert" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Default Alert" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyAlert Variant="Info" Message="Info message" />
                     </StackPanel>
 
                     <!-- Styled Alert -->
                     <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
-                        <TextBlock Text="Custom Alert Colors" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Custom Alert Colors" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyAlert Variant="Info" Message="Custom styling">
                             <daisy:DaisyAlert.Resources>
@@ -296,7 +296,7 @@
             <!-- Navigation Controls -->
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="styling-navigation" Title="Navigation" />
-                <TextBlock Opacity="0.8" Foreground="{ThemeResource DaisyBaseContentBrush}" Margin="0,0,0,12"
+                <TextBlock Opacity="{ThemeResource GalleryOpacity80}" Foreground="{ThemeResource DaisyBaseContentBrush}" Margin="0,0,0,12"
                            daisy:FlowerySizeManager.ResponsiveFont="Primary">
                     Menu, Tabs, Dock, Steps, Breadcrumbs, Pagination
                 </TextBlock>
@@ -304,14 +304,14 @@
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto" ColumnSpacing="16" RowSpacing="16">
                     <!-- Default Tabs -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Default Tabs" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Default Tabs" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyTabs x:Name="DefaultTabs" Variant="Boxed" />
                     </StackPanel>
 
                     <!-- Styled Tabs -->
                     <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
-                        <TextBlock Text="Custom Tab Colors" FontWeight="SemiBold" Opacity="0.7" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                        <TextBlock Text="Custom Tab Colors" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         <daisy:DaisyTabs x:Name="StyledTabs" Variant="Boxed">
                             <daisy:DaisyTabs.Resources>
@@ -328,7 +328,7 @@
             <!-- Resource Keys Reference -->
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="styling-reference" Title="Resource Keys Reference" />
-                <TextBlock TextWrapping="Wrap" Opacity="0.8" Foreground="{ThemeResource DaisyBaseContentBrush}" Margin="0,0,0,12"
+                <TextBlock TextWrapping="Wrap" Opacity="{ThemeResource GalleryOpacity80}" Foreground="{ThemeResource DaisyBaseContentBrush}" Margin="0,0,0,12"
                            daisy:FlowerySizeManager.ResponsiveFont="Primary">
                     Below is a summary of common resource keys. For the complete list, see StylingResources.md in the documentation.
                 </TextBlock>
@@ -338,7 +338,7 @@
                         <StackPanel Spacing="4">
                             <TextBlock FontWeight="Bold" Foreground="{ThemeResource DaisyPrimaryBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary">Core Controls</TextBlock>
-                            <TextBlock FontFamily="Consolas" TextWrapping="Wrap" Opacity="0.9" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                            <TextBlock FontFamily="Consolas" TextWrapping="Wrap" Opacity="{ThemeResource GalleryOpacity90}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Tertiary">
 DaisyButton{Variant?}Background, Foreground, BorderBrush
 DaisyInput{Variant?}Background, Foreground, BorderBrush, FocusBorderBrush
@@ -350,7 +350,7 @@ DaisyBadge{Variant}Background, Foreground
                         <StackPanel Spacing="4">
                             <TextBlock FontWeight="Bold" Foreground="{ThemeResource DaisyPrimaryBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary">Toggle/Checkbox/Radio</TextBlock>
-                            <TextBlock FontFamily="Consolas" TextWrapping="Wrap" Opacity="0.9" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                            <TextBlock FontFamily="Consolas" TextWrapping="Wrap" Opacity="{ThemeResource GalleryOpacity90}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Tertiary">
 DaisyToggle{Variant}KnobBrush, TrackBackground
 DaisyCheckBox{Variant}BorderBrush, Background, CheckmarkBrush
@@ -361,7 +361,7 @@ DaisyRadio{Variant}BorderBrush, Background, DotBrush
                         <StackPanel Spacing="4">
                             <TextBlock FontWeight="Bold" Foreground="{ThemeResource DaisyPrimaryBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary">Progress/Range</TextBlock>
-                            <TextBlock FontFamily="Consolas" TextWrapping="Wrap" Opacity="0.9" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                            <TextBlock FontFamily="Consolas" TextWrapping="Wrap" Opacity="{ThemeResource GalleryOpacity90}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Tertiary">
 DaisyProgress{Variant}FillBrush, TrackBrush
 DaisyRange{Variant}FillBrush, ThumbBrush, TrackBrush
@@ -372,7 +372,7 @@ DaisyRadialProgress{Variant}FillBrush, TrackBrush
                         <StackPanel Spacing="4">
                             <TextBlock FontWeight="Bold" Foreground="{ThemeResource DaisyPrimaryBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary">Table/List</TextBlock>
-                            <TextBlock FontFamily="Consolas" TextWrapping="Wrap" Opacity="0.9" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                            <TextBlock FontFamily="Consolas" TextWrapping="Wrap" Opacity="{ThemeResource GalleryOpacity90}" Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Tertiary">
 DaisyTableBackground, BorderBrush
 DaisyTableRowBackground, Foreground, HoverBackground, ActiveBackground

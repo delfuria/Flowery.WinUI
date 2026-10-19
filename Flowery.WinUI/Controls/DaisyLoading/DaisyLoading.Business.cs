@@ -91,6 +91,8 @@ namespace Flowery.Controls
                 var b = (byte)Math.Clamp(c.B * shade, 0, 255);
                 backgroundBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(220, r, g, b));
             }
+            if (DaisySystemAppearance.HighContrast)
+                backgroundBrush = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
 
             var page = new Border
             {
@@ -118,7 +120,7 @@ namespace Flowery.Controls
                     Height = Math.Max(1, borderThickness * 1.5),
                     Width = double.NaN,
                     Fill = brush,
-                    Opacity = i == 0 ? 0.5 : 0.25
+                    Opacity = DaisyResourceLookup.GetContentOpacity(i == 0 ? 0.5 : 0.25)
                 });
             }
 
@@ -441,6 +443,14 @@ namespace Flowery.Controls
             var redBrush = new SolidColorBrush(Colors.IndianRed);
             var yellowBrush = new SolidColorBrush(Colors.Gold);
             var greenBrush = new SolidColorBrush(Colors.LimeGreen);
+            if (DaisySystemAppearance.HighContrast)
+            {
+                var contrastBrush = (SolidColorBrush)GetColorBrush();
+                borderBrush = contrastBrush;
+                redBrush = contrastBrush;
+                yellowBrush = contrastBrush;
+                greenBrush = contrastBrush;
+            }
 
             var bodyWidth = 38.0 * u;
             var bodyHeight = 84.0 * u;

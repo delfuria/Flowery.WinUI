@@ -53,6 +53,7 @@ namespace Flowery.Controls
             Checked += (s, e) => ApplyAll();
             Unchecked += (s, e) => ApplyAll();
             Indeterminate += (s, e) => ApplyAll();
+            IsEnabledChanged += (s, e) => ApplyAll();
         }
 
         #region Dependency Properties
@@ -324,16 +325,24 @@ namespace Flowery.Controls
 
             var accentBrush = bgOverride ?? DaisyResourceLookup.GetBrush(bgBrushKey);
             var contentBrush = fgOverride ?? DaisyResourceLookup.GetBrush(fgBrushKey);
-            var borderBrush = borderOverride ?? DaisyResourceLookup.GetBrush("DaisyBase300Brush");
-            var labelBrush = _hasForegroundOverride
+            var borderBrush = borderOverride ?? DaisyResourceLookup.GetBorderBrush();
+            var labelBrush = _hasForegroundOverride && !DaisySystemAppearance.HighContrast
                 ? Foreground
                 : GetAppBrush("DaisyBaseContentBrush");
+
+            if (DaisySystemAppearance.HighContrast)
+            {
+                accentBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyPrimaryBrush" : "DaisyBase100Brush");
+                contentBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyPrimaryContentBrush" : "DaisyDisabledForegroundBrush");
+                borderBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush");
+                labelBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+            }
 
             if (isChecked)
             {
                 _checkmark.Data = IsChecked == null ? CreateIndeterminateGeometry() : CreateCheckmarkGeometry();
                 _checkboxBorder.Background = accentBrush;
-                _checkboxBorder.BorderBrush = accentBrush;
+                _checkboxBorder.BorderBrush = DaisySystemAppearance.HighContrast ? borderBrush : accentBrush;
                 _checkmark.Stroke = contentBrush;
                 _checkmark.Visibility = Visibility.Visible;
             }
@@ -349,6 +358,7 @@ namespace Flowery.Controls
                 SetForeground(labelBrush);
             }
 
+            if (_contentPresenter != null) _contentPresenter.Foreground = labelBrush;
             if (_labelTextBlock != null)
             {
                 _labelTextBlock.Foreground = labelBrush;
@@ -374,8 +384,8 @@ namespace Flowery.Controls
             if (_controlBorder == null)
                 return;
 
-            _controlBorder.Background = Background;
-            _controlBorder.BorderBrush = BorderBrush;
+            _controlBorder.Background = DaisySystemAppearance.HighContrast ? DaisyResourceLookup.GetBrush("DaisyBase100Brush") : Background;
+            _controlBorder.BorderBrush = DaisySystemAppearance.HighContrast ? DaisyResourceLookup.GetBorderBrush() : BorderBrush;
             _controlBorder.BorderThickness = BorderThickness;
             _controlBorder.Padding = Padding;
         }

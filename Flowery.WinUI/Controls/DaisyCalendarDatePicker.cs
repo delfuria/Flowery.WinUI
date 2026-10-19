@@ -33,6 +33,7 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyCalendarDatePicker);
             IsTabStop = false;
+            IsEnabledChanged += (sender, args) => ApplyAll();
 
             // Apply global size early if allowed and not explicitly ignored.
             if (FlowerySizeManager.UseGlobalSizeByDefault && !FlowerySizeManager.GetIgnoreGlobalSize(this))
@@ -381,6 +382,22 @@ namespace Flowery.Controls
             if (_inputBorder == null || _calendarDatePicker == null)
                 return;
 
+            if (DaisySystemAppearance.HighContrast)
+            {
+                // Let the native calendar template supply its complete contrast state palette.
+                foreach (var key in _calendarDatePicker.Resources.Keys.OfType<string>()
+                    .Where(key => key.StartsWith("CalendarDatePicker", StringComparison.Ordinal)
+                        || key.StartsWith("TextControl", StringComparison.Ordinal)).ToArray())
+                    _calendarDatePicker.Resources.Remove(key);
+                _baseInputBackground = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                _baseInputBorderBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush");
+                _inputBorder.Background = _calendarDatePicker.Background = _baseInputBackground;
+                _inputBorder.BorderBrush = _baseInputBorderBrush;
+                _inputBorder.BorderThickness = new Thickness(1);
+                _calendarDatePicker.Foreground = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+                return;
+            }
+
             var transparent = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
             var base100 = DaisyResourceLookup.GetBrush(resources, "DaisyBase100Brush", new SolidColorBrush(Colors.White));
             var base200 = DaisyResourceLookup.GetBrush(resources, "DaisyBase200Brush", new SolidColorBrush(Colors.LightGray));
@@ -575,6 +592,12 @@ namespace Flowery.Controls
             }
 
             var isFocused = _calendarDatePicker != null && _calendarDatePicker.FocusState != FocusState.Unfocused;
+            if (DaisySystemAppearance.HighContrast)
+            {
+                _inputBorder.BorderBrush = DaisyResourceLookup.GetBrush(!IsEnabled ? "DaisyDisabledForegroundBrush"
+                    : isFocused ? "DaisyFocusBrush" : "DaisyBorderBrush");
+                return;
+            }
             if (isFocused)
             {
                 _inputBorder.BorderBrush = GetVariantFocusBrush(resources);

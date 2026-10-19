@@ -21,19 +21,12 @@
             </SplitView.Pane>
             <SplitView.Content>
                 <Grid RowDefinitions="Auto,Auto,*">
-                    <Border x:Name="HeaderBorder" Grid.Row="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                <GradientStop Offset="0" Color="#0F172A" />
-                                <GradientStop Offset="0.5" Color="#1E293B" />
-                                <GradientStop Offset="1" Color="#0F172A" />
-                            </LinearGradientBrush>
-                        </Border.Background>
+                    <Border x:Name="HeaderBorder" Grid.Row="0" Background="{ThemeResource GalleryHeaderBackgroundBrush}">
                         <Grid>
                             <Ellipse x:Name="HeaderOrbRight"
                                      Width="150"
                                      Height="150"
-                                     Opacity="0.1"
+                                     Opacity="{ThemeResource GalleryHeaderOrbOpacity}"
                                      HorizontalAlignment="Right"
                                      VerticalAlignment="Top"
                                      Margin="0,-40,-20,0">
@@ -47,7 +40,7 @@
                             <Ellipse x:Name="HeaderOrbLeft"
                                      Width="100"
                                      Height="100"
-                                     Opacity="0.05"
+                                     Opacity="{ThemeResource GalleryHeaderSmallOrbOpacity}"
                                      HorizontalAlignment="Left"
                                      VerticalAlignment="Bottom"
                                      Margin="-20,0,0,-20">
@@ -72,8 +65,8 @@
                                                        Grid.Column="0"
                                                        VerticalAlignment="Center">
                                         <daisy:DaisyButton.Resources>
-                                            <SolidColorBrush x:Key="DaisyButtonGhostForeground" Color="#F8FAFC" />
-                                            <SolidColorBrush x:Key="DaisyButtonGhostForegroundPointerOver" Color="#FFFFFF" />
+                                            <StaticResource x:Key="DaisyButtonGhostForeground" ResourceKey="GalleryHeaderTitleBrush" />
+                                            <StaticResource x:Key="DaisyButtonGhostForegroundPointerOver" ResourceKey="GalleryHeaderTitleBrush" />
                                         </daisy:DaisyButton.Resources>
                                         <PathIcon Width="18"
                                                   Height="18"
@@ -93,18 +86,13 @@
                                         <TextBlock x:Name="HeaderTitle"
                                                    FontSize="28"
                                                    FontWeight="Bold"
-                                                   TextTrimming="CharacterEllipsis">
-                                            <TextBlock.Foreground>
-                                                <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
-                                                    <GradientStop Offset="0" Color="#F8FAFC" />
-                                                    <GradientStop Offset="1" Color="#94A3B8" />
-                                                </LinearGradientBrush>
-                                            </TextBlock.Foreground>
-                                            <Run x:Name="HeaderTitleRun" Text="Flowery.WinUI" Foreground="#F8FAFC" />
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Foreground="{ThemeResource GalleryHeaderTitleBrush}">
+                                            <Run x:Name="HeaderTitleRun" Text="Flowery.WinUI" Foreground="{ThemeResource GalleryHeaderTitleBrush}" />
                                             <Run x:Name="HeaderSubtitleRun"
                                                  Text=" Gallery"
                                                  FontWeight="Normal"
-                                                 Foreground="#94A3B8" />
+                                                 Foreground="{ThemeResource GalleryHeaderSubtitleBrush}" />
                                         </TextBlock>
                                         <Grid x:Name="SubtitleRow" ColumnDefinitions="*,Auto">
                                             <Grid x:Name="CreditsGrid"
@@ -113,23 +101,21 @@
                                                   ColumnSpacing="6">
                                                 <TextBlock Text="Created by"
                                                            FontSize="13"
-                                                           Foreground="#64748B"
+                                                           Foreground="{ThemeResource GalleryHeaderCaptionBrush}"
                                                            VerticalAlignment="Center" />
-                                                <Button Grid.Column="1"
+                                                <HyperlinkButton Grid.Column="1"
                                                         Padding="0"
-                                                        Background="Transparent"
-                                                        BorderThickness="0"
+                                                        Foreground="{ThemeResource GalleryHeaderLinkBrush}"
                                                         Click="OpenGitHub_Click">
                                                     <TextBlock Text="tobitege"
                                                                FontSize="13"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="#38BDF8" />
-                                                </Button>
+                                                               FontWeight="SemiBold" />
+                                                </HyperlinkButton>
                                                 <TextBlock x:Name="MitLicenseText"
                                                            Grid.Column="2"
                                                            Text=" - 2026 - MIT licensed"
                                                            FontSize="12"
-                                                           Foreground="#64748B"
+                                                           Foreground="{ThemeResource GalleryHeaderCaptionBrush}"
                                                            TextTrimming="CharacterEllipsis"
                                                            VerticalAlignment="Center" />
                                             </Grid>
@@ -145,16 +131,7 @@
                                     </StackPanel>
                                 </Grid>
 
-                                <Border x:Name="HeaderAccentBar" Height="3">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
-                                            <GradientStop Offset="0" Color="#0EA5E9" />
-                                            <GradientStop Offset="0.3" Color="#2DD4BF" />
-                                            <GradientStop Offset="0.6" Color="#38BDF8" />
-                                            <GradientStop Offset="1" Color="#14B8A6" />
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                </Border>
+                                <Border x:Name="HeaderAccentBar" Height="3" Background="{ThemeResource GalleryHeaderAccentBrush}" />
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -162,7 +139,7 @@
                     <Border x:Name="CategoryTitleBar"
                         Grid.Row="1"
                         Background="{ThemeResource DaisyBase200Brush}"
-                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="0,0,0,1"
                         Padding="24,4,24,20"
                         Visibility="Collapsed">
@@ -174,10 +151,10 @@
                                 <StackPanel Orientation="Horizontal" Spacing="-6">
                                     <Path Data="M0,0 L6,0 L12,7 L6,14 L0,14 L6,7 Z"
                                           Fill="{ThemeResource DaisyPrimaryBrush}"
-                                          Opacity="0.4" />
+                                          Opacity="{ThemeResource GalleryOpacity40}" />
                                     <Path Data="M0,0 L6,0 L12,7 L6,14 L0,14 L6,7 Z"
                                           Fill="{ThemeResource DaisyPrimaryBrush}"
-                                          Opacity="0.7" />
+                                          Opacity="{ThemeResource GalleryOpacity70}" />
                                     <Path Data="M0,0 L6,0 L12,7 L6,14 L0,14 L6,7 Z"
                                           Fill="{ThemeResource DaisyPrimaryBrush}"
                                           Opacity="1" />
@@ -207,11 +184,11 @@
                 <TextBlock
                     Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                     TextWrapping="Wrap"
-                    Opacity="0.8" />
+                    Opacity="{ThemeResource GalleryOpacity80}" />
                 <TextBlock
                     Text="Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
                     TextWrapping="Wrap"
-                    Opacity="0.7"
+                    Opacity="{ThemeResource GalleryOpacity70}"
                     FontSize="13" />
                 <daisy:DaisyButton Content="Close"
                                    Variant="Primary"

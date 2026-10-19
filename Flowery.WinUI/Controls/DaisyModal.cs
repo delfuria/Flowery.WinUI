@@ -180,6 +180,11 @@ namespace Flowery.Controls
             var backdropBrush = DaisyResourceLookup.TryGetControlBrush(this, "DaisyModal", "BackdropBrush")
                 ?? DaisyResourceLookup.GetBrush(resources, "DaisyModalBackdropBrush", new SolidColorBrush(Color.FromArgb(160, 0, 0, 0)));
             _root.Background = backdropBrush;
+            if (DaisySystemAppearance.HighContrast) _root.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+            _dialogHost.Shadow = DaisySystemAppearance.HighContrast ? null : new ThemeShadow();
+            _dialogHost.Translation = new System.Numerics.Vector3(0, 0, DaisySystemAppearance.HighContrast ? 0 : 32);
+            _dialogBorder.BorderBrush = DaisySystemAppearance.HighContrast ? DaisyResourceLookup.GetBorderBrush() : null;
+            _dialogBorder.BorderThickness = new Thickness(DaisySystemAppearance.HighContrast ? 1 : 0);
 
             // Dialog background: Check for user-defined DaisyModalBackground, else fall back to DaisyBase100Brush
             var dialogBg = DaisyResourceLookup.TryGetControlBrush(this, "DaisyModal", "Background")
@@ -196,7 +201,8 @@ namespace Flowery.Controls
             {
                 var grabBarBrush = DaisyResourceLookup.TryGetControlBrush(this, "DaisyModal", "GrabBarBrush")
                     ?? DaisyResourceLookup.GetBrush(resources, "DaisyBase300Brush", new SolidColorBrush(Colors.LightGray));
-                _grabBar.Background = grabBarBrush;
+                _grabBar.Background = DaisyResourceLookup.GetBorderBrush(grabBarBrush);
+                _grabBar.Opacity = DaisyResourceLookup.GetContentOpacity(0.6);
             }
         }
 

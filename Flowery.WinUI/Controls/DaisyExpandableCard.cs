@@ -47,6 +47,14 @@ namespace Flowery.Controls
 
         private void OnMotionChanged(object? sender, EventArgs e) => UpdateExpandedState(animate: false);
 
+        protected override void OnThemeChanged(string themeName)
+        {
+            base.OnThemeChanged(themeName);
+            if (UseBatteriesIncludedMode && IsLoaded)
+                BuildBatteriesIncludedContent();
+            UpdateExpandedState(animate: false);
+        }
+
         #region Dependency Properties
 
         public static readonly DependencyProperty IsExpandedProperty =
@@ -358,6 +366,8 @@ namespace Flowery.Controls
                 }
             };
             mainGrid.Children.Add(gradientBorder);
+            if (DaisySystemAppearance.HighContrast)
+                gradientBorder.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
 
             // Add icon in top-right if IconData is provided
             if (!string.IsNullOrEmpty(IconData))
@@ -376,6 +386,7 @@ namespace Flowery.Controls
                         Margin = new Thickness(0, 8, 8, 0)
                     };
                     mainGrid.Children.Add(iconPath);
+                    if (DaisySystemAppearance.HighContrast) iconPath.Visibility = Visibility.Collapsed;
                 }
                 catch
                 {
@@ -431,7 +442,7 @@ namespace Flowery.Controls
             {
                 Width = CardWidth,
                 Height = CardHeight,
-                Background = ReadLocalValue(ExpandedBackgroundProperty) == DependencyProperty.UnsetValue 
+                Background = DaisySystemAppearance.HighContrast || ReadLocalValue(ExpandedBackgroundProperty) == DependencyProperty.UnsetValue
                     ? DaisyResourceLookup.GetBrush("DaisyBase200Brush") 
                     : new Microsoft.UI.Xaml.Media.SolidColorBrush(ExpandedBackground),
                 Padding = new Thickness(16),
@@ -461,7 +472,7 @@ namespace Flowery.Controls
                 {
                     Text = ExpandedSubtitle,
                     Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
-                    Opacity = 0.7,
+                    Opacity = DaisyResourceLookup.GetContentOpacity(0.7),
                     FontSize = 9
                 });
             }

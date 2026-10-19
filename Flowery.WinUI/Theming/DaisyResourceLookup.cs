@@ -25,6 +25,7 @@ namespace Flowery.Theming
     ///   <item>Application.Current.Resources (app-level override)</item>
     ///   <item>Fallback to control's internal palette logic</item>
     /// </list>
+    /// <para>Windows contrast themes use system colors instead of these decorative brush overrides.</para>
     /// <para><b>Usage Example:</b></para>
     /// <code>
     /// // In a control's ApplyColors method:
@@ -34,6 +35,11 @@ namespace Flowery.Theming
     /// </remarks>
     public static class DaisyResourceLookup
     {
+        /// <summary>
+        /// Gets whether Windows currently uses a contrast theme.
+        /// </summary>
+        public static bool IsHighContrast => Flowery.Services.DaisySystemAppearance.HighContrast;
+
         /// <summary>
         /// Ensures default sizing tokens are available in application resources.
         /// Call this early (e.g. app startup) if you need token values before any Daisy control loads.
@@ -165,6 +171,25 @@ namespace Flowery.Theming
             return GetBrush(Application.Current.Resources, key, fallback ?? new SolidColorBrush(Microsoft.UI.Colors.Transparent));
         }
 
+        /// <summary>
+        /// Gets a visible control boundary in a Windows contrast theme.
+        /// </summary>
+        /// <param name="fallback">The control's normal border brush, or Base300 when omitted.</param>
+        public static Brush GetBorderBrush(Brush? fallback = null)
+        {
+            if (!IsHighContrast && fallback is not null)
+                return fallback;
+
+            return GetBrush("DaisyBorderBrush", GetBrush(IsHighContrast ? "DaisyBaseContentBrush" : "DaisyBase300Brush"));
+        }
+
+        /// <summary>
+        /// Keeps text and control states opaque in Windows contrast themes.
+        /// </summary>
+        /// <param name="normal">The opacity used outside Windows contrast themes.</param>
+        public static double GetContentOpacity(double normal) =>
+            Flowery.Services.DaisySystemAppearance.HighContrast ? 1 : normal;
+
         // ---- Lightweight Styling Helpers ----
 
         /// <summary>
@@ -197,6 +222,7 @@ namespace Flowery.Theming
         /// </code>
         /// <para><b>Common Resource Keys:</b> Background, Foreground, BorderBrush,
         /// PrimaryBackground, PrimaryForeground, ActiveBackground, HoverBackground, etc.</para>
+        /// <para>Returns null in a Windows contrast theme so the control uses its system palette.</para>
         /// </remarks>
         /// <example>
         /// <code>
@@ -208,6 +234,10 @@ namespace Flowery.Theming
         /// </example>
         public static Brush? TryGetControlBrush(FrameworkElement control, string controlName, string suffix)
         {
+            // The user's Windows contrast colors take precedence over decorative overrides.
+            if (Flowery.Services.DaisySystemAppearance.HighContrast)
+                return null;
+
             var key = $"{controlName}{suffix}";
 
             // 1. Check control-level resources first (lightweight styling on specific instance)
@@ -963,6 +993,17 @@ namespace Flowery.Theming
         /// </summary>
         private static readonly Dictionary<Windows.UI.Color, string> _colorToPaletteCache = new();
         private static string? _cachedThemeName;
+
+        static DaisyResourceLookup()
+        {
+            DaisyThemeManager.ThemeChanged += OnThemeChanged;
+        }
+
+        private static void OnThemeChanged(object? sender, string themeName)
+        {
+            _colorToPaletteCache.Clear();
+            _cachedThemeName = themeName;
+        }
 
         /// <summary>
         /// Gets the Daisy palette name (e.g., "Primary", "Secondary") for a given color.

@@ -137,6 +137,7 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyExpander);
             IsTabStop = false;
+            IsEnabledChanged += (sender, args) => UpdateColors();
 
             BuildLayout();
 
@@ -290,7 +291,7 @@ namespace Flowery.Controls
         {
             if (d is DaisyExpander expander && expander._headerButton != null)
             {
-                expander._headerButton.Background = (Brush?)e.NewValue ?? new SolidColorBrush(Colors.Transparent);
+                expander.UpdateColors();
             }
         }
 
@@ -361,6 +362,8 @@ namespace Flowery.Controls
 
             var foreground = HeaderForeground ?? DaisyResourceLookup.GetBrush(Application.Current?.Resources, "DaisyBaseContentBrush", new SolidColorBrush(Colors.White));
             _chevron.Fill = foreground;
+            if (DaisySystemAppearance.HighContrast && _headerContent != null)
+                _chevron.SetBinding(Shape.FillProperty, new Binding { Source = _headerContent, Path = new PropertyPath(nameof(Foreground)) });
         }
 
         private void UpdateContentVisibility()
@@ -394,6 +397,15 @@ namespace Flowery.Controls
             if (_headerButton != null)
             {
                 _headerButton.Background = HeaderBackground ?? new SolidColorBrush(Colors.Transparent);
+                if (DaisySystemAppearance.HighContrast)
+                    _headerButton.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+            }
+            if (_contentPresenter != null)
+            {
+                if (DaisySystemAppearance.HighContrast)
+                    _contentPresenter.Foreground = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+                else
+                    _contentPresenter.ClearValue(ContentPresenter.ForegroundProperty);
             }
         }
 
@@ -401,8 +413,8 @@ namespace Flowery.Controls
         {
             if (_headerBorder != null)
             {
-                _headerBorder.BorderBrush = BorderBrush;
-                _headerBorder.BorderThickness = BorderThickness;
+                _headerBorder.BorderBrush = DaisySystemAppearance.HighContrast ? DaisyResourceLookup.GetBorderBrush() : BorderBrush;
+                _headerBorder.BorderThickness = DaisySystemAppearance.HighContrast ? new Thickness(1) : BorderThickness;
             }
         }
 

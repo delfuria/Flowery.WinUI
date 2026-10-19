@@ -316,6 +316,7 @@ namespace Flowery.Controls
         public DaisyStepItem()
         {
             IsTabStop = false;
+            IsEnabledChanged += (_, _) => RebuildVisual();
         }
 
         protected override void OnContentChanged(object oldContent, object newContent)
@@ -664,6 +665,15 @@ namespace Flowery.Controls
             var indicatorStroke = IsActive ? colorBrush : (indicatorOverride ?? base300Brush);
             var indicatorTextBrush = IsActive ? colorContentBrush : baseContentBrush;
             var connectorBrush = IsActive ? colorBrush : (connectorOverride ?? base300Brush);
+            if (DaisySystemAppearance.HighContrast)
+            {
+                var foreground = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+                indicatorFill = DaisyResourceLookup.GetBrush(IsActive && IsEnabled ? "DaisyPrimaryBrush" : "DaisyBase100Brush");
+                indicatorStroke = foreground;
+                indicatorTextBrush = DaisyResourceLookup.GetBrush(IsActive && IsEnabled ? "DaisyPrimaryContentBrush" : IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+                connectorBrush = foreground;
+                baseContentBrush = foreground;
+            }
 
             // Apply indicator styling
             if (_indicator != null)
@@ -691,6 +701,7 @@ namespace Flowery.Controls
             if (_iconPresenter != null)
             {
                 _iconPresenter.Content = Icon;
+                _iconPresenter.Foreground = indicatorTextBrush;
                 _iconPresenter.Visibility = Icon != null ? Visibility.Visible : Visibility.Collapsed;
             }
 

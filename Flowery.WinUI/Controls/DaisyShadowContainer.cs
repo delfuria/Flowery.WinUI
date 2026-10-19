@@ -69,6 +69,8 @@ public sealed partial class DaisyShadowContainer : ContentControl
 
     private void OnLoaded(object sender, RoutedEventArgs args)
     {
+        DaisySystemAppearance.Initialize(XamlRoot);
+        DaisySystemAppearance.ColorsChanged += OnSystemColorsChanged;
         ObserveShadows();
         ObserveLayout();
         QueueUpdate();
@@ -76,6 +78,7 @@ public sealed partial class DaisyShadowContainer : ContentControl
 
     private void OnUnloaded(object sender, RoutedEventArgs args)
     {
+        DaisySystemAppearance.ColorsChanged -= OnSystemColorsChanged;
         StopObservingShadows();
         _layoutTracker?.Dispose();
         _layoutTracker = null;
@@ -91,6 +94,7 @@ public sealed partial class DaisyShadowContainer : ContentControl
     }
 
     private void OnLayoutChanged(CompositionElementBounds? bounds) => UpdateShadows();
+    private void OnSystemColorsChanged(object? sender, EventArgs args) => QueueUpdate();
     private void OnSurfaceChanged(DependencyObject sender, DependencyProperty property) => QueueUpdate();
     private void OnShadowChanged(object? sender, EventArgs args) => QueueUpdate();
 
@@ -140,7 +144,7 @@ public sealed partial class DaisyShadowContainer : ContentControl
             return;
         var width = (float)ActualWidth;
         var height = (float)ActualHeight;
-        if (width <= 0 || height <= 0 || Shadows.Count == 0)
+        if (DaisySystemAppearance.HighContrast || width <= 0 || height <= 0 || Shadows.Count == 0)
         {
             ReleaseVisuals();
             return;

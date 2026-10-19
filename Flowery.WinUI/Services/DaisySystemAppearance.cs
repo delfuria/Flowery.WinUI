@@ -17,9 +17,12 @@ internal static class DaisySystemAppearance
     private static bool _highContrast = Accessibility.HighContrast;
     private static bool _animationsEnabled = Settings.AnimationsEnabled;
     private static bool? _motionPreferenceOverride;
+    private static int _refreshQueued;
 
     static DaisySystemAppearance()
     {
+        // Contrast/color notifications use per-window ThemeSettings below; the
+        // UISettings and AccessibilitySettings color/contrast events require UWP.
         Settings.AnimationsEnabledChanged += (_, _) => QueueRefresh();
     }
 
@@ -54,7 +57,14 @@ internal static class DaisySystemAppearance
 
     private static void QueueRefresh()
     {
-        _dispatcher?.TryEnqueue(Refresh);
+        var dispatcher = _dispatcher;
+        if (dispatcher is null || Interlocked.Exchange(ref _refreshQueued, 1) != 0) return;
+        if (!dispatcher.TryEnqueue(() =>
+        {
+            Volatile.Write(ref _refreshQueued, 0);
+            Refresh();
+        }))
+            Volatile.Write(ref _refreshQueued, 0);
     }
 
     private static void Refresh()
@@ -94,16 +104,18 @@ internal static class DaisySystemAppearance
             Settings.UIElementColor(UIElementType.WindowText),
             Settings.UIElementColor(UIElementType.Highlight),
             Settings.UIElementColor(UIElementType.HighlightText),
-            Settings.UIElementColor(UIElementType.GrayText));
+            Settings.UIElementColor(UIElementType.GrayText),
+            Settings.UIElementColor(UIElementType.Hotlight));
     }
 
     internal static void SetContrastColors(ResourceDictionary palette, Color background,
-        Color foreground, Color selectedBackground, Color selectedForeground, Color disabledForeground)
+        Color foreground, Color selectedBackground, Color selectedForeground, Color disabledForeground,
+        Color linkForeground)
     {
         foreach (var prefix in new[] { "DaisyBase100", "DaisyBase200", "DaisyBase300", "DaisyNeutral", "DaisyNeutralFocus" })
             SetColor(palette, prefix, background);
         foreach (var prefix in new[] { "DaisyBaseContent", "DaisyNeutralContent", "DaisyPrimaryForeground",
-            "DaisySecondaryForeground", "DaisyAccentForeground", "DaisyButtonPrimaryForeground" })
+            "DaisySecondaryForeground", "DaisyAccentForeground", "DaisyNeutralForeground", "DaisyButtonPrimaryForeground" })
             SetColor(palette, prefix, foreground);
         foreach (var name in new[] { "Primary", "Secondary", "Accent", "Info", "Success", "Warning", "Error" })
         {
@@ -111,8 +123,13 @@ internal static class DaisySystemAppearance
             SetColor(palette, "Daisy" + name + "Focus", selectedBackground);
             SetColor(palette, "Daisy" + name + "Content", selectedForeground);
         }
+        SetColor(palette, "DaisyBorder", foreground);
+        SetColor(palette, "DaisyFocus", selectedBackground);
+        SetColor(palette, "DaisyLink", linkForeground);
+        SetColor(palette, "DaisyComboBoxItemHighlight", selectedBackground);
+        SetColor(palette, "DaisyComboBoxItemHighlightForeground", selectedForeground);
         SetColor(palette, "DaisyButtonPrimaryDisabled", background);
-        palette["DaisyDisabledForegroundBrush"] = new SolidColorBrush(disabledForeground);
+        SetColor(palette, "DaisyDisabledForeground", disabledForeground);
     }
 
     private static void SetColor(ResourceDictionary resources, string prefix, Color color)

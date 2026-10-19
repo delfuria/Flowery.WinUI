@@ -258,14 +258,13 @@ namespace Flowery.WinUI.Kanban.Controls
                 Text = FloweryLocalization.GetStringInternal("Kanban_Settings_Title"),
                 TextWrapping = TextWrapping.Wrap
             });
-            headerStack.Children.Add(new TextBlock
+            headerStack.Children.Add(DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = FloweryLocalization.GetStringInternal("Kanban_Settings_Subtitle"),
-                Opacity = 0.7,
                 TextWrapping = TextWrapping.Wrap
-            });
+            }, 0.7));
             var sectionBackground = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            var sectionBorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var sectionBorderBrush = DaisyResourceLookup.GetBorderBrush();
 
             var headerCard = new Border
             {
@@ -467,12 +466,11 @@ namespace Flowery.WinUI.Kanban.Controls
                 Text = FloweryLocalization.GetStringInternal("Kanban_Settings_CompactColumnCardCount"),
                 TextWrapping = TextWrapping.Wrap
             };
-            var compactCardCountValue = new TextBlock
+            var compactCardCountValue = DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = state.CompactManualCardCount.ToString(),
-                Opacity = 0.7,
                 HorizontalAlignment = HorizontalAlignment.Left
-            };
+            }, 0.7);
             var compactCardCountRange = new DaisyRange
             {
                 Minimum = 1,
@@ -518,7 +516,8 @@ namespace Flowery.WinUI.Kanban.Controls
 
                 var isManual = mode == FlowKanbanCompactColumnSizingMode.Manual;
                 compactCardCountStack.IsHitTestVisible = isManual;
-                compactCardCountStack.Opacity = isManual ? 1.0 : 0.55;
+                compactCardCountRange.IsEnabled = isManual;
+                DaisyHighContrast.SetContentOpacity(compactCardCountStack, isManual ? 1.0 : 0.55);
             }
 
             UpdateCompactCardCountState();

@@ -93,6 +93,7 @@ namespace Flowery.Controls
             Unloaded += OnUnloaded;
             PointerEntered += OnPointerEntered;
             PointerExited += OnPointerExited;
+            IsEnabledChanged += (_, _) => ApplyAll();
         }
 
         // Wrapper for lifecycle - combines theme sync and brush refresh
@@ -188,6 +189,7 @@ namespace Flowery.Controls
         {
             ApplySizing();
             ApplyVisualState();
+            RefreshThemeBrushes();
         }
 
         private void ApplySizing()
@@ -256,6 +258,15 @@ namespace Flowery.Controls
 
             DaisyTokenDefaults.EnsureDefaults(resources);
 
+            if (DaisySystemAppearance.HighContrast)
+            {
+                var active = IsEnabled && (IsChecked == true || _isPointerOver);
+                Background = DaisyResourceLookup.GetBrush(active ? "DaisyPrimaryBrush" : "DaisyBase100Brush");
+                Foreground = DaisyResourceLookup.GetBrush(!IsEnabled ? "DaisyDisabledForegroundBrush" : active ? "DaisyPrimaryContentBrush" : "DaisyBaseContentBrush");
+                BorderBrush = IsEnabled ? DaisyResourceLookup.GetBorderBrush() : Foreground;
+                return;
+            }
+
             if (Mode == ThemeRadioMode.Button)
             {
                 // Default
@@ -313,7 +324,7 @@ namespace Flowery.Controls
         private void RefreshThemeBrushes()
         {
             // Clone brushes to ensure visual update (assigning same brush instance is a no-op)
-            var baseContentBrush = CloneBrush(DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"));
+            var baseContentBrush = CloneBrush(DaisyResourceLookup.GetBrush(DaisySystemAppearance.HighContrast && !IsEnabled ? "DaisyDisabledForegroundBrush" : "DaisyBaseContentBrush"));
             var base100Brush = CloneBrush(DaisyResourceLookup.GetBrush("DaisyBase100Brush"));
 
             if (_radioIndicatorBorder != null && baseContentBrush != null)
@@ -321,11 +332,13 @@ namespace Flowery.Controls
                 if (IsChecked == true)
                 {
                     _radioIndicatorBorder.Background = baseContentBrush;
-                    _radioIndicatorBorder.BorderBrush = baseContentBrush;
+                    _radioIndicatorBorder.BorderBrush = !DaisySystemAppearance.HighContrast && _isPointerOver
+                        ? DaisyResourceLookup.GetBrush("DaisyPrimaryBrush") : baseContentBrush;
                 }
                 else
                 {
-                    _radioIndicatorBorder.BorderBrush = baseContentBrush;
+                    _radioIndicatorBorder.BorderBrush = !DaisySystemAppearance.HighContrast && _isPointerOver
+                        ? DaisyResourceLookup.GetBrush("DaisyPrimaryBrush") : baseContentBrush;
                     if (base100Brush != null)
                         _radioIndicatorBorder.Background = base100Brush;
                 }

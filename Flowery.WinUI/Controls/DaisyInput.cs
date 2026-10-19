@@ -43,6 +43,7 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyInput);
             IsTabStop = false;
+            IsEnabledChanged += (sender, args) => ApplyAll();
 
             // Apply global size early if allowed and not explicitly ignored.
             if (FlowerySizeManager.UseGlobalSizeByDefault && !FlowerySizeManager.GetIgnoreGlobalSize(this))
@@ -336,6 +337,8 @@ namespace Flowery.Controls
 
             _textBox = new TextBox
             {
+                // Semantic colors are supplied here; automatic backplates would cover the outer border.
+                HighContrastAdjustment = ElementHighContrastAdjustment.None,
                 Background = new SolidColorBrush(Colors.Transparent),
                 BorderThickness = new Thickness(0),
                 VerticalAlignment = VerticalAlignment.Stretch,
@@ -567,8 +570,9 @@ namespace Flowery.Controls
             UpdateFloatingPlaceholder();
 
             var resources = Application.Current?.Resources;
-            var baseContent = DaisyResourceLookup.GetBrush(resources, "DaisyBaseContentBrush", new SolidColorBrush(Colors.Black));
-            var primary = DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryBrush", new SolidColorBrush(Colors.Blue));
+            var disabled = DaisySystemAppearance.HighContrast && !IsEnabled;
+            var baseContent = DaisyResourceLookup.GetBrush(resources, disabled ? "DaisyDisabledForegroundBrush" : "DaisyBaseContentBrush", new SolidColorBrush(Colors.Black));
+            var primary = DaisyResourceLookup.GetBrush(resources, disabled ? "DaisyDisabledForegroundBrush" : "DaisyPrimaryBrush", new SolidColorBrush(Colors.Blue));
 
             // Calculate the vertical offset to center the label in the input when not floating.
             // Input row has top margin (floatingTopSpace) + input height.
@@ -609,7 +613,7 @@ namespace Flowery.Controls
                 if (_floatingLabelText != null)
                 {
                     _floatingLabelText.FontWeight = Microsoft.UI.Text.FontWeights.SemiBold;
-                    _floatingLabelText.Foreground = primary;
+                    _floatingLabelText.Foreground = DaisySystemAppearance.HighContrast ? baseContent : primary;
                 }
             }
             else
@@ -629,7 +633,7 @@ namespace Flowery.Controls
                 var borderTop = _inputBorder?.BorderThickness.Top ?? 0;
                 targetTranslateY = floatingTopSpace + borderTop + topPadding + 1;
 
-                targetOpacity = 0.5;
+                targetOpacity = DaisySystemAppearance.HighContrast ? 1 : 0.5;
                 transformDelay = TimeSpan.Zero;
 
                 _floatingLabelBorder.BorderBrush = new SolidColorBrush(Colors.Transparent);
@@ -738,6 +742,13 @@ namespace Flowery.Controls
                 DaisyTokenDefaults.EnsureDefaults(resources);
 
             var isFocused = _textBox != null && _textBox.FocusState != FocusState.Unfocused;
+            if (DaisySystemAppearance.HighContrast)
+            {
+                _inputBorder.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                _inputBorder.BorderBrush = DaisyResourceLookup.GetBrush(!IsEnabled ? "DaisyDisabledForegroundBrush"
+                    : isFocused ? "DaisyFocusBrush" : "DaisyBorderBrush");
+                return;
+            }
             if (isFocused)
             {
                 _inputBorder.BorderBrush = GetVariantFocusBrush(resources);
@@ -771,7 +782,7 @@ namespace Flowery.Controls
 
         private Brush GetVariantFocusBrush(ResourceDictionary? resources)
         {
-            if (BorderRingBrush != null)
+            if (BorderRingBrush != null && !DaisySystemAppearance.HighContrast)
                 return BorderRingBrush;
 
             var primary = DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryBrush", new SolidColorBrush(Colors.Blue));
@@ -1521,6 +1532,13 @@ namespace Flowery.Controls
                     break;
             }
 
+            if (DaisySystemAppearance.HighContrast)
+            {
+                background = base100;
+                border = DaisyResourceLookup.GetBorderBrush();
+                borderThickness = new Thickness(1);
+            }
+
             if (_inputBorder != null)
             {
                 _inputBorder.Background = background;
@@ -1539,7 +1557,8 @@ namespace Flowery.Controls
             }
 
             // Text foreground with override support
-            var textForeground = fgOverride ?? baseContent;
+            var textForeground = DaisySystemAppearance.HighContrast && !IsEnabled
+                ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush") : fgOverride ?? baseContent;
             if (_textBox != null)
             {
                 _textBox.Foreground = textForeground;
@@ -1547,10 +1566,14 @@ namespace Flowery.Controls
                 // Override internal TextBox states to prevent them from using system highlight colors
                 _textBox.Resources["TextControlForegroundPointerOver"] = textForeground;
                 _textBox.Resources["TextControlForegroundFocused"] = textForeground;
-                _textBox.Resources["TextControlForegroundDisabled"] = textForeground;
+                _textBox.Resources["TextControlForegroundDisabled"] = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
 
                 // Set placeholder color
-                if (placeholderOverride != null)
+                if (DaisySystemAppearance.HighContrast)
+                {
+                    _textBox.PlaceholderForeground = textForeground;
+                }
+                else if (placeholderOverride != null)
                 {
                     _textBox.PlaceholderForeground = placeholderOverride;
                 }
@@ -1574,16 +1597,19 @@ namespace Flowery.Controls
             if (_optionalText != null)
             {
                 _optionalText.Foreground = textForeground;
+                _optionalText.Opacity = DaisySystemAppearance.HighContrast ? 1 : 0.7;
             }
 
             if (_hintTextBlock != null)
             {
                 _hintTextBlock.Foreground = textForeground;
+                _hintTextBlock.Opacity = DaisySystemAppearance.HighContrast ? 1 : 0.7;
             }
 
             if (_helperTextBlock != null)
             {
                 _helperTextBlock.Foreground = textForeground;
+                _helperTextBlock.Opacity = DaisySystemAppearance.HighContrast ? 1 : 0.7;
             }
 
             if (_startIconPath != null)

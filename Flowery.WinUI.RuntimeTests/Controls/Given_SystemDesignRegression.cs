@@ -45,7 +45,7 @@ public class Given_SystemDesignRegression
     {
         var palette = new ResourceDictionary();
         Appearance.GetMethod("SetContrastColors", BindingFlags.NonPublic | BindingFlags.Static)!
-            .Invoke(null, new object[] { palette, Colors.Black, Colors.White, Colors.Yellow, Colors.Black, Colors.Gray });
+            .Invoke(null, new object[] { palette, Colors.Black, Colors.White, Colors.Yellow, Colors.Black, Colors.Gray, Colors.Cyan });
         Assert.AreEqual(Colors.Black, ((SolidColorBrush)palette["DaisyBase100Brush"]).Color);
         Assert.AreEqual(Colors.White, ((SolidColorBrush)palette["DaisyBaseContentBrush"]).Color);
         foreach (var role in new[] { "Primary", "Secondary", "Accent", "Info", "Success", "Warning", "Error" })
@@ -54,6 +54,9 @@ public class Given_SystemDesignRegression
             Assert.AreEqual(Colors.Black, ((SolidColorBrush)palette["Daisy" + role + "ContentBrush"]).Color);
         }
         Assert.AreEqual(Colors.Gray, ((SolidColorBrush)palette["DaisyDisabledForegroundBrush"]).Color);
+        Assert.AreEqual(Colors.White, ((SolidColorBrush)palette["DaisyBorderBrush"]).Color);
+        Assert.AreEqual(Colors.Yellow, ((SolidColorBrush)palette["DaisyFocusBrush"]).Color);
+        Assert.AreEqual(Colors.Cyan, ((SolidColorBrush)palette["DaisyLinkBrush"]).Color);
     }
 
     [TestMethod]

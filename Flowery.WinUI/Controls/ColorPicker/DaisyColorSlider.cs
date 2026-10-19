@@ -217,7 +217,35 @@ namespace Flowery.Controls.ColorPicker
             UpdateMaximum();
             IsTabStop = true;
             UseSystemFocusVisuals = true;
+            RegisterPropertyChangedCallback(IsEnabledProperty, static (sender, _) => ((DaisyColorSlider)sender).ApplyAppearance());
             UpdateAutomationProperties();
+        }
+
+        protected override void OnLoaded()
+        {
+            base.OnLoaded();
+            ApplyAppearance();
+        }
+
+        protected override void OnThemeChanged(string themeName)
+        {
+            base.OnThemeChanged(themeName);
+            ApplyAppearance();
+        }
+
+        private void ApplyAppearance()
+        {
+            if (_border == null || _markerMain == null || _markerLeft == null || _markerRight == null)
+                return;
+            var contrast = DaisySystemAppearance.HighContrast;
+            _border.BorderBrush = contrast
+                ? DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush")
+                : new SolidColorBrush(Color.FromArgb(255, 160, 160, 160));
+            _markerMain.Stroke = contrast ? DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush")
+                : new SolidColorBrush(Colors.White);
+            var outerStroke = contrast ? DaisyResourceLookup.GetBrush("DaisyBase100Brush") : new SolidColorBrush(Colors.Black);
+            _markerLeft.Stroke = outerStroke;
+            _markerRight.Stroke = outerStroke;
         }
 
         private static void OnChannelPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

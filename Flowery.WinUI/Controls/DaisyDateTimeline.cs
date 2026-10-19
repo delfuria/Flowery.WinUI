@@ -122,6 +122,7 @@ namespace Flowery.Controls
             PointerCaptureLost += OnPointerCaptureLost;
 
             IsTabStop = true;
+            UseSystemFocusVisuals = true;
             TabFocusNavigation = KeyboardNavigationMode.Local;
 
             UpdateHeaderText();
@@ -599,6 +600,11 @@ namespace Flowery.Controls
                 return;
 
             _headerTextBlock.Text = HeaderText;
+            _headerTextBlock.Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+            if (_previousButton.Content is Path previousIcon)
+                previousIcon.SetBinding(Shape.StrokeProperty, new Binding { Source = _previousButton, Path = new PropertyPath(nameof(Foreground)) });
+            if (_nextButton.Content is Path nextIcon)
+                nextIcon.SetBinding(Shape.StrokeProperty, new Binding { Source = _nextButton, Path = new PropertyPath(nameof(Foreground)) });
 
             // Header visibility
             _headerGrid.Visibility = HeaderType == DateTimelineHeaderType.None ? Visibility.Collapsed : Visibility.Visible;
@@ -1184,6 +1190,7 @@ namespace Flowery.Controls
 
             PointerEntered += (_, _) => { _isPointerOver = true; ApplyAll(); };
             PointerExited += (_, _) => { _isPointerOver = false; ApplyAll(); };
+            IsEnabledChanged += (sender, args) => ApplyAll();
         }
 
         protected override void OnLoaded()
@@ -1435,7 +1442,7 @@ namespace Flowery.Controls
 
             // Base style
             _background.Background = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            _background.BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            _background.BorderBrush = DaisyResourceLookup.GetBorderBrush();
             _background.BorderThickness = new Thickness(1);
             _background.Opacity = IsDisabled ? 0.4 : 1.0;
 
@@ -1518,6 +1525,19 @@ namespace Flowery.Controls
                 _monthName.Foreground = DaisyResourceLookup.GetBrush("DaisyPrimaryContentBrush");
                 _dayName.Opacity = 0.8;
                 _monthName.Opacity = 0.8;
+            }
+
+            if (DaisySystemAppearance.HighContrast)
+            {
+                var disabled = IsDisabled || !IsEnabled;
+                var active = !disabled && (IsSelected || _isPointerOver);
+                var foreground = DaisyResourceLookup.GetBrush(disabled ? "DaisyDisabledForegroundBrush"
+                    : active ? "DaisyPrimaryContentBrush" : "DaisyBaseContentBrush");
+                _background.Background = DaisyResourceLookup.GetBrush(active ? "DaisyPrimaryBrush" : "DaisyBase100Brush");
+                _background.BorderBrush = foreground;
+                _background.BorderThickness = new Thickness(IsMarked ? 3 : IsToday && ShowTodayHighlight ? 2 : 1);
+                _background.Opacity = _monthName.Opacity = _dayName.Opacity = 1;
+                _monthName.Foreground = _dayName.Foreground = _dayNumber.Foreground = foreground;
             }
 
             // ToolTip for marked dates with text

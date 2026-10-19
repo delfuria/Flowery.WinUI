@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Flowery.Controls;
+using Flowery.Theming;
 using Microsoft.UI;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
@@ -20,6 +21,7 @@ namespace Flowery.WinUI.Gallery.Examples
         private StackPanel? _skiaMatrixContainer;
         private int _currentCardIndex;
         private readonly List<DaisyCard> _cards = [];
+        private readonly List<TextBlock> _matrixLabels = [];
         private DaisyButton? _prevCardButton;
         private DaisyButton? _nextCardButton;
 
@@ -27,14 +29,30 @@ namespace Flowery.WinUI.Gallery.Examples
         {
             InitializeComponent();
             Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
         }
 
         protected override ScrollViewer? ScrollViewer => MainScrollViewer;
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
+            DaisyThemeManager.ThemeChanged += OnThemeChanged;
             InitializeCardStack();
             InitializeSkiaMatrix();
+            ApplyMatrixLabelTheme();
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e) => DaisyThemeManager.ThemeChanged -= OnThemeChanged;
+
+        private void OnThemeChanged(object? sender, string themeName) => ApplyMatrixLabelTheme();
+
+        private void ApplyMatrixLabelTheme()
+        {
+            var brush = DaisyResourceLookup.IsHighContrast
+                ? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
+                : new SolidColorBrush(Colors.White);
+            foreach (var label in _matrixLabels)
+                label.Foreground = brush;
         }
 
         private void InitializeCardStack()
@@ -100,7 +118,7 @@ namespace Flowery.WinUI.Gallery.Examples
 
                 Canvas.SetZIndex(card, zIndex);
                 card.Visibility = offset >= 0 ? Visibility.Visible : Visibility.Collapsed;
-                card.Opacity = opacity;
+                DaisyHighContrast.SetContentOpacity(card, opacity);
 
                 if (card.RenderTransform is CompositeTransform transform)
                 {
@@ -201,7 +219,7 @@ namespace Flowery.WinUI.Gallery.Examples
 
             for (var sat = 0; sat <= 100; sat += 10)
             {
-                headerRow.Children.Add(new TextBlock
+                var label = new TextBlock
                 {
                     Text = $"S{sat}%",
                     Width = 50,
@@ -209,7 +227,9 @@ namespace Flowery.WinUI.Gallery.Examples
                     Foreground = new SolidColorBrush(Colors.White),
                     TextAlignment = Microsoft.UI.Xaml.TextAlignment.Center,
                     FontWeight = FontWeights.Bold
-                });
+                };
+                _matrixLabels.Add(label);
+                headerRow.Children.Add(label);
             }
             _skiaMatrixContainer.Children.Add(headerRow);
 
@@ -219,7 +239,7 @@ namespace Flowery.WinUI.Gallery.Examples
                 var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
 
                 // Row Header
-                row.Children.Add(new TextBlock
+                var label = new TextBlock
                 {
                     Text = $"B{blur}",
                     Width = 40,
@@ -228,7 +248,9 @@ namespace Flowery.WinUI.Gallery.Examples
                     FontSize = 10,
                     FontWeight = FontWeights.Bold,
                     TextAlignment = Microsoft.UI.Xaml.TextAlignment.Right
-                });
+                };
+                _matrixLabels.Add(label);
+                row.Children.Add(label);
 
                 for (var sat = 0; sat <= 100; sat += 10)
                 {

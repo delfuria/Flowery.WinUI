@@ -14,6 +14,7 @@ namespace Flowery.Controls
         public DaisyAlert()
         {
             DefaultStyleKey = typeof(DaisyAlert);
+            IsEnabledChanged += (sender, args) => ApplyColors();
         }
 
         #region Dependency Properties
@@ -516,6 +517,13 @@ namespace Flowery.Controls
 
             _iconElement.Fill = contentBrush;
             Foreground = fgOverride ?? contentBrush;
+            if (DaisySystemAppearance.HighContrast && !IsEnabled)
+            {
+                _alertBorder.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                _alertBorder.BorderBrush = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
+                _iconElement.Fill = Foreground = _alertBorder.BorderBrush;
+            }
+            if (_contentPresenter != null) _contentPresenter.Foreground = Foreground;
         }
 
         private void UpdateIconVisibility()

@@ -162,7 +162,6 @@ namespace Flowery.Controls
         #endregion
         protected const string ShadowContainerPartName = "PART_ShadowContainer";
         private bool _isPointerOver;
-        private bool _isPressed;
         private bool _hasCornerRadiusOverride;
         private bool _isApplyingCornerRadius;
 
@@ -224,6 +223,7 @@ namespace Flowery.Controls
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
             IsEnabledChanged += (_, _) => ApplyCurrentPointerState();
+            RegisterPropertyChangedCallback(IsPressedProperty, OnNativePressedChanged);
 
             // Watch for Height changes to keep Width in sync for Circle/Square shapes
             RegisterPropertyChangedCallback(HeightProperty, OnHeightPropertyChanged);
@@ -876,23 +876,22 @@ namespace Flowery.Controls
         {
             base.OnPointerExited(e);
             _isPointerOver = false;
-            _isPressed = false;
             ApplyCurrentPointerState();
         }
 
         protected override void OnPointerPressed(PointerRoutedEventArgs e)
         {
             base.OnPointerPressed(e);
-            _isPressed = true;
             ApplyCurrentPointerState();
         }
 
         protected override void OnPointerReleased(PointerRoutedEventArgs e)
         {
             base.OnPointerReleased(e);
-            _isPressed = false;
             ApplyCurrentPointerState();
         }
+
+        private void OnNativePressedChanged(DependencyObject sender, DependencyProperty property) => ApplyCurrentPointerState();
 
         private void ApplyAll()
         {
@@ -1343,8 +1342,10 @@ namespace Flowery.Controls
 
                 // Disabled state is also often handled via resources
                 SetResourceIfNotNull("ButtonBackgroundDisabled", DaisyResourceLookup.WithOpacity(_normalBackground, 0.5) ?? _normalBackground);
-                SetResourceIfNotNull("ButtonForegroundDisabled", DaisyResourceLookup.WithOpacity(_normalForeground, 0.5) ?? _normalForeground);
-                SetResourceIfNotNull("ButtonBorderBrushDisabled", DaisyResourceLookup.WithOpacity(_normalBorderBrush, 0.5) ?? _normalBorderBrush);
+                SetResourceIfNotNull("ButtonForegroundDisabled", DaisySystemAppearance.HighContrast
+                    ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush") : DaisyResourceLookup.WithOpacity(_normalForeground, 0.5) ?? _normalForeground);
+                SetResourceIfNotNull("ButtonBorderBrushDisabled", DaisySystemAppearance.HighContrast
+                    ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush") : DaisyResourceLookup.WithOpacity(_normalBorderBrush, 0.5) ?? _normalBorderBrush);
             }
             catch (System.Runtime.InteropServices.COMException)
             {
@@ -1429,10 +1430,11 @@ namespace Flowery.Controls
                     ?? DaisyResourceLookup.WithOpacity(_normalBackground, 0.5) ?? _normalBackground;
                 Foreground = DaisyResourceLookup.GetBrush(Application.Current?.Resources, "DaisyDisabledForegroundBrush",
                     DaisyResourceLookup.WithOpacity(_normalForeground, 0.5) ?? _normalForeground!);
-                BorderBrush = DaisyResourceLookup.WithOpacity(_normalBorderBrush, 0.5) ?? _normalBorderBrush;
+                BorderBrush = DaisySystemAppearance.HighContrast ? Foreground
+                    : DaisyResourceLookup.WithOpacity(_normalBorderBrush, 0.5) ?? _normalBorderBrush;
                 BorderThickness = _normalBorderThickness;
             }
-            else if (_isPressed)
+            else if (IsPressed)
             {
                 Background = _pressedBackground;
                 Foreground = _pressedForeground;
@@ -1500,7 +1502,9 @@ namespace Flowery.Controls
 
                 // Update dashed border color based on state
                 Brush strokeBrush;
-                if (_isPressed)
+                if (DaisySystemAppearance.HighContrast && !IsEnabled)
+                    strokeBrush = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
+                else if (IsPressed)
                     strokeBrush = _pressedBorderBrush ?? _normalBorderBrush ?? new SolidColorBrush(Microsoft.UI.Colors.Gray);
                 else if (_isPointerOver)
                     strokeBrush = _pointerOverBorderBrush ?? _normalBorderBrush ?? new SolidColorBrush(Microsoft.UI.Colors.Gray);

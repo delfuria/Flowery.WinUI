@@ -1,5 +1,7 @@
 using System;
 using System.Numerics;
+using Flowery.Controls;
+using Flowery.Theming;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Hosting;
@@ -31,11 +33,35 @@ namespace Flowery.WinUI.Gallery.Examples
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
+            DaisyThemeManager.ThemeChanged += OnGalleryThemeChanged;
+            ApplyRawEffects();
+        }
+
+        private void OnGalleryThemeChanged(object? sender, string themeName) => ApplyRawEffects();
+
+        private void ApplyRawEffects()
+        {
+            ClearRawDropShadow();
+            if (FindName("RawElevationTarget") is UIElement target)
+            {
+                target.Shadow = null;
+                target.Translation = Vector3.Zero;
+            }
+
+            if (DaisyResourceLookup.IsHighContrast)
+                return;
+
             ApplyRawElevation();
             ApplyRawDropShadow();
         }
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            DaisyThemeManager.ThemeChanged -= OnGalleryThemeChanged;
+            ClearRawDropShadow();
+        }
+
+        private void ClearRawDropShadow()
         {
             if (FindName("RawDropShadowTarget") is FrameworkElement target)
             {
@@ -44,7 +70,8 @@ namespace Flowery.WinUI.Gallery.Examples
 
             if (FindName("RawDropShadowLayer") is FrameworkElement shadowLayer)
             {
-                if (_rawDropShadowAttached)
+                if (_rawDropShadowAttached &&
+                    ReferenceEquals(ElementCompositionPreview.GetElementChildVisual(shadowLayer), _dropShadowVisual))
                 {
                     try
                     {
@@ -60,6 +87,16 @@ namespace Flowery.WinUI.Gallery.Examples
             }
 
             _rawDropShadowAttached = false;
+            if (_dropShadowVisual is not null)
+                _dropShadowVisual.Shadow = null;
+            if (_dropShadow is not null)
+            {
+                var mask = _dropShadow.Mask;
+                _dropShadow.Mask = null;
+                mask?.Dispose();
+            }
+            _dropShadow?.Dispose();
+            _dropShadowVisual?.Dispose();
             _dropShadow = null;
             _dropShadowVisual = null;
 

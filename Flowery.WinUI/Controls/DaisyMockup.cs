@@ -309,7 +309,7 @@ namespace Flowery.Controls
         protected override void OnThemeChanged(string themeName)
         {
             base.OnThemeChanged(themeName);
-            ApplyAll();
+            RebuildVisualTree();
         }
 
         protected override void OnGlobalSizeChanged(DaisySize size)
@@ -492,7 +492,7 @@ namespace Flowery.Controls
                 HorizontalAlignment = HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Center,
                 FontSize = UrlFontSize,
-                Opacity = 0.8
+                Opacity = DaisyResourceLookup.GetContentOpacity(0.8)
             };
             urlBar.Child = _urlTextBlock;
             Grid.SetColumn(urlBar, 1);
@@ -616,7 +616,9 @@ namespace Flowery.Controls
                     {
                         Data = (Geometry)Microsoft.UI.Xaml.Markup.XamlBindingHelper.ConvertValue(
                             typeof(Geometry), "M0,0 L12,0 L12,12 L0,12 Z M0,3 L12,3"),
-                        Stroke = new SolidColorBrush(ColorFromHex("#858585")),
+                        Stroke = DaisyResourceLookup.IsHighContrast
+                            ? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
+                            : new SolidColorBrush(ColorFromHex("#858585")),
                         StrokeThickness = 1,
                         Width = iconPathSize,
                         Height = iconPathSize,
@@ -667,7 +669,9 @@ namespace Flowery.Controls
             {
                 Data = (Geometry)Microsoft.UI.Xaml.Markup.XamlBindingHelper.ConvertValue(
                     typeof(Geometry), pathData),
-                Stroke = new SolidColorBrush(ColorFromHex(foregroundColor)),
+                Stroke = DaisyResourceLookup.IsHighContrast
+                    ? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
+                    : new SolidColorBrush(ColorFromHex(foregroundColor)),
                 StrokeThickness = 1,
                 Width = iconSize,
                 Height = iconSize,
@@ -726,7 +730,9 @@ namespace Flowery.Controls
             {
                 Data = (Geometry)Microsoft.UI.Xaml.Markup.XamlBindingHelper.ConvertValue(
                     typeof(Geometry), pathData),
-                Stroke = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 255, 255)),
+                Stroke = DaisyResourceLookup.IsHighContrast
+                    ? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
+                    : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 255, 255)),
                 StrokeThickness = 1.5,
                 Width = iconSize,
                 Height = iconSize,
@@ -740,7 +746,11 @@ namespace Flowery.Controls
                 Width = buttonSize,
                 Height = buttonSize,
                 CornerRadius = new CornerRadius(buttonSize / 2),
-                Background = new SolidColorBrush(ColorFromHex(bgColor)),
+                Background = DaisyResourceLookup.IsHighContrast
+                    ? DaisyResourceLookup.GetBrush("DaisyBase100Brush")
+                    : new SolidColorBrush(ColorFromHex(bgColor)),
+                BorderBrush = DaisyResourceLookup.IsHighContrast ? DaisyResourceLookup.GetBorderBrush() : null,
+                BorderThickness = DaisyResourceLookup.IsHighContrast ? new Thickness(1) : new Thickness(0),
                 Child = path,
                 // Prevent icon mirroring when parent has FlowDirection.RightToLeft
                 FlowDirection = FlowDirection.LeftToRight
@@ -755,7 +765,9 @@ namespace Flowery.Controls
                 Width = dotSize,
                 Height = dotSize,
                 CornerRadius = new CornerRadius(dotSize / 2),
-                Background = new SolidColorBrush(ColorFromHex(hexColor))
+                Background = DaisyResourceLookup.IsHighContrast
+                    ? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
+                    : new SolidColorBrush(ColorFromHex(hexColor))
             };
         }
 
@@ -789,6 +801,7 @@ namespace Flowery.Controls
             var base100Brush = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
             var base200Brush = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
             var base300Brush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var borderBrush = DaisyResourceLookup.GetBorderBrush(base300Brush);
             var baseContentBrush = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
 
             switch (Variant)
@@ -796,18 +809,20 @@ namespace Flowery.Controls
                 case DaisyMockupVariant.Code:
                     // Dark code theme
                     var codeBgColor = Windows.UI.Color.FromArgb(255, 42, 48, 60); // #2a303c
-                    _outerBorder.Background = new SolidColorBrush(codeBgColor);
-                    _outerBorder.BorderThickness = new Thickness(0);
-                    _innerBorder.Background = new SolidColorBrush(codeBgColor);
-                    _headerBorder.Background = new SolidColorBrush(codeBgColor);
+                    var codeBackground = DaisyResourceLookup.IsHighContrast ? base100Brush : new SolidColorBrush(codeBgColor);
+                    _outerBorder.Background = codeBackground;
+                    _outerBorder.BorderBrush = borderBrush;
+                    _outerBorder.BorderThickness = DaisyResourceLookup.IsHighContrast ? new Thickness(1) : new Thickness(0);
+                    _innerBorder.Background = codeBackground;
+                    _headerBorder.Background = codeBackground;
                     _contentBorder.Padding = new Thickness(24);
-                    _contentBorder.Background = new SolidColorBrush(codeBgColor);
-                    Foreground = new SolidColorBrush(Microsoft.UI.Colors.White);
+                    _contentBorder.Background = codeBackground;
+                    Foreground = DaisyResourceLookup.IsHighContrast ? baseContentBrush : new SolidColorBrush(Microsoft.UI.Colors.White);
                     break;
 
                 case DaisyMockupVariant.Window:
                     _outerBorder.Background = base300Brush;
-                    _outerBorder.BorderBrush = base300Brush;
+                    _outerBorder.BorderBrush = borderBrush;
                     _outerBorder.BorderThickness = new Thickness(1);
                     _innerBorder.Background = base200Brush;
                     _headerBorder.Background = base200Brush;
@@ -818,7 +833,7 @@ namespace Flowery.Controls
 
                 case DaisyMockupVariant.Browser:
                     _outerBorder.Background = base300Brush;
-                    _outerBorder.BorderBrush = base300Brush;
+                    _outerBorder.BorderBrush = borderBrush;
                     _outerBorder.BorderThickness = new Thickness(1);
                     _innerBorder.Background = base100Brush;
                     _headerBorder.Background = base100Brush;
@@ -836,7 +851,7 @@ namespace Flowery.Controls
                     }
 
                     _contentBorder.Background = base100Brush;
-                    _contentBorder.BorderBrush = base300Brush;
+                    _contentBorder.BorderBrush = borderBrush;
                     _contentBorder.Padding = new Thickness(0);
                     Foreground = baseContentBrush;
                     break;

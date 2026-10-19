@@ -302,6 +302,19 @@ namespace Flowery.Controls
             if (_breadcrumbBar == null || _rootBorder == null)
                 return;
 
+            if (DaisySystemAppearance.HighContrast)
+            {
+                // Restore native system brushes for normal, hover, selected, disabled and overflow items.
+                foreach (var key in _breadcrumbBar.Resources.Keys.OfType<string>()
+                    .Where(key => key.StartsWith("BreadcrumbBar", StringComparison.Ordinal)
+                        && !key.EndsWith("FontSize", StringComparison.Ordinal)).ToArray())
+                    _breadcrumbBar.Resources.Remove(key);
+                _rootBorder.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                _rootBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush();
+                _rootBorder.BorderThickness = BorderThickness;
+                return;
+            }
+
             var transparent = new SolidColorBrush(Colors.Transparent);
 
             var baseContent = DaisyResourceLookup.GetBrush(resources, "DaisyBaseContentBrush", new SolidColorBrush(Colors.Black));

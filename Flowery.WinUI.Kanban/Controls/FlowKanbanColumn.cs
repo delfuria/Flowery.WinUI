@@ -78,7 +78,8 @@ namespace Flowery.WinUI.Kanban.Controls
         private void SetDragHighlightBorder(bool isActive)
         {
             BorderThickness = s_dragHighlightBorderThickness;
-            BorderBrush = isActive ? GetDragHighlightBrush() : s_dragHighlightTransparentBrush;
+            BorderBrush = isActive ? GetDragHighlightBrush()
+                : DaisyResourceLookup.IsHighContrast ? DaisyResourceLookup.GetBorderBrush() : s_dragHighlightTransparentBrush;
 
             // Ensure the focus VisualState doesn't override the drag highlight brush.
             if (isActive)
@@ -126,6 +127,8 @@ namespace Flowery.WinUI.Kanban.Controls
 
             var isDragActive = _isDragHighlightActive;
             SetDragHighlightBorder(isDragActive);
+            if (_editButton?.IsHitTestVisible == true)
+                ShowHeaderButtons();
         }
 
         private void OnColumnLoaded(object sender, RoutedEventArgs e)
@@ -330,7 +333,7 @@ namespace Flowery.WinUI.Kanban.Controls
             if (_editButton != null)
             {
                 _editButton.IsHitTestVisible = true;
-                _editButton.Opacity = 0.7;
+                _editButton.Opacity = DaisyResourceLookup.GetContentOpacity(0.7);
             }
         }
 

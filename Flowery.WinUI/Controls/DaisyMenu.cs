@@ -207,7 +207,7 @@ namespace Flowery.Controls
                 CornerRadius = new CornerRadius(8),
                 Padding = new Thickness(8),
                 Background = DaisyResourceLookup.GetBrush("DaisyBase200Brush"),
-                BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush"),
+                BorderBrush = DaisyResourceLookup.GetBorderBrush(),
                 BorderThickness = new Thickness(1)
             };
 
@@ -289,7 +289,7 @@ namespace Flowery.Controls
             if (_containerBorder != null)
             {
                 _containerBorder.Background = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-                _containerBorder.BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+                _containerBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush();
             }
 
             foreach (var item in _menuItems)
@@ -534,6 +534,7 @@ namespace Flowery.Controls
         {
             IsTabStop = true;
             UseSystemFocusVisuals = true;
+            IsEnabledChanged += (_, _) => RebuildVisual();
         }
 
         protected override void OnLoaded()
@@ -678,8 +679,10 @@ namespace Flowery.Controls
             var baseContentBrush = fgOverride ?? DaisyResourceLookup.GetBrush(resources, "DaisyBaseContentBrush");
             var primaryBrush = DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryBrush");
             var primaryContentBrush = DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryContentBrush");
-            var hoverBrush = hoverBgOverride ?? DaisyResourceLookup.GetBrush(resources, "DaisyBase300Brush");
+            var hoverBrush = hoverBgOverride ?? DaisyResourceLookup.GetBrush(resources,
+                DaisyResourceLookup.IsHighContrast ? "DaisyPrimaryBrush" : "DaisyBase300Brush");
             var useAnimatedSelection = ParentMenu?.IsSelectionAnimationEnabled == true;
+            var disabled = IsDisabled || !IsEnabled;
 
             // Get sizing from tokens (guaranteed by EnsureDefaults)
             var sizeKey = DaisyResourceLookup.GetSizeKeyFull(Size);
@@ -688,13 +691,17 @@ namespace Flowery.Controls
 
             _rootBorder.Padding = padding;
 
-            ResolvedActiveBackground = ActiveBackground ?? activeBgOverride ?? primaryBrush;
+            ResolvedActiveBackground = DaisyResourceLookup.IsHighContrast
+                ? primaryBrush
+                : ActiveBackground ?? activeBgOverride ?? primaryBrush;
 
             // Apply colors based on state
-            if (IsDisabled)
+            if (disabled)
             {
-                _rootBorder.Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
-                _rootBorder.Opacity = 0.5;
+                _rootBorder.Background = DaisyResourceLookup.IsHighContrast
+                    ? DaisyResourceLookup.GetBrush(resources, "DaisyBase100Brush")
+                    : new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                _rootBorder.Opacity = DaisyResourceLookup.GetContentOpacity(0.5);
                 IsTabStop = false;
             }
             else if (IsActive)
@@ -724,7 +731,13 @@ namespace Flowery.Controls
                 _contentPresenter.Content = _userContent;
                 FontSize = fontSize;
 
-                if (IsActive && ActiveForeground != null)
+                if (DaisyResourceLookup.IsHighContrast)
+                {
+                    Foreground = disabled
+                        ? DaisyResourceLookup.GetBrush(resources, "DaisyDisabledForegroundBrush")
+                        : IsActive || _isPointerOver ? primaryContentBrush : baseContentBrush;
+                }
+                else if (IsActive && ActiveForeground != null)
                 {
                     Foreground = ActiveForeground;
                 }

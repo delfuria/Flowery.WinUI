@@ -344,6 +344,7 @@ namespace Flowery.Controls
             BuildLayout();
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
+            IsEnabledChanged += OnEnabledChanged;
 
             if (FlowerySizeManager.UseGlobalSizeByDefault && !FlowerySizeManager.GetIgnoreGlobalSize(this))
             {
@@ -359,6 +360,8 @@ namespace Flowery.Controls
             UpdateTextForegrounds();
             RefreshItemVisuals();
         }
+
+        private void OnEnabledChanged(object sender, DependencyPropertyChangedEventArgs args) => RefreshItemVisuals();
 
         private void BuildLayout()
         {
@@ -580,7 +583,9 @@ namespace Flowery.Controls
                 DaisyTokenDefaults.EnsureDefaults(resources);
 
             _rootBorder.Background = GetBrush(resources, "DaisyBase200Brush", new SolidColorBrush(Color.FromArgb(255, 30, 30, 32)));
-            _rootBorder.BorderBrush = GetBrush(resources, "DaisyBase300Brush", new SolidColorBrush(Color.FromArgb(255, 60, 60, 70)));
+            _rootBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush(
+                GetBrush(resources, "DaisyBase300Brush", new SolidColorBrush(Color.FromArgb(255, 60, 60, 70))));
+            _currentBase300Brush = _rootBorder.BorderBrush;
         }
 
         private void UpdateTextForegrounds()
@@ -599,6 +604,7 @@ namespace Flowery.Controls
                         continue;
 
                     expander.HeaderForeground = baseContentBrush;
+                    expander.BorderBrush = _currentBase300Brush;
                     expander.Foreground = baseContentBrush;
 
                     if (expander.Header is DaisyIconText dit)
@@ -852,10 +858,10 @@ namespace Flowery.Controls
                     "DaisyBaseContentBrush",
                     new SolidColorBrush(Colors.White));
 
-                _currentBase300Brush = GetBrush(
+                _currentBase300Brush = DaisyResourceLookup.GetBorderBrush(GetBrush(
                     Application.Current?.Resources,
                     "DaisyBase300Brush",
-                    new SolidColorBrush(Color.FromArgb(255, 60, 60, 70)));
+                    new SolidColorBrush(Color.FromArgb(255, 60, 60, 70))));
 
                 SidebarCategory? priorityCategory = null;
                 if (SelectedItem != null)
@@ -1190,9 +1196,9 @@ namespace Flowery.Controls
                     IconSize = metrics.FavoriteIconSize,
                     Size = Size,
                     Foreground = GetBrush(Application.Current?.Resources, "DaisyBaseContentBrush", new SolidColorBrush(Colors.White)),
-                    Opacity = 0.5,
                     NeumorphicEnabled = false
                 };
+                DaisyHighContrast.SetContentOpacity(outlineIcon, 0.5);
                 FlowerySizeManager.SetIgnoreGlobalSize(outlineIcon, true);
                 if (outlineIcon != null)
                 {
@@ -1222,9 +1228,9 @@ namespace Flowery.Controls
                     Variant = DaisyBadgeVariant.Neutral,
                     Size = DaisySize.ExtraSmall,
                     Content = item.Badge,
-                    Margin = new Thickness(8, 0, 0, 0),
-                    Opacity = 0.7
+                    Margin = new Thickness(8, 0, 0, 0)
                 };
+                DaisyHighContrast.SetContentOpacity(badge, 0.7);
                 Grid.SetColumn(badge, 2);
                 grid.Children.Add(badge);
             }
@@ -1424,6 +1430,37 @@ namespace Flowery.Controls
             var primaryContent = GetBrush(resources, "DaisyPrimaryContentBrush", new SolidColorBrush(Colors.White));
 
             var isSelected = forceSelected || (SelectedItem != null && view.Item == SelectedItem);
+
+            if (view.Container.BorderThickness != new Thickness(0))
+                view.Container.BorderBrush = DaisyResourceLookup.GetBorderBrush();
+
+            if (DaisyResourceLookup.IsHighContrast)
+            {
+                var highlighted = IsEnabled && (isSelected || view.IsHovered);
+                var background = highlighted ? primary : GetBrush(resources, "DaisyBase100Brush", base300);
+                var foreground = !IsEnabled
+                    ? GetBrush(resources, "DaisyDisabledForegroundBrush", baseContent)
+                    : highlighted ? primaryContent : baseContent;
+                view.Container.Background = background;
+                view.TextItem.Background = background;
+                view.TextItem.Variant = highlighted ? DaisyBadgeVariant.Primary : DaisyBadgeVariant.Default;
+                view.TextItem.Foreground = foreground;
+                foreach (var favorite in new[] { view.FavoriteFilled, view.FavoriteOutline })
+                {
+                    if (favorite is null) continue;
+                    favorite.Background = background;
+                    favorite.Variant = highlighted ? DaisyBadgeVariant.Primary : DaisyBadgeVariant.Default;
+                    favorite.Foreground = foreground;
+                }
+                return;
+            }
+
+            if (view.FavoriteFilled is { } filled)
+            {
+                filled.Background = new SolidColorBrush(Colors.Transparent);
+                filled.Variant = DaisyBadgeVariant.Default;
+                filled.Foreground = GetBrush(resources, "DaisyWarningBrush", baseContent);
+            }
 
             if (isSelected)
             {

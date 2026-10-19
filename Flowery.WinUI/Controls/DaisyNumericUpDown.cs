@@ -23,7 +23,6 @@ namespace Flowery.Controls
         private bool _isUpdatingText;
         private bool _isUpdatingValue;
         private DispatcherTimer? _errorFlashTimer;
-        private Brush? _normalBorderBrush;
         private bool _pendingFocusRequest;
         private bool _pendingFocusSelectAll;
         private FocusState _pendingFocusState = FocusState.Programmatic;
@@ -31,6 +30,7 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyNumericUpDown);
             IsTabStop = false;
+            IsEnabledChanged += (sender, args) => ApplyAll();
 
             // Apply global size early if allowed and not explicitly ignored.
             if (FlowerySizeManager.UseGlobalSizeByDefault && !FlowerySizeManager.GetIgnoreGlobalSize(this))
@@ -403,6 +403,8 @@ namespace Flowery.Controls
         protected override void OnUnloaded()
         {
             base.OnUnloaded();
+            _errorFlashTimer?.Stop();
+            _errorFlashTimer = null;
             _pendingFocusRequest = false;
             DetachPendingFocusHandler();
         }
@@ -924,10 +926,18 @@ namespace Flowery.Controls
             var borderOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyNumericUpDown", "BorderBrush");
             var fgOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyNumericUpDown", "Foreground");
 
+            if (DaisySystemAppearance.HighContrast)
+            {
+                background = base100;
+                border = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush");
+                foreground = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+                borderThickness = new Thickness(1);
+            }
+
             if (_rootBorder != null)
             {
                 var isFocused = _textBox != null && _textBox.FocusState != FocusState.Unfocused;
-                if (isFocused)
+                if (isFocused && IsEnabled)
                 {
                     _rootBorder.BorderBrush = GetVariantFocusBrush(resources);
                 }
@@ -938,7 +948,6 @@ namespace Flowery.Controls
                 _rootBorder.Background = bgOverride ?? background;
                 _rootBorder.BorderThickness = borderThickness;
 
-                _normalBorderBrush = borderOverride ?? border;
             }
 
             var effectiveForeground = fgOverride ?? foreground;
@@ -948,11 +957,17 @@ namespace Flowery.Controls
 
             var prefixTextBlock = _prefixTextBlock;
             if (prefixTextBlock != null)
+            {
                 prefixTextBlock.Foreground = effectiveForeground;
+                prefixTextBlock.Opacity = DaisySystemAppearance.HighContrast ? 1 : 0.8;
+            }
 
             var suffixTextBlock = _suffixTextBlock;
             if (suffixTextBlock != null)
+            {
                 suffixTextBlock.Foreground = effectiveForeground;
+                suffixTextBlock.Opacity = DaisySystemAppearance.HighContrast ? 1 : 0.8;
+            }
 
             if (_clearButton != null)
                 _clearButton.Foreground = effectiveForeground;
@@ -960,6 +975,20 @@ namespace Flowery.Controls
                 _increaseButton.Foreground = effectiveForeground;
             if (_decreaseButton != null)
                 _decreaseButton.Foreground = effectiveForeground;
+            foreach (var button in new[] { _increaseButton, _decreaseButton })
+            {
+                if (button == null) continue;
+                foreach (var state in new[] { "PointerOver", "Pressed" })
+                {
+                    var key = "ButtonBackground" + state;
+                    if (DaisySystemAppearance.HighContrast) button.Resources[key] = base100;
+                    else button.Resources.Remove(key);
+                }
+            }
+            var stepperForeground = DaisySystemAppearance.HighContrast && (IsReadOnly || !IsEnabled)
+                ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush") : effectiveForeground;
+            if (_increaseIconPath != null) _increaseIconPath.Stroke = stepperForeground;
+            if (_decreaseIconPath != null) _decreaseIconPath.Stroke = stepperForeground;
 
             // Update TextBox state resources to follow Daisy theme colors instead of system defaults.
             // Update the TextControl* and TextBoxDeleteButton* resource keys.
@@ -967,7 +996,7 @@ namespace Flowery.Controls
             {
                 textBox.Resources["TextControlForegroundPointerOver"] = effectiveForeground;
                 textBox.Resources["TextControlForegroundFocused"] = effectiveForeground;
-                textBox.Resources["TextControlForegroundDisabled"] = effectiveForeground;
+                textBox.Resources["TextControlForegroundDisabled"] = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
 
                 textBox.Resources["TextControlButtonForeground"] = effectiveForeground;
                 textBox.Resources["TextControlButtonForegroundPointerOver"] = effectiveForeground;
@@ -1747,8 +1776,8 @@ namespace Flowery.Controls
             };
             _errorFlashTimer.Tick += (s, e) =>
             {
-                _rootBorder.BorderBrush = _normalBorderBrush;
                 _errorFlashTimer?.Stop();
+                ApplyTheme(Application.Current?.Resources);
             };
             _errorFlashTimer.Start();
         }

@@ -207,6 +207,14 @@ namespace Flowery.Controls
 
             _toolTip.Background = bgOverride ?? DaisyResourceLookup.GetBrush(bgKey);
             _toolTip.Foreground = fgOverride ?? DaisyResourceLookup.GetBrush(fgKey);
+            if (DaisySystemAppearance.HighContrast)
+            {
+                _toolTip.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                _toolTip.Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+                _toolTip.BorderBrush = DaisyResourceLookup.GetBorderBrush();
+            }
+            else
+                _toolTip.ClearValue(Control.BorderBrushProperty);
         }
 
         #endregion
