@@ -2,8 +2,26 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:Flowery.Controls"
+    xmlns:theming="using:Flowery.Theming"
     xmlns:weather="using:Flowery.Controls.Weather"
 >
+
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+            <SolidColorBrush x:Key="DaisyWeatherPrimaryTextBrush" Color="{ThemeResource DaisyPrimaryColor}" />
+            <SolidColorBrush x:Key="DaisyWeatherSecondaryTextBrush" Color="{ThemeResource DaisySecondaryColor}" />
+            <SolidColorBrush x:Key="DaisyWeatherWarningTextBrush" Color="{ThemeResource DaisyWarningColor}" />
+            <SolidColorBrush x:Key="DaisyWeatherErrorTextBrush" Color="{ThemeResource DaisyErrorColor}" />
+            <SolidColorBrush x:Key="DaisyWeatherInfoTextBrush" Color="{ThemeResource DaisyInfoColor}" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <SolidColorBrush x:Key="DaisyWeatherPrimaryTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyWeatherSecondaryTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyWeatherWarningTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyWeatherErrorTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyWeatherInfoTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
 
     <!-- ===================== Weather Controls ===================== -->
     <Style TargetType="weather:DaisyWeatherIcon">
@@ -155,7 +173,7 @@
 
                         <!-- Background Layer (Transparent/Themed with Opacity) -->
                         <Border Background="{TemplateBinding Background}"
-                                Opacity="0.8"
+                                theming:DaisyHighContrast.ContentOpacity="0.8"
                                 CornerRadius="{TemplateBinding CornerRadius}" />
 
                         <!-- Content Layer -->
@@ -168,7 +186,7 @@
                             <weather:DaisyWeatherIcon x:Name="ConditionIcon"
                                                       Grid.Column="0"
                                                       IconSize="64"
-                                                      Foreground="{ThemeResource DaisyPrimaryBrush}"
+                                                      Foreground="{ThemeResource DaisyWeatherPrimaryTextBrush}"
                                                       Condition="{TemplateBinding Condition}" />
 
                             <StackPanel Grid.Column="1"
@@ -183,7 +201,7 @@
 
                                 <TextBlock x:Name="DatePartText"
                                            FontSize="16"
-                                           Opacity="0.8"
+                                           theming:DaisyHighContrast.ContentOpacity="0.8"
                                            Foreground="{TemplateBinding Foreground}"
                                            Text="{TemplateBinding FormattedMonthDate}" />
 
@@ -197,12 +215,12 @@
                                               Width="16"
                                               Height="16"
                                               Stretch="Uniform"
-                                              Fill="{ThemeResource DaisyWarningBrush}" />
+                                              Fill="{ThemeResource DaisyWeatherWarningTextBrush}" />
                                         <TextBlock x:Name="SunriseText"
                                                    FontSize="12"
                                                    VerticalAlignment="Center"
                                                    Foreground="{TemplateBinding Foreground}"
-                                                   Opacity="0.8"
+                                                   theming:DaisyHighContrast.ContentOpacity="0.8"
                                                    Text="{Binding Sunrise, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource TimeSpanToStringConverter}}" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="4">
@@ -210,12 +228,12 @@
                                               Width="16"
                                               Height="16"
                                               Stretch="Uniform"
-                                              Fill="{ThemeResource DaisyErrorBrush}" />
+                                              Fill="{ThemeResource DaisyWeatherErrorTextBrush}" />
                                         <TextBlock x:Name="SunsetText"
                                                    FontSize="12"
                                                    VerticalAlignment="Center"
                                                    Foreground="{TemplateBinding Foreground}"
-                                                   Opacity="0.8"
+                                                   theming:DaisyHighContrast.ContentOpacity="0.8"
                                                    Text="{Binding Sunset, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource TimeSpanToStringConverter}}" />
                                     </StackPanel>
                                 </StackPanel>
@@ -228,14 +246,14 @@
                                     <TextBlock x:Name="TemperatureText"
                                                FontSize="48"
                                                FontWeight="Bold"
-                                               Foreground="{ThemeResource DaisyPrimaryBrush}"
+                                               Foreground="{ThemeResource DaisyWeatherPrimaryTextBrush}"
                                                Text="{Binding Temperature, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource DoubleToIntStringConverter}}" />
                                     <TextBlock x:Name="TemperatureUnitText"
                                                FontSize="24"
                                                FontWeight="Light"
                                                VerticalAlignment="Top"
                                                Margin="2,8,0,0"
-                                               Foreground="{ThemeResource DaisyPrimaryBrush}"
+                                               Foreground="{ThemeResource DaisyWeatherPrimaryTextBrush}"
                                                Text="{Binding TemperatureUnit, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource TemperatureUnitToDegreeConverter}}" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal"
@@ -244,18 +262,18 @@
                                             Margin="0,-4,0,0">
                                     <TextBlock x:Name="FeelsLikeLabel"
                                                FontSize="14"
-                                               Opacity="0.8"
+                                               theming:DaisyHighContrast.ContentOpacity="0.8"
                                                Foreground="{TemplateBinding Foreground}"
                                                Text="{TemplateBinding FeelsLikeLabel}" />
                                     <TextBlock x:Name="FeelsLikeValue"
                                                FontSize="14"
                                                FontWeight="SemiBold"
-                                               Foreground="{ThemeResource DaisySecondaryBrush}"
+                                               Foreground="{ThemeResource DaisyWeatherSecondaryTextBrush}"
                                                Text="{Binding FeelsLike, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource DoubleToIntStringConverter}}" />
                                     <TextBlock x:Name="FeelsLikeUnit"
                                                FontSize="14"
                                                FontWeight="SemiBold"
-                                               Foreground="{ThemeResource DaisySecondaryBrush}"
+                                               Foreground="{ThemeResource DaisyWeatherSecondaryTextBrush}"
                                                Margin="-4,0,0,0"
                                                Text="{Binding TemperatureUnit, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource TemperatureUnitToDegreeConverter}}" />
                                 </StackPanel>
@@ -322,7 +340,7 @@
 
                         <!-- Background Layer -->
                         <Border Background="{TemplateBinding Background}"
-                                Opacity="0.8"
+                                theming:DaisyHighContrast.ContentOpacity="0.8"
                                 CornerRadius="{TemplateBinding CornerRadius}" />
 
                         <!-- Content Layer -->
@@ -342,7 +360,7 @@
                             <weather:DaisyWeatherIcon x:Name="ConditionIcon"
                                                       IconSize="28"
                                                       HorizontalAlignment="Center"
-                                                      Foreground="{ThemeResource DaisyPrimaryBrush}"
+                                                      Foreground="{ThemeResource DaisyWeatherPrimaryTextBrush}"
                                                       Condition="{TemplateBinding Condition}" />
 
                             <StackPanel x:Name="TempStack"
@@ -358,7 +376,7 @@
                                 <TextBlock x:Name="LowTempText"
                                            Text="{Binding LowTemperature, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource DoubleToIntStringConverter}, ConverterParameter=deg}"
                                            FontSize="11"
-                                           Opacity="0.8"
+                                           theming:DaisyHighContrast.ContentOpacity="0.8"
                                            HorizontalAlignment="Center"
                                            Foreground="{TemplateBinding Foreground}" />
                             </StackPanel>
@@ -445,7 +463,7 @@
 
                         <!-- Background Layer -->
                         <Border Background="{TemplateBinding Background}"
-                                Opacity="0.8"
+                                theming:DaisyHighContrast.ContentOpacity="0.8"
                                 CornerRadius="{TemplateBinding CornerRadius}" />
 
                         <!-- Main Content -->
@@ -469,11 +487,11 @@
                                               Shape="Circle"
                                               Size="Small"
                                               Variant="Neutral"
-                                              Opacity="0.8"
+                                              theming:DaisyHighContrast.ContentOpacity="0.8"
                                               Margin="-6,0,0,0"
                                               Visibility="Collapsed">
                             <Path x:Name="LeftScrollIcon" Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
-                                  Fill="{ThemeResource DaisyBaseContentBrush}"
+                                  Fill="{Binding Foreground, ElementName=PART_LeftScrollButton}"
                                   Stretch="Uniform"
                                   Width="12" Height="12" />
                         </controls:DaisyButton>
@@ -485,11 +503,11 @@
                                               Shape="Circle"
                                               Size="Small"
                                               Variant="Neutral"
-                                              Opacity="0.8"
+                                              theming:DaisyHighContrast.ContentOpacity="0.8"
                                               Margin="0,0,-6,0"
                                               Visibility="Collapsed">
                             <Path x:Name="RightScrollIcon" Data="M10,6L8.59,7.41L13.17,12L8.59,16.58L10,18L16,12L10,6Z"
-                                  Fill="{ThemeResource DaisyBaseContentBrush}"
+                                  Fill="{Binding Foreground, ElementName=PART_RightScrollButton}"
                                   Stretch="Uniform"
                                   Width="12" Height="12" />
                         </controls:DaisyButton>
@@ -604,7 +622,7 @@
 
                         <!-- Background Layer -->
                         <Border Background="{TemplateBinding Background}"
-                                Opacity="0.8"
+                                theming:DaisyHighContrast.ContentOpacity="0.8"
                                 CornerRadius="{TemplateBinding CornerRadius}" />
 
                         <Border x:Name="RootBorder"
@@ -622,7 +640,7 @@
                                        FontSize="10"
                                        FontWeight="SemiBold"
                                        Foreground="{TemplateBinding Foreground}"
-                                       Opacity="0.8"
+                                       theming:DaisyHighContrast.ContentOpacity="0.8"
                                        Margin="4,2" />
                             <TextBlock x:Name="NowHeader"
                                        Grid.Row="0"
@@ -631,7 +649,7 @@
                                        FontSize="10"
                                        FontWeight="SemiBold"
                                        Foreground="{TemplateBinding Foreground}"
-                                       Opacity="0.8"
+                                       theming:DaisyHighContrast.ContentOpacity="0.8"
                                        Margin="4,2"
                                        HorizontalAlignment="Center" />
                             <TextBlock x:Name="MaxHeader"
@@ -641,7 +659,7 @@
                                        FontSize="10"
                                        FontWeight="SemiBold"
                                        Foreground="{TemplateBinding Foreground}"
-                                       Opacity="0.8"
+                                       theming:DaisyHighContrast.ContentOpacity="0.8"
                                        Margin="4,2"
                                        HorizontalAlignment="Center" />
 
@@ -655,7 +673,7 @@
                                       Width="16"
                                       Height="16"
                                       Stretch="Uniform"
-                                      Fill="{ThemeResource DaisyWarningBrush}" />
+                                      Fill="{ThemeResource DaisyWeatherWarningTextBrush}" />
                                 <TextBlock x:Name="UvLabel"
                                            Text="UV"
                                            FontSize="12"
@@ -678,7 +696,7 @@
                                        Text="{Binding UvMax, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource DoubleToIntStringConverter}}"
                                        FontSize="14"
                                        Foreground="{TemplateBinding Foreground}"
-                                       Opacity="0.8"
+                                       theming:DaisyHighContrast.ContentOpacity="0.8"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"
                                        Margin="4,2" />
@@ -693,7 +711,7 @@
                                       Width="16"
                                       Height="16"
                                       Stretch="Uniform"
-                                      Fill="{ThemeResource DaisyInfoBrush}" />
+                                      Fill="{ThemeResource DaisyWeatherInfoTextBrush}" />
                                 <TextBlock x:Name="WindLabel"
                                            Text="{Binding WindUnit, RelativeSource={RelativeSource TemplatedParent}}"
                                            FontSize="12"
@@ -716,7 +734,7 @@
                                        Text="{Binding WindMax, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource DoubleToIntStringConverter}}"
                                        FontSize="14"
                                        Foreground="{TemplateBinding Foreground}"
-                                       Opacity="0.8"
+                                       theming:DaisyHighContrast.ContentOpacity="0.8"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"
                                        Margin="4,2" />
@@ -731,7 +749,7 @@
                                       Width="16"
                                       Height="16"
                                       Stretch="Uniform"
-                                      Fill="{ThemeResource DaisySecondaryBrush}" />
+                                      Fill="{ThemeResource DaisyWeatherSecondaryTextBrush}" />
                                 <TextBlock x:Name="HumidityLabel"
                                            Text="%"
                                            FontSize="12"
@@ -754,7 +772,7 @@
                                        Text="{Binding HumidityMax, RelativeSource={RelativeSource TemplatedParent}}"
                                        FontSize="14"
                                        Foreground="{TemplateBinding Foreground}"
-                                       Opacity="0.8"
+                                       theming:DaisyHighContrast.ContentOpacity="0.8"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"
                                        Margin="4,2" />
@@ -804,7 +822,7 @@
 
                         <!-- Background Layer -->
                         <Border Background="{TemplateBinding Background}"
-                                Opacity="0.8"
+                                theming:DaisyHighContrast.ContentOpacity="0.8"
                                 CornerRadius="{TemplateBinding CornerRadius}" />
 
                         <Border x:Name="CardBorder"
@@ -853,7 +871,7 @@
                             </Grid>
 
                             <Border Background="{ThemeResource DaisyBase100Brush}"
-                                    Opacity="0.9"
+                                    theming:DaisyHighContrast.ContentOpacity="0.9"
                                     CornerRadius="{TemplateBinding CornerRadius}"
                                     Visibility="{Binding IsLoading, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <controls:DaisyLoading HorizontalAlignment="Center"

@@ -55,6 +55,7 @@ namespace Flowery.Controls
             UseSystemFocusVisuals = true;
 
             SizeChanged += OnSizeChanged;
+            IsEnabledChanged += (sender, args) => RebuildGripVisual();
         }
 
         protected override void OnLoaded()
@@ -282,7 +283,7 @@ namespace Flowery.Controls
             _gripThumb.PointerPressed += OnGripPointerPressed;
 
             // WinUI Thumb has no Content; render the grip as a separate overlay element.
-            _gripVisual = BuildGripVisual(Orientation);
+            _gripVisual = BuildGripVisual(Orientation, IsEnabled);
             _gripVisual.IsHitTestVisible = false;
 
             _overlayCanvas.Children.Add(_gripVisual);
@@ -295,9 +296,13 @@ namespace Flowery.Controls
             Content = _rootGrid;
         }
 
-        private static Grid BuildGripVisual(DiffOrientation orientation)
+        private static Grid BuildGripVisual(DiffOrientation orientation, bool isEnabled)
         {
             var grid = new Grid();
+            if (DaisySystemAppearance.HighContrast)
+                grid.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+            var foreground = DaisyResourceLookup.GetBrush(DaisySystemAppearance.HighContrast && !isEnabled
+                ? "DaisyDisabledForegroundBrush" : "DaisyBaseContentBrush");
 
             if (orientation == DiffOrientation.Vertical)
             {
@@ -307,8 +312,8 @@ namespace Flowery.Controls
                     Height = 2,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Center,
-                    Fill = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
-                    Opacity = 0.6
+                    Fill = foreground,
+                    Opacity = DaisyResourceLookup.GetContentOpacity(0.6)
                 };
                 grid.Children.Add(line);
 
@@ -318,10 +323,10 @@ namespace Flowery.Controls
                     Height = 14,
                     CornerRadius = new CornerRadius(8),
                     Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush"),
-                    BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush"),
+                    BorderBrush = DaisyResourceLookup.GetBorderBrush(),
                     BorderThickness = new Thickness(1),
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    Child = CreateGripIcon("DaisyIconDotsHorizontal")
+                    Child = CreateGripIcon("DaisyIconDotsHorizontal", foreground)
                 };
                 grid.Children.Add(handle);
             }
@@ -333,8 +338,8 @@ namespace Flowery.Controls
                     Width = 2,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Stretch,
-                    Fill = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
-                    Opacity = 0.6
+                    Fill = foreground,
+                    Opacity = DaisyResourceLookup.GetContentOpacity(0.6)
                 };
                 grid.Children.Add(line);
 
@@ -344,10 +349,10 @@ namespace Flowery.Controls
                     Height = 28,
                     CornerRadius = new CornerRadius(8),
                     Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush"),
-                    BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush"),
+                    BorderBrush = DaisyResourceLookup.GetBorderBrush(),
                     BorderThickness = new Thickness(1),
                     VerticalAlignment = VerticalAlignment.Center,
-                    Child = CreateGripIcon("DaisyIconEllipsis")
+                    Child = CreateGripIcon("DaisyIconEllipsis", foreground)
                 };
                 grid.Children.Add(handle);
             }
@@ -355,14 +360,14 @@ namespace Flowery.Controls
             return grid;
         }
 
-        private static Viewbox CreateGripIcon(string iconKey)
+        private static Viewbox CreateGripIcon(string iconKey, Brush foreground)
         {
             var pathData = FloweryPathHelpers.GetIconPathData(iconKey);
             var path = new Path
             {
                 Stretch = Stretch.Uniform,
-                Fill = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
-                Opacity = 0.8
+                Fill = foreground,
+                Opacity = DaisyResourceLookup.GetContentOpacity(0.8)
             };
 
             if (!string.IsNullOrEmpty(pathData))
@@ -512,7 +517,7 @@ namespace Flowery.Controls
             }
 
             // Create new grip visual with current orientation
-            _gripVisual = BuildGripVisual(Orientation);
+            _gripVisual = BuildGripVisual(Orientation, IsEnabled);
             _gripVisual.IsHitTestVisible = false;
             _overlayCanvas.Children.Insert(0, _gripVisual);
         }

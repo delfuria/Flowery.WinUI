@@ -188,6 +188,7 @@ namespace Flowery.Controls
         {
             IsTabStop = true;
             UseSystemFocusVisuals = true;
+            RegisterPropertyChangedCallback(IsEnabledProperty, static (sender, _) => ((DaisyAccordionItem)sender).RebuildVisual());
         }
 
         protected override void OnLoaded()
@@ -392,14 +393,19 @@ namespace Flowery.Controls
             var fgOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyAccordionItem", "Foreground");
 
             var base200Brush = DaisyResourceLookup.GetBrush(resources, "DaisyBase200Brush");
-            var base300Brush = DaisyResourceLookup.GetBrush(resources, "DaisyBase300Brush");
+            var base300Brush = DaisyResourceLookup.GetBorderBrush();
             var baseContentBrush = DaisyResourceLookup.GetBrush(resources, "DaisyBaseContentBrush");
+            if (DaisySystemAppearance.HighContrast && !IsEnabled)
+            {
+                baseContentBrush = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
+                base300Brush = baseContentBrush;
+            }
 
             // Header styling
             if (_headerBorder != null)
             {
                 _headerBorder.Background = headerBgOverride ?? base200Brush;
-                _headerBorder.BorderBrush = _isFocused
+                _headerBorder.BorderBrush = _isFocused && IsEnabled
                     ? DaisyResourceLookup.GetBrush("DaisyAccentBrush")
                     : headerBorderOverride ?? base300Brush;
                 _headerBorder.BorderThickness = new Thickness(1);
@@ -440,6 +446,10 @@ namespace Flowery.Controls
             {
                 _contentPresenter.Visibility = IsExpanded ? Visibility.Visible : Visibility.Collapsed;
                 _contentPresenter.Content = _userContent;
+                if (DaisySystemAppearance.HighContrast)
+                    _contentPresenter.Foreground = baseContentBrush;
+                else
+                    _contentPresenter.ClearValue(ContentPresenter.ForegroundProperty);
             }
 
             UpdateAutomationProperties();

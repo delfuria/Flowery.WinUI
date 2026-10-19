@@ -57,6 +57,7 @@ namespace Flowery.Controls
         {
             base.OnThemeChanged(themeName);
             ApplyAll();
+            StartAnimation();
         }
 
         protected override FrameworkElement? GetNeumorphicHostElement()
@@ -151,6 +152,8 @@ namespace Flowery.Controls
                 DaisyTokenDefaults.EnsureDefaults(resources);
 
             _backgroundBorder.CornerRadius = CornerRadius;
+            _backgroundBorder.BorderBrush = DaisySystemAppearance.HighContrast ? DaisyResourceLookup.GetBorderBrush() : null;
+            _backgroundBorder.BorderThickness = new Thickness(DaisySystemAppearance.HighContrast ? 1 : 0);
 
             if (IsTextMode)
             {
@@ -180,7 +183,7 @@ namespace Flowery.Controls
 
         private void StartAnimation()
         {
-            if (!DaisyMotion.AnimationsEnabled || !IsLoaded)
+            if (DaisySystemAppearance.HighContrast || !DaisyMotion.AnimationsEnabled || !IsLoaded)
             {
                 StopAnimation();
                 return;

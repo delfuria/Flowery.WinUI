@@ -37,7 +37,7 @@
                         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <TextBlock Text="Max Scale:"
                                        VerticalAlignment="Center"
-                                       Opacity="0.9"
+                                       Opacity="{ThemeResource GalleryOpacity90}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                             <daisy:DaisySelect Variant="Ghost"
                                                Width="100"
@@ -68,7 +68,7 @@
                                               IsEnabled="{x:Bind IsManualZoomEnabled, Mode=OneWay}" />
                             <TextBlock x:Name="ZoomPercentText"
                                        VerticalAlignment="Center"
-                                       Opacity="0.9"
+                                       Opacity="{ThemeResource GalleryOpacity90}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         </StackPanel>
                         
@@ -76,7 +76,7 @@
                                     Visibility="{x:Bind IsDesktopApp, Mode=OneWay}">
                             <TextBlock Text="Resolution:"
                                        VerticalAlignment="Center"
-                                       Opacity="0.9"
+                                       Opacity="{ThemeResource GalleryOpacity90}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                             <daisy:DaisySelect Variant="Ghost"
                                                Width="180"
@@ -100,7 +100,7 @@
                 <local:SectionHeader SectionId="customer-details" Title="Customer Details Form" />
                 <TextBlock x:Name="CustomerSubtitle"
                            Text="A real-world customer management form demonstrating responsive scaling across all elements."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <!-- Main Customer Card -->
@@ -128,7 +128,7 @@
 
                                 <!-- Customer ID -->
                                 <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
-                                    <daisy:DaisyIconText x:Name="CustomerNumberLabel" Text="Customer #" Opacity="0.7" 
+                                    <daisy:DaisyIconText x:Name="CustomerNumberLabel" Text="Customer #" Opacity="{ThemeResource GalleryOpacity70}"
                                                FontSize="11" Variant="Primary" />
                                     <daisy:DaisyIconText x:Name="CustomerIdText" Text="FK-1984-NIGHTMARE" FontWeight="SemiBold"
                                                FontSize="14" Variant="Primary" />
@@ -153,7 +153,7 @@
                                         <daisy:DaisyInput Text="Springwood" IsReadOnly="True" Label="City" LabelPosition="Inset" />
                                         <daisy:DaisyInput Text="OH 45066" IsReadOnly="True" Label="State/ZIP" LabelPosition="Inset" />
                                         <StackPanel Spacing="2">
-                                            <TextBlock x:Name="CountryLabel" Text="Country" Opacity="0.7"
+                                            <TextBlock x:Name="CountryLabel" Text="Country" Opacity="{ThemeResource GalleryOpacity70}"
                                                 Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                             <daisy:DaisySelect x:Name="CountrySelect" Width="200" Variant="Primary" Size="Small" SelectedIndex="12">
                                                 <x:String>China</x:String>
@@ -233,7 +233,7 @@
                                     <daisy:DaisyDivider />
                                     <StackPanel x:Name="GroupFieldsPanel">
                                         <Grid ColumnDefinitions="Auto,*">
-                                            <TextBlock Grid.Column="0" x:Name="GroupLabelText" Text="Group:" Opacity="0.7"
+                                            <TextBlock Grid.Column="0" x:Name="GroupLabelText" Text="Group:" Opacity="{ThemeResource GalleryOpacity70}"
                                                 VerticalAlignment="Center" Margin="0,0,12,0"
                                                 Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                             <daisy:DaisyBadge Grid.Column="1" Content="Enterprise" Variant="Secondary" Size="Small" HorizontalAlignment="Left" />
@@ -260,7 +260,7 @@
                                                 <TextBlock Grid.Column="1" x:Name="Activity1Text" Text="Nightmare delivery #666 completed"
                                                     Margin="8,0"
                                                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                                                <TextBlock Grid.Column="2" x:Name="Activity1Time" Text="2h ago" Opacity="0.6"
+                                                <TextBlock Grid.Column="2" x:Name="Activity1Time" Text="2h ago" Opacity="{ThemeResource GalleryOpacity60}"
                                                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                             </Grid>
                                         </Border>
@@ -270,7 +270,7 @@
                                                 <TextBlock Grid.Column="1" x:Name="Activity2Text" Text="Soul collection #7 pending"
                                                     Margin="8,0"
                                                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                                                <TextBlock Grid.Column="2" x:Name="Activity2Time" Text="1d ago" Opacity="0.6"
+                                                <TextBlock Grid.Column="2" x:Name="Activity2Time" Text="1d ago" Opacity="{ThemeResource GalleryOpacity60}"
                                                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                             </Grid>
                                         </Border>
@@ -280,7 +280,7 @@
                                                 <TextBlock Grid.Column="1" x:Name="Activity3Text" Text="Dream realm expansion approved"
                                                     Margin="8,0"
                                                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                                                <TextBlock Grid.Column="2" x:Name="Activity3Time" Text="3d ago" Opacity="0.6"
+                                                <TextBlock Grid.Column="2" x:Name="Activity3Time" Text="3d ago" Opacity="{ThemeResource GalleryOpacity60}"
                                                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                             </Grid>
                                         </Border>
@@ -331,7 +331,7 @@
                 <local:SectionHeader SectionId="scale-presets" Title="Available Scale Presets" />
                 <TextBlock x:Name="PresetsSubtitle"
                            Text="The ScaleExtension provides semantic presets for consistent sizing across your app."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <daisy:WrapPanel Orientation="Horizontal">
@@ -430,7 +430,7 @@ myBorder.Padding = ScaleHelper.GetScaledThickness(
                             x:Name="AboutDescriptionText"
                             Foreground="{ThemeResource DaisyBaseContentBrush}"
                             Text="This Customer Details form demonstrates Flowery's FloweryScaleManager in action. As you resize the window, all fonts, spacing, padding, and element widths scale proportionally to maintain visual consistency. The demo uses ScaleHelper with presets like FontTitle, SpacingMedium, and CardWidth for semantic, maintainable scaling." />
-                        <TextBlock TextWrapping="Wrap" Opacity="0.7"
+                        <TextBlock TextWrapping="Wrap" Opacity="{ThemeResource GalleryOpacity70}"
                             x:Name="AboutTipText"
                             Foreground="{ThemeResource DaisyBaseContentBrush}"
                             Text="Tip: Try the resolution dropdown to quickly test common screen sizes, or use the manual zoom slider for precise control." />

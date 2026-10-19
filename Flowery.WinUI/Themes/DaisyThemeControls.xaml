@@ -109,7 +109,7 @@
 
     <ControlTemplate x:Key="DaisyThemeControllerCheckboxTemplate" TargetType="controls:DaisyThemeController">
         <Grid Background="Transparent">
-            <Border Width="48"
+            <Border x:Name="CheckboxMode" Width="48"
                     Height="48"
                     CornerRadius="8"
                     Background="{ThemeResource DaisyBase300Brush}">
@@ -244,10 +244,10 @@
     <ControlTemplate x:Key="DaisyThemeControllerToggleWithTextTemplate" TargetType="controls:DaisyThemeController">
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
             <TextBlock Text="{TemplateBinding UncheckedLabel}"
-                       Foreground="{ThemeResource DaisyBaseContentBrush}"
+                       Foreground="{TemplateBinding Foreground}"
                        VerticalAlignment="Center"
                        FontSize="14" />
-            <Border Width="48"
+            <Border x:Name="TextToggleMode" Width="48"
                     Height="24"
                     CornerRadius="12"
                     Background="{ThemeResource DaisyBase300Brush}">
@@ -265,7 +265,7 @@
                 </Grid>
             </Border>
             <TextBlock Text="{TemplateBinding CheckedLabel}"
-                       Foreground="{ThemeResource DaisyBaseContentBrush}"
+                       Foreground="{TemplateBinding Foreground}"
                        VerticalAlignment="Center"
                        FontSize="14" />
 
@@ -303,13 +303,13 @@
     <ControlTemplate x:Key="DaisyThemeControllerToggleWithIconsTemplate" TargetType="controls:DaisyThemeController">
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
             <!-- Sun icon - use Warning (yellow/orange) for sun -->
-            <Path Data="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"
+            <Path x:Name="InlineSunIcon" Data="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"
                   Fill="{ThemeResource DaisyWarningBrush}"
                   Stretch="Uniform"
                   Width="20"
                   Height="20"
                   VerticalAlignment="Center" />
-            <Border Width="48"
+            <Border x:Name="IconToggleMode" Width="48"
                     Height="24"
                     CornerRadius="12"
                     Background="{ThemeResource DaisyBase300Brush}">
@@ -327,7 +327,7 @@
                 </Grid>
             </Border>
             <!-- Moon icon (crescent) - use Info (blue) for moon -->
-            <Path Data="M21,12.79A9,9,0,1,1,11.21,3,7,7,0,0,0,21,12.79Z"
+            <Path x:Name="InlineMoonIcon" Data="M21,12.79A9,9,0,1,1,11.21,3,7,7,0,0,0,21,12.79Z"
                   Fill="{ThemeResource DaisyInfoBrush}"
                   Stretch="Uniform"
                   Width="20"
@@ -385,6 +385,7 @@
                          VerticalAlignment="Center" />
             </Border>
             <ContentPresenter Grid.Column="1"
+                              Foreground="{TemplateBinding Foreground}"
                               Content="{TemplateBinding Content}"
                               ContentTemplate="{TemplateBinding ContentTemplate}"
                               Margin="{TemplateBinding Padding}"
@@ -397,8 +398,6 @@
                     <VisualState x:Name="Checked">
                         <VisualState.Setters>
                             <Setter Target="CheckMark.Opacity" Value="1" />
-                            <Setter Target="PART_Border.Background" Value="{ThemeResource DaisyBaseContentBrush}" />
-                            <Setter Target="PART_Border.BorderBrush" Value="{ThemeResource DaisyBaseContentBrush}" />
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
@@ -406,7 +405,6 @@
                     <VisualState x:Name="Normal" />
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Target="PART_Border.BorderBrush" Value="{ThemeResource DaisyPrimaryBrush}" />
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
@@ -422,6 +420,7 @@
                 CornerRadius="{TemplateBinding CornerRadius}"
                 Padding="{TemplateBinding Padding}">
             <ContentPresenter Content="{TemplateBinding Content}"
+                              Foreground="{TemplateBinding Foreground}"
                               ContentTemplate="{TemplateBinding ContentTemplate}"
                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
@@ -429,6 +428,7 @@
     </ControlTemplate>
 
     <Style TargetType="controls:DaisyThemeRadio">
+        <Setter Property="UseSystemFocusVisuals" Value="True" />
         <Setter Property="Padding" Value="8,0,0,0" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Center" />
@@ -440,6 +440,7 @@
 
     <!-- ===================== DaisyThemeController style (template selected in code) ===================== -->
     <Style TargetType="controls:DaisyThemeController">
+        <Setter Property="UseSystemFocusVisuals" Value="True" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Template" Value="{StaticResource DaisyThemeControllerToggleTemplate}" />
     </Style>

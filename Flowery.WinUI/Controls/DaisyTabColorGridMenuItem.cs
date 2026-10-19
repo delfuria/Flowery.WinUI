@@ -52,6 +52,32 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyTabColorGridMenuItem);
             IsTabStop = false;
+            Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
+            IsEnabledChanged += (_, _) => UpdateSwatchBorders();
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            DaisySystemAppearance.Initialize(XamlRoot);
+            DaisyThemeManager.ThemeChanged += OnThemeChanged;
+            UpdateSwatchBorders();
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e) => DaisyThemeManager.ThemeChanged -= OnThemeChanged;
+
+        private void OnThemeChanged(object? sender, string themeName) => UpdateSwatchBorders();
+
+        private void UpdateSwatchBorders()
+        {
+            if (_swatchGrid == null) return;
+            foreach (var button in _swatchGrid.Children.OfType<Button>())
+            {
+                if (button.Content is Ellipse { Stroke: not null } ellipse)
+                    ellipse.Stroke = DaisySystemAppearance.HighContrast && !IsEnabled
+                        ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush")
+                        : DaisyResourceLookup.GetBorderBrush(DefaultStrokeBrush);
+            }
         }
 
         public static IReadOnlyList<DaisyTabPaletteSwatch> CreateDefaultSwatches()
@@ -118,7 +144,9 @@ namespace Flowery.Controls
             }
             else
             {
-                stroke = DefaultStrokeBrush;
+                stroke = DaisySystemAppearance.HighContrast && !IsEnabled
+                    ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush")
+                    : DaisyResourceLookup.GetBorderBrush(DefaultStrokeBrush);
             }
 
             var ellipse = new Ellipse

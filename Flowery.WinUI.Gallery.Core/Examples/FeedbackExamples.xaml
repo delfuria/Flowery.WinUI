@@ -33,7 +33,7 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="loading" Title="Loading" />
 
-                <TextBlock Text="Basic Variants" FontWeight="SemiBold" Opacity="0.8"
+                <TextBlock Text="Basic Variants" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <daisy:WrapPanel Spacing="16">
                     <daisy:DaisyLoading Variant="Spinner" />
@@ -65,11 +65,11 @@
                     <daisy:DaisyLoading Variant="CountdownSpinner" />
                 </daisy:WrapPanel>
 
-                <TextBlock Text="Random (colors rotate every 2 cycles)" FontWeight="SemiBold" Opacity="0.8" Margin="0,16,0,0"
+                <TextBlock Text="Random (colors rotate every 2 cycles)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,16,0,0"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <daisy:WrapPanel x:Name="RandomLoadersPanel" Spacing="16" />
 
-                <TextBlock Text="Business (48px)" FontWeight="SemiBold" Opacity="0.8" Margin="0,16,0,0"
+                <TextBlock Text="Business (48px)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,16,0,0"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <daisy:WrapPanel Spacing="10">
                     <daisy:DaisyLoading Variant="DocumentFlipOn" PixelSize="48" />
@@ -98,7 +98,7 @@
                     <daisy:DaisyLoading Variant="CoffeeCup" PixelSize="48" />
                 </daisy:WrapPanel>
 
-                <TextBlock Text="Battery + Traffic Lights (48px)" FontWeight="SemiBold" Opacity="0.8" Margin="0,16,0,0"
+                <TextBlock Text="Battery + Traffic Lights (48px)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,16,0,0"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <daisy:WrapPanel Spacing="10">
                     <daisy:DaisyLoading Variant="BatteryCharging" PixelSize="48" />
@@ -109,7 +109,7 @@
                     <daisy:DaisyLoading Variant="TrafficLightLeft" PixelSize="48" />
                 </daisy:WrapPanel>
 
-                <TextBlock Text="Win95 Retro (48px)" FontWeight="SemiBold" Opacity="0.8" Margin="0,16,0,0"
+                <TextBlock Text="Win95 Retro (48px)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,16,0,0"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <daisy:WrapPanel Spacing="10">
                     <daisy:DaisyLoading Variant="Win95FileCopy" PixelSize="48" />
@@ -136,7 +136,7 @@
                 <local:SectionHeader SectionId="progress" Title="Progress (Linear)" />
 
                 <StackPanel Spacing="16" MaxWidth="400" HorizontalAlignment="Left">
-                    <TextBlock Text="Variants" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Variants" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyProgress Value="40" Variant="Default" />
                     <daisy:DaisyProgress Value="50" Variant="Primary" />
@@ -146,7 +146,7 @@
                     <daisy:DaisyProgress Value="90" Variant="Warning" />
                     <daisy:DaisyProgress Value="100" Variant="Error" />
 
-                    <TextBlock Text="Sizes" FontWeight="SemiBold" Opacity="0.8" Margin="0,12,0,0"
+                    <TextBlock Text="Sizes" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,12,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}"
                                daisy:FlowerySizeManager.IgnoreGlobalSize="True" />
                     <StackPanel Spacing="8" daisy:FlowerySizeManager.IgnoreGlobalSize="True">
@@ -156,7 +156,7 @@
                         <daisy:DaisyProgress Value="60" Size="Large" Variant="Primary" />
                     </StackPanel>
 
-                    <TextBlock Text="Shimmer (Breathing Animation)" FontWeight="SemiBold" Opacity="0.8" Margin="0,12,0,0"
+                    <TextBlock Text="Shimmer (Breathing Animation)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,12,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Spacing="8">
                         <daisy:DaisyProgress Value="70" Variant="Primary" Shimmer="True" />
@@ -171,12 +171,12 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="radial-progress" Title="Radial Progress" />
                 <TextBlock Text="Circular progress indicator with size + variant styling."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Variants" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Variants" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:WrapPanel Spacing="16">
                         <daisy:DaisyRadialProgress Value="25" Variant="Default" />
@@ -188,7 +188,7 @@
                         <daisy:DaisyRadialProgress Value="100" Variant="Error" />
                     </daisy:WrapPanel>
 
-                    <TextBlock Text="Sizes" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="Sizes" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}"
                                daisy:FlowerySizeManager.IgnoreGlobalSize="True" />
                     <daisy:WrapPanel Spacing="16"
@@ -200,7 +200,7 @@
                         <daisy:DaisyRadialProgress Value="100" Size="ExtraLarge" Variant="Primary" />
                     </daisy:WrapPanel>
 
-                    <TextBlock Text="Shimmer (Breathing Animation)" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="Shimmer (Breathing Animation)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:WrapPanel Spacing="16">
                         <daisy:DaisyRadialProgress Value="75" Variant="Primary" Shimmer="True" />
@@ -215,12 +215,12 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="skeleton" Title="Skeleton" />
                 <TextBlock Text="Loading placeholders with pulsing animation. Use to indicate content is loading."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Basic Shapes" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Basic Shapes" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <daisy:DaisySkeleton Height="32" Width="32" CornerRadius="16" />
@@ -229,7 +229,7 @@
                         <daisy:DaisySkeleton Height="24" Width="80" CornerRadius="12" />
                     </StackPanel>
 
-                    <TextBlock Text="Text Lines" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="Text Lines" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Spacing="8" MaxWidth="300" HorizontalAlignment="Left">
                         <daisy:DaisySkeleton Height="20" CornerRadius="4" />
@@ -237,7 +237,7 @@
                         <daisy:DaisySkeleton Height="20" Width="180" CornerRadius="4" />
                     </StackPanel>
 
-                    <TextBlock Text="Avatar + Text (Profile Card)" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="Avatar + Text (Profile Card)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <daisy:DaisySkeleton Width="48" Height="48" CornerRadius="24" />
@@ -247,7 +247,7 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <TextBlock Text="Content Card Skeleton" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="Content Card Skeleton" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <Border Background="{ThemeResource DaisyBase200Brush}"
                             CornerRadius="12"
@@ -270,7 +270,7 @@
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Text="List Items Skeleton" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="List Items Skeleton" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Spacing="12" MaxWidth="400" HorizontalAlignment="Left">
                         <StackPanel Orientation="Horizontal" Spacing="12">
@@ -296,7 +296,7 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <TextBlock Text="Text Mode (Pulsing Text)" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="Text Mode (Pulsing Text)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Spacing="8">
                         <daisy:DaisySkeleton IsTextMode="True">
@@ -306,7 +306,7 @@
                             <TextBlock Text="Loading content..." />
                         </daisy:DaisySkeleton>
                         <daisy:DaisySkeleton IsTextMode="True">
-                            <TextBlock Text="Please wait while we fetch your data" FontSize="12" Opacity="0.8" />
+                            <TextBlock Text="Please wait while we fetch your data" FontSize="12" Opacity="{ThemeResource GalleryOpacity80}" />
                         </daisy:DaisySkeleton>
                     </StackPanel>
                 </StackPanel>
@@ -318,100 +318,100 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="status" Title="Status" />
                 <TextBlock Text="Status is a small icon to visually show the current status of an element, like online, offline, error, etc."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Sizes" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Sizes" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center"
                                 daisy:FlowerySizeManager.IgnoreGlobalSize="True">
                         <StackPanel Spacing="4" HorizontalAlignment="Center">
                             <daisy:DaisyStatusIndicator Size="ExtraSmall" />
-                            <TextBlock Text="XS" FontSize="10" Opacity="0.5"
+                            <TextBlock Text="XS" FontSize="10" Opacity="{ThemeResource GalleryOpacity50}"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                         <StackPanel Spacing="4" HorizontalAlignment="Center">
                             <daisy:DaisyStatusIndicator Size="Small" />
-                            <TextBlock Text="SM" FontSize="10" Opacity="0.5"
+                            <TextBlock Text="SM" FontSize="10" Opacity="{ThemeResource GalleryOpacity50}"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                         <StackPanel Spacing="4" HorizontalAlignment="Center">
                             <daisy:DaisyStatusIndicator Size="Medium" />
-                            <TextBlock Text="MD" FontSize="10" Opacity="0.5"
+                            <TextBlock Text="MD" FontSize="10" Opacity="{ThemeResource GalleryOpacity50}"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                         <StackPanel Spacing="4" HorizontalAlignment="Center">
                             <daisy:DaisyStatusIndicator Size="Large" />
-                            <TextBlock Text="LG" FontSize="10" Opacity="0.5"
+                            <TextBlock Text="LG" FontSize="10" Opacity="{ThemeResource GalleryOpacity50}"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                         <StackPanel Spacing="4" HorizontalAlignment="Center">
                             <daisy:DaisyStatusIndicator Size="ExtraLarge" />
-                            <TextBlock Text="XL" FontSize="10" Opacity="0.5"
+                            <TextBlock Text="XL" FontSize="10" Opacity="{ThemeResource GalleryOpacity50}"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                     </StackPanel>
 
-                    <TextBlock Text="Brand Colors" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Brand Colors" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <StackPanel Spacing="4" HorizontalAlignment="Center">
                             <daisy:DaisyStatusIndicator Color="Primary" />
-                            <TextBlock Text="Primary" FontSize="10" Opacity="0.5"
+                            <TextBlock Text="Primary" FontSize="10" Opacity="{ThemeResource GalleryOpacity50}"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                         <StackPanel Spacing="4" HorizontalAlignment="Center">
                             <daisy:DaisyStatusIndicator Color="Secondary" />
-                            <TextBlock Text="Secondary" FontSize="10" Opacity="0.5"
+                            <TextBlock Text="Secondary" FontSize="10" Opacity="{ThemeResource GalleryOpacity50}"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                         <StackPanel Spacing="4" HorizontalAlignment="Center">
                             <daisy:DaisyStatusIndicator Color="Accent" />
-                            <TextBlock Text="Accent" FontSize="10" Opacity="0.5"
+                            <TextBlock Text="Accent" FontSize="10" Opacity="{ThemeResource GalleryOpacity50}"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                         <StackPanel Spacing="4" HorizontalAlignment="Center">
                             <daisy:DaisyStatusIndicator Color="Neutral" />
-                            <TextBlock Text="Neutral" FontSize="10" Opacity="0.5"
+                            <TextBlock Text="Neutral" FontSize="10" Opacity="{ThemeResource GalleryOpacity50}"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                     </StackPanel>
 
-                    <TextBlock Text="State Colors" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="State Colors" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <StackPanel Spacing="4" HorizontalAlignment="Center">
                             <daisy:DaisyStatusIndicator Color="Info" />
-                            <TextBlock Text="Info" FontSize="10" Opacity="0.5"
+                            <TextBlock Text="Info" FontSize="10" Opacity="{ThemeResource GalleryOpacity50}"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                         <StackPanel Spacing="4" HorizontalAlignment="Center">
                             <daisy:DaisyStatusIndicator Color="Success" />
-                            <TextBlock Text="Success" FontSize="10" Opacity="0.5"
+                            <TextBlock Text="Success" FontSize="10" Opacity="{ThemeResource GalleryOpacity50}"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                         <StackPanel Spacing="4" HorizontalAlignment="Center">
                             <daisy:DaisyStatusIndicator Color="Warning" />
-                            <TextBlock Text="Warning" FontSize="10" Opacity="0.5"
+                            <TextBlock Text="Warning" FontSize="10" Opacity="{ThemeResource GalleryOpacity50}"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                         <StackPanel Spacing="4" HorizontalAlignment="Center">
                             <daisy:DaisyStatusIndicator Color="Error" />
-                            <TextBlock Text="Error" FontSize="10" Opacity="0.5"
+                            <TextBlock Text="Error" FontSize="10" Opacity="{ThemeResource GalleryOpacity50}"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
@@ -419,7 +419,7 @@
 
                     <Grid ColumnDefinitions="*">
                         <StackPanel Grid.Column="0" Spacing="10">
-                            <TextBlock Text="Battery" FontWeight="SemiBold" Opacity="0.7"
+                            <TextBlock Text="Battery" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:WrapPanel Spacing="12">
                                 <daisy:DaisyStatusIndicator Variant="Battery" Color="Primary" BatteryChargePercent="0" />
@@ -429,7 +429,7 @@
                                 <daisy:DaisyStatusIndicator Variant="Battery" Color="Primary" BatteryChargePercent="100" />
                             </daisy:WrapPanel>
 
-                            <TextBlock Text="Traffic Lights" FontWeight="SemiBold" Opacity="0.7"
+                            <TextBlock Text="Traffic Lights" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:WrapPanel Spacing="12">
                                 <daisy:DaisyStatusIndicator Variant="TrafficLightVertical" TrafficLightActive="Green" />
@@ -442,7 +442,7 @@
                                 <daisy:DaisyStatusIndicator Variant="TrafficLightHorizontal" TrafficLightActive="Red" />
                             </daisy:WrapPanel>
 
-                            <TextBlock Text="WiFi Signal (1-3)" FontWeight="SemiBold" Opacity="0.7"
+                            <TextBlock Text="WiFi Signal (1-3)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:WrapPanel Spacing="12">
                                 <daisy:DaisyStatusIndicator Variant="WifiSignal" Color="Primary" SignalStrength="0" />
@@ -451,7 +451,7 @@
                                 <daisy:DaisyStatusIndicator Variant="WifiSignal" Color="Primary" SignalStrength="3" />
                             </daisy:WrapPanel>
 
-                            <TextBlock Text="Cellular Signal (1-5)" FontWeight="SemiBold" Opacity="0.7"
+                            <TextBlock Text="Cellular Signal (1-5)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:WrapPanel Spacing="12">
                                 <daisy:DaisyStatusIndicator Variant="CellularSignal" Color="Primary" SignalStrength="0" />
@@ -464,222 +464,222 @@
                         </StackPanel>
                     </Grid>
 
-                    <TextBlock Text="Ping Animation" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Ping Animation" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                         <daisy:DaisyStatusIndicator Color="Error" Variant="Ping" />
-                        <TextBlock Text="Server is down" Opacity="0.8"
+                        <TextBlock Text="Server is down" Opacity="{ThemeResource GalleryOpacity80}"
                                    VerticalAlignment="Center"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     </StackPanel>
 
-                    <TextBlock Text="Bounce Animation" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Bounce Animation" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                         <daisy:DaisyStatusIndicator Color="Info" Variant="Bounce" />
-                        <TextBlock Text="Unread messages" Opacity="0.8"
+                        <TextBlock Text="Unread messages" Opacity="{ThemeResource GalleryOpacity80}"
                                    VerticalAlignment="Center"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     </StackPanel>
 
-                    <TextBlock Text="Usage Examples" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Usage Examples" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Style="{StaticResource GallerySectionStyle}">
                         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <daisy:DaisyStatusIndicator Color="Success" Size="Small" />
-                            <TextBlock Text="Online" Opacity="0.8"
+                            <TextBlock Text="Online" Opacity="{ThemeResource GalleryOpacity80}"
                                        VerticalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <daisy:DaisyStatusIndicator Color="Neutral" Size="Small" />
-                            <TextBlock Text="Offline" Opacity="0.8"
+                            <TextBlock Text="Offline" Opacity="{ThemeResource GalleryOpacity80}"
                                        VerticalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <daisy:DaisyStatusIndicator Color="Warning" Size="Small" Variant="Ping" />
-                            <TextBlock Text="Connecting..." Opacity="0.8"
+                            <TextBlock Text="Connecting..." Opacity="{ThemeResource GalleryOpacity80}"
                                        VerticalAlignment="Center"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         </StackPanel>
                     </StackPanel>
 
-                    <TextBlock Text="Animation Variants (27 total)" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Animation Variants (27 total)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Classic Variants" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Classic Variants" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:WrapPanel Spacing="16">
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Success" Variant="Default" />
-                                <TextBlock Text="Default" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Default" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Success" Variant="Ping" />
-                                <TextBlock Text="Ping" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Ping" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Info" Variant="Bounce" />
-                                <TextBlock Text="Bounce" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Bounce" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                         <daisy:DaisyStatusIndicator Color="Warning" Variant="Pulse" />
-                                <TextBlock Text="Pulse" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Pulse" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Error" Variant="Blink" />
-                                <TextBlock Text="Blink" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Blink" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Primary" Variant="Ripple" />
-                                <TextBlock Text="Ripple" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Ripple" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Error" Variant="Heartbeat" />
-                                <TextBlock Text="Heartbeat" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Heartbeat" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                         </daisy:WrapPanel>
 
-                        <TextBlock Text="Motion Variants" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Motion Variants" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:WrapPanel Spacing="16">
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Primary" Variant="Spin" />
-                                <TextBlock Text="Spin" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Spin" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Secondary" Variant="Wave" />
-                                <TextBlock Text="Wave" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Wave" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Accent" Variant="Glow" />
-                                <TextBlock Text="Glow" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Glow" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Info" Variant="Morph" />
-                                <TextBlock Text="Morph" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Morph" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Success" Variant="Orbit" />
-                                <TextBlock Text="Orbit" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Orbit" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Error" Variant="Shake" />
-                                <TextBlock Text="Shake" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Shake" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Warning" Variant="Wobble" />
-                                <TextBlock Text="Wobble" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Wobble" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Primary" Variant="Swing" />
-                                <TextBlock Text="Swing" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Swing" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Secondary" Variant="Jiggle" />
-                                <TextBlock Text="Jiggle" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Jiggle" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                         </daisy:WrapPanel>
 
-                        <TextBlock Text="Effect Variants" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Effect Variants" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:WrapPanel Spacing="16">
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Info" Variant="Radar" />
-                                <TextBlock Text="Radar" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Radar" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Success" Variant="Sonar" />
-                                <TextBlock Text="Sonar" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Sonar" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Warning" Variant="Beacon" />
-                                <TextBlock Text="Beacon" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Beacon" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Accent" Variant="Pop" />
-                                <TextBlock Text="Pop" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Pop" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Error" Variant="Flicker" />
-                                <TextBlock Text="Flicker" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Flicker" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Primary" Variant="Breathe" />
-                                <TextBlock Text="Breathe" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Breathe" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Secondary" Variant="Ring" />
-                                <TextBlock Text="Ring" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Ring" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Warning" Variant="Flash" />
-                                <TextBlock Text="Flash" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Flash" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Error" Variant="Throb" />
-                                <TextBlock Text="Throb" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Throb" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Accent" Variant="Twinkle" />
-                                <TextBlock Text="Twinkle" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Twinkle" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <StackPanel Spacing="4" HorizontalAlignment="Center">
                                 <daisy:DaisyStatusIndicator Color="Info" Variant="Splash" />
-                                <TextBlock Text="Splash" FontSize="9" Opacity="0.5"
+                                <TextBlock Text="Splash" FontSize="9" Opacity="{ThemeResource GalleryOpacity50}"
                                            HorizontalAlignment="Center"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
@@ -693,13 +693,13 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="toast" Title="Toast" />
                 <TextBlock Text="Toast container positions notifications in a corner of a surface."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <daisy:WrapPanel Spacing="12">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Bottom End (default)" Opacity="0.7"
+                        <TextBlock Text="Bottom End (default)" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <Border Width="320" Height="180"
                                 Background="{ThemeResource DaisyBase200Brush}"
@@ -721,7 +721,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Top Start" Opacity="0.7"
+                        <TextBlock Text="Top Start" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <Border Width="320" Height="180"
                                 Background="{ThemeResource DaisyBase200Brush}"
@@ -753,7 +753,7 @@
                 <local:SectionHeader SectionId="tooltip" Title="Tooltip" />
 
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Basic Tooltips (not for Android)" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Basic Tooltips (not for Android)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Orientation="Horizontal" Spacing="16">
                         <daisy:DaisyTooltip Tip="Default tooltip">

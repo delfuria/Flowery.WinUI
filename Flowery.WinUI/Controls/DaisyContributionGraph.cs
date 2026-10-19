@@ -551,7 +551,7 @@ namespace Flowery.Controls
                     {
                         Text = mh.Text,
                         FontSize = fontSize,
-                        Opacity = 0.7,
+                        Opacity = DaisySystemAppearance.HighContrast ? 1 : 0.7,
                         Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
                         // Left padding to match cell margin
                         Margin = new Thickness(CellMargin.Left, 0, 0, 0)
@@ -586,7 +586,7 @@ namespace Flowery.Controls
                         {
                             Text = dl.Text,
                             FontSize = fontSize,
-                            Opacity = 0.7,
+                            Opacity = DaisySystemAppearance.HighContrast ? 1 : 0.7,
                             Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
                             VerticalAlignment = VerticalAlignment.Center
                         }
@@ -618,7 +618,7 @@ namespace Flowery.Controls
             for (int i = 0; i < Cells.Count; i++)
             {
                 var cell = Cells[i];
-                var border = CreateCellBorder(cell);
+                var border = CreateCellBorder(cell, CellSize);
                 // Add extra margin to center cells within the larger row height
                 if (extraVerticalMargin > 0)
                 {
@@ -642,7 +642,7 @@ namespace Flowery.Controls
                 {
                     Text = FloweryLocalization.GetStringInternal("ContributionGraph_Less", "Less"),
                     FontSize = fontSize,
-                    Opacity = 0.7,
+                    Opacity = DaisySystemAppearance.HighContrast ? 1 : 0.7,
                     Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
                     VerticalAlignment = VerticalAlignment.Center
                 });
@@ -658,7 +658,7 @@ namespace Flowery.Controls
                 {
                     Text = FloweryLocalization.GetStringInternal("ContributionGraph_More", "More"),
                     FontSize = fontSize,
-                    Opacity = 0.7,
+                    Opacity = DaisySystemAppearance.HighContrast ? 1 : 0.7,
                     Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
                     VerticalAlignment = VerticalAlignment.Center
                 });
@@ -668,20 +668,18 @@ namespace Flowery.Controls
         private Border CreateLegendSwatch(int level)
         {
             var cell = new DaisyContributionGraphCell { Date = DateTime.Today, Level = level, IsMonthStart = false };
-            var border = CreateCellBorder(cell);
-            border.Width = 10;
-            border.Height = 10;
+            var border = CreateCellBorder(cell, 10);
             border.Margin = new Thickness(0);
             border.CornerRadius = new CornerRadius(2);
             return border;
         }
 
-        private Border CreateCellBorder(DaisyContributionGraphCell cell)
+        private Border CreateCellBorder(DaisyContributionGraphCell cell, double size)
         {
             var border = new Border
             {
-                Width = CellSize,
-                Height = CellSize,
+                Width = size,
+                Height = size,
                 Margin = CellMargin,
                 CornerRadius = CellCornerRadius,
                 BorderThickness = new Thickness(0)
@@ -695,6 +693,8 @@ namespace Flowery.Controls
             }
 
             ApplyCellColors(border, cell.Level);
+            if (cell.Date is { } date)
+                Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(border, FormatToolTip(date, cell.Count));
 
             if (cell.IsMonthStart)
             {
@@ -714,8 +714,9 @@ namespace Flowery.Controls
             };
             border.PointerExited += (_, _) =>
             {
-                border.BorderThickness = cell.IsMonthStart ? new Thickness(1) : new Thickness(0);
-                border.BorderBrush = cell.IsMonthStart ? DaisyResourceLookup.GetBrush("DaisySecondaryBrush") : null;
+                border.BorderThickness = cell.IsMonthStart || DaisySystemAppearance.HighContrast ? new Thickness(1) : new Thickness(0);
+                border.BorderBrush = cell.IsMonthStart ? DaisyResourceLookup.GetBrush("DaisySecondaryBrush")
+                    : DaisySystemAppearance.HighContrast ? DaisyResourceLookup.GetBorderBrush() : null;
             };
 
             return border;
@@ -723,6 +724,23 @@ namespace Flowery.Controls
 
         private static void ApplyCellColors(Border border, int level)
         {
+            if (DaisySystemAppearance.HighContrast)
+            {
+                border.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                border.BorderBrush = DaisyResourceLookup.GetBorderBrush();
+                border.BorderThickness = new Thickness(1);
+                // Area encodes the level without blending the user's contrast colors.
+                if (level > 0)
+                    border.Child = new Border
+                    {
+                        Background = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
+                        Width = Math.Max(1, (border.Width - 2) * Math.Clamp(level, 0, 4) / 4),
+                        HorizontalAlignment = HorizontalAlignment.Left,
+                        IsHitTestVisible = false
+                    };
+                return;
+            }
+
             var primary = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
             var base300 = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
 

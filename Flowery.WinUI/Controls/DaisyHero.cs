@@ -176,7 +176,14 @@ namespace Flowery.Controls
                 return;
 
             // Apply overlay opacity
-            _overlayBorder.Opacity = OverlayOpacity;
+            _overlayBorder.Opacity = DaisySystemAppearance.HighContrast ? 0 : OverlayOpacity;
+
+            if (DaisySystemAppearance.HighContrast)
+            {
+                _backgroundBorder.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                ApplyContentForeground(DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"));
+                return;
+            }
 
             // Get the background color from the control's Background brush
             var bgColor = (Background as SolidColorBrush)?.Color;

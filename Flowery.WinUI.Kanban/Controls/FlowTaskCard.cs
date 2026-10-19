@@ -51,6 +51,7 @@ namespace Flowery.WinUI.Kanban.Controls
             LostFocus += OnCardLostFocus;
             KeyDown += OnCardKeyDown;
             PointerPressed += OnCardPointerPressed;
+            RegisterPropertyChangedCallback(IsEnabledProperty, OnIsEnabledChanged);
             UpdateSelectionBadgePlacement();
         }
 
@@ -898,6 +899,14 @@ namespace Flowery.WinUI.Kanban.Controls
 
         private void ApplyPalette()
         {
+            if (DaisyResourceLookup.IsHighContrast)
+            {
+                Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                Foreground = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+                ApplySelectionVisual();
+                return;
+            }
+
             if (Palette == DaisyColor.Default)
             {
                 var secondaryBackground = DaisyResourceLookup.GetBrush("DaisySecondaryBrush");
@@ -1333,7 +1342,10 @@ namespace Flowery.WinUI.Kanban.Controls
             ApplyPalette();
             ApplySizing();
             ApplySelectionVisual();
+            UpdateCloseButtonVisibility();
         }
+
+        private void OnIsEnabledChanged(DependencyObject sender, DependencyProperty property) => ApplyPalette();
 
         internal void RefreshTheme()
         {
@@ -1528,7 +1540,7 @@ namespace Flowery.WinUI.Kanban.Controls
             if (_closeButton != null)
             {
                 _closeButton.IsHitTestVisible = isVisible;
-                _closeButton.Opacity = isVisible ? 0.7 : 0;
+                _closeButton.Opacity = isVisible ? DaisyResourceLookup.GetContentOpacity(0.7) : 0;
             }
 
             var showPill = IsSelected || isVisible;
@@ -1610,14 +1622,15 @@ namespace Flowery.WinUI.Kanban.Controls
             if (!IsSelected)
             {
                 _rootBorder.BorderThickness = _defaultBorderThickness;
-                _rootBorder.BorderBrush = TransparentBorderBrush;
+                _rootBorder.BorderBrush = DaisyResourceLookup.IsHighContrast
+                    ? DaisyResourceLookup.GetBorderBrush() : TransparentBorderBrush;
                 return;
             }
 
             var accent = DaisyResourceLookup.GetBrush("DaisyAccentBrush");
             if (accent != null)
                 _rootBorder.BorderBrush = accent;
-            _rootBorder.BorderThickness = _defaultBorderThickness;
+            _rootBorder.BorderThickness = DaisyResourceLookup.IsHighContrast ? new Thickness(2) : _defaultBorderThickness;
         }
 
         private bool IsFocusWithin()

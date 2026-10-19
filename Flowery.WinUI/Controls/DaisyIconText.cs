@@ -18,13 +18,13 @@ namespace Flowery.Controls
     /// <code>
     /// &lt;!-- Icon only --&gt;
     /// &lt;daisy:DaisyIconText IconData="M12 2C8.13..." Size="Medium" /&gt;
-    /// 
+    ///
     /// &lt;!-- Symbol only --&gt;
     /// &lt;daisy:DaisyIconText IconSymbol="Home" Size="Large" /&gt;
-    /// 
+    ///
     /// &lt;!-- Text only --&gt;
     /// &lt;daisy:DaisyIconText Text="Hello" Size="Small" /&gt;
-    /// 
+    ///
     /// &lt;!-- Icon + Text --&gt;
     /// &lt;daisy:DaisyIconText IconSymbol="Save" Text="Save" IconPlacement="Left" /&gt;
     /// </code>
@@ -242,6 +242,7 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyIconText);
             IsTabStop = false;
+            IsEnabledChanged += (_, _) => SyncInternalForeground();
         }
 
         private long _foregroundCallbackToken;
@@ -291,13 +292,15 @@ namespace Flowery.Controls
 
         private void SyncInternalForeground()
         {
+            var foreground = DaisySystemAppearance.HighContrast && !IsEnabled
+                ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush") : Foreground;
             if (_textBlock != null)
-                _textBlock.Foreground = Foreground;
+                _textBlock.Foreground = foreground;
 
             if (_iconViewbox?.Child is Microsoft.UI.Xaml.Shapes.Path path)
-                path.Fill = Foreground;
+                path.Fill = foreground;
             else if (_iconViewbox?.Child is IconElement icon)
-                icon.Foreground = Foreground;
+                icon.Foreground = foreground;
         }
 
         protected override void OnGlobalSizeChanged(DaisySize size)
@@ -445,7 +448,7 @@ namespace Flowery.Controls
                 return;
             }
 
-            // Smart Contrast: If background is essentially transparent, 
+            // Smart Contrast: If background is essentially transparent,
             // use the variant brush itself (e.g. PrimaryBrush) because it's designed to contrast with Base.
             // If background is solid, use the content brush (e.g. PrimaryContentBrush) designed for that accent.
             var bgBrush = Background as SolidColorBrush;
@@ -477,10 +480,12 @@ namespace Flowery.Controls
             var brush = foregroundKey != null
                 ? DaisyResourceLookup.GetBrush(foregroundKey, DaisyResourceLookup.GetBrush(fgKey))
                 : DaisyResourceLookup.GetBrush(fgKey);
+            if (DaisySystemAppearance.HighContrast && isTransparent)
+                brush = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
 
             // Universal Contrast Guard: If we have a solid background, ensure the foreground actually stands out.
             // This protects against themes with poorly matched ContentBrushes.
-            if (!isTransparent && bgColor.HasValue && brush is SolidColorBrush fcb)
+            if (!DaisySystemAppearance.HighContrast && !isTransparent && bgColor.HasValue && brush is SolidColorBrush fcb)
             {
                 var bgLum = FloweryColorHelpers.GetLuminance(bgColor.Value);
                 var fgLum = FloweryColorHelpers.GetLuminance(fcb.Color);

@@ -120,6 +120,9 @@ namespace Flowery.Controls
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
+            DaisySystemAppearance.Initialize(XamlRoot);
+            DaisyThemeManager.ThemeChanged += OnThemeChanged;
+            UpdateGripColors();
             if (_gripThumb != null)
             {
                 _gripThumb.DragStarted -= OnGripDragStarted;
@@ -150,6 +153,7 @@ namespace Flowery.Controls
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
+            DaisyThemeManager.ThemeChanged -= OnThemeChanged;
             _hoverUpdateTimer?.Stop();
             DetachHoverTracking();
             if (_itemsVectorSubscribed && Items is IObservableVector<object> observable)
@@ -175,6 +179,7 @@ namespace Flowery.Controls
         private void OnIsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             UpdateInteractionState();
+            UpdateGripColors();
         }
 
         private void OnAllowDropChanged(DependencyObject sender, DependencyProperty dp)
@@ -310,6 +315,36 @@ namespace Flowery.Controls
 
             _gripCanvas.Children.Add(_gripVisual);
             _gripCanvas.Children.Add(_gripThumb);
+            UpdateGripColors();
+        }
+
+        private void OnThemeChanged(object? sender, string themeName) => UpdateGripColors();
+
+        private void UpdateGripColors()
+        {
+            if (_gripVisual == null)
+                return;
+
+            var foreground = DaisyResourceLookup.GetBrush(DaisySystemAppearance.HighContrast && !IsEnabled
+                ? "DaisyDisabledForegroundBrush" : "DaisyBaseContentBrush");
+            foreach (var child in _gripVisual.Children)
+            {
+                if (child is Rectangle line)
+                {
+                    line.Fill = DaisySystemAppearance.HighContrast ? foreground : DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
+                    line.Opacity = DaisyResourceLookup.GetContentOpacity(0.8);
+                }
+                else if (child is Border handle)
+                {
+                    handle.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                    handle.BorderBrush = DaisySystemAppearance.HighContrast ? foreground : DaisyResourceLookup.GetBorderBrush();
+                    if (handle.Child is Viewbox { Child: Path path })
+                    {
+                        path.Fill = foreground;
+                        path.Opacity = DaisyResourceLookup.GetContentOpacity(0.8);
+                    }
+                }
+            }
         }
 
         private Grid CreateGripVisual()

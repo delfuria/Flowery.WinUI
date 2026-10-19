@@ -358,6 +358,12 @@ namespace Flowery.Controls
                 var index = container.Tag is int i ? i : -1;
                 if (IsSelectionAnimationEnabled && index == _selectedIndex)
                     return;
+                if (DaisyResourceLookup.IsHighContrast)
+                {
+                    container.BorderBrush = DaisyResourceLookup.GetBrush("DaisyFocusBrush");
+                    container.BorderThickness = new Thickness(1);
+                    return;
+                }
 
                 container.Background = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
             }
@@ -367,6 +373,11 @@ namespace Flowery.Controls
         {
             if (sender is Border container)
             {
+                if (DaisyResourceLookup.IsHighContrast)
+                {
+                    UpdateSelection();
+                    return;
+                }
                 var index = container.Tag is int i ? i : -1;
                 if (IsSelectionAnimationEnabled)
                 {
@@ -411,6 +422,10 @@ namespace Flowery.Controls
             {
                 if (_itemsPanel.Children[i] is Border container)
                 {
+                    container.BorderThickness = DaisyResourceLookup.IsHighContrast && !IsSelectionAnimationEnabled && i == _selectedIndex
+                        ? new Thickness(2) : new Thickness(0);
+                    container.BorderBrush = DaisyResourceLookup.IsHighContrast
+                        ? DaisyResourceLookup.GetBrush("DaisyFocusBrush") : null;
                     if (IsSelectionAnimationEnabled)
                     {
                         container.Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
@@ -418,7 +433,7 @@ namespace Flowery.Controls
                     else
                     {
                         container.Background = i == _selectedIndex
-                            ? DaisyResourceLookup.GetBrush("DaisyPrimaryBrush")
+                            ? DaisyResourceLookup.GetBrush(DaisyResourceLookup.IsHighContrast ? "DaisyBase100Brush" : "DaisyPrimaryBrush")
                             : new SolidColorBrush(Microsoft.UI.Colors.Transparent);
                     }
                 }
@@ -506,7 +521,7 @@ namespace Flowery.Controls
             var borderOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyDock", "BorderBrush");
 
             _dockBorder.Background = bgOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            _dockBorder.BorderBrush = borderOverride ?? DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            _dockBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush(borderOverride);
             _dockBorder.BorderThickness = new Thickness(1);
 
             UpdateSelection();
@@ -632,7 +647,11 @@ namespace Flowery.Controls
             var targetWidth = container.ActualWidth;
             var targetHeight = container.ActualHeight;
 
-            _selectionIndicator.Background = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
+            _selectionIndicator.Background = DaisyResourceLookup.GetBrush(
+                DaisyResourceLookup.IsHighContrast ? "DaisyBase100Brush" : "DaisyPrimaryBrush");
+            _selectionIndicator.BorderBrush = DaisyResourceLookup.IsHighContrast
+                ? DaisyResourceLookup.GetBrush("DaisyFocusBrush") : null;
+            _selectionIndicator.BorderThickness = DaisyResourceLookup.IsHighContrast ? new Thickness(2) : new Thickness(0);
             _selectionIndicator.CornerRadius = container.CornerRadius;
 
             var shouldAnimate = animate && Flowery.Services.DaisyMotion.AnimationsEnabled && _selectionIndicator.Opacity > 0;

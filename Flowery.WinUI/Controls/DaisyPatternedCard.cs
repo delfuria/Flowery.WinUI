@@ -47,6 +47,20 @@ namespace Flowery.Controls
             base.OnUnloaded();
         }
 
+        protected override void OnThemeChanged(string themeName)
+        {
+            base.OnThemeChanged(themeName);
+            UpdateDecorativeVisibility();
+            RebuildDecorativeLayers();
+        }
+
+        private void UpdateDecorativeVisibility()
+        {
+            var visibility = DaisySystemAppearance.HighContrast ? Visibility.Collapsed : Visibility.Visible;
+            if (_patternLayer != null) _patternLayer.Visibility = visibility;
+            if (_ornamentLayer != null) _ornamentLayer.Visibility = visibility;
+        }
+
         private void OnSizeChanged(object sender, Microsoft.UI.Xaml.SizeChangedEventArgs e)
         {
             RebuildDecorativeLayers();
@@ -150,6 +164,8 @@ namespace Flowery.Controls
         /// </summary>
         private void RebuildDecorativeLayersDirect()
         {
+            UpdateDecorativeVisibility();
+            if (DaisySystemAppearance.HighContrast) return;
             if (ActualWidth <= 0 || ActualHeight <= 0) return;
             RebuildPatternLayer();
             RebuildOrnamentLayer();
@@ -157,6 +173,8 @@ namespace Flowery.Controls
 
         private void RebuildDecorativeLayers()
         {
+            UpdateDecorativeVisibility();
+            if (DaisySystemAppearance.HighContrast) return;
             // Skip if deferred - will be called directly when DeferPatternGeneration is set to false
             if (DeferPatternGeneration) return;
             if (ActualWidth <= 0 || ActualHeight <= 0) return;
@@ -167,6 +185,7 @@ namespace Flowery.Controls
             DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Normal, () =>
             {
                 _isRebuildPending = false;
+                if (DaisySystemAppearance.HighContrast) return;
                 if (DeferPatternGeneration) return;
                 if (ActualWidth <= 0 || ActualHeight <= 0) return;
 
@@ -289,7 +308,7 @@ namespace Flowery.Controls
                 Stroke = brush,
                 StrokeThickness = t,
                 Opacity = 0.8,
-                Data = GeometryFromString(hDir == 0 
+                Data = GeometryFromString(hDir == 0
                     ? (vDir == 0 ? $"M {w},0 L 0,0 L 0,{h}" : $"M {w},{h} L 0,{h} L 0,0")
                     : (vDir == 0 ? $"M 0,0 L {w},0 L {w},{h}" : $"M 0,{h} L {w},{h} L {w},0"))
             };

@@ -750,7 +750,7 @@ namespace Flowery.Controls
                 Child = countdown,
                 Padding = new Thickness(8, 4, 8, 4),
                 Background = DaisyResourceLookup.GetBrush("DaisyBase200Brush"),
-                BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush"),
+                BorderBrush = DaisyResourceLookup.GetBorderBrush(),
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(4)
             };
@@ -806,7 +806,7 @@ namespace Flowery.Controls
                 Child = textBlock,
                 Padding = new Thickness(12, 8, 12, 8),
                 Background = DaisyResourceLookup.GetBrush("DaisyBase200Brush"),
-                BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush"),
+                BorderBrush = DaisyResourceLookup.GetBorderBrush(),
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(4)
             };
@@ -820,7 +820,7 @@ namespace Flowery.Controls
                 Child = textBlock,
                 Padding = new Thickness(4, 8, 4, 8),
                 Background = DaisyResourceLookup.GetBrush("DaisyBase200Brush"),
-                BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush"),
+                BorderBrush = DaisyResourceLookup.GetBorderBrush(),
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(4)
             };
@@ -1294,6 +1294,15 @@ namespace Flowery.Controls
         {
             var foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
             var neutralForeground = DaisyResourceLookup.GetBrush("DaisyNeutralContentBrush");
+            if (_daisyJoin != null)
+            {
+                foreach (var border in _daisyJoin.JoinedItems.OfType<Border>())
+                {
+                    border.Background = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
+                    border.BorderBrush = DaisyResourceLookup.GetBorderBrush();
+                    if (border.Child is TextBlock text) text.Foreground = foreground;
+                }
+            }
 
             // Separators are wrapped in Grid - get the TextBlock inside
             if (GetSeparatorTextBlock(_separator1) is TextBlock sep1) sep1.Foreground = foreground;

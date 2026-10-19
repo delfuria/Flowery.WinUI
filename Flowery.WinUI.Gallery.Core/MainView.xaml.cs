@@ -184,7 +184,7 @@ namespace Flowery.WinUI.Gallery
             if (CategoryTitleBar != null)
             {
                 CategoryTitleBar.Background = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-                CategoryTitleBar.BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+                CategoryTitleBar.BorderBrush = DaisyResourceLookup.GetBrush("DaisyBorderBrush");
             }
 
             if (CategoryTitle != null)

@@ -759,7 +759,7 @@ namespace Flowery.Controls
             double height = baseHeight + 4;
             double width = height; // Square buttons
             double fontSize = DaisyResourceLookup.GetDefaultFontSize(effectiveSize);
-            var base300Brush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var base300Brush = DaisyResourceLookup.GetBorderBrush();
 
             foreach (var button in _allButtons)
             {
@@ -773,7 +773,7 @@ namespace Flowery.Controls
                 // Style ellipsis differently
                 if (button.IsEllipsis)
                 {
-                    button.Opacity = 0.6;
+                    button.Opacity = DaisyResourceLookup.GetContentOpacity(0.6);
                 }
             }
         }

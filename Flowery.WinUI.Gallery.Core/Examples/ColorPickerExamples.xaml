@@ -14,14 +14,14 @@
                 <StackPanel Style="{StaticResource GallerySectionStyle}">
                     <local:SectionHeader SectionId="colorwheel" Title="Color Wheel" />
                     <TextBlock Text="A circular color wheel for selecting hue and saturation values."
-                               Opacity="0.7"
+                               Opacity="{ThemeResource GalleryOpacity70}"
                                TextWrapping="Wrap"
                                Foreground="{ThemeResource DaisyBaseContentBrush}"
                                daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                     <daisy:WrapPanel Orientation="Horizontal" Spacing="24">
                         <StackPanel Spacing="10" Margin="0,0,40,20">
                             <TextBlock Text="Basic Color Wheel"
-                                       Opacity="0.7"
+                                       Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                             <colorpicker:DaisyColorWheel x:Name="ColorWheel1"
@@ -31,13 +31,13 @@
                                                          ColorChanged="ColorWheel1_ColorChanged" />
                             <TextBlock x:Name="ColorWheelValue1"
                                        Text="Color: #FF0000"
-                                       Opacity="0.6"
+                                       Opacity="{ThemeResource GalleryOpacity60}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         </StackPanel>
                         <StackPanel Spacing="10" Margin="0,0,40,20">
                             <TextBlock Text="With Center Lines"
-                                       Opacity="0.7"
+                                       Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                             <colorpicker:DaisyColorWheel Width="200"
@@ -47,7 +47,7 @@
                         </StackPanel>
                         <StackPanel Spacing="10" Margin="0,0,40,20">
                             <TextBlock Text="Different Lightness (0.7)"
-                                       Opacity="0.7"
+                                       Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                             <colorpicker:DaisyColorWheel Width="200"
@@ -64,27 +64,27 @@
                 <StackPanel Style="{StaticResource GallerySectionStyle}">
                     <local:SectionHeader SectionId="colorgrid" Title="Color Grid" />
                     <TextBlock Text="A grid control for selecting colors from predefined palettes."
-                               Opacity="0.7"
+                               Opacity="{ThemeResource GalleryOpacity70}"
                                TextWrapping="Wrap"
                                Foreground="{ThemeResource DaisyBaseContentBrush}"
                                daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                     <daisy:WrapPanel Orientation="Horizontal" Spacing="24">
                         <StackPanel Spacing="10" Margin="0,0,40,20">
                             <TextBlock Text="Paint Palette"
-                                       Opacity="0.7"
+                                       Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                             <colorpicker:DaisyColorGrid x:Name="ColorGrid1"
                                                         ColorChanged="ColorGrid1_ColorChanged" />
                             <TextBlock x:Name="ColorGridValue1"
                                        Text="Selected: #000000"
-                                       Opacity="0.6"
+                                       Opacity="{ThemeResource GalleryOpacity60}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         </StackPanel>
                         <StackPanel Spacing="10" Margin="0,0,40,20">
                             <TextBlock Text="Larger Cells (20x20)"
-                                       Opacity="0.7"
+                                       Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                             <colorpicker:DaisyColorGrid CellSize="20,20" Columns="8" />
@@ -98,14 +98,14 @@
                 <StackPanel Style="{StaticResource GallerySectionStyle}">
                     <local:SectionHeader SectionId="colorslider" Title="Color Sliders" />
                     <TextBlock Text="Sliders for individual color channel selection (RGB, HSL, Alpha)."
-                               Opacity="0.7"
+                               Opacity="{ThemeResource GalleryOpacity70}"
                                TextWrapping="Wrap"
                                Foreground="{ThemeResource DaisyBaseContentBrush}"
                                daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                     <daisy:WrapPanel Orientation="Horizontal" Spacing="24">
                         <StackPanel Spacing="10" Margin="0,0,40,20" Width="300">
                             <TextBlock Text="RGB Channels"
-                                       Opacity="0.7"
+                                       Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                             <Grid ColumnDefinitions="40,*">
@@ -123,7 +123,7 @@
                         </StackPanel>
                         <StackPanel Spacing="10" Margin="0,0,40,20" Width="300">
                             <TextBlock Text="HSL Channels"
-                                       Opacity="0.7"
+                                       Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                             <Grid ColumnDefinitions="40,*">
@@ -141,7 +141,7 @@
                         </StackPanel>
                         <StackPanel Spacing="10" Margin="0,0,40,20" Width="300">
                             <TextBlock Text="Alpha Channel"
-                                       Opacity="0.7"
+                                       Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                             <Grid ColumnDefinitions="40,*">
@@ -158,21 +158,21 @@
                 <StackPanel Style="{StaticResource GallerySectionStyle}">
                     <local:SectionHeader SectionId="coloreditor" Title="Color Editor" />
                     <TextBlock Text="A comprehensive color editor with RGB/HSL sliders and numeric inputs."
-                               Opacity="0.7"
+                               Opacity="{ThemeResource GalleryOpacity70}"
                                TextWrapping="Wrap"
                                Foreground="{ThemeResource DaisyBaseContentBrush}"
                                daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                     <daisy:WrapPanel Orientation="Horizontal" Spacing="24">
                         <StackPanel Spacing="10" Margin="0,0,40,20" Width="500">
                             <TextBlock Text="Full Color Editor"
-                                       Opacity="0.7"
+                                       Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                             <colorpicker:DaisyColorEditor x:Name="ColorEditor1" Color="Purple" />
                         </StackPanel>
                         <StackPanel Spacing="10" Margin="0,0,40,20" Width="500">
                             <TextBlock Text="RGB Only (No Alpha)"
-                                       Opacity="0.7"
+                                       Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                             <colorpicker:DaisyColorEditor Color="Orange" ShowAlphaChannel="False" ShowHslSliders="False" />
@@ -188,7 +188,7 @@
                             x:Load="{x:Bind IsScreenPickerSupported}">
                     <local:SectionHeader SectionId="screenpicker" Title="Screen Color Picker" />
                     <TextBlock TextWrapping="Wrap"
-                               Opacity="0.7"
+                               Opacity="{ThemeResource GalleryOpacity70}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}"
                                daisy:FlowerySizeManager.ResponsiveFont="Primary">
                         <Run Text="An eyedropper tool for picking colors from anywhere on screen using a " />
@@ -205,23 +205,23 @@
                             <StackPanel Spacing="4">
                                 <TextBlock Text="1. Click and HOLD the left mouse button on the control"
                                            FontSize="11"
-                                           Opacity="0.8"
+                                           Opacity="{ThemeResource GalleryOpacity80}"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <TextBlock Text="2. DRAG anywhere on screen (even outside this window)"
                                            FontSize="11"
-                                           Opacity="0.8"
+                                           Opacity="{ThemeResource GalleryOpacity80}"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <TextBlock Text="3. Watch the live color preview update as you move"
                                            FontSize="11"
-                                           Opacity="0.8"
+                                           Opacity="{ThemeResource GalleryOpacity80}"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <TextBlock Text="4. RELEASE to capture the color at the cursor position"
                                            FontSize="11"
-                                           Opacity="0.8"
+                                           Opacity="{ThemeResource GalleryOpacity80}"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             </StackPanel>
                             <TextBlock Text="Press Escape while dragging to cancel."
-                                       Opacity="0.6"
+                                       Opacity="{ThemeResource GalleryOpacity60}"
                                        Margin="0,4,0,0"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
@@ -231,7 +231,7 @@
                     <daisy:WrapPanel Orientation="Horizontal" Spacing="24">
                         <StackPanel Spacing="10" Margin="0,0,40,20">
                             <TextBlock Text="Eyedropper Tool"
-                                       Opacity="0.7"
+                                       Opacity="{ThemeResource GalleryOpacity70}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                             <colorpicker:DaisyScreenColorPicker x:Name="ScreenPicker1"
@@ -240,7 +240,7 @@
                                                                 ColorChanged="ScreenPicker1_ColorChanged" />
                             <TextBlock x:Name="ScreenPickerValue1"
                                        Text="Click and drag to pick a color"
-                                       Opacity="0.6"
+                                       Opacity="{ThemeResource GalleryOpacity60}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         </StackPanel>
@@ -253,7 +253,7 @@
                 <StackPanel Style="{StaticResource GallerySectionStyle}">
                     <local:SectionHeader SectionId="colorpickerdialog" Title="Color Picker Dialog" />
                     <TextBlock Text="A complete color picker dialog combining all components."
-                               Opacity="0.7"
+                               Opacity="{ThemeResource GalleryOpacity70}"
                                TextWrapping="Wrap"
                                Foreground="{ThemeResource DaisyBaseContentBrush}"
                                daisy:FlowerySizeManager.ResponsiveFont="Primary" />
@@ -268,11 +268,11 @@
                                     Height="30"
                                     Background="Red"
                                     CornerRadius="4"
-                                    BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                    BorderBrush="{ThemeResource DaisyBorderBrush}"
                                     BorderThickness="1" />
                             <TextBlock x:Name="SelectedColorText"
                                        Text="Selected: #FF0000"
-                                       Opacity="0.6"
+                                       Opacity="{ThemeResource GalleryOpacity60}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}"
                                        daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
                         </StackPanel>

@@ -9,6 +9,9 @@ namespace Flowery.Controls
         private void StartDotAnimation()
         {
             if (_dotVisual == null || _compositor == null || !_isAnimating) return;
+            if (DaisySystemAppearance.HighContrast && Variant is DaisyStatusIndicatorVariant.Pulse
+                or DaisyStatusIndicatorVariant.Blink or DaisyStatusIndicatorVariant.Flicker
+                or DaisyStatusIndicatorVariant.Flash or DaisyStatusIndicatorVariant.Beacon) return;
 
             switch (Variant)
             {
@@ -341,7 +344,8 @@ namespace Flowery.Controls
             opacity.IterationBehavior = AnimationIterationBehavior.Forever;
 
             PlatformCompatibility.StartAnimation(_dotVisual, "Scale", scale);
-            PlatformCompatibility.StartAnimation(_dotVisual, "Opacity", opacity);
+            if (!DaisySystemAppearance.HighContrast)
+                PlatformCompatibility.StartAnimation(_dotVisual, "Opacity", opacity);
         }
 
         private void StartTwinkleAnimation()
@@ -366,7 +370,8 @@ namespace Flowery.Controls
             scale.Duration = TimeSpan.FromMilliseconds(1000);
             scale.IterationBehavior = AnimationIterationBehavior.Forever;
 
-            PlatformCompatibility.StartAnimation(_dotVisual, "Opacity", opacity);
+            if (!DaisySystemAppearance.HighContrast)
+                PlatformCompatibility.StartAnimation(_dotVisual, "Opacity", opacity);
             PlatformCompatibility.StartAnimation(_dotVisual, "Scale", scale);
         }
 
@@ -391,6 +396,14 @@ namespace Flowery.Controls
         private void StopAnimation()
         {
             _isAnimating = false;
+            _spinContainerVisual?.Properties.StopAnimation("SpinAngle");
+            _spinContainerVisual = null;
+            foreach (var satellite in _spinSatelliteVisuals)
+            {
+                satellite.StopAnimation("Translation");
+                satellite.Properties.InsertVector3("Translation", Vector3.Zero);
+            }
+            _spinSatelliteVisuals.Clear();
             var dotVisual = _dotVisual;
             _dotVisual = null;
             PlatformCompatibility.StopRotationAnimation(dotVisual);
@@ -486,7 +499,7 @@ namespace Flowery.Controls
                         StartBeaconRingBurstAnimation(_animatedContainer, size);
                         break;
                     case DaisyStatusIndicatorVariant.Spin:
-                        StartOrbitRotationAnimation(_animatedContainer, size, 800);
+                        StartSpinAnimation(_animatedContainer, size);
                         break;
                     case DaisyStatusIndicatorVariant.Orbit:
                         StartOrbitRotationAnimation(_animatedContainer, size, 1300);
@@ -553,6 +566,41 @@ namespace Flowery.Controls
             PlatformCompatibility.StartAnimation(visual, "Opacity", opacity);
         }
 
+        private void StartSpinAnimation(UIElement element, double size)
+        {
+            if (!_isAnimating || element is not Grid container || _spinContainerVisual is not null) return;
+
+            // Keep the XAML circles unrotated: rotating their shared container can
+            // produce rasterization streaks as the satellites cross an axis.
+            var visual = ElementCompositionPreview.GetElementVisual(container);
+            _spinContainerVisual = visual;
+            var compositor = visual.Compositor;
+            var orbit = visual.Properties;
+            orbit.InsertScalar("SpinAngle", 0);
+            var radius = (float)(size - 1 - Math.Max(2, size * 0.25) / 2);
+            for (var index = 0; index < container.Children.Count; index++)
+            {
+                var satellite = container.Children[index];
+                ElementCompositionPreview.SetIsTranslationEnabled(satellite, true);
+                var satelliteVisual = ElementCompositionPreview.GetElementVisual(satellite);
+                _spinSatelliteVisuals.Add(satelliteVisual);
+                using var position = compositor.CreateExpressionAnimation(
+                    "Vector3(direction * radius * Sin(orbit.SpinAngle), direction * radius * (1 - Cos(orbit.SpinAngle)), 0)");
+                position.SetReferenceParameter("orbit", orbit);
+                position.SetScalarParameter("radius", radius);
+                position.SetScalarParameter("direction", index == 0 ? 1 : -1);
+                satelliteVisual.StartAnimation("Translation", position);
+            }
+
+            using var linear = compositor.CreateLinearEasingFunction();
+            using var angle = compositor.CreateScalarKeyFrameAnimation();
+            angle.InsertKeyFrame(0, 0, linear);
+            angle.InsertKeyFrame(1, 2 * MathF.PI, linear);
+            angle.Duration = TimeSpan.FromMilliseconds(800);
+            angle.IterationBehavior = AnimationIterationBehavior.Forever;
+            orbit.StartAnimation("SpinAngle", angle);
+        }
+
         private void StartOrbitRotationAnimation(UIElement element, double elementSize, int durationMs)
         {
             if (!_isAnimating) return;
@@ -610,6 +658,9 @@ namespace Flowery.Controls
 
         private Brush GetColorBrush()
         {
+            if (DaisySystemAppearance.HighContrast)
+                return DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+
             var resourceKey = Color switch
             {
                 DaisyColor.Primary => "DaisyPrimaryBrush",

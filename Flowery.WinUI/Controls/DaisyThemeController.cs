@@ -112,6 +112,7 @@ namespace Flowery.Controls
             Unchecked += OnCheckedChanged;
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
+            IsEnabledChanged += (_, _) => RefreshThemeBrushes();
         }
 
         // Wrapper for lifecycle - combines all theme-related updates
@@ -208,6 +209,7 @@ namespace Flowery.Controls
         {
             var stateName = IsChecked == true ? "Checked" : "Unchecked";
             VisualStateManager.GoToState(this, stateName, useTransitions);
+            RefreshThemeBrushes();
         }
 
         private void UpdateAlternateTheme(string themeName)
@@ -227,6 +229,39 @@ namespace Flowery.Controls
             var warningBrush = CloneBrush(DaisyResourceLookup.GetBrush("DaisyWarningBrush"));
             var infoBrush = CloneBrush(DaisyResourceLookup.GetBrush("DaisyInfoBrush"));
             var baseContentBrush = CloneBrush(DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"));
+            if (DaisySystemAppearance.HighContrast)
+            {
+                var foreground = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+                Foreground = foreground;
+                baseContentBrush = CloneBrush(foreground);
+                warningBrush = infoBrush = baseContentBrush;
+                primaryBrush = CloneBrush(DaisyResourceLookup.GetBrush(IsEnabled && IsChecked == true ? "DaisyPrimaryContentBrush" : IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush"));
+                foreach (var name in new[] { "ToggleMode", "TextToggleMode", "IconToggleMode", "CheckboxMode" })
+                {
+                    if (GetTemplateChild(name) is Border track)
+                    {
+                        track.Background = DaisyResourceLookup.GetBrush(IsEnabled && IsChecked == true ? "DaisyPrimaryBrush" : "DaisyBase100Brush");
+                        track.BorderBrush = foreground;
+                        track.BorderThickness = new Thickness(1);
+                    }
+                }
+                if (Mode == ThemeControllerMode.Checkbox)
+                    baseContentBrush = primaryBrush;
+            }
+            else
+            {
+                if (baseContentBrush != null)
+                    Foreground = baseContentBrush;
+                foreach (var name in new[] { "ToggleMode", "TextToggleMode", "IconToggleMode", "CheckboxMode" })
+                {
+                    if (GetTemplateChild(name) is Border track)
+                    {
+                        track.Background = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+                        track.BorderBrush = null;
+                        track.BorderThickness = new Thickness(0);
+                    }
+                }
+            }
 
             // Update toggle knobs
             if (GetTemplateChild("ToggleKnob") is Ellipse toggleKnob && primaryBrush != null)
@@ -241,6 +276,10 @@ namespace Flowery.Controls
                 sunIcon.Fill = warningBrush;
             if (GetTemplateChild("MoonIcon") is Path moonIcon && infoBrush != null)
                 moonIcon.Fill = infoBrush;
+            if (GetTemplateChild("InlineSunIcon") is Path inlineSunIcon && warningBrush != null)
+                inlineSunIcon.Fill = warningBrush;
+            if (GetTemplateChild("InlineMoonIcon") is Path inlineMoonIcon && infoBrush != null)
+                inlineMoonIcon.Fill = infoBrush;
 
             // Update checkmark
             if (GetTemplateChild("CheckMark") is Path checkMark && baseContentBrush != null)

@@ -436,6 +436,7 @@ namespace Flowery.Controls
         private void BuildWin95StartupVisual(double size, bool useColor)
         {
             if (_rootGrid == null) return;
+            useColor &= !DaisySystemAppearance.HighContrast;
 
             var brush = GetColorBrush();
             var u = size / 96.0;

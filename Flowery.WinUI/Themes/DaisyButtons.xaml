@@ -72,6 +72,7 @@
     </ControlTemplate>
 
     <Style x:Key="DaisyButtonStyle" TargetType="controls:DaisyButton">
+        <Setter Property="UseSystemFocusVisuals" Value="True" />
         <Setter Property="Template" Value="{StaticResource DaisyButtonTemplate}" />
     </Style>
 

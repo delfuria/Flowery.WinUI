@@ -438,6 +438,49 @@ Flowery.WinUI targets Windows with WinUI 3.
 Composition animations, Storyboards, bitmap capture, and SkiaSharp image processing run in the native build.
 The optional Flowery.WinUI.Win2D project supplies Win2D graphics.
 
+### Shared Composition foundation
+
+The existing rendering paths have different responsibilities:
+
+| Existing path | Reuse decision |
+| --- | --- |
+| XAML controls, layout, and automation peers | Keep text, input, focus, hit testing, and accessible semantics in WinUI. |
+| `DaisyLoading`, progress, status, and motion behaviors | Keep their native Composition animations and reuse the `DaisyMotion` policy. |
+| `DaisyShadowContainer` outer shadows | Use the shared visual scope and retained vector geometry. |
+| Optional `Flowery.WinUI.Win2D` geometry and carousel masks | Retain the optional integration; the core foundation does not reference Win2D. |
+| Inset shadows and captured glass | Keep CPU SkiaSharp processing; displaying its bitmap through WinUI does not make that processing GPU work. |
+| WebView2 shader examples | Keep the separate shader host; it is not the shared Composition implementation. |
+
+The core library combines normal WinUI content with native Composition visuals.
+Text, input, focus, and accessibility remain with the WinUI controls.
+Composition draws decorative vectors and supports animation without a separate application render loop.
+
+The internal `Flowery.Composition` helpers manage four responsibilities:
+
+| Helper | Responsibility |
+| --- | --- |
+| `CompositionVisualScope` | Owns an attached visual tree and its resources. It preserves another owner's child visual during attachment and disposal. |
+| `CompositionVectorVisual` | Keeps a native shape, geometry, and fill brush together for in-place updates. Native stroke, dash, transform, and clip properties remain available. |
+| `CompositionElementTracker` | Reports changed element bounds in host-relative DIPs after layout, scrolling, or rasterization-scale changes. Unchanged bounds do not trigger another update. |
+| `CompositionVisualTree` | Checks membership in the root content or an open popup. A cached `XamlRoot` reference alone does not establish that an element is still attached. |
+
+`DaisyShadowContainer` uses this foundation for outer shadows.
+Size, corner-radius, and appearance changes update the existing outer visual graph.
+Changes in the number of visible outer shadows rebuild that graph.
+Unload and template replacement release the owned resources.
+The Showcase page combines this container with a normal editable `DaisyInput`.
+
+Consumers supply theme and appearance changes through their dependency properties.
+XAML layout supplies size changes; animated controls use the existing `DaisyMotion` policy.
+The shared helpers do not subscribe to theme or motion settings themselves.
+`DaisyShadowContainer` observes Windows contrast themes and releases its decorative outer and inset graphics while contrast mode is active.
+It retains the shadow descriptions and restores the graphics when contrast mode ends.
+
+Layout and wrapping still run through XAML on the UI thread.
+Hardware composition does not calculate control relationships or replace those layout updates.
+Inset shadows and captured glass effects retain their CPU SkiaSharp processing paths.
+These helpers do not add a mandatory Win2D dependency or change the public shadow API.
+
 The shader effects and gallery examples use a native WinUI 3 WebView2 host.
 Tier 3 carousel transitions use Windows Composition surfaces and mask grids.
 The repository's `PORTING.md` records validated configurations and verification scope.

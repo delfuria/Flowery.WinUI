@@ -32,7 +32,7 @@
                                      Title="{Binding [Actions_Neumorphic_Tuning_Title]}"
                                      x:Uid="ActionsExamples.SectionHeader.NeumorphicTuning" />
                 <TextBlock Text="{Binding [Actions_Neumorphic_Tuning_Description]}"
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}"
                            x:Uid="ActionsExamples.Text.NeumorphicTuningDescription" />
@@ -41,7 +41,7 @@
                     <StackPanel Spacing="4">
                         <TextBlock Text="{Binding [Actions_Neumorphic_Intensity_Label]}"
                                    FontWeight="SemiBold"
-                                   Opacity="0.8"
+                                   Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    x:Uid="ActionsExamples.Label.NeumorphicIntensity" />
                         <daisy:DaisyNumericUpDown x:Name="NeumorphicIntensityBox" Width="120"
@@ -50,7 +50,7 @@
                     <StackPanel Spacing="4">
                         <TextBlock Text="{Binding [Actions_Neumorphic_Offset_Label]}"
                                    FontWeight="SemiBold"
-                                   Opacity="0.8"
+                                   Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    x:Uid="ActionsExamples.Label.NeumorphicOffset" />
                         <daisy:DaisyNumericUpDown x:Name="NeumorphicOffsetBox" Width="120"
@@ -59,7 +59,7 @@
                     <StackPanel Spacing="4">
                         <TextBlock Text="{Binding [Actions_Neumorphic_Blur_Label]}"
                                    FontWeight="SemiBold"
-                                   Opacity="0.8"
+                                   Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}"
                                    x:Uid="ActionsExamples.Label.NeumorphicBlur" />
                         <daisy:DaisyNumericUpDown x:Name="NeumorphicBlurBox" Width="120"
@@ -72,7 +72,7 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="button" Title="Button" />
 
-                <TextBlock Text="Colors" FontWeight="SemiBold" Opacity="0.8"
+                <TextBlock Text="Colors" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,20">
                     <daisy:DaisyButton Content="Default" />
@@ -86,7 +86,7 @@
                     <daisy:DaisyButton Content="Error" Variant="Error" />
                 </StackPanel>
 
-                <TextBlock Text="Styles" FontWeight="SemiBold" Opacity="0.8"
+                <TextBlock Text="Styles" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <daisy:DaisyButton Content="Ghost" Variant="Ghost" />
@@ -96,7 +96,7 @@
                     <daisy:DaisyButton Content="Dash" Variant="Primary" ButtonStyle="Dash" />
                 </StackPanel>
 
-                <TextBlock Text="Sizes" FontWeight="SemiBold" Opacity="0.8"
+                <TextBlock Text="Sizes" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                            Foreground="{ThemeResource DaisyBaseContentBrush}"
                            daisy:FlowerySizeManager.IgnoreGlobalSize="True" />
                 <StackPanel Orientation="Horizontal" Spacing="8"
@@ -108,7 +108,7 @@
                     <daisy:DaisyButton Content="XL" Size="ExtraLarge" />
                 </StackPanel>
 
-                <TextBlock Text="Shapes" FontWeight="SemiBold" Opacity="0.8"
+                <TextBlock Text="Shapes" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <daisy:DaisyButton Content="Wide" Shape="Wide" />
@@ -122,7 +122,7 @@
                 <Grid Margin="0,20,0,0"
                       ColumnDefinitions="Auto,*"
                       ColumnSpacing="8"
-                      Opacity="0.8">
+                      Opacity="{ThemeResource GalleryOpacity80}">
                     <Path Data="{StaticResource DaisyIconBolt}"
                           Width="12"
                           Height="12"
@@ -136,7 +136,7 @@
                 </Grid>
                 <Grid ColumnDefinitions="Auto,*"
                       ColumnSpacing="8"
-                      Opacity="0.5">
+                      Opacity="{ThemeResource GalleryOpacity50}">
                     <Path Data="{StaticResource DaisyIconCheck}"
                           Width="12"
                           Height="12"
@@ -163,7 +163,7 @@
                     <daisy:DaisyButton IconSymbol="Setting" Shape="Square" Variant="Ghost" ToolTipService.ToolTip="Settings" />
                 </StackPanel>
                 <TextBlock Text="With custom path data (IconData):"
-                           Opacity="0.5" FontSize="11" TextWrapping="Wrap"
+                           Opacity="{ThemeResource GalleryOpacity50}" FontSize="11" TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <!-- IconData - uses centralized path data resources -->
@@ -184,11 +184,11 @@
                     <daisy:DaisyButton IconSymbol="Home" Content="XL" Size="ExtraLarge" Variant="Neutral" />
                 </StackPanel>
 
-                <TextBlock Text="Icon Buttons (SymbolIcon)" FontWeight="SemiBold" Opacity="0.8"
+                <TextBlock Text="Icon Buttons (SymbolIcon)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                            Margin="0,20,0,0"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <TextBlock Text="Built-in Windows symbols, wrapped in DaisyIconText for consistent scaling."
-                           Opacity="0.5" FontSize="11" TextWrapping="Wrap"
+                           Opacity="{ThemeResource GalleryOpacity50}" FontSize="11" TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <daisy:DaisyButton x:Name="SymbolIconAddButton" Shape="Circle" Variant="Primary" ToolTipService.ToolTip="Add">
@@ -221,11 +221,11 @@
                     </daisy:DaisyButton>
                 </StackPanel>
 
-                <TextBlock Text="Icon + Text (StackPanel layout)" FontWeight="SemiBold" Opacity="0.8"
+                <TextBlock Text="Icon + Text (StackPanel layout)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                            Margin="0,20,0,0"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <TextBlock Text="Classic approach: Wrap icon and text in a StackPanel for combined layouts."
-                           Opacity="0.5" FontSize="11" TextWrapping="Wrap"
+                           Opacity="{ThemeResource GalleryOpacity50}" FontSize="11" TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <daisy:DaisyButton Variant="Primary">
@@ -254,11 +254,11 @@
                     </daisy:DaisyButton>
                 </StackPanel>
 
-                <TextBlock Text="Login Buttons (Brands)" FontWeight="SemiBold" Opacity="0.8"
+                <TextBlock Text="Login Buttons (Brands)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                            Margin="0,20,0,0"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <TextBlock Text="Brand login buttons with SVG path icons from the DaisyUI demo."
-                           Opacity="0.5" FontSize="11" TextWrapping="Wrap"
+                           Opacity="{ThemeResource GalleryOpacity50}" FontSize="11" TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <daisy:WrapPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
                     <daisy:DaisyLoginButton Brand="Email" />
@@ -278,11 +278,11 @@
                     <daisy:DaisyLoginButton Brand="MetaMask" />
                 </daisy:WrapPanel>
 
-                <TextBlock Text="Standalone Icon Labels (DaisyIconText)" FontWeight="SemiBold" Opacity="0.8"
+                <TextBlock Text="Standalone Icon Labels (DaisyIconText)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                            Margin="0,24,0,0"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <TextBlock Text="DaisyIconText works outside buttons too - for stats, labels, or inline indicators."
-                           Opacity="0.5" FontSize="11" TextWrapping="Wrap"
+                           Opacity="{ThemeResource GalleryOpacity50}" FontSize="11" TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <StackPanel Orientation="Horizontal" Spacing="24">
                     <!-- Like count label -->
@@ -319,7 +319,7 @@
                     </StackPanel>
                 </StackPanel>
                 <TextBlock Text="With combined icon + text in a single control:"
-                           Opacity="0.5" FontSize="11" Margin="0,8,0,0"
+                           Opacity="{ThemeResource GalleryOpacity50}" FontSize="11" Margin="0,8,0,0"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <StackPanel Orientation="Horizontal" Spacing="16">
                     <daisy:DaisyIconText IconSymbol="Home" Text="Home" Variant="Primary" />
@@ -328,11 +328,11 @@
                     <daisy:DaisyIconText IconData="{StaticResource DaisyIconStar}" Text="Favorites" Variant="Warning" />
                 </StackPanel>
 
-                <TextBlock Text="📚 All Available Symbols (A-Z)" FontWeight="SemiBold" Opacity="0.8"
+                <TextBlock Text="📚 All Available Symbols (A-Z)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                            Margin="0,24,0,0"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <TextBlock Text="Complete list of all Symbol icons with cross-platform path data support."
-                           Opacity="0.5" FontSize="11"
+                           Opacity="{ThemeResource GalleryOpacity50}" FontSize="11"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <!-- All symbols in a wrapping layout -->
@@ -415,14 +415,14 @@
                 <local:SectionHeader SectionId="button-group" Title="Button Group" />
                 <TextBlock
                     Text="Segmented group container for joined buttons."
-                    Opacity="0.7"
+                    Opacity="{ThemeResource GalleryOpacity70}"
                     TextWrapping="Wrap"
                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <daisy:WrapPanel Orientation="Horizontal" Spacing="24">
                     <!-- Column 1: Text buttons -->
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Basic" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Basic" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyButtonGroup AutoSelect="True" SelectedIndex="0" NeumorphicEnabled="True">
                             <StackPanel Orientation="Horizontal">
@@ -432,7 +432,7 @@
                             </StackPanel>
                         </daisy:DaisyButtonGroup>
 
-                        <TextBlock Text="Vertical" FontWeight="SemiBold" Opacity="0.8" Margin="0,6,0,0"
+                        <TextBlock Text="Vertical" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,6,0,0"
                             Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyButtonGroup AutoSelect="True" SelectedIndex="1" NeumorphicEnabled="True">
                             <StackPanel Orientation="Vertical">
@@ -445,7 +445,7 @@
 
                     <!-- Column 2: Icon buttons -->
                     <StackPanel Spacing="10">
-                        <TextBlock Text="With Icons" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="With Icons" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyButtonGroup AutoSelect="True" SelectedIndex="0" NeumorphicEnabled="True">
                             <StackPanel Orientation="Horizontal">
@@ -455,7 +455,7 @@
                             </StackPanel>
                         </daisy:DaisyButtonGroup>
 
-                        <TextBlock Text="Actions" FontWeight="SemiBold" Opacity="0.8" Margin="0,6,0,0"
+                        <TextBlock Text="Actions" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,6,0,0"
                             Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyButtonGroup AutoSelect="True" SelectedIndex="0" NeumorphicEnabled="True">
                             <StackPanel Orientation="Horizontal">
@@ -465,7 +465,7 @@
                             </StackPanel>
                         </daisy:DaisyButtonGroup>
 
-                        <TextBlock Text="Playback" FontWeight="SemiBold" Opacity="0.8" Margin="0,6,0,0"
+                        <TextBlock Text="Playback" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,6,0,0"
                             Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyButtonGroup AutoSelect="True" SelectedIndex="1" NeumorphicEnabled="True">
                             <StackPanel Orientation="Horizontal">
@@ -478,10 +478,10 @@
 
                     <!-- Column 3: Multi-select formatting -->
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Multi-Select" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Multi-Select" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <TextBlock Text="Click to toggle multiple selections"
-                                   Opacity="0.5" FontSize="11"
+                                   Opacity="{ThemeResource GalleryOpacity50}" FontSize="11"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyButtonGroup AutoSelect="True" SelectionMode="Multiple" NeumorphicEnabled="True">
                             <StackPanel Orientation="Horizontal">
@@ -491,7 +491,7 @@
                             </StackPanel>
                         </daisy:DaisyButtonGroup>
 
-                        <TextBlock Text="With Variant" FontWeight="SemiBold" Opacity="0.8" Margin="0,6,0,0"
+                        <TextBlock Text="With Variant" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,6,0,0"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyButtonGroup AutoSelect="True" SelectionMode="Multiple" Variant="Primary" NeumorphicEnabled="True">
                             <StackPanel Orientation="Horizontal">
@@ -511,7 +511,7 @@
                 <local:SectionHeader SectionId="figma-comment" Title="Figma Comment (Recipe)" />
                 <TextBlock
                     Text="Interactive comment bubble that expands on click."
-                    Opacity="0.7"
+                    Opacity="{ThemeResource GalleryOpacity70}"
                     TextWrapping="Wrap"
                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
@@ -526,7 +526,7 @@
                                       Unchecked="CommentToggle_Unchecked">
                             <Border x:Name="CommentBubbleBorder"
                                     Background="{ThemeResource DaisyBase100Brush}"
-                                    BorderBrush="{ThemeResource DaisyBase300Brush}"
+                                    BorderBrush="{ThemeResource DaisyBorderBrush}"
                                     BorderThickness="1"
                                     CornerRadius="16"
                                     Padding="8"
@@ -548,12 +548,12 @@
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <TextBlock x:Name="CommentAuthorText" Text="Freddy Krueger" FontWeight="SemiBold"
                                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                                            <TextBlock x:Name="CommentTimeText" Text="Just now" Opacity="0.6"
+                                            <TextBlock x:Name="CommentTimeText" Text="Just now" Opacity="{ThemeResource GalleryOpacity60}"
                                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                         </StackPanel>
                                         <TextBlock x:Name="CommentBodyText" Text="What happens if someone on Elm Street has nightmares?"
                                                    TextWrapping="Wrap"
-                                                   Opacity="0.8"
+                                                   Opacity="{ThemeResource GalleryOpacity80}"
                                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                     </StackPanel>
                                 </Grid>
@@ -570,7 +570,7 @@
                 <local:SectionHeader SectionId="copybutton" Title="Copy Button" />
                 <TextBlock
                     Text="Copies text to clipboard and briefly shows a success state."
-                    Opacity="0.7"
+                    Opacity="{ThemeResource GalleryOpacity70}"
                     TextWrapping="Wrap"
                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
@@ -596,7 +596,7 @@
                 <local:SectionHeader SectionId="dropdown" Title="Dropdown" />
                 <StackPanel Orientation="Horizontal" Spacing="16">
                     <StackPanel Spacing="6" Width="220">
-                        <TextBlock Text="Select" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Select" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySelect PlaceholderText="Choose...">
                             <x:String>Action 1</x:String>
@@ -605,7 +605,7 @@
                         </daisy:DaisySelect>
                     </StackPanel>
                     <StackPanel Spacing="6" Width="220">
-                        <TextBlock Text="Theme Dropdown" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Theme Dropdown" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyThemeDropdown />
                     </StackPanel>
@@ -619,7 +619,7 @@
                 <local:SectionHeader SectionId="dropdownmenu" Title="Dropdown Menu" />
                 <TextBlock
                     Text="Menu-style dropdown for actions (select → handle → reset)."
-                    Opacity="0.7"
+                    Opacity="{ThemeResource GalleryOpacity70}"
                     TextWrapping="Wrap"
                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
@@ -631,7 +631,7 @@
                                          SelectedItemChanged="MenuDropdown_SelectedItemChanged" />
                     <TextBlock x:Name="DropdownMenuResultText"
                                Text="(no action selected yet)"
-                               Opacity="0.7"
+                               Opacity="{ThemeResource GalleryOpacity70}"
                                TextWrapping="Wrap"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 </StackPanel>
@@ -644,14 +644,14 @@
                 <local:SectionHeader SectionId="fab" Title="FAB / Speed Dial" />
                 <TextBlock
                     Text="Floating action button that expands a set of action items."
-                    Opacity="0.7"
+                    Opacity="{ThemeResource GalleryOpacity70}"
                     TextWrapping="Wrap"
                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <daisy:WrapPanel Orientation="Horizontal" Spacing="16">
                     <Border Background="{ThemeResource DaisyBase200Brush}" CornerRadius="8" Padding="10" Width="110" Height="240">
                         <Grid>
-                            <TextBlock Text="Vertical" Opacity="0.6"
+                            <TextBlock Text="Vertical" Opacity="{ThemeResource GalleryOpacity60}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:DaisyFab TriggerContent="+" TriggerVariant="Primary" Size="Medium">
                                 <StackPanel>
@@ -665,7 +665,7 @@
 
                     <Border Background="{ThemeResource DaisyBase200Brush}" CornerRadius="8" Padding="10" Width="240" Height="110">
                         <Grid>
-                            <TextBlock Text="Horizontal" Opacity="0.6"
+                            <TextBlock Text="Horizontal" Opacity="{ThemeResource GalleryOpacity60}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:DaisyFab Layout="Horizontal" TriggerContent="+" TriggerVariant="Accent" Size="Medium"
                                 HorizontalAlignment="Left" VerticalAlignment="Bottom">
@@ -680,7 +680,7 @@
 
                     <Border Background="{ThemeResource DaisyBase200Brush}" CornerRadius="8" Padding="10" Width="110" Height="240">
                         <Grid>
-                            <TextBlock Text="Icons" Opacity="0.6"
+                            <TextBlock Text="Icons" Opacity="{ThemeResource GalleryOpacity60}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:DaisyFab TriggerVariant="Secondary" Size="Medium"
                                 TriggerIconData="M13,0L6,14H11V24L18,10H13V0Z"
@@ -703,7 +703,7 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="popover" Title="Popover" />
                 <StackPanel Spacing="10" Width="320">
-                    <TextBlock Text="Rich Popover" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Rich Popover" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyPopover Placement="Bottom" VerticalOffset="8">
                         <daisy:DaisyPopover.TriggerContent>
@@ -714,7 +714,7 @@
                                 <TextBlock Text="Video Tutorial" FontWeight="SemiBold"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <TextBlock Text="A popover can host any content, including action buttons."
-                                           Opacity="0.8"
+                                           Opacity="{ThemeResource GalleryOpacity80}"
                                            TextWrapping="Wrap"
                                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
                                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -743,7 +743,7 @@
 
                 <TextBlock
                     Text="Open the shared demo modal with different corner radii."
-                    Opacity="0.7"
+                    Opacity="{ThemeResource GalleryOpacity70}"
                     TextWrapping="Wrap"
                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
@@ -761,7 +761,7 @@
                 <local:SectionHeader SectionId="swap" Title="Swap" />
                 <StackPanel Orientation="Horizontal" Spacing="16">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Text swap" Opacity="0.7"
+                        <TextBlock Text="Text swap" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySwap>
                             <daisy:DaisySwap.OffContent>
@@ -775,7 +775,7 @@
                         </daisy:DaisySwap>
                     </StackPanel>
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Rotate effect" Opacity="0.7"
+                        <TextBlock Text="Rotate effect" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySwap TransitionEffect="Rotate">
                             <daisy:DaisySwap.OffContent>

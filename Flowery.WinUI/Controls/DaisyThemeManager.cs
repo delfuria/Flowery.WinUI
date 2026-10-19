@@ -556,7 +556,13 @@ namespace Flowery.Controls
             ("DaisyPrimaryForeground", "DaisyPrimary"),
             ("DaisySecondaryForeground", "DaisySecondary"),
             ("DaisyAccentForeground", "DaisyAccent"),
-            ("DaisyButtonPrimaryForeground", "DaisyPrimary")
+            ("DaisyNeutralForeground", "DaisyNeutral"),
+            ("DaisyButtonPrimaryForeground", "DaisyPrimary"),
+            ("DaisyBorder", "DaisyBase300"),
+            ("DaisyFocus", "DaisyPrimary"),
+            ("DaisyLink", "DaisyPrimaryForeground"),
+            ("DaisyComboBoxItemHighlight", "DaisyBase300"),
+            ("DaisyComboBoxItemHighlightForeground", "DaisyBaseContent")
         ];
 
         // Optional keys that are removed when the next palette doesn't define them.
@@ -573,7 +579,9 @@ namespace Flowery.Controls
             "DaisySuccess", "DaisySuccessContent",
             "DaisyWarning", "DaisyWarningContent",
             "DaisyError", "DaisyErrorContent",
-            "DaisyPrimaryForeground", "DaisySecondaryForeground", "DaisyAccentForeground",
+            "DaisyBorder", "DaisyFocus", "DaisyLink",
+            "DaisyComboBoxItemHighlight", "DaisyComboBoxItemHighlightForeground",
+            "DaisyPrimaryForeground", "DaisySecondaryForeground", "DaisyAccentForeground", "DaisyNeutralForeground",
             "DaisyButtonPrimaryForeground", "DaisyButtonPrimaryDisabled", "DaisyDisabledForeground"
         ];
 

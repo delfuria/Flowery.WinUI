@@ -121,6 +121,7 @@ namespace Flowery.Controls.ColorPicker
         private readonly ScrollViewer _contentScroller;
         private readonly Border _colorPreview;
         private readonly Border _originalColorPreview;
+        private readonly Border _originalColorLabelSurface;
         private readonly TextBlock _originalColorHexText;
         private readonly DaisyButton _undoButton;
         private readonly DaisyButton _redoButton;
@@ -285,7 +286,14 @@ namespace Flowery.Controls.ColorPicker
                 VerticalAlignment = VerticalAlignment.Center
             };
             _originalColorPreview = CreatePreviewBorder();
-            _originalColorPreview.Child = _originalColorHexText;
+            _originalColorLabelSurface = new Border
+            {
+                Child = _originalColorHexText,
+                Padding = new Thickness(2, 0, 2, 0),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            _originalColorPreview.Child = _originalColorLabelSurface;
             _colorPreview = CreatePreviewBorder();
 
             _undoButton = CreateHistoryButton(UndoButtonName, L("ColorPicker_Undo"), mirrorIcon: true);
@@ -494,7 +502,29 @@ namespace Flowery.Controls.ColorPicker
             _originalColorPreview.Background = new SolidColorBrush(original);
             _originalColorHexText.Text = $"#{original.R:X2}{original.G:X2}{original.B:X2}";
             var luminance = 0.299 * original.R + 0.587 * original.G + 0.114 * original.B;
-            _originalColorHexText.Foreground = new SolidColorBrush(luminance > 128 ? Colors.Black : Colors.White);
+            if (DaisyResourceLookup.IsHighContrast)
+            {
+                _originalColorHexText.Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+                _originalColorLabelSurface.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+            }
+            else
+            {
+                _originalColorHexText.Foreground = new SolidColorBrush(luminance > 128 ? Colors.Black : Colors.White);
+                _originalColorLabelSurface.ClearValue(Border.BackgroundProperty);
+            }
+        }
+
+        protected override void OnLoaded()
+        {
+            base.OnLoaded();
+            UpdateOriginalPreview();
+        }
+
+        protected override void OnThemeChanged(string themeName)
+        {
+            base.OnThemeChanged(themeName);
+            if (_originalColorPreview != null)
+                UpdateOriginalPreview();
         }
 
         private void OnColorWheelColorChanged(object? sender, ColorChangedEventArgs e)
@@ -599,7 +629,7 @@ namespace Flowery.Controls.ColorPicker
         private static Border CreatePreviewBorder() => new()
         {
             Height = ColorPreviewHeight,
-            BorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush"),
+            BorderBrush = DaisyResourceLookup.GetBrush("DaisyBorderBrush"),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(2)
         };

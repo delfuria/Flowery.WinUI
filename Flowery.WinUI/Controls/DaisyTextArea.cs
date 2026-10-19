@@ -28,6 +28,7 @@ namespace Flowery.Controls
             VerticalContentAlignment = VerticalAlignment.Top;
 
             TextChanged += OnTextAreaTextChanged;
+            IsEnabledChanged += (_, _) => RefreshLayout();
         }
 
         protected override void OnLoaded()
@@ -68,7 +69,12 @@ namespace Flowery.Controls
             UpdateRowHeight();
             ApplyAutoGrow();
             if (_resizeGrip != null)
+            {
                 _resizeGrip.Visibility = CanResize ? Visibility.Visible : Visibility.Collapsed;
+                if (_resizeGrip.Children[0] is Border grip)
+                    grip.Background = DaisyResourceLookup.GetBrush(DaisyResourceLookup.IsHighContrast && !IsEnabled
+                        ? "DaisyDisabledForegroundBrush" : "DaisyBaseContentBrush");
+            }
             if (_resizeThumb != null)
                 Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(_resizeThumb,
                     FloweryLocalization.GetStringInternal("TextArea_Resize", "Resize text area"));

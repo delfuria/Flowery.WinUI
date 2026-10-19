@@ -54,7 +54,7 @@
                         <TextBlock x:Name="IntroCreditsBody"
                                    TextWrapping="Wrap"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}"
-                                   Opacity="0.85">
+                                   Opacity="{ThemeResource GalleryOpacity85}">
                             <Run Text="These color palettes were lovingly imported from " />
                             <Hyperlink NavigateUri="https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"
                                       Foreground="{ThemeResource DaisyAccentBrush}">
@@ -88,7 +88,7 @@
                 <TextBlock x:Name="FormDescription"
                            TextWrapping="Wrap"
                            Margin="0,0,0,6"
-                           Opacity="0.85"
+                           Opacity="{ThemeResource GalleryOpacity85}"
                            Foreground="{ThemeResource DaisyBaseContentBrush}">
                     <Run Text="Different themes will display a " />
                     <Run Text="unique form" FontWeight="SemiBold" />
@@ -101,7 +101,7 @@
                         MaxWidth="500"
                         HorizontalAlignment="Left"
                         Background="Transparent"
-                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="2"
                         CornerRadius="12"
                         Padding="16">

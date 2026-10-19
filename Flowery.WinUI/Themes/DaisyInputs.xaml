@@ -24,12 +24,12 @@
                     <VisualState x:Name="Pressed">
                         <VisualState.Setters>
                             <Setter Target="PointerOverBackground.Opacity" Value="1" />
-                            <Setter Target="PointerOverBackground.Background" Value="{ThemeResource DaisyBase300Brush}" />
+                            <Setter Target="PointerOverBackground.Background" Value="{ThemeResource DaisyComboBoxItemHighlightBrush}" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="Disabled">
                         <VisualState.Setters>
-                            <Setter Target="Root.Opacity" Value="0.5" />
+                            <Setter Target="Root.Opacity" Value="{ThemeResource DaisyDisabledOpacity}" />
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
@@ -57,11 +57,11 @@
             </VisualStateManager.VisualStateGroups>
             <Grid>
                 <Border x:Name="PointerOverBackground"
-                        Background="{TemplateBinding BorderBrush}"
+                        Background="{ThemeResource DaisyComboBoxItemHighlightBrush}"
                         Opacity="0"
                         IsHitTestVisible="False" />
                 <Border x:Name="SelectionBackground"
-                        Background="{TemplateBinding BorderBrush}"
+                        Background="{ThemeResource DaisyComboBoxItemHighlightBrush}"
                         Opacity="0"
                         IsHitTestVisible="False" />
                 <ContentPresenter x:Name="ContentPresenter"
@@ -97,12 +97,12 @@
                     <VisualState x:Name="Pressed">
                         <VisualState.Setters>
                             <Setter Target="PointerOverBackground.Opacity" Value="1" />
-                            <Setter Target="PointerOverBackground.Background" Value="{ThemeResource DaisyBase300Brush}" />
+                            <Setter Target="PointerOverBackground.Background" Value="{ThemeResource DaisyComboBoxItemHighlightBrush}" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="Disabled">
                         <VisualState.Setters>
-                            <Setter Target="Root.Opacity" Value="0.5" />
+                            <Setter Target="Root.Opacity" Value="{ThemeResource DaisyDisabledOpacity}" />
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
@@ -126,11 +126,11 @@
             </VisualStateManager.VisualStateGroups>
             <Grid>
                 <Border x:Name="PointerOverBackground"
-                        Background="{TemplateBinding BorderBrush}"
+                        Background="{ThemeResource DaisyComboBoxItemHighlightBrush}"
                         Opacity="0"
                         IsHitTestVisible="False" />
                 <Border x:Name="SelectionBackground"
-                        Background="{TemplateBinding BorderBrush}"
+                        Background="{ThemeResource DaisyComboBoxItemHighlightBrush}"
                         Opacity="0"
                         IsHitTestVisible="False" />
                 <ContentPresenter x:Name="ContentPresenter"
@@ -166,6 +166,7 @@
     <!-- Minimal style for DaisyCheckBox: the control builds its own visual tree in code,
          so we just need a template that passes through the Content property. -->
     <Style TargetType="controls:DaisyCheckBox">
+        <Setter Property="UseSystemFocusVisuals" Value="True" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Foreground" Value="{ThemeResource DaisyBaseContentBrush}" />
@@ -235,6 +236,7 @@
     </ControlTemplate>
 
     <Style TargetType="controls:DaisyToggle">
+        <Setter Property="UseSystemFocusVisuals" Value="True" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Foreground" Value="{ThemeResource DaisyBaseContentBrush}" />
@@ -244,6 +246,7 @@
 
     <!-- ===================== DaisyRadio (code-driven visual tree) ===================== -->
     <Style TargetType="controls:DaisyRadio">
+        <Setter Property="UseSystemFocusVisuals" Value="True" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Foreground" Value="{ThemeResource DaisyBaseContentBrush}" />
@@ -271,7 +274,8 @@
                                          VerticalAlignment="Center"
                                          Visibility="Collapsed" />
                             </Border>
-                            <ContentPresenter Content="{TemplateBinding Content}"
+                            <ContentPresenter x:Name="PART_LabelPresenter"
+                                              Content="{TemplateBinding Content}"
                                               ContentTemplate="{TemplateBinding ContentTemplate}"
                                               FontFamily="{TemplateBinding FontFamily}"
                                               FontSize="{TemplateBinding FontSize}"

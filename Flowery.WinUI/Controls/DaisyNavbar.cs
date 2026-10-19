@@ -205,6 +205,11 @@ namespace Flowery.Controls
             {
                 _rootBorder.Background = new SolidColorBrush(Color.FromArgb(255, 40, 40, 50));
             }
+            _rootBorder.BorderThickness = new Thickness(DaisySystemAppearance.HighContrast ? 1 : 0);
+            if (DaisySystemAppearance.HighContrast)
+                _rootBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush();
+            else
+                _rootBorder.ClearValue(Border.BorderBrushProperty);
         }
     }
 }

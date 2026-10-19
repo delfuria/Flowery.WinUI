@@ -424,6 +424,7 @@ namespace Flowery.Controls
             }
 
             OnLoaded();
+            OnThemeChanged(DaisyThemeManager.CurrentThemeName ?? DaisyThemeManager.BaseThemeName);
 
             // Defer neumorphic attachment until the visual tree is fully laid out.
             // When Content is set in OnLoaded(), the ContentPresenter doesn't process
@@ -867,7 +868,7 @@ namespace Flowery.Controls
                 CornerRadius = cornerRadius,
                 BorderThickness = borderThickness,
                 Background = GetThemedBrush("DaisyBase200Brush"),
-                BorderBrush = GetThemedBrush("DaisyBase300Brush")
+                BorderBrush = DaisyResourceLookup.GetBorderBrush()
             };
         }
 

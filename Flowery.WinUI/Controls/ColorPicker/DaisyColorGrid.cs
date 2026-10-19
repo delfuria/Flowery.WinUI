@@ -260,6 +260,19 @@ namespace Flowery.Controls.ColorPicker
             PointerExited += OnPointerExited;
             IsTabStop = true;
             UseSystemFocusVisuals = true;
+            RegisterPropertyChangedCallback(IsEnabledProperty, static (sender, _) => ((DaisyColorGrid)sender).UpdateSelectionHighlight());
+        }
+
+        protected override void OnLoaded()
+        {
+            base.OnLoaded();
+            UpdateSelectionHighlight();
+        }
+
+        protected override void OnThemeChanged(string themeName)
+        {
+            base.OnThemeChanged(themeName);
+            UpdateSelectionHighlight();
         }
 
         private static void OnColorPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -668,6 +681,13 @@ namespace Flowery.Controls.ColorPicker
 
         private void UpdateSelectionHighlight()
         {
+            if (_rootCanvas != null)
+            {
+                if (DaisySystemAppearance.HighContrast)
+                    _rootCanvas.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                else
+                    _rootCanvas.ClearValue(Panel.BackgroundProperty);
+            }
             foreach (var kvp in _cells)
             {
                 int index = kvp.Key;
@@ -688,6 +708,9 @@ namespace Flowery.Controls.ColorPicker
                     cell.BorderThickness = new Thickness(1);
                     cell.BorderBrush = new SolidColorBrush(CellBorderColor);
                 }
+                if (DaisySystemAppearance.HighContrast)
+                    cell.BorderBrush = DaisyResourceLookup.GetBrush(!IsEnabled ? "DaisyDisabledForegroundBrush"
+                        : index == ColorIndex || index == _hotIndex ? "DaisyFocusBrush" : "DaisyBorderBrush");
             }
         }
 

@@ -47,6 +47,7 @@ namespace Flowery.Controls
 
             // Chat bubbles should not render neumorphic shadows by default.
             DaisyNeumorphic.SetIsEnabled(this, false);
+            RegisterPropertyChangedCallback(IsEnabledProperty, static (sender, _) => ((DaisyChatBubble)sender).ApplyAll());
         }
 
         #region Dependency Properties
@@ -388,6 +389,26 @@ namespace Flowery.Controls
             Foreground = fgOverride ?? DaisyResourceLookup.GetBrush(fgBrushKey);
             _headerTextBlock.Foreground = headerFgOverride ?? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
             _footerTextBlock.Foreground = footerFgOverride ?? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+            _headerTextBlock.Opacity = DaisyResourceLookup.GetContentOpacity(0.7);
+            _footerTextBlock.Opacity = DaisyResourceLookup.GetContentOpacity(0.5);
+            if (DaisySystemAppearance.HighContrast)
+            {
+                _bubbleBorder.BorderBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush");
+                _bubbleBorder.BorderThickness = new Thickness(1);
+                if (!IsEnabled)
+                {
+                    _bubbleBorder.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                    Foreground = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
+                    _headerTextBlock.Foreground = Foreground;
+                    _footerTextBlock.Foreground = Foreground;
+                }
+            }
+            else
+            {
+                _bubbleBorder.ClearValue(Border.BorderBrushProperty);
+                _bubbleBorder.BorderThickness = new Thickness(0);
+            }
+            _contentPresenter!.Foreground = Foreground;
         }
 
         #endregion

@@ -299,7 +299,7 @@ namespace Flowery.Controls
                     Width = 1,
                     Height = 20,
                     Margin = new Thickness(4, 0, 4, 0),
-                    Background = DaisyResourceLookup.GetBrush(Application.Current?.Resources, "DaisyBase300Brush")
+                    Background = DaisyResourceLookup.GetBorderBrush()
                 };
                 _rootPanel.Children.Add(_separator);
             }
@@ -406,7 +406,7 @@ namespace Flowery.Controls
         {
             // Separator brush should track theme changes
             if (_separator != null)
-                _separator.Background = DaisyResourceLookup.GetBrush(Application.Current?.Resources, "DaisyBase300Brush");
+                _separator.Background = DaisyResourceLookup.GetBorderBrush();
 
             ApplyKeyStyle(_shiftKey, IsShiftPressed, isLockKey: false);
             ApplyKeyStyle(_ctrlKey, IsCtrlPressed, isLockKey: false);

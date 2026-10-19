@@ -86,6 +86,7 @@ namespace Flowery.Controls
             _listViewItemTappedHandler = OnListViewItemTapped;
             Loaded += OnBaseLoaded;
             Unloaded += OnBaseUnloaded;
+            IsEnabledChanged += (sender, args) => RequestApplyAll();
 
             // Build early so the visual tree exists before first measure (Android layout quirk).
             BuildVisualTree();
@@ -1596,6 +1597,15 @@ namespace Flowery.Controls
             ApplySizing(resources);
             ApplyDropdownTheme(resources);
             OnAfterApplyAll(resources);
+            if (DaisySystemAppearance.HighContrast)
+            {
+                Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                Foreground = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+                BorderBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush");
+                BorderThickness = new Thickness(1);
+                if (_triggerButton != null) _triggerButton.Foreground = Foreground;
+                if (_chevron != null) _chevron.Fill = Foreground;
+            }
             RequestNeumorphicRefresh();
         }
 
@@ -1639,7 +1649,7 @@ namespace Flowery.Controls
              if (_popupBorder != null)
              {
                  _popupBorder.Background = base100;
-                 _popupBorder.BorderBrush = base300;
+                 _popupBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush(base300);
              }
              if (_listView != null)
              {
@@ -1837,7 +1847,7 @@ namespace Flowery.Controls
             var scope = DaisyNeumorphic.GetScopeEnabled(this);
             bool isActuallyEnabled = scope ?? NeumorphicEnabled ?? DaisyBaseContentControl.GlobalNeumorphicEnabled;
 
-            return isActuallyEnabled && GetEffectiveNeumorphicMode() != DaisyNeumorphicMode.None;
+            return !DaisySystemAppearance.HighContrast && isActuallyEnabled && GetEffectiveNeumorphicMode() != DaisyNeumorphicMode.None;
         }
 
         private DaisyNeumorphicMode GetEffectiveNeumorphicMode()
@@ -1901,7 +1911,7 @@ namespace Flowery.Controls
             AddSetterIfMissing(style, userStyle, Control.BorderThicknessProperty, new Thickness(0));
             AddSetterIfMissing(style, userStyle, Control.BorderBrushProperty, selectedBackground);
             AddSetterIfMissing(style, userStyle, Control.BackgroundProperty, baseBackground);
-            if (UseCustomItemContainerTemplate)
+            if (UseCustomItemContainerTemplate && !DaisySystemAppearance.HighContrast)
             {
                 var template = itemContainerType == typeof(ListBoxItem)
                     ? TryGetListBoxItemTemplate()

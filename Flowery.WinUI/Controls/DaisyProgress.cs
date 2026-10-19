@@ -25,6 +25,7 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyProgress);
             IsTabStop = false;
+            IsEnabledChanged += (sender, args) => ApplyAll();
         }
 
         #region Dependency Properties
@@ -247,10 +248,10 @@ namespace Flowery.Controls
                 _ => new CornerRadius(4)
             };
 
-            _trackBorder.Height = height;
+            _trackBorder.Height = DaisySystemAppearance.HighContrast ? Math.Max(4, height) : height;
             _trackBorder.CornerRadius = cornerRadius;
 
-            _fillBorder.Height = height;
+            _fillBorder.Height = DaisySystemAppearance.HighContrast ? _trackBorder.Height - 2 : height;
             _fillBorder.CornerRadius = cornerRadius;
         }
 
@@ -293,6 +294,11 @@ namespace Flowery.Controls
 
             _trackBorder.Background = trackOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush");
             _fillBorder.Background = fillOverride ?? DaisyResourceLookup.GetBrush(fillBrushKey);
+            _trackBorder.BorderBrush = DaisySystemAppearance.HighContrast
+                ? DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush") : null;
+            _trackBorder.BorderThickness = new Thickness(DaisySystemAppearance.HighContrast ? 1 : 0);
+            if (DaisySystemAppearance.HighContrast)
+                _fillBorder.Background = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyPrimaryBrush" : "DaisyDisabledForegroundBrush");
         }
 
         private void UpdateFillWidth()
@@ -310,7 +316,7 @@ namespace Flowery.Controls
             var percentage = (Value - Minimum) / range;
             percentage = Math.Max(0, Math.Min(1, percentage));
 
-            var trackWidth = _trackBorder.ActualWidth;
+            var trackWidth = _trackBorder.ActualWidth - _trackBorder.BorderThickness.Left - _trackBorder.BorderThickness.Right;
             if (trackWidth > 0)
             {
                 _fillBorder.Width = trackWidth * percentage;
@@ -323,7 +329,7 @@ namespace Flowery.Controls
 
         private void UpdateShimmerAnimation()
         {
-            if (Shimmer && IsLoaded && DaisyMotion.AnimationsEnabled)
+            if (Shimmer && IsLoaded && DaisyMotion.AnimationsEnabled && !DaisySystemAppearance.HighContrast)
                 StartShimmerAnimation();
             else
                 StopShimmerAnimation();

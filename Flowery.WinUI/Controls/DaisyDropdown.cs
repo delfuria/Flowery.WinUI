@@ -35,6 +35,7 @@ namespace Flowery.Controls
 
         public DaisyDropdown()
         {
+            IsEnabledChanged += (sender, args) => ApplyAll();
         }
 
         protected override void OnLoaded()
@@ -441,6 +442,11 @@ namespace Flowery.Controls
                 DaisyColor.Error => DaisyResourceLookup.GetBrush(resources, "DaisyErrorContentBrush"),
                 _ => baseContentBrush
             };
+            if (DaisySystemAppearance.HighContrast)
+            {
+                buttonBg = base100Brush;
+                buttonFg = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+            }
 
             // Apply to trigger button
             if (_triggerButton != null)
@@ -450,7 +456,7 @@ namespace Flowery.Controls
                 _triggerButton.CornerRadius = cornerRadius;
                 _triggerButton.Background = buttonBg;
                 _triggerButton.Foreground = buttonFg;
-                _triggerButton.BorderBrush = base300Brush;
+                _triggerButton.BorderBrush = DaisyResourceLookup.GetBorderBrush(base300Brush);
                 _triggerButton.BorderThickness = new Thickness(1);
                 UpdateAutomationProperties();
             }
@@ -459,19 +465,22 @@ namespace Flowery.Controls
             {
                 _triggerText.FontSize = fontSize;
                 _triggerText.Foreground = buttonFg;
+                if (DaisySystemAppearance.HighContrast) _triggerText.ClearValue(TextBlock.ForegroundProperty);
                 UpdateTriggerText();
             }
 
             if (_chevron != null)
             {
                 _chevron.Fill = buttonFg;
+                if (DaisySystemAppearance.HighContrast && _triggerText != null)
+                    _chevron.SetBinding(Shape.FillProperty, new Binding { Source = _triggerText, Path = new PropertyPath(nameof(Foreground)) });
             }
 
             // Apply to popup
             if (_popupBorder != null)
             {
                 _popupBorder.Background = base100Brush;
-                _popupBorder.BorderBrush = base300Brush;
+                _popupBorder.BorderBrush = DaisyResourceLookup.GetBorderBrush(base300Brush);
                 _popupBorder.BorderThickness = new Thickness(1);
                 _popupBorder.CornerRadius = cornerRadius;
             }

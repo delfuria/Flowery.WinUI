@@ -203,6 +203,7 @@ namespace Flowery.Controls
         private void OnIsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             UpdateInteractionState();
+            UpdateStarFills();
         }
 
         protected override void OnKeyDown(KeyRoutedEventArgs e)
@@ -398,10 +399,15 @@ namespace Flowery.Controls
 
             var filledBrush = DaisyResourceLookup.GetBrush(filledBrushKey);
             var emptyBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            if (DaisySystemAppearance.HighContrast)
+                filledBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyPrimaryBrush" : "DaisyDisabledForegroundBrush");
 
             for (int i = 0; i < _stars.Count; i++)
             {
                 var starIndex = i + 1;
+                _stars[i].Stroke = DaisySystemAppearance.HighContrast
+                    ? DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush") : null;
+                _stars[i].StrokeThickness = DaisySystemAppearance.HighContrast ? 1 : 0;
                 if (Value >= starIndex)
                 {
                     // Fully filled

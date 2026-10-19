@@ -22,6 +22,7 @@ namespace Flowery.Controls
             // Set base background to transparent to avoid artifacts behind our pill border
             Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
             IsTabStop = false;
+            IsEnabledChanged += (sender, args) => ApplyAll();
             BuildLayout();
         }
 
@@ -219,6 +220,18 @@ namespace Flowery.Controls
 
         private void ApplyTheme(ResourceDictionary? resources)
         {
+            if (DaisySystemAppearance.HighContrast)
+            {
+                if (_border != null)
+                {
+                    _border.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                    _border.BorderBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush");
+                    _border.BorderThickness = new Thickness(1);
+                }
+                Foreground = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+                if (_contentPresenter != null) _contentPresenter.Foreground = Foreground;
+                return;
+            }
 
             // Get variant name for resource lookup
             var variantName = Variant switch
@@ -302,6 +315,7 @@ namespace Flowery.Controls
                 }
                 Foreground = outlineFgOverride ?? outlineBrush;
             }
+            if (_contentPresenter != null) _contentPresenter.Foreground = Foreground;
         }
 
 

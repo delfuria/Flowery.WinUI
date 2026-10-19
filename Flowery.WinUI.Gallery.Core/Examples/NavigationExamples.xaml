@@ -11,12 +11,12 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="breadcrumbs" Title="Breadcrumbs" />
                 <TextBlock Text="Breadcrumb trail for hierarchical navigation."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <StackPanel Spacing="10">
-                    <TextBlock Text="Default separator" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Default separator" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyBreadcrumbs>
                         <StackPanel Orientation="Horizontal">
@@ -26,7 +26,7 @@
                         </StackPanel>
                     </daisy:DaisyBreadcrumbs>
 
-                    <TextBlock Text="Custom separator" FontWeight="SemiBold" Opacity="0.8" Margin="0,6,0,0"
+                    <TextBlock Text="Custom separator" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,6,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyBreadcrumbs Separator=">" Size="Small">
                         <StackPanel Orientation="Horizontal">
@@ -41,20 +41,20 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="breadcrumbbar" Title="Breadcrumb bar" />
                 <TextBlock Text="WinUI BreadcrumbBar styled with Daisy tokens."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <StackPanel Spacing="10">
-                    <TextBlock Text="Default" FontWeight="SemiBold" Opacity="0.8"
+                    <TextBlock Text="Default" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyBreadcrumbBar ItemsSource="{x:Bind BreadcrumbBarItems}" />
 
-                    <TextBlock Text="Small" FontWeight="SemiBold" Opacity="0.8" Margin="0,6,0,0"
+                    <TextBlock Text="Small" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,6,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyBreadcrumbBar ItemsSource="{x:Bind BreadcrumbBarItems}" Size="Small" />
 
-                    <TextBlock Text="With icons" FontWeight="SemiBold" Opacity="0.8" Margin="0,6,0,0"
+                    <TextBlock Text="With icons" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,6,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:DaisyBreadcrumbBar x:Name="IconBreadcrumbBar" ItemsSource="{x:Bind BreadcrumbBarIconItems}">
                         <daisy:DaisyBreadcrumbBar.ItemTemplate>
@@ -74,7 +74,7 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="dock" Title="Dock" />
                 <TextBlock Text="macOS-style dock: hover highlight and optional selection."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
@@ -94,7 +94,7 @@
 
                     <TextBlock x:Name="DockSelectionText"
                                Text="Selected: (click an icon)"
-                               Opacity="0.7"
+                               Opacity="{ThemeResource GalleryOpacity70}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 </StackPanel>
             </StackPanel>
@@ -104,13 +104,13 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="menu" Title="Menu" />
                 <TextBlock Text="Vertical/horizontal menus with active + disabled items."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <daisy:WrapPanel Spacing="16">
                     <StackPanel Spacing="8" Width="240">
-                        <TextBlock Text="Vertical" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Vertical" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyMenu>
                             <StackPanel>
@@ -123,7 +123,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Horizontal" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Horizontal" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyMenu Orientation="Horizontal" Size="Small">
                             <StackPanel Orientation="Horizontal">
@@ -146,7 +146,7 @@
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     </daisy:DaisyNavbar.NavbarStart>
                     <daisy:DaisyNavbar.NavbarCenter>
-                        <TextBlock Text="Center" Opacity="0.7"
+                        <TextBlock Text="Center" Opacity="{ThemeResource GalleryOpacity70}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     </daisy:DaisyNavbar.NavbarCenter>
                     <daisy:DaisyNavbar.NavbarEnd>
@@ -163,14 +163,14 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="pagination" Title="Pagination" />
                 <TextBlock Text="Page navigation control with smart truncation, ellipsis, and jump buttons for large page counts."
-                           Opacity="0.7"
+                           Opacity="{ThemeResource GalleryOpacity70}"
                            TextWrapping="Wrap"
                            Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <StackPanel Spacing="16">
                     <!-- Basic pagination -->
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Basic (7 pages)" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Basic (7 pages)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyPagination x:Name="BasicPagination"
                                                TotalPages="7"
@@ -180,7 +180,7 @@
 
                     <!-- Large page count with full navigation (100 pages) -->
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Large page count (100 pages) - Full navigation" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Large page count (100 pages) - Full navigation" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyPagination x:Name="LargePagination"
                                                TotalPages="100"
@@ -191,13 +191,13 @@
                                                JumpStep="10"
                                                PageChanged="Pagination_PageChanged" />
                         <TextBlock Text="Order by magnitude: |← (first) « (jump) ‹ (prev) [pages] › (next) » (jump) →| (last)"
-                                   Opacity="0.5" FontSize="12"
+                                   Opacity="{ThemeResource GalleryOpacity50}" FontSize="12"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     </StackPanel>
 
                     <!-- With First/Last buttons -->
                     <StackPanel Spacing="6">
-                        <TextBlock Text="With First/Last buttons" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="With First/Last buttons" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyPagination TotalPages="50"
                                                CurrentPage="25"
@@ -208,7 +208,7 @@
 
                     <!-- With Jump buttons (double chevron) -->
                     <StackPanel Spacing="6">
-                        <TextBlock Text="With Jump buttons (skip 10 pages)" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="With Jump buttons (skip 10 pages)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyPagination TotalPages="100"
                                                CurrentPage="50"
@@ -220,7 +220,7 @@
 
                     <!-- Full featured -->
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Full featured (First/Last + Jump + Prev/Next)" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Full featured (First/Last + Jump + Prev/Next)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyPagination x:Name="FullPagination"
                                                TotalPages="200"
@@ -234,7 +234,7 @@
 
                     <!-- Minimal (no prev/next) -->
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Minimal (no prev/next buttons)" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Minimal (no prev/next buttons)" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                    Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyPagination TotalPages="10"
                                                CurrentPage="5"
@@ -244,7 +244,7 @@
 
                     <TextBlock x:Name="PaginationStatusText"
                                Text="Current page: 3"
-                               Opacity="0.7"
+                               Opacity="{ThemeResource GalleryOpacity70}"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 </StackPanel>
             </StackPanel>
@@ -255,13 +255,13 @@
                 <local:SectionHeader SectionId="steps" Title="Steps" />
                 <StackPanel Spacing="16">
                     <TextBlock Text="Steps can be used to show a progress or a list of steps."
-                               Opacity="0.7"
+                               Opacity="{ThemeResource GalleryOpacity70}"
                                TextWrapping="Wrap"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                     <daisy:WrapPanel Spacing="16">
                         <StackPanel Spacing="10">
-                            <TextBlock Text="Horizontal Steps" FontWeight="SemiBold" Opacity="0.8"
+                            <TextBlock Text="Horizontal Steps" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:DaisySteps SelectedIndex="1" Width="400" HorizontalAlignment="Left">
                                 <StackPanel Orientation="Horizontal">
@@ -274,7 +274,7 @@
                         </StackPanel>
 
                         <StackPanel Spacing="10">
-                            <TextBlock Text="Vertical Steps" FontWeight="SemiBold" Opacity="0.8"
+                            <TextBlock Text="Vertical Steps" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                                        Foreground="{ThemeResource DaisyBaseContentBrush}" />
                             <daisy:DaisySteps Orientation="Vertical" SelectedIndex="1" HorizontalAlignment="Left">
                                 <StackPanel>
@@ -287,7 +287,7 @@
                         </StackPanel>
                     </daisy:WrapPanel>
 
-                    <TextBlock Text="Color Variants" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,0"
+                    <TextBlock Text="Color Variants" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:WrapPanel Spacing="16">
                         <daisy:DaisySteps Width="400" HorizontalAlignment="Left">
@@ -313,7 +313,7 @@
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <StackPanel Spacing="16" daisy:FlowerySizeManager.IgnoreGlobalSize="True">
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Extra Small" Opacity="0.5" FontSize="12" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                            <TextBlock Text="Extra Small" Opacity="{ThemeResource GalleryOpacity50}" FontSize="12" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                             <daisy:DaisySteps Size="ExtraSmall" SelectedIndex="1" Width="350" HorizontalAlignment="Left">
                                 <StackPanel Orientation="Horizontal">
                                     <daisy:DaisyStepItem Content="Register" Color="Primary"/>
@@ -324,7 +324,7 @@
                             </daisy:DaisySteps>
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Small" Opacity="0.5" FontSize="12" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                            <TextBlock Text="Small" Opacity="{ThemeResource GalleryOpacity50}" FontSize="12" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                             <daisy:DaisySteps Size="Small" SelectedIndex="1" Width="350" HorizontalAlignment="Left">
                                 <StackPanel Orientation="Horizontal">
                                     <daisy:DaisyStepItem Content="Register" Color="Primary"/>
@@ -335,7 +335,7 @@
                             </daisy:DaisySteps>
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Large" Opacity="0.5" FontSize="12" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                            <TextBlock Text="Large" Opacity="{ThemeResource GalleryOpacity50}" FontSize="12" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                             <daisy:DaisySteps Size="Large" SelectedIndex="1" Width="400" HorizontalAlignment="Left">
                                 <StackPanel Orientation="Horizontal">
                                     <daisy:DaisyStepItem Content="Register" Color="Primary"/>
@@ -401,12 +401,12 @@
             <StackPanel Style="{StaticResource GallerySectionStyle}">
                 <local:SectionHeader SectionId="tabs" Title="Tabs" />
                 <TextBlock Text="Tabs are used to show different content in a tabbed interface"
-                           Opacity="0.7" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                           Opacity="{ThemeResource GalleryOpacity70}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <!-- Photo tab recipe -->
                 <TextBlock Text="Photo tab recipe" FontWeight="SemiBold" Margin="0,16,0,0" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                 <TextBlock Text="A photo card with an overlay action bar. Click an icon to swap the photo."
-                           Opacity="0.7" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                           Opacity="{ThemeResource GalleryOpacity70}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
 
                 <Border x:Name="PhotoTabCard"
                         Width="260"
@@ -436,7 +436,7 @@
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Bottom"
                                 Margin="0,0,0,12"
-                                Opacity="0.85"
+                                Opacity="{ThemeResource GalleryOpacity85}"
                                 Background="{ThemeResource DaisyPrimaryBrush}">
                             <Grid Margin="6">
                                 <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
@@ -465,7 +465,7 @@
                 <TextBlock Text="Variants" FontWeight="SemiBold" Margin="0,16,0,0" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                 <daisy:WrapPanel Spacing="16">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Bordered (default)" Opacity="0.5" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                        <TextBlock Text="Bordered (default)" Opacity="{ThemeResource GalleryOpacity50}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                         <daisy:DaisyTabs Variant="Bordered">
                             <StackPanel>
                                 <TabViewItem Header="Tab 1">
@@ -479,7 +479,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Boxed (pill style)" Opacity="0.5" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                        <TextBlock Text="Boxed (pill style)" Opacity="{ThemeResource GalleryOpacity50}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                         <daisy:DaisyTabs Variant="Boxed">
                             <StackPanel>
                                 <TabViewItem Header="Tab 1">
@@ -497,7 +497,7 @@
                 <TextBlock Text="Sizes" FontWeight="SemiBold" Margin="0,16,0,0" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                 <daisy:WrapPanel Spacing="16" daisy:FlowerySizeManager.IgnoreGlobalSize="True">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Extra Small" Opacity="0.5" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                        <TextBlock Text="Extra Small" Opacity="{ThemeResource GalleryOpacity50}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                         <daisy:DaisyTabs Variant="Boxed" Size="ExtraSmall">
                             <StackPanel>
                                 <TabViewItem Header="Tab 1">
@@ -510,7 +510,7 @@
                         </daisy:DaisyTabs>
                     </StackPanel>
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Small" Opacity="0.5" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                        <TextBlock Text="Small" Opacity="{ThemeResource GalleryOpacity50}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                         <daisy:DaisyTabs Variant="Boxed" Size="Small">
                             <StackPanel>
                                 <TabViewItem Header="Tab 1">
@@ -523,7 +523,7 @@
                         </daisy:DaisyTabs>
                     </StackPanel>
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Medium (default)" Opacity="0.5" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                        <TextBlock Text="Medium (default)" Opacity="{ThemeResource GalleryOpacity50}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                         <daisy:DaisyTabs Variant="Boxed" Size="Medium">
                             <StackPanel>
                                 <TabViewItem Header="Tab 1">
@@ -536,7 +536,7 @@
                         </daisy:DaisyTabs>
                     </StackPanel>
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Large" Opacity="0.5" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                        <TextBlock Text="Large" Opacity="{ThemeResource GalleryOpacity50}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                         <daisy:DaisyTabs Variant="Boxed" Size="Large">
                             <StackPanel>
                                 <TabViewItem Header="Tab 1">
@@ -554,7 +554,7 @@
                 <TextBlock Text="Width Modes" FontWeight="SemiBold" Margin="0,16,0,0" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                 <daisy:WrapPanel Spacing="16">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Auto (default)" Opacity="0.5" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                        <TextBlock Text="Auto (default)" Opacity="{ThemeResource GalleryOpacity50}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                         <daisy:DaisyTabs Variant="Boxed" TabWidthMode="Auto">
                             <StackPanel>
                                 <TabViewItem Header="Short">
@@ -571,7 +571,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Equal (all same width)" Opacity="0.5" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                        <TextBlock Text="Equal (all same width)" Opacity="{ThemeResource GalleryOpacity50}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                         <daisy:DaisyTabs Variant="Boxed" TabWidthMode="Equal" Width="400">
                             <StackPanel>
                                 <TabViewItem Header="Short">
@@ -592,7 +592,7 @@
                 <TextBlock Text="Semantic &amp; Palette Colors" FontWeight="SemiBold" Margin="0,16,0,0" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                 <daisy:WrapPanel Spacing="16">
                      <StackPanel Spacing="10">
-                        <TextBlock Text="Semantic Colors" Opacity="0.5" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                        <TextBlock Text="Semantic Colors" Opacity="{ThemeResource GalleryOpacity50}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                         <daisy:DaisyTabs Variant="Boxed">
                             <StackPanel>
                                 <TabViewItem Header="Primary" daisy:DaisyTabs.TabColor="Primary">
@@ -609,7 +609,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Palette Colors" Opacity="0.5" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                        <TextBlock Text="Palette Colors" Opacity="{ThemeResource GalleryOpacity50}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                         <daisy:DaisyTabs Variant="Boxed">
                             <StackPanel>
                                 <TabViewItem Header="Indigo" daisy:DaisyTabs.TabPaletteColor="Indigo">
@@ -629,7 +629,7 @@
                 <!-- Code Editor Tabs Example (VS Code style) -->
                 <TextBlock Text="Code Editor Example (VS Code style)" FontWeight="SemiBold" Margin="0,16,0,0" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                 <TextBlock Text="Right-click tabs to access context menu with close actions and color selection"
-                           Opacity="0.7" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                           Opacity="{ThemeResource GalleryOpacity70}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                 <daisy:DaisyCard Background="{ThemeResource DaisyBase200Brush}" Padding="0" Margin="0,12,0,0" HorizontalAlignment="Left">
                     <daisy:DaisyTabs x:Name="CodeEditorTabs"
                                      Variant="Boxed"
@@ -642,51 +642,51 @@
                         <StackPanel>
                             <TabViewItem Header="Program.cs" daisy:DaisyTabs.TabPaletteColor="Green">
                                 <StackPanel Margin="12,12,12,8" Spacing="4" MinHeight="200">
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary">
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary">
                                         <Run Foreground="{ThemeResource DaisyInfoBrush}">using</Run> <Run>System;</Run>
                                     </TextBlock>
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary">
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary">
                                         <Run Foreground="{ThemeResource DaisyInfoBrush}">using</Run> <Run>Flowery.Controls;</Run>
                                     </TextBlock>
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary">
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary">
                                         <Run Foreground="{ThemeResource DaisyInfoBrush}">namespace</Run> <Run>MyApp;</Run>
                                     </TextBlock>
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary">
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary">
                                         <Run Foreground="{ThemeResource DaisyInfoBrush}">public class</Run> <Run Foreground="{ThemeResource DaisySuccessBrush}">Program</Run>
                                     </TextBlock>
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="{}{" />
-                                    <TextBlock FontFamily="Consolas" Opacity="0.4" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="    // Entry point" />
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="{}}" />
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="{}{" />
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity40}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="    // Entry point" />
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="{}}" />
                                 </StackPanel>
                             </TabViewItem>
                             <TabViewItem Header="MainPage.xaml" daisy:DaisyTabs.TabPaletteColor="Indigo">
                                 <StackPanel Margin="12,12,12,8" Spacing="4" MinHeight="200">
-                                    <TextBlock FontFamily="Consolas" Opacity="0.4" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="&lt;!-- Main View --&gt;" />
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary">
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity40}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="&lt;!-- Main View --&gt;" />
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary">
                                         <Run Foreground="{ThemeResource DaisyInfoBrush}">&lt;Page</Run> <Run>x:Class=</Run><Run Foreground="{ThemeResource DaisyWarningBrush}">"MainPage"</Run><Run Foreground="{ThemeResource DaisyInfoBrush}">&gt;</Run>
                                     </TextBlock>
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary">
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary">
                                         <Run>    &lt;Grid&gt;</Run>
                                     </TextBlock>
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary">
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary">
                                         <Run>        &lt;TextBlock Text=</Run><Run Foreground="{ThemeResource DaisyWarningBrush}">"Hello World"</Run><Run>/&gt;</Run>
                                     </TextBlock>
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary">
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary">
                                         <Run>    &lt;/Grid&gt;</Run>
                                     </TextBlock>
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary">
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary">
                                         <Run Foreground="{ThemeResource DaisyInfoBrush}">&lt;/Page&gt;</Run>
                                     </TextBlock>
                                 </StackPanel>
                             </TabViewItem>
                             <TabViewItem Header="App.xaml.cs" daisy:DaisyTabs.TabPaletteColor="Lime">
                                 <StackPanel Margin="12,12,12,8" Spacing="4" MinHeight="200">
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary">
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary">
                                         <Run Foreground="{ThemeResource DaisyInfoBrush}">public partial class</Run> <Run Foreground="{ThemeResource DaisySuccessBrush}">App</Run> <Run>:</Run> <Run Foreground="{ThemeResource DaisySuccessBrush}">Application</Run>
                                     </TextBlock>
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="{}{" />
-                                    <TextBlock FontFamily="Consolas" Opacity="0.4" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="    // Application lifecycle" />
-                                    <TextBlock FontFamily="Consolas" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="{}}" />
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="{}{" />
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity40}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="    // Application lifecycle" />
+                                    <TextBlock FontFamily="Consolas" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary" Text="{}}" />
                                 </StackPanel>
                             </TabViewItem>
                         </StackPanel>

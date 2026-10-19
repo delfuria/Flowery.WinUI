@@ -295,7 +295,7 @@ namespace Flowery.WinUI.Kanban.Controls
                 buttonPanel.Children.Add(cancelButton);
 
                 var sectionBackground = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-                var sectionBorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+                var sectionBorderBrush = DaisyResourceLookup.GetBorderBrush();
                 var footerCard = new Border
                 {
                     Background = sectionBackground,
@@ -896,25 +896,23 @@ namespace Flowery.WinUI.Kanban.Controls
             if (!isNewBoard)
             {
                 createdStack.Children.Add(CreateSectionLabel(FloweryLocalization.GetStringInternal("Kanban_Board_CreatedAt")));
-                var createdAtText = new TextBlock
+                var createdAtText = DaisyHighContrast.WithContentOpacity(new TextBlock
                 {
                     Text = editState.CreatedAt.ToString("g"),
                     FontSize = 13,
-                    Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
-                    Opacity = 0.8
-                };
+                    Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
+                }, 0.8);
                 createdStack.Children.Add(createdAtText);
 
                 createdStack.Children.Add(CreateSectionLabel(FloweryLocalization.GetStringInternal("Kanban_Board_Id")));
-                var idText = new TextBlock
+                var idText = DaisyHighContrast.WithContentOpacity(new TextBlock
                 {
                     Text = board.Id,
                     FontSize = 11,
                     FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Consolas, Courier New"),
                     Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
-                    Opacity = 0.6,
                     TextWrapping = TextWrapping.Wrap
-                };
+                }, 0.6);
                 createdStack.Children.Add(idText);
             }
 
@@ -955,7 +953,7 @@ namespace Flowery.WinUI.Kanban.Controls
             outerContainer.Children.Add(tabs);
 
             var sectionBackground = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            var sectionBorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var sectionBorderBrush = DaisyResourceLookup.GetBorderBrush();
             var buttonPanel = FloweryDialogBase.CreateStandardButtonFooter(
                 out saveButton,
                 out cancelButton);
@@ -1033,13 +1031,12 @@ namespace Flowery.WinUI.Kanban.Controls
             addRow.Children.Add(addButton);
             section.Children.Add(addRow);
 
-            var emptyText = new TextBlock
+            var emptyText = DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = FloweryLocalization.GetStringInternal("Kanban_Lanes_Empty"),
                 TextWrapping = TextWrapping.Wrap,
-                Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
-                Opacity = 0.7
-            };
+                Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
+            }, 0.7);
             section.Children.Add(emptyText);
 
             var lanesPanel = new StackPanel { Spacing = 8 };
@@ -1066,13 +1063,12 @@ namespace Flowery.WinUI.Kanban.Controls
 
             if (board.Columns.Count == 0)
             {
-                section.Children.Add(new TextBlock
+                section.Children.Add(DaisyHighContrast.WithContentOpacity(new TextBlock
                 {
                     Text = FloweryLocalization.GetStringInternal("Kanban_Policies_Empty"),
                     TextWrapping = TextWrapping.Wrap,
-                    Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
-                    Opacity = 0.7
-                });
+                    Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
+                }, 0.7));
                 return section;
             }
 
@@ -1156,22 +1152,20 @@ namespace Flowery.WinUI.Kanban.Controls
             toggleRow.Children.Add(toggle);
             section.Children.Add(toggleRow);
 
-            section.Children.Add(new TextBlock
+            section.Children.Add(DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = FloweryLocalization.GetStringInternal("Kanban_DoneAging_Description"),
                 TextWrapping = TextWrapping.Wrap,
-                Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
-                Opacity = 0.7
-            });
+                Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
+            }, 0.7));
 
             var columnStack = new StackPanel { Spacing = 6 };
-            var columnLabel = new TextBlock
+            var columnLabel = DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = FloweryLocalization.GetStringInternal("Kanban_DoneAging_ColumnLabel"),
                 FontSize = 11,
-                Opacity = 0.7,
                 Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
-            };
+            }, 0.7);
             var columnSelect = new DaisySelect
             {
                 PlaceholderText = FloweryLocalization.GetStringInternal("Select_Placeholder"),
@@ -1208,13 +1202,12 @@ namespace Flowery.WinUI.Kanban.Controls
             section.Children.Add(columnStack);
 
             var daysStack = new StackPanel { Spacing = 6 };
-            var daysLabel = new TextBlock
+            var daysLabel = DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = FloweryLocalization.GetStringInternal("Kanban_DoneAging_DaysLabel"),
                 FontSize = 11,
-                Opacity = 0.7,
                 Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
-            };
+            }, 0.7);
             var daysInput = new DaisyNumericUpDown
             {
                 Value = editState.AutoArchiveDoneDays > 0 ? editState.AutoArchiveDoneDays : 14,
@@ -1645,7 +1638,7 @@ namespace Flowery.WinUI.Kanban.Controls
                 FloweryLocalization.GetStringInternal("Kanban_Lanes_Delete"),
                 DaisyButtonVariant.Default);
             deleteButton.Tag = new LaneActionContext(context, lane);
-            deleteButton.Opacity = 0.8;
+            DaisyHighContrast.SetContentOpacity(deleteButton, 0.8);
             deleteButton.Click += OnLaneDeleteClicked;
             actionsPanel.Children.Add(deleteButton);
 
@@ -1788,14 +1781,13 @@ namespace Flowery.WinUI.Kanban.Controls
 
         private static TextBlock CreateSectionLabel(string text)
         {
-            return new TextBlock
+            return DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = text,
                 FontSize = 12,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush"),
-                Opacity = 0.85
-            };
+                Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
+            }, 0.85);
         }
     }
 }

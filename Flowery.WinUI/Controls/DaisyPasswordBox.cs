@@ -59,6 +59,7 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyPasswordBox);
             IsTabStop = false;
+            IsEnabledChanged += (sender, args) => ApplyAll();
         }
 
         protected override void OnLoaded()
@@ -338,6 +339,8 @@ namespace Flowery.Controls
             // PasswordBox
             _passwordBox = new PasswordBox
             {
+                // Semantic colors are supplied here; automatic backplates would cover the outer border.
+                HighContrastAdjustment = ElementHighContrastAdjustment.None,
                 Background = new SolidColorBrush(Colors.Transparent),
                 BorderThickness = new Thickness(0),
                 VerticalAlignment = VerticalAlignment.Stretch,
@@ -548,8 +551,9 @@ namespace Flowery.Controls
             UpdateFloatingPlaceholder();
 
             var resources = Application.Current?.Resources;
-            var baseContent = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush") ?? new SolidColorBrush(Colors.Black);
-            var primary = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush") ?? new SolidColorBrush(Colors.Blue);
+            var disabled = DaisySystemAppearance.HighContrast && !IsEnabled;
+            var baseContent = DaisyResourceLookup.GetBrush(disabled ? "DaisyDisabledForegroundBrush" : "DaisyBaseContentBrush") ?? new SolidColorBrush(Colors.Black);
+            var primary = DaisyResourceLookup.GetBrush(disabled ? "DaisyDisabledForegroundBrush" : "DaisyPrimaryBrush") ?? new SolidColorBrush(Colors.Blue);
 
             var inputHeight = _inputBorder?.MinHeight > 0 ? _inputBorder.MinHeight : DaisyResourceLookup.GetDefaultHeight(Size);
             var sizeKey = DaisyResourceLookup.GetSizeKeyFull(Size);
@@ -582,7 +586,7 @@ namespace Flowery.Controls
                 if (_floatingLabelText != null)
                 {
                     _floatingLabelText.FontWeight = Microsoft.UI.Text.FontWeights.SemiBold;
-                    _floatingLabelText.Foreground = primary;
+                    _floatingLabelText.Foreground = DaisySystemAppearance.HighContrast ? baseContent : primary;
                 }
             }
             else
@@ -596,7 +600,7 @@ namespace Flowery.Controls
                 var borderTop = _inputBorder?.BorderThickness.Top ?? 0;
                 targetTranslateY = floatingTopSpace + borderTop + topPadding + 1;
 
-                targetOpacity = 0.5;
+                targetOpacity = DaisySystemAppearance.HighContrast ? 1 : 0.5;
                 transformDelay = TimeSpan.Zero;
 
                 _floatingLabelBorder.BorderBrush = new SolidColorBrush(Colors.Transparent);
@@ -705,6 +709,13 @@ namespace Flowery.Controls
                 DaisyTokenDefaults.EnsureDefaults(resources);
 
             var isFocused = _passwordBox != null && _passwordBox.FocusState != FocusState.Unfocused;
+            if (DaisySystemAppearance.HighContrast)
+            {
+                _inputBorder.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                _inputBorder.BorderBrush = DaisyResourceLookup.GetBrush(!IsEnabled ? "DaisyDisabledForegroundBrush"
+                    : isFocused ? "DaisyFocusBrush" : "DaisyBorderBrush");
+                return;
+            }
             if (isFocused)
             {
                 _inputBorder.BorderBrush = GetVariantFocusBrush();
@@ -735,7 +746,7 @@ namespace Flowery.Controls
 
         private Brush GetVariantFocusBrush()
         {
-            if (BorderRingBrush != null)
+            if (BorderRingBrush != null && !DaisySystemAppearance.HighContrast)
                 return BorderRingBrush;
 
             var primary = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush") ?? new SolidColorBrush(Colors.Blue);
@@ -1391,6 +1402,13 @@ namespace Flowery.Controls
                     break;
             }
 
+            if (DaisySystemAppearance.HighContrast)
+            {
+                background = base100;
+                border = DaisyResourceLookup.GetBorderBrush();
+                borderThickness = new Thickness(1);
+            }
+
             if (_inputBorder != null)
             {
                 _inputBorder.Background = background;
@@ -1401,16 +1419,21 @@ namespace Flowery.Controls
                 _baseInputBorderBrush = border;
             }
 
-            var textForeground = fgOverride ?? baseContent;
+            var textForeground = DaisySystemAppearance.HighContrast && !IsEnabled
+                ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush") : fgOverride ?? baseContent;
             if (_passwordBox != null)
             {
                 _passwordBox.Foreground = textForeground;
                 _passwordBox.Resources["TextControlForegroundPointerOver"] = textForeground;
                 _passwordBox.Resources["TextControlForegroundFocused"] = textForeground;
-                _passwordBox.Resources["TextControlForegroundDisabled"] = textForeground;
+                _passwordBox.Resources["TextControlForegroundDisabled"] = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
 
                 Brush? placeholderBrush = null;
-                if (placeholderOverride != null)
+                if (DaisySystemAppearance.HighContrast)
+                {
+                    placeholderBrush = textForeground;
+                }
+                else if (placeholderOverride != null)
                 {
                     placeholderBrush = placeholderOverride;
                 }
@@ -1466,6 +1489,9 @@ namespace Flowery.Controls
             if (_optionalText != null) _optionalText.Foreground = textForeground;
             if (_hintTextBlock != null) _hintTextBlock.Foreground = textForeground;
             if (_helperTextBlock != null) _helperTextBlock.Foreground = textForeground;
+            if (_optionalText != null) _optionalText.Opacity = DaisySystemAppearance.HighContrast ? 1 : 0.7;
+            if (_hintTextBlock != null) _hintTextBlock.Opacity = DaisySystemAppearance.HighContrast ? 1 : 0.7;
+            if (_helperTextBlock != null) _helperTextBlock.Opacity = DaisySystemAppearance.HighContrast ? 1 : 0.7;
             if (_floatingLabelBorder != null) _floatingLabelBorder.Background = bgOverride ?? base100;
             if (_floatingLabelText != null) _floatingLabelText.Foreground = textForeground;
         }

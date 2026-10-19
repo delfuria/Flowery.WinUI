@@ -22,6 +22,7 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyFileInput);
             IsTabStop = false;
+            IsEnabledChanged += (sender, args) => ApplyColors();
         }
 
         #region Dependency Properties
@@ -265,10 +266,13 @@ namespace Flowery.Controls
 
             _browseButton.Variant = Variant;
             _fileNameTextBlock.Foreground = fgOverride ?? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+            _fileNameTextBlock.Opacity = DaisyResourceLookup.GetContentOpacity(0.7);
+            if (DaisySystemAppearance.HighContrast && !IsEnabled)
+                _fileNameTextBlock.Foreground = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
 
             // Style the container border
             _containerBorder.Background = bgOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            _containerBorder.BorderBrush = borderOverride ?? DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            _containerBorder.BorderBrush = borderOverride ?? DaisyResourceLookup.GetBorderBrush();
             _containerBorder.BorderThickness = new Thickness(1);
         }
 

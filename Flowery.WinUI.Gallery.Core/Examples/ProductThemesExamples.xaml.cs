@@ -161,7 +161,7 @@ namespace Flowery.WinUI.Gallery.Examples
         {
             // Manually update card colors since ThemeResource doesn't auto-refresh on MergedDictionaries change
             var bg = DaisyResourceLookup.GetBrush("DaisyBase200Brush") ?? new SolidColorBrush(Microsoft.UI.Colors.Transparent);
-            var border = DaisyResourceLookup.GetBrush("DaisyBase300Brush") ?? new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+            var border = DaisyResourceLookup.GetBrush("DaisyBorderBrush") ?? new SolidColorBrush(Microsoft.UI.Colors.Transparent);
 
             IntroCard.Background = bg;
             IntroCard.BorderBrush = border;
@@ -181,11 +181,13 @@ namespace Flowery.WinUI.Gallery.Examples
             // Update form card colors for new theme (called AFTER theme is applied)
             ApplyFormCardTheme();
 
-            // Always rebuild form when theme changes (to pick up new colors)
-            // even if industry category stays the same
+            // Palette brushes update in place. Keep entered values when only colors change.
             var industry = GetIndustryForTheme(themeName);
-            _currentIndustry = industry;
-            BuildFormForIndustry(industry);
+            if (!string.Equals(_currentIndustry, industry, StringComparison.OrdinalIgnoreCase))
+            {
+                _currentIndustry = industry;
+                BuildFormForIndustry(industry);
+            }
             SyncFormSelectorToIndustry(industry);
             SyncProductThemeDropdownToTheme(themeName);
 
@@ -581,16 +583,15 @@ namespace Flowery.WinUI.Gallery.Examples
             Foreground = GetBrush("DaisyPrimaryBrush")
         };
 
-        private static TextBlock CreateSectionLabel(string text) => new()
+        private static TextBlock CreateSectionLabel(string text) => DaisyHighContrast.WithContentOpacity(new TextBlock
         {
             Text = text,
             FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.SectionHeader, FlowerySizeManager.CurrentSize),
             Tag = ResponsiveFontTier.SectionHeader,
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-            Opacity = 0.8,
             Margin = new Thickness(0, 8, 0, 0),
             Foreground = GetBrush("DaisyBaseContentBrush")
-        };
+        }, 0.8);
 
         private static Brush? GetBrush(string key)
         {
@@ -611,14 +612,13 @@ namespace Flowery.WinUI.Gallery.Examples
         private static StackPanel CreateLabeledSelect(string label, DaisySelect select)
         {
             var panel = new StackPanel { Spacing = 4 };
-            panel.Children.Add(new TextBlock
+            panel.Children.Add(DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = label,
                 FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.Secondary, FlowerySizeManager.CurrentSize),
                 Tag = ResponsiveFontTier.Secondary,
-                Opacity = 0.9,
                 Foreground = GetBrush("DaisyBaseContentBrush")
-            });
+            }, 0.9));
             panel.Children.Add(select);
             return panel;
         }
@@ -626,14 +626,13 @@ namespace Flowery.WinUI.Gallery.Examples
         private static StackPanel CreateLabeledFileInput(string label, DaisyFileInput fileInput)
         {
             var panel = new StackPanel { Spacing = 4 };
-            panel.Children.Add(new TextBlock
+            panel.Children.Add(DaisyHighContrast.WithContentOpacity(new TextBlock
             {
                 Text = label,
                 FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.Secondary, FlowerySizeManager.CurrentSize),
                 Tag = ResponsiveFontTier.Secondary,
-                Opacity = 0.9,
                 Foreground = GetBrush("DaisyBaseContentBrush")
-            });
+            }, 0.9));
             panel.Children.Add(fileInput);
             return panel;
         }

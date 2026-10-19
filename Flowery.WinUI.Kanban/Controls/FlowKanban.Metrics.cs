@@ -187,7 +187,7 @@ namespace Flowery.WinUI.Kanban.Controls
                 DaisyColor.Primary => "DaisyPrimaryBrush",
                 DaisyColor.Secondary => "DaisySecondaryBrush",
                 DaisyColor.Accent => "DaisyAccentBrush",
-                DaisyColor.Neutral => "DaisyNeutralBrush",
+                DaisyColor.Neutral => "DaisyNeutralForegroundBrush",
                 DaisyColor.Info => "DaisyInfoBrush",
                 DaisyColor.Success => "DaisySuccessBrush",
                 DaisyColor.Warning => "DaisyWarningBrush",
@@ -339,7 +339,7 @@ namespace Flowery.WinUI.Kanban.Controls
                 var subtitle = CreateTextBlock(
                     owner.Board.Title,
                     "BodyTextBlockStyle");
-                subtitle.Opacity = 0.7;
+                DaisyHighContrast.SetContentOpacity(subtitle, 0.7);
 
                 var header = new StackPanel
                 {
@@ -517,16 +517,15 @@ namespace Flowery.WinUI.Kanban.Controls
             private static FrameworkElement CreateLegendRow(string activeLabel, string blockedLabel, string overdueLabel)
             {
                 var text = $"{activeLabel} | {blockedLabel} | {overdueLabel}";
-                return new TextBlock
+                return DaisyHighContrast.WithContentOpacity(new TextBlock
                 {
                     Text = text,
                     Margin = new Thickness(0, 4, 0, 0),
-                    Opacity = 0.7,
                     TextAlignment = FloweryLocalization.Instance.IsRtl
                         ? Microsoft.UI.Xaml.TextAlignment.Right
                         : Microsoft.UI.Xaml.TextAlignment.Left,
                     Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
-                };
+                }, 0.7);
             }
 
             private static TextBlock CreateTextBlock(string text, string styleKey)

@@ -52,6 +52,7 @@ namespace Flowery.Controls
             TabFocusNavigation = KeyboardNavigationMode.Local;
             UseSystemFocusVisuals = true;
             KeyDown += OnKeyDown;
+            RegisterPropertyChangedCallback(IsEnabledProperty, static (sender, _) => ((DaisyStack)sender).ApplyAll());
         }
 
         #region Dependency Properties
@@ -548,7 +549,7 @@ namespace Flowery.Controls
                             var scale = Math.Max(0.8, 1.0 - 0.05 * i);
                             var opacity = Math.Max(0.3, StackOpacity - 0.1 * (i - 1));
 
-                            fe.Opacity = opacity;
+                            fe.Opacity = DaisyResourceLookup.GetContentOpacity(opacity);
                             var transformGroup = new TransformGroup();
                             transformGroup.Children.Add(new TranslateTransform { X = offset, Y = offset });
                             transformGroup.Children.Add(new ScaleTransform { ScaleX = scale, ScaleY = scale });
@@ -575,6 +576,7 @@ namespace Flowery.Controls
         private void ApplyAll()
         {
             ApplyButtonColors();
+            UpdateItemVisibility();
             UpdateCounter();
         }
 
@@ -598,10 +600,13 @@ namespace Flowery.Controls
 
             _previousButton.Variant = variant;
             _nextButton.Variant = variant;
+            _previousButton.Opacity = DaisyResourceLookup.GetContentOpacity(0.8);
+            _nextButton.Opacity = DaisyResourceLookup.GetContentOpacity(0.8);
 
             if (_counterTextBlock != null)
             {
-                _counterTextBlock.Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+                _counterTextBlock.Foreground = DaisyResourceLookup.GetBrush(DaisySystemAppearance.HighContrast && !IsEnabled
+                    ? "DaisyDisabledForegroundBrush" : "DaisyBaseContentBrush");
             }
         }
 

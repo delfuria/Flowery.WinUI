@@ -683,10 +683,10 @@ namespace Flowery.WinUI.Kanban.Controls
                 }
             }
 
-            ApplyPanelTheme(_userListPanel, "DaisyBase200Brush", "DaisyBase300Brush");
-            ApplyPanelTheme(_userDetailsPanel, "DaisyBase200Brush", "DaisyBase300Brush");
-            ApplyPanelTheme(_userDetailsCard, "DaisyBase100Brush", "DaisyBase300Brush");
-            ApplyPanelTheme(_userDetailsEmptyCard, "DaisyBase100Brush", "DaisyBase300Brush");
+            ApplyPanelTheme(_userListPanel, "DaisyBase200Brush", "DaisyBorderBrush");
+            ApplyPanelTheme(_userDetailsPanel, "DaisyBase200Brush", "DaisyBorderBrush");
+            ApplyPanelTheme(_userDetailsCard, "DaisyBase100Brush", "DaisyBorderBrush");
+            ApplyPanelTheme(_userDetailsEmptyCard, "DaisyBase100Brush", "DaisyBorderBrush");
         }
 
         private static void ApplyCardTheme(DaisyCard card)
@@ -1619,7 +1619,7 @@ namespace Flowery.WinUI.Kanban.Controls
             fieldStack.Children.Add(_tokenInput);
 
             var sectionBackground = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            var sectionBorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var sectionBorderBrush = DaisyResourceLookup.GetBorderBrush();
 
             var fieldCard = new Border
             {
@@ -1811,7 +1811,7 @@ namespace Flowery.WinUI.Kanban.Controls
             buttonPanel.Children.Add(_closeButton);
 
             var sectionBackground = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            var sectionBorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var sectionBorderBrush = DaisyResourceLookup.GetBorderBrush();
 
             var footerCard = new Border
             {
@@ -1939,7 +1939,7 @@ namespace Flowery.WinUI.Kanban.Controls
             _confirmButton.Variant = DaisyButtonVariant.Error;
 
             var sectionBackground = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            var sectionBorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var sectionBorderBrush = DaisyResourceLookup.GetBorderBrush();
 
             var footerCard = new Border
             {
@@ -2060,7 +2060,7 @@ namespace Flowery.WinUI.Kanban.Controls
 
             var bodyStyle = Application.Current?.Resources["BodyTextBlockStyle"] as Style;
             var sectionBackground = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            var sectionBorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var sectionBorderBrush = DaisyResourceLookup.GetBorderBrush();
 
             _localUserOptions = localUsers
                 .Select(user => new LocalUserOption(user))

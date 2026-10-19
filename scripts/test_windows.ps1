@@ -8,6 +8,7 @@ param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Debug',
     [switch]$SkipBuild,
+    [string]$TestFilter,
     [ValidateRange(0, 16)]
     [int]$Monitor = 0,
     [ValidateSet('Full', 'LowerHalf')]
@@ -50,12 +51,14 @@ $logPath = Join-Path $logDirectory "tests-$Configuration-$runId.log"
 $runnerArguments = @('--report-trx', '--results-directory', $resultsDirectory)
 $previousGalleryPath = [Environment]::GetEnvironmentVariable('FLOWERY_GALLERY_EXE_PATH', 'Process')
 $previousResultsRoot = [Environment]::GetEnvironmentVariable('FLOWERY_TEST_RESULTS_ROOT', 'Process')
+$previousTestFilter = [Environment]::GetEnvironmentVariable('FLOWERY_RUNTIME_TEST_FILTER', 'Process')
 $previousMonitorDevice = [Environment]::GetEnvironmentVariable('FLOWERY_MONITOR_DEVICE', 'Process')
 $previousMonitorRegion = [Environment]::GetEnvironmentVariable('FLOWERY_MONITOR_REGION', 'Process')
 
 try {
     [Environment]::SetEnvironmentVariable('FLOWERY_GALLERY_EXE_PATH', $galleryPath, 'Process')
     [Environment]::SetEnvironmentVariable('FLOWERY_TEST_RESULTS_ROOT', $resultsDirectory, 'Process')
+    [Environment]::SetEnvironmentVariable('FLOWERY_RUNTIME_TEST_FILTER', $TestFilter, 'Process')
     if ($Monitor -gt 0) {
         $monitorDevice = '\\.\DISPLAY{0}' -f $Monitor
         $monitorRegion = if ($WindowRegion -eq 'LowerHalf') { 'lower-half' } else { 'full' }
@@ -71,6 +74,7 @@ try {
 finally {
     [Environment]::SetEnvironmentVariable('FLOWERY_GALLERY_EXE_PATH', $previousGalleryPath, 'Process')
     [Environment]::SetEnvironmentVariable('FLOWERY_TEST_RESULTS_ROOT', $previousResultsRoot, 'Process')
+    [Environment]::SetEnvironmentVariable('FLOWERY_RUNTIME_TEST_FILTER', $previousTestFilter, 'Process')
     [Environment]::SetEnvironmentVariable('FLOWERY_MONITOR_DEVICE', $previousMonitorDevice, 'Process')
     [Environment]::SetEnvironmentVariable('FLOWERY_MONITOR_REGION', $previousMonitorRegion, 'Process')
 }

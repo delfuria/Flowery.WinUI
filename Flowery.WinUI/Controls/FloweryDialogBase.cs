@@ -746,7 +746,7 @@ namespace Flowery.Controls
             if (_resizeGripIcon != null)
             {
                 _resizeGripIcon.Stroke = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
-                _resizeGripIcon.Opacity = 0.65;
+                _resizeGripIcon.Opacity = DaisyResourceLookup.GetContentOpacity(0.65);
             }
         }
 

@@ -312,6 +312,9 @@ namespace Flowery.Controls
 
         private Brush GetLineBrush()
         {
+            if (DaisySystemAppearance.HighContrast)
+                return DaisyResourceLookup.GetBorderBrush();
+
             // Get color name for resource lookup
             var colorName = Color switch
             {
@@ -353,7 +356,7 @@ namespace Flowery.Controls
 
         private double GetLineOpacity()
         {
-            return Color == DaisyDividerColor.Neutral ? 0.7 : 1.0;
+            return !DaisySystemAppearance.HighContrast && Color == DaisyDividerColor.Neutral ? 0.7 : 1.0;
         }
 
         private Brush GetTextForeground()
@@ -815,7 +818,7 @@ namespace Flowery.Controls
         private void StartGlowAnimation()
         {
             StopGlowAnimation();
-            if (_glowLine == null || !IsLoaded || !DaisyMotion.AnimationsEnabled) return;
+            if (_glowLine == null || !IsLoaded || !DaisyMotion.AnimationsEnabled || DaisySystemAppearance.HighContrast) return;
 
             // Use explicit keyframes to ensure smooth pulsation in all environments (avoiding potential AutoReverse bugs)
             var animation = new DoubleAnimationUsingKeyFrames
@@ -1226,18 +1229,18 @@ namespace Flowery.Controls
             // Apply to line elements
             if (_line1 != null)
             {
-                if (DividerStyle == DaisyDividerStyle.Gradient)
+                if (DividerStyle == DaisyDividerStyle.Gradient && !DaisySystemAppearance.HighContrast)
                 {
                     _line1.Fill = CreateCenterFadeGradient(brush);
                 }
-                else if (DividerStyle != DaisyDividerStyle.Inset) // Inset uses shadow/highlight
+                else if (DividerStyle != DaisyDividerStyle.Inset || DaisySystemAppearance.HighContrast)
                 {
                     _line1.Fill = brush;
                 }
                 _line1.Opacity = opacity;
             }
 
-            if (_line2 != null && DividerStyle != DaisyDividerStyle.Inset)
+            if (_line2 != null && (DividerStyle != DaisyDividerStyle.Inset || DaisySystemAppearance.HighContrast))
             {
                 _line2.Fill = brush;
                 _line2.Opacity = opacity;
@@ -1261,6 +1264,7 @@ namespace Flowery.Controls
             if (_glowLine != null)
             {
                 _glowLine.Fill = brush;
+                _glowLine.Visibility = DaisySystemAppearance.HighContrast ? Visibility.Collapsed : Visibility.Visible;
             }
 
             // Apply to ornament
@@ -1270,6 +1274,7 @@ namespace Flowery.Controls
             if (_textBlock != null)
             {
                 _textBlock.Foreground = GetTextForeground();
+                _textBlock.Opacity = DaisySystemAppearance.HighContrast ? 1 : 0.8;
             }
             if (_textContainer != null)
             {

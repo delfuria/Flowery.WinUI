@@ -13,12 +13,12 @@
                 <local:SectionHeader SectionId="size-dropdown" Title="Size Dropdown" />
                 <StackPanel Orientation="Horizontal" Spacing="16">
                     <StackPanel Spacing="6" Width="180">
-                        <TextBlock Text="Default" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Default" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                             Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySizeDropdown />
                     </StackPanel>
                     <StackPanel Spacing="6" Width="140">
-                        <TextBlock Text="Abbreviations" FontWeight="SemiBold" Opacity="0.8"
+                        <TextBlock Text="Abbreviations" FontWeight="SemiBold" Opacity="{ThemeResource GalleryOpacity80}"
                             Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisySizeDropdown ShowAbbreviations="True" />
                     </StackPanel>
@@ -30,28 +30,28 @@
             <StackPanel>
                 <local:SectionHeader SectionId="modifier-keys-observer" Title="Modifier Keys (Observer)" />
                 <TextBlock Text="Live keyboard state observer showing modifier and lock key states. Switch between structural styles below."
-                    Opacity="0.7" TextWrapping="Wrap"
+                    Opacity="{ThemeResource GalleryOpacity70}" TextWrapping="Wrap"
                     daisy:FlowerySizeManager.ResponsiveFont="Primary"
                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
 
                 <StackPanel Spacing="24" Margin="0,16,0,0">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Three-Dimensional (Stock)" FontSize="12" Opacity="0.6" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                        <TextBlock Text="Three-Dimensional (Stock)" FontSize="12" Opacity="{ThemeResource GalleryOpacity60}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyModifierKeys KbdStyle="ThreeDimensional" />
                     </StackPanel>
 
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Flat Style" FontSize="12" Opacity="0.6" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                        <TextBlock Text="Flat Style" FontSize="12" Opacity="{ThemeResource GalleryOpacity60}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyModifierKeys KbdStyle="Flat" />
                     </StackPanel>
 
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Keycap Style (Tactile)" FontSize="12" Opacity="0.6"     Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                        <TextBlock Text="Keycap Style (Tactile)" FontSize="12" Opacity="{ThemeResource GalleryOpacity60}"     Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyModifierKeys KbdStyle="Keycap" />
                     </StackPanel>
 
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Ghost Style (Minimal)" FontSize="12" Opacity="0.6" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                        <TextBlock Text="Ghost Style (Minimal)" FontSize="12" Opacity="{ThemeResource GalleryOpacity60}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
                         <daisy:DaisyModifierKeys KbdStyle="Ghost" />
                     </StackPanel>
                 </StackPanel>
@@ -63,7 +63,7 @@
                 <local:SectionHeader SectionId="weather-card" Title="Weather Card" />
                 <TextBlock
                     Text="Complete weather widget with current conditions and forecast. The first card shows a 7-day Fahrenheit forecast (stress-testing 3-digit temps), while the second shows a 5-day Celsius forecast. AutoFitItems automatically scales day items to fit."
-                    Opacity="0.8" TextWrapping="Wrap"
+                    Opacity="{ThemeResource GalleryOpacity80}" TextWrapping="Wrap"
                     daisy:FlowerySizeManager.ResponsiveFont="Primary"
                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <daisy:WrapPanel Orientation="Horizontal">
@@ -72,7 +72,7 @@
                         Margin="0,0,24,24"
                         Width="400"
                         HorizontalAlignment="Left"
-                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="1"
                         Temperature="98"
                         FeelsLike="105"
@@ -91,7 +91,7 @@
                         Margin="0,0,24,24"
                         Width="360"
                         HorizontalAlignment="Left"
-                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="1"
                         Temperature="22"
                         FeelsLike="24"
@@ -106,7 +106,7 @@
             <StackPanel>
                 <local:SectionHeader SectionId="current-weather" Title="Current Weather" />
                 <TextBlock Text="Standalone current weather display with temperature, condition, and sun times."
-                    Opacity="0.8"
+                    Opacity="{ThemeResource GalleryOpacity80}"
                     TextWrapping="Wrap"
                     daisy:FlowerySizeManager.ResponsiveFont="Primary"
                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
@@ -117,7 +117,7 @@
                         Width="300"
                         HorizontalAlignment="Left"
                         Padding="16"
-                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="1"
                         Temperature="15"
                         FeelsLike="13"
@@ -130,7 +130,7 @@
                         Width="300"
                         HorizontalAlignment="Left"
                         Padding="16"
-                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="1"
                         Temperature="28"
                         FeelsLike="32"
@@ -145,7 +145,7 @@
                         Width="300"
                         HorizontalAlignment="Left"
                         Padding="16"
-                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="1"
                         Temperature="-5"
                         FeelsLike="-12"
@@ -159,7 +159,7 @@
             <StackPanel>
                 <local:SectionHeader SectionId="weather-forecast" Title="Weather Forecast" />
                 <TextBlock Text="Horizontal forecast strip showing upcoming days."
-                    Opacity="0.8"
+                    Opacity="{ThemeResource GalleryOpacity80}"
                     TextWrapping="Wrap"
                     daisy:FlowerySizeManager.ResponsiveFont="Primary"
                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
@@ -170,7 +170,7 @@
                         Width="480"
                         HorizontalAlignment="Left"
                         Padding="16"
-                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="1"
                         Background="{ThemeResource DaisyBase200Brush}" />
                 </daisy:WrapPanel>
@@ -181,7 +181,7 @@
             <StackPanel>
                 <local:SectionHeader SectionId="weather-metrics" Title="Weather Metrics" />
                 <TextBlock Text="Detailed metrics table showing UV, wind, and humidity."
-                    Opacity="0.8"
+                    Opacity="{ThemeResource GalleryOpacity80}"
                     TextWrapping="Wrap"
                     daisy:FlowerySizeManager.ResponsiveFont="Primary"
                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
@@ -191,7 +191,7 @@
                         Width="300"
                         HorizontalAlignment="Left"
                         Padding="16"
-                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="1"
                         UvIndex="0"
                         UvMax="1"
@@ -206,7 +206,7 @@
                         Width="300"
                         HorizontalAlignment="Left"
                         Padding="16"
-                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="1"
                         UvIndex="7"
                         UvMax="9"
@@ -224,7 +224,7 @@
             <StackPanel>
                 <local:SectionHeader SectionId="weather-conditions" Title="Weather Icon (Animated)" />
                 <TextBlock Text="Animated weather condition icons with unique animations per weather type."
-                    Opacity="0.8" TextWrapping="Wrap"
+                    Opacity="{ThemeResource GalleryOpacity80}" TextWrapping="Wrap"
                     daisy:FlowerySizeManager.ResponsiveFont="Primary"
                     Foreground="{ThemeResource DaisyBaseContentBrush}" />
                 <daisy:WrapPanel Orientation="Horizontal">
@@ -334,7 +334,7 @@
                         <TextBlock Text="Windy" FontSize="10" HorizontalAlignment="Center" Margin="0,4,0,0" />
                     </StackPanel>
                 </daisy:WrapPanel>
-                <TextBlock Text="Static (animations disabled)" daisy:FlowerySizeManager.ResponsiveFont="Secondary" Opacity="0.6" Margin="0,8,0,4" />
+                <TextBlock Text="Static (animations disabled)" daisy:FlowerySizeManager.ResponsiveFont="Secondary" Opacity="{ThemeResource GalleryOpacity60}" Margin="0,8,0,4" />
                 <daisy:WrapPanel Orientation="Horizontal">
                     <StackPanel Margin="8" HorizontalAlignment="Center">
                         <weather:DaisyWeatherIcon Condition="Sunny" IconSize="32" IsAnimated="False"
@@ -372,7 +372,7 @@
 </weather:DaisyWeatherCard>]]>
                             </TextBlock>
                         </daisy:DaisyCard>
-                        <TextBlock TextWrapping="Wrap" Opacity="0.8" daisy:FlowerySizeManager.ResponsiveFont="Primary"
+                        <TextBlock TextWrapping="Wrap" Opacity="{ThemeResource GalleryOpacity80}" daisy:FlowerySizeManager.ResponsiveFont="Primary"
                             Text="Get a free API key from openweathermap.org to use the built-in OpenWeatherMapService, or implement IWeatherService for custom providers." />
                     </StackPanel>
                 </daisy:DaisyAlert>
@@ -383,7 +383,7 @@
             <StackPanel>
                 <local:SectionHeader Title="Live API Test" />
                 <TextBlock Text="Test the OpenWeatherMap service integration with your API key."
-                    Opacity="0.7" TextWrapping="Wrap" daisy:FlowerySizeManager.ResponsiveFont="Primary" />
+                    Opacity="{ThemeResource GalleryOpacity70}" TextWrapping="Wrap" daisy:FlowerySizeManager.ResponsiveFont="Primary" />
                 <daisy:DaisyAlert Variant="Warning" Padding="8" Width="460" HorizontalAlignment="Left">
                     <TextBlock TextWrapping="Wrap" FontSize="12">
                         <Run FontWeight="SemiBold">Note:</Run>
@@ -436,7 +436,7 @@
                     <TextBlock Text="Live Weather Data:" FontWeight="SemiBold" Margin="0,0,0,8" />
                     <weather:DaisyWeatherCard x:Name="LiveWeatherCard"
                         Width="460" HorizontalAlignment="Left"
-                        BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        BorderBrush="{ThemeResource DaisyBorderBrush}"
                         BorderThickness="1"
                         Background="{ThemeResource DaisyBase200Brush}" />
                 </StackPanel>

@@ -327,7 +327,17 @@ namespace Flowery.WinUI.RuntimeTests.Controls
                 card.IsGlass = true;
                 card.EnableBackdropBlur = true;
                 card.BlurMode = GlassBlurMode.SkiaSharp;
-                await LoadAsync(card);
+                // Capture hides glass surfaces. Keep a real backdrop in the rendered scene.
+                var scene = new Grid
+                {
+                    Width = 200,
+                    Height = 140,
+                    Background = new SolidColorBrush(Microsoft.UI.Colors.Coral),
+                    Children = { card }
+                };
+                await LoadAsync(scene);
+                await RuntimeTestHelpers.EnsureLoadedAsync(card).WaitAsync(TimeSpan.FromSeconds(10));
+                scene.UpdateLayout();
                 var image = Field<Image>(card, "_blurredBackdrop");
                 Assert.IsNotNull(image, card.GetType().Name);
                 if (new Windows.UI.ViewManagement.AccessibilitySettings().HighContrast)
@@ -351,6 +361,16 @@ namespace Flowery.WinUI.RuntimeTests.Controls
                     {
                         card.RefreshBackdrop();
                         await captured.Task.WaitAsync(TimeSpan.FromSeconds(15));
+                    }
+                    catch (TimeoutException error)
+                    {
+                        var currentImage = Field<Image>(card, "_blurredBackdrop");
+                        throw new TimeoutException(
+                            $"{card.GetType().Name} did not publish its backdrop: Loaded={card.IsLoaded}, Size={card.ActualWidth}x{card.ActualHeight}, Source={image.Source}, Visibility={image.Visibility}, " +
+                            $"SameImage={ReferenceEquals(image, currentImage)}, CurrentSource={currentImage.Source}, CurrentVisibility={currentImage.Visibility}, " +
+                            $"Capturing={Field<bool>(card, "_isCapturing")}, Queued={Field<bool>(card, "_captureQueued")}, NeedsUpdate={Field<bool>(card, "_needsUpdate")}, Version={Field<int>(card, "_captureVersion")}, " +
+                            $"UsesBlur={typeof(DaisyCard).GetProperty("UsesBackdropBlur", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(card)}, " +
+                            $"CaptureGate={((SemaphoreSlim)typeof(Flowery.Skia.SkiaBackdropCapture).GetField("CaptureGate", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!).CurrentCount}.", error);
                     }
                     finally
                     {

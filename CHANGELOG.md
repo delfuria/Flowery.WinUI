@@ -6,6 +6,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-10-19
+
+### Added
+
+- Windows contrast theme support across the library, Kanban, and Gallery, with live system colors and visible control states.
+- `DaisyHighContrast.ContentOpacity` keeps captions opaque in Windows contrast themes and restores their normal opacity afterward.
+- Shared internal Composition support for visual ownership, retained vector graphics, and geometry updates after layout, wrapping, scrolling, and DPI changes (#24).
+- Gallery: a Showcase example combines normal WinUI text and input with shared Composition graphics (#24).
+
+### Changed
+
+- `DaisyShadowContainer` now updates existing outer-shadow visuals when size, corner radius, or appearance changes. Shadow-count changes rebuild the visual graph (#24).
+
+### Fixed
+
+- `DaisyStatusIndicator` Spin no longer flashes horizontal or vertical streaks while its two satellites orbit.
+- Custom controls show keyboard focus and keyboard-pressed states. Numeric input keeps its focus border after validation feedback.
+- `DaisyShadowContainer` no longer replaces or removes an attached visual owned by another component (#24).
+
 ## [1.5.0] - 2026-10-19
 
 ### Added

@@ -31,6 +31,7 @@ namespace Flowery.Controls
         {
             DefaultStyleKey = typeof(DaisyRadialProgress);
             IsTabStop = false;
+            IsEnabledChanged += (sender, args) => ApplyAll();
 
             HorizontalAlignment = HorizontalAlignment.Center;
             VerticalAlignment = VerticalAlignment.Center;
@@ -345,7 +346,7 @@ namespace Flowery.Controls
             _trackEllipse.Width = finalSize;
             _trackEllipse.Height = finalSize;
             _trackEllipse.StrokeThickness = strokeThickness;
-            _progressArc.StrokeThickness = strokeThickness;
+            _progressArc.StrokeThickness = DaisySystemAppearance.HighContrast ? Math.Max(1, strokeThickness - 2) : strokeThickness;
         }
 
         private void ApplyColors()
@@ -389,6 +390,12 @@ namespace Flowery.Controls
             _trackEllipse.Stroke = trackOverride ?? DaisyResourceLookup.GetBrush("DaisyBase200Brush");
             _progressArc.Stroke = arcOverride ?? DaisyResourceLookup.GetBrush(progressBrushKey);
             _valueTextBlock.Foreground = textOverride ?? DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+            if (DaisySystemAppearance.HighContrast)
+            {
+                _trackEllipse.Stroke = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush");
+                _progressArc.Stroke = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyPrimaryBrush" : "DaisyDisabledForegroundBrush");
+                _valueTextBlock.Foreground = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+            }
         }
 
         private void UpdateProgressArc()
@@ -471,7 +478,7 @@ namespace Flowery.Controls
 
         private void UpdateShimmerAnimation()
         {
-            if (Shimmer && IsLoaded && DaisyMotion.AnimationsEnabled)
+            if (Shimmer && IsLoaded && DaisyMotion.AnimationsEnabled && !DaisySystemAppearance.HighContrast)
                 StartShimmerAnimation();
             else
                 StopShimmerAnimation();

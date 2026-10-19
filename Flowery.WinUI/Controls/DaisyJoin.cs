@@ -16,6 +16,7 @@ namespace Flowery.Controls
     {
         private StackPanel? _itemsPanel;
         private readonly List<UIElement> _joinItems = [];
+        private readonly Dictionary<DaisyButton, (bool External, long EnabledToken)> _externalButtons = new();
 
         public DaisyJoin()
         {
@@ -39,6 +40,12 @@ namespace Flowery.Controls
         {
             base.OnThemeChanged(themeName);
             ApplyTheme();
+        }
+
+        protected override void OnUnloaded()
+        {
+            RestoreExternalButtons();
+            base.OnUnloaded();
         }
 
         #region Orientation
@@ -137,6 +144,7 @@ namespace Flowery.Controls
 
         private void CollectAndDisplay()
         {
+            RestoreExternalButtons();
             var resources = Application.Current?.Resources;
             if (resources != null)
                 DaisyTokenDefaults.EnsureDefaults(resources);
@@ -228,7 +236,7 @@ namespace Flowery.Controls
 
             bool isHorizontal = Orientation == Orientation.Horizontal;
             var resources = Application.Current?.Resources;
-            var base300Brush = DaisyResourceLookup.GetBrush(resources, "DaisyBase300Brush");
+            var base300Brush = DaisyResourceLookup.GetBorderBrush(DaisyResourceLookup.GetBrush(resources, "DaisyBase300Brush"));
 
             for (int i = 0; i < _joinItems.Count; i++)
             {
@@ -369,14 +377,17 @@ namespace Flowery.Controls
 
         private void ApplyActiveHighlight()
         {
+            RestoreExternalButtons();
             if (_joinItems.Count == 0 || ActiveIndex < 0)
                 return;
 
             var resources = Application.Current?.Resources;
             var base200Brush = DaisyResourceLookup.GetBrush(resources, "DaisyBase200Brush");
             var baseContentBrush = DaisyResourceLookup.GetBrush(resources, "DaisyBaseContentBrush");
-            var activeBg = ActiveBackground ?? DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryBrush");
-            var activeFg = ActiveForeground ?? DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryContentBrush");
+            var activeBg = DaisySystemAppearance.HighContrast ? DaisyResourceLookup.GetBrush("DaisyPrimaryBrush")
+                : ActiveBackground ?? DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryBrush");
+            var activeFg = DaisySystemAppearance.HighContrast ? DaisyResourceLookup.GetBrush("DaisyPrimaryContentBrush")
+                : ActiveForeground ?? DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryContentBrush");
 
             for (int i = 0; i < _joinItems.Count; i++)
             {
@@ -384,10 +395,30 @@ namespace Flowery.Controls
 
                 if (_joinItems[i] is Control control)
                 {
-                    control.Background = isActive ? activeBg : base200Brush;
-                    control.Foreground = isActive ? activeFg : baseContentBrush;
+                    if (DaisySystemAppearance.HighContrast && isActive && control is DaisyButton button)
+                    {
+                        var token = button.RegisterPropertyChangedCallback(IsEnabledProperty, OnJoinedButtonEnabledChanged);
+                        _externalButtons.Add(button, (button.IsExternallyControlled, token));
+                        button.IsExternallyControlled = true;
+                        button.BorderBrush = DaisyResourceLookup.GetBrush(control.IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush");
+                    }
+                    control.Background = isActive && (!DaisySystemAppearance.HighContrast || control.IsEnabled) ? activeBg : base200Brush;
+                    control.Foreground = DaisySystemAppearance.HighContrast && !control.IsEnabled
+                        ? DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush") : isActive ? activeFg : baseContentBrush;
                 }
             }
+        }
+
+        private void OnJoinedButtonEnabledChanged(DependencyObject sender, DependencyProperty property) => ApplyActiveHighlight();
+
+        private void RestoreExternalButtons()
+        {
+            foreach (var (button, original) in _externalButtons)
+            {
+                button.UnregisterPropertyChangedCallback(IsEnabledProperty, original.EnabledToken);
+                button.IsExternallyControlled = original.External;
+            }
+            _externalButtons.Clear();
         }
 
         /// <summary>

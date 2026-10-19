@@ -356,8 +356,7 @@ namespace Flowery.Controls
             if (OverflowCount > 0)
             {
                 // Get border brush for overflow indicator (matches page background)
-                var overflowBorderBrush = DaisyResourceLookup.GetBrush("DaisyBase100Brush") 
-                    ?? new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                var overflowBorderBrush = DaisyResourceLookup.GetBorderBrush(DaisyResourceLookup.GetBrush("DaisyBase100Brush"));
                 
                 _overflowAvatar = new DaisyAvatar
                 {

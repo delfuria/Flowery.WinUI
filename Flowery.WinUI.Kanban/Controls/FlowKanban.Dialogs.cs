@@ -234,7 +234,7 @@ namespace Flowery.WinUI.Kanban.Controls
             buttonPanel.Children.Add(cancelButton);
 
             var sectionBackground = DaisyResourceLookup.GetBrush("DaisyBase200Brush");
-            var sectionBorderBrush = DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            var sectionBorderBrush = DaisyResourceLookup.GetBorderBrush();
             var footerCard = new Border
             {
                 Background = sectionBackground,
@@ -402,13 +402,12 @@ namespace Flowery.WinUI.Kanban.Controls
                     HorizontalAlignment = HorizontalAlignment.Stretch
                 };
 
-                var titleLabel = new TextBlock
+                var titleLabel = DaisyHighContrast.WithContentOpacity(new TextBlock
                 {
                     Text = FloweryLocalization.GetStringInternal("Kanban_RenameSection"),
                     FontSize = 11,
-                    Opacity = 0.7,
                     Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
-                };
+                }, 0.7);
                 contentStack.Children.Add(titleLabel);
 
                 _titleInput = new DaisyInput
@@ -421,13 +420,12 @@ namespace Flowery.WinUI.Kanban.Controls
                 AutomationProperties.SetLabeledBy(_titleInput, titleLabel);
                 contentStack.Children.Add(_titleInput);
 
-                var policyLabel = new TextBlock
+                var policyLabel = DaisyHighContrast.WithContentOpacity(new TextBlock
                 {
                     Text = FloweryLocalization.GetStringInternal("Kanban_Policy_Info"),
                     FontSize = 11,
-                    Opacity = 0.7,
                     Foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")
-                };
+                }, 0.7);
                 contentStack.Children.Add(policyLabel);
 
                 _policyBox = new DaisyTextArea
@@ -744,7 +742,7 @@ namespace Flowery.WinUI.Kanban.Controls
                 var subtitle = CreateTextBlock(
                     FloweryLocalization.GetStringInternal("Kanban_KeyboardHelp_Subtitle"),
                     "BodyTextBlockStyle");
-                subtitle.Opacity = 0.7;
+                DaisyHighContrast.SetContentOpacity(subtitle, 0.7);
                 header.Children.Add(subtitle);
 
                 var shortcuts = new StackPanel

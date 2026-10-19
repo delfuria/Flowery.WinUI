@@ -202,6 +202,7 @@ namespace Flowery.Controls
         private TextBlock? _contentText;
         private ContentPresenter? _contentPresenter;
         private object? _userContent;
+        private bool _isPointerOver;
 
         internal int Index { get; set; }
         internal bool IsFirst { get; set; }
@@ -212,6 +213,21 @@ namespace Flowery.Controls
         public DaisyBreadcrumbItem()
         {
             UseSystemFocusVisuals = true;
+            PointerEntered += OnPointerEntered;
+            PointerExited += OnPointerExited;
+            RegisterPropertyChangedCallback(IsEnabledProperty, static (sender, _) => ((DaisyBreadcrumbItem)sender).RebuildVisual());
+        }
+
+        private void OnPointerEntered(object sender, PointerRoutedEventArgs args)
+        {
+            _isPointerOver = true;
+            if (DaisyResourceLookup.IsHighContrast) RebuildVisual();
+        }
+
+        private void OnPointerExited(object sender, PointerRoutedEventArgs args)
+        {
+            _isPointerOver = false;
+            if (DaisyResourceLookup.IsHighContrast) RebuildVisual();
         }
 
         protected override void OnLoaded()
@@ -383,7 +399,16 @@ namespace Flowery.Controls
             var separatorFgOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyBreadcrumbItem", "SeparatorForeground");
 
             var baseContentBrush = fgOverride ?? DaisyResourceLookup.GetBrush(resources, "DaisyBaseContentBrush");
-            var primaryBrush = linkFgOverride ?? DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryBrush");
+            var primaryBrush = linkFgOverride ?? DaisyResourceLookup.GetBrush(resources,
+                DaisyResourceLookup.IsHighContrast ? "DaisyLinkBrush" : "DaisyPrimaryBrush");
+            bool isClickable = IsClickable && !IsLast;
+            var highlighted = DaisyResourceLookup.IsHighContrast && IsEnabled && isClickable && _isPointerOver;
+            if (DaisyResourceLookup.IsHighContrast && !IsEnabled)
+                baseContentBrush = primaryBrush = DaisyResourceLookup.GetBrush("DaisyDisabledForegroundBrush");
+            if (highlighted)
+                baseContentBrush = primaryBrush = DaisyResourceLookup.GetBrush("DaisyPrimaryContentBrush");
+            _rootGrid.Background = highlighted ? DaisyResourceLookup.GetBrush("DaisyPrimaryBrush")
+                : new SolidColorBrush(Microsoft.UI.Colors.Transparent);
 
             // Get font size based on size
             double fontSize = DaisyResourceLookup.GetDefaultFontSize(Size);
@@ -395,7 +420,7 @@ namespace Flowery.Controls
             {
                 _separatorText.Text = Separator;
                 _separatorText.Foreground = separatorFgOverride ?? baseContentBrush;
-                _separatorText.Opacity = SeparatorOpacity;
+                _separatorText.Opacity = DaisyResourceLookup.GetContentOpacity(SeparatorOpacity);
                 _separatorText.FontSize = fontSize;
                 _separatorText.Visibility = IsFirst ? Visibility.Collapsed : Visibility.Visible;
             }
@@ -411,9 +436,8 @@ namespace Flowery.Controls
             }
 
             // Content
-            bool isClickable = IsClickable && !IsLast;
             var contentBrush = isClickable ? primaryBrush : baseContentBrush;
-            double contentOpacity = IsLast ? 0.7 : 1.0;
+            double contentOpacity = DaisyResourceLookup.GetContentOpacity(IsLast ? 0.7 : 1.0);
             IsTabStop = isClickable;
 
             if (_userContent is string text)
@@ -440,6 +464,10 @@ namespace Flowery.Controls
                 if (_contentPresenter != null)
                 {
                     _contentPresenter.Content = _userContent;
+                    if (DaisyResourceLookup.IsHighContrast)
+                        _contentPresenter.Foreground = contentBrush;
+                    else
+                        _contentPresenter.ClearValue(ContentPresenter.ForegroundProperty);
                     _contentPresenter.Opacity = contentOpacity;
                     _contentPresenter.Visibility = Visibility.Visible;
                 }

@@ -255,6 +255,8 @@ namespace Flowery.Controls
         {
             base.OnThemeChanged(themeName);
             UpdateTriggerButton();
+            if (DaisyResourceLookup.IsHighContrast)
+                UpdateActionsVisibility();
         }
 
         protected override void OnGlobalSizeChanged(DaisySize size)
@@ -461,7 +463,7 @@ namespace Flowery.Controls
 
             StopActionsStoryboard();
 
-            if (!Flowery.Services.DaisyMotion.AnimationsEnabled)
+            if (!Flowery.Services.DaisyMotion.AnimationsEnabled || DaisyResourceLookup.IsHighContrast)
             {
                 _actionsPanel.Visibility = IsOpen ? Visibility.Visible : Visibility.Collapsed;
                 foreach (var button in _actionButtons)

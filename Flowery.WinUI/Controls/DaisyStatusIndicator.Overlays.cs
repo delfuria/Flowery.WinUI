@@ -205,7 +205,7 @@ namespace Flowery.Controls
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Top,
                 Margin = new Thickness(0, 1, 0, 0),
-                Opacity = 0.85
+                Opacity = DaisyResourceLookup.GetContentOpacity(0.85)
             };
 
             var satellite2 = new Ellipse
@@ -216,7 +216,7 @@ namespace Flowery.Controls
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Bottom,
                 Margin = new Thickness(0, 0, 0, 1),
-                Opacity = 0.85
+                Opacity = DaisyResourceLookup.GetContentOpacity(0.85)
             };
 
             spinContainer.Children.Add(satellite1);
@@ -224,7 +224,7 @@ namespace Flowery.Controls
             _rootGrid!.Children.Add(spinContainer);
             _animatedContainer = spinContainer;
 
-            spinContainer.Loaded += (s, e) => StartOrbitRotationAnimation(spinContainer, size, 800);
+            spinContainer.Loaded += (s, e) => StartSpinAnimation(spinContainer, size);
         }
 
         private void BuildOrbitOverlay(double size, Brush brush)
@@ -245,7 +245,7 @@ namespace Flowery.Controls
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Top,
                 Margin = new Thickness(0, 1, 0, 0),
-                Opacity = 0.85
+                Opacity = DaisyResourceLookup.GetContentOpacity(0.85)
             };
 
             orbitContainer.Children.Add(satellite);

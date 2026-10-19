@@ -31,6 +31,7 @@ namespace Flowery.Controls
             DefaultStyleKey = typeof(DaisySlideToConfirm);
             IsTabStop = true;
             UseSystemFocusVisuals = true;
+            IsEnabledChanged += (sender, args) => ApplyAll();
             KeyDown += OnKeyDown;
 
             // Replaced DaisyControlLifecycle with inherited lifecycle by removing explicit instantiation
@@ -87,7 +88,7 @@ namespace Flowery.Controls
             {
                 _originalTrackBrush = brush;
             }
-            
+
             RefreshNeumorphicEffect();
         }
 
@@ -438,13 +439,48 @@ namespace Flowery.Controls
                 // Add left margin to prevent text from being cut off by the handle
                 _label.Margin = new Thickness(handleSize + 4, 0, 4, 0);
                 // Set initial opacity (dimmed until slid)
-                _label.Opacity = 0.7;
+                _label.Opacity = DaisyResourceLookup.GetContentOpacity(0.7);
             }
             // Vertical centering is handled by VerticalAlignment="Center" in XAML
         }
 
         private void ApplyVariantColors()
         {
+            if (DaisySystemAppearance.HighContrast)
+            {
+                var foreground = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
+                if (_track != null)
+                {
+                    _track.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                    _track.BorderBrush = foreground;
+                    _track.BorderThickness = new Thickness(1);
+                    _track.Margin = new Thickness(0);
+                }
+                if (_handle != null)
+                {
+                    _handle.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+                    _handle.BorderBrush = foreground;
+                    _handle.BorderThickness = new Thickness(1);
+                }
+                if (_icon != null) _icon.Fill = foreground;
+                if (_label != null)
+                {
+                    _label.Foreground = foreground;
+                    _label.Opacity = 1;
+                }
+                if (_slideCompleted) UpdateVisualFeedback(1, 1);
+                return;
+            }
+            if (_handle != null)
+            {
+                _handle.BorderBrush = null;
+                _handle.BorderThickness = new Thickness(0);
+            }
+            if (_track != null)
+                _track.Background = Background ?? DaisyResourceLookup.GetBrush("DaisyBase300Brush");
+            if (_label != null)
+                _label.Opacity = _slideCompleted ? 1 : 0.7;
+
             // Get variant brush key
             var brushKey = Variant switch
             {
@@ -742,6 +778,8 @@ namespace Flowery.Controls
                 return;
 
             _slideCompleted = true;
+            if (DaisySystemAppearance.HighContrast)
+                UpdateVisualFeedback(maxLeft, maxLeft);
             _isDragging = false;
             _handle?.ReleasePointerCaptures();
 
@@ -831,6 +869,15 @@ namespace Flowery.Controls
                 return;
 
             var progress = Math.Clamp(currentLeft / maxLeft, 0, 1);
+            if (DaisySystemAppearance.HighContrast)
+            {
+                var active = progress > 0 && IsEnabled;
+                _track.Background = DaisyResourceLookup.GetBrush(active ? "DaisyPrimaryBrush" : "DaisyBase100Brush");
+                _label.Foreground = DaisyResourceLookup.GetBrush(!IsEnabled ? "DaisyDisabledForegroundBrush"
+                    : active ? "DaisyPrimaryContentBrush" : "DaisyBaseContentBrush");
+                _label.Opacity = 1;
+                return;
+            }
 
             // Interpolate track background color (Base300 -> SlideColor)
             var originalColor = _originalTrackBrush?.Color ?? Color.FromArgb(255, 100, 100, 100);
@@ -864,6 +911,11 @@ namespace Flowery.Controls
 
         private void ResetVisualFeedback()
         {
+            if (DaisySystemAppearance.HighContrast)
+            {
+                ApplyVariantColors();
+                return;
+            }
             if (_track != null && _originalTrackBrush != null)
             {
                 _track.Background = _originalTrackBrush;
@@ -871,7 +923,7 @@ namespace Flowery.Controls
 
             if (_label != null)
             {
-                _label.Opacity = 0.7;
+                _label.Opacity = DaisyResourceLookup.GetContentOpacity(0.7);
                 if (_originalLabelBrush != null)
                 {
                     _label.Foreground = _originalLabelBrush;
@@ -902,7 +954,6 @@ namespace Flowery.Controls
                 _handleNeumorphicHelper = null;
                 return;
             }
-            
             // 1. Update Track (Inset)
             _neumorphicHelper ??= new DaisyNeumorphicHelper(_track);
             
