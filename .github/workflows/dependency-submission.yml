@@ -1,0 +1,63 @@
+name: Flowery.WinUI Dependency Submission
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '15 5 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: windows-2025-vs2026
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.402'
+      - name: Restore every C# project with the native Windows toolchain
+        shell: pwsh
+        run: |
+          . ./scripts/build_core.ps1
+          Initialize-BuildEnvironment -HeadName 'dependency submission' -LogFileName 'dependency-restore' -Configuration Release -SdkVersion '10.0.402'
+          $gitArguments = @('ls-files', '--', '*.csproj')
+          $projects = @(& git @gitArguments)
+          if ($LASTEXITCODE -ne 0 -or $projects.Count -eq 0) {
+              throw 'Could not enumerate the tracked C# projects.'
+          }
+          foreach ($project in $projects) {
+              $restoreArguments = @(
+                  $project, '-t:Restore', '-nologo', '-nodeReuse:false', '-verbosity:normal', '-m:1',
+                  '-p:Configuration=Release', '-p:Platform=x64', '-p:RestoreForceEvaluate=true'
+              )
+              if (-not (Invoke-MSBuildOperation -Title $project -Arguments $restoreArguments)) {
+                  Write-BuildFailure $project
+                  exit 1
+              }
+          }
+          Write-BuildSummary
+      - name: Submit resolved direct and transitive NuGet dependencies
+        uses: advanced-security/component-detection-dependency-submission-action@v0.2.0
+        with:
+          detectorsCategories: NuGet
+          fail-on-empty: true
+          correlator: native-windows-nuget
+      - name: Upload restore log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: dependency-restore
+          path: logs/dependency-restore-*.log
+          if-no-files-found: error

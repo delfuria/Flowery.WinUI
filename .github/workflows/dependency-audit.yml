@@ -1,0 +1,35 @@
+name: Flowery.WinUI NuGet Audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '45 4 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: windows-2025-vs2026
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.402'
+      - name: Audit all C# projects and transitive NuGet dependencies
+        shell: pwsh
+        run: ./scripts/audit_nuget.ps1 -Configuration Release -SdkVersion '10.0.402'
+      - name: Upload audit log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nuget-audit
+          path: logs/nuget-audit-*.log
+          if-no-files-found: error

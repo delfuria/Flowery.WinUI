@@ -10,7 +10,7 @@ All commands below run in PowerShell 7 from the repository root.
 - Visual Studio with MSBuild and the Windows SDK.
 - Microsoft Edge WebView2 Runtime for the shader-effect views.
 
-The build uses Microsoft.WindowsAppSDK 1.7.250909003.
+The build uses the Microsoft.WindowsAppSDK version pinned in `Directory.Packages.props`.
 It requires the native Windows toolchain listed above.
 
 ## Select the .NET SDK
@@ -170,6 +170,24 @@ It refuses to run if Flowery Photos is already installed for the current user.
 Use `-LaunchGui` to also start the installed application once.
 
 ## Continuous integration
+
+Run the NuGet security audit locally with the same native toolchain:
+
+```powershell
+./scripts/audit_nuget.ps1 -Configuration Release -SdkVersion 10.0.402
+```
+
+The audit restores every tracked C# project, including the tools and standalone unit-test project outside the solution.
+It checks direct and transitive packages and fails on known vulnerabilities or unavailable vulnerability data.
+The NuGet Audit workflow runs for pull requests, pushes to `main`, and weekly.
+It has read-only repository access.
+
+Dependabot checks NuGet and GitHub Actions weekly, with a limit of ten version-update PRs per ecosystem.
+Related MSTest packages and their test-platform extensions update together.
+Other package families and unrelated major upgrades remain separate.
+The Dependency Submission workflow restores all C# projects on Windows and submits resolved NuGet dependencies from the default branch.
+Only its submission job has repository write access; it does not run for pull requests.
+The repository's built-in automatic submission remains disabled because its Linux restore fails for these native Windows projects.
 
 The CI workflow is configured to build and check Gallery and Kiosk in Debug and Release with SDK `10.0.402` and `11.0.100-rc.2.26504.105`.
 The release workflow creates the native packages, Gallery output, `Flowery.WinUI.Kiosk-Windows-x64.zip`, `Flowery.WinUI.Photos-Windows-x64.zip` and the Photos installer `Flowery.WinUI.Photos-Setup-<version>-x64.exe`.
