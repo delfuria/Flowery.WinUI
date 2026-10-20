@@ -47,7 +47,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
     private readonly TextBlock _description = new() { TextWrapping = TextWrapping.Wrap };
     private readonly TextBlock _count = new() { TextWrapping = TextWrapping.Wrap };
     private readonly ContentPresenter _customContent = new();
-    private readonly ScrollViewer _textScroll = new() { HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled };
+    private readonly ScrollViewer _textScroll = new() { HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
     private readonly ScrollViewer _progressScroll = new() { HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden, VerticalScrollBarVisibility = ScrollBarVisibility.Disabled, IsTabStop = false };
     private readonly DaisySteps _progress = new();
     private readonly DaisyButton _back = new();
@@ -357,12 +357,11 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             {
                 if (!DaisyTourLayout.TryBounds(endpoint, _surface, out var full))
                     return Unavailable(session, annotation, endpoint);
+                // Connectors keep the endpoint's real position, even partly outside the visible area.
+                // Only its visible part is highlighted.
+                if (!bounds.ContainsKey(endpoint)) bounds[endpoint] = full;
                 var clipped = DaisyTourLayout.VisibleBounds(endpoint, _surface, full);
-                // A relationship needs two identifiable endpoints, not a clipped fragment.
-                if (clipped.IsEmpty || clipped.Width < full.Width - 1 || clipped.Height < full.Height - 1)
-                    return Unavailable(session, annotation, endpoint);
-                bounds[endpoint] = clipped;
-                if (!holes.Contains(clipped)) holes.Add(clipped);
+                if (!clipped.IsEmpty && clipped.Width > 0 && clipped.Height > 0 && !holes.Contains(clipped)) holes.Add(clipped);
             }
         }
         LayoutCard();
@@ -440,17 +439,60 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             var end = annotation.Target is { } target ? bounds[target] : TargetBounds;
             var kind = DaisyTourAnnotationPresenter.ResolveKind(annotation, AnnotationDefaults, step.AnnotationDefaults);
             var source = annotation.Source is { } start ? bounds[start] : CardBounds;
-            if (annotation.Source is null && kind is DaisyTourAnnotationKind.Cloud or DaisyTourAnnotationKind.SpeechBubble or DaisyTourAnnotationKind.Custom)
+            if (kind != DaisyTourAnnotationKind.Custom)
             {
-                var measured = presenter.MeasureSurface(annotation, foreground, AnnotationDefaults,
-                    step.AnnotationDefaults, scale, _card.FlowDirection);
-                source = DaisyTourLayout.PlaceAnnotation(end, CardBounds, new Size(_surface.Width, _surface.Height), measured);
+                // Connectors and tails start and end at the highlight frame instead of crossing it.
+                var frame = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness / 2;
+                end = Inflate(end, frame);
+                if (annotation.Source is not null) source = Inflate(source, frame);
             }
+            if (kind == DaisyTourAnnotationKind.Custom)
+                source = MarkerBounds(annotation.Source is null ? end : source);
+            presenter.WidthLimit = double.PositiveInfinity;
+            if (annotation.Source is null && kind is DaisyTourAnnotationKind.Cloud or DaisyTourAnnotationKind.SpeechBubble)
+                source = PlaceSurface(presenter, annotation, step, end, bounds.Values, foreground, scale);
             presenter.Update(annotation, source, end,
                 DaisyResourceLookup.GetBrush("DaisyPrimaryBrush"), DaisyResourceLookup.GetBrush("DaisyBase100Brush"),
                 foreground, AnnotationDefaults, step.AnnotationDefaults, scale, _card.FlowDirection);
         }
     }
+
+    // Surfaces go beside their target in one of eight directions. Without a fitting direction,
+    // the surface narrows in steps down to its minimum width before it is clamped into view.
+    private Rect PlaceSurface(DaisyTourAnnotationPresenter presenter, DaisyTourAnnotation annotation, DaisyTourStep step,
+        Rect target, IEnumerable<Rect> highlighted, Brush foreground, double scale)
+    {
+        var frame = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness;
+        var highlights = highlighted.Select(rect => Inflate(rect, frame)).ToArray();
+        var viewport = new Size(_surface.Width, _surface.Height);
+        var rightToLeft = _card.FlowDirection == FlowDirection.RightToLeft;
+        for (var limit = double.PositiveInfinity; ; )
+        {
+            presenter.WidthLimit = limit;
+            var measured = presenter.MeasureSurface(annotation, foreground, AnnotationDefaults, step.AnnotationDefaults, scale, _card.FlowDirection);
+            var placed = DaisyTourLayout.PlaceAnnotation(target, CardBounds, viewport, measured, highlights,
+                presenter.PlacementDirection, rightToLeft, out var direction);
+            if (direction >= 0)
+                presenter.PlacementDirection = direction;
+            // The limit falls strictly, so content with a fixed width ends the search as well.
+            limit = Math.Min(limit, measured.Width) * 0.8;
+            if (direction >= 0 || limit < 80 * scale)
+                return placed;
+        }
+    }
+
+    // A custom marker is centered on its anchor. An ellipse inscribed in this box
+    // encloses the anchor's complete highlight, including its corners.
+    private Rect MarkerBounds(Rect anchor)
+    {
+        var margin = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness;
+        var width = (anchor.Width + 2 * margin) * Math.Sqrt(2);
+        var height = (anchor.Height + 2 * margin) * Math.Sqrt(2);
+        return new Rect(anchor.X + anchor.Width / 2 - width / 2, anchor.Y + anchor.Height / 2 - height / 2, width, height);
+    }
+
+    private static Rect Inflate(Rect rect, double margin) =>
+        new(rect.X - margin, rect.Y - margin, rect.Width + 2 * margin, rect.Height + 2 * margin);
 
     private void BuildProgress(Session session)
     {

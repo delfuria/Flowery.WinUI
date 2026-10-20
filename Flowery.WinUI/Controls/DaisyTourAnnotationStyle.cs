@@ -8,7 +8,7 @@ namespace Flowery.Controls;
 /// <summary>Common appearances that can be overridden property by property.</summary>
 public enum DaisyTourAnnotationPreset { Default, ThinArrow, ThickArrow, BlockArrow, CurvedArrow, TwoEndedArrow, DottedLine, DashedLine, DashDotLine, Cloud, SpeechBubble }
 public enum DaisyTourAnnotationKind { Default, Arrow, Line, Cloud, SpeechBubble, Custom }
-public enum DaisyTourAnnotationPath { Default, Straight, Curved, Elbow }
+public enum DaisyTourAnnotationPath { Default, Straight, Curved, Elbow, SCurve, Bezier, Custom }
 public enum DaisyTourArrowHead { Default, None, Open, Triangle, Diamond, Circle }
 public enum DaisyTourArrowStyle { Default, Line, Block }
 public enum DaisyTourStrokeStyle { Default, Solid, Dotted, Dashed, DashDot, Custom }
@@ -63,6 +63,14 @@ public partial class DaisyTourAnnotationStyle : DependencyObject
         nameof(BodyWidth), typeof(double), typeof(DaisyTourAnnotationStyle), new PropertyMetadata(double.NaN, OnChanged));
     public static readonly DependencyProperty CurvatureProperty = DependencyProperty.Register(
         nameof(Curvature), typeof(double), typeof(DaisyTourAnnotationStyle), new PropertyMetadata(double.NaN, OnChanged));
+    public static readonly DependencyProperty ControlPoint1XProperty = DependencyProperty.Register(
+        nameof(ControlPoint1X), typeof(double), typeof(DaisyTourAnnotationStyle), new PropertyMetadata(double.NaN, OnChanged));
+    public static readonly DependencyProperty ControlPoint1YProperty = DependencyProperty.Register(
+        nameof(ControlPoint1Y), typeof(double), typeof(DaisyTourAnnotationStyle), new PropertyMetadata(double.NaN, OnChanged));
+    public static readonly DependencyProperty ControlPoint2XProperty = DependencyProperty.Register(
+        nameof(ControlPoint2X), typeof(double), typeof(DaisyTourAnnotationStyle), new PropertyMetadata(double.NaN, OnChanged));
+    public static readonly DependencyProperty ControlPoint2YProperty = DependencyProperty.Register(
+        nameof(ControlPoint2Y), typeof(double), typeof(DaisyTourAnnotationStyle), new PropertyMetadata(double.NaN, OnChanged));
     public static readonly DependencyProperty SourceOffsetXProperty = DependencyProperty.Register(
         nameof(SourceOffsetX), typeof(double), typeof(DaisyTourAnnotationStyle), new PropertyMetadata(double.NaN, OnChanged));
     public static readonly DependencyProperty SourceOffsetYProperty = DependencyProperty.Register(
@@ -112,6 +120,12 @@ public partial class DaisyTourAnnotationStyle : DependencyObject
     public double HeadWidth { get => (double)GetValue(HeadWidthProperty); set => SetValue(HeadWidthProperty, value); }
     public double BodyWidth { get => (double)GetValue(BodyWidthProperty); set => SetValue(BodyWidthProperty, value); }
     public double Curvature { get => (double)GetValue(CurvatureProperty); set => SetValue(CurvatureProperty, value); }
+    /// <summary>Bezier control points in connector coordinates: (0,0) is the start, (1,0) the end.
+    /// Positive Y bends to the same side as a positive Curvature.</summary>
+    public double ControlPoint1X { get => (double)GetValue(ControlPoint1XProperty); set => SetValue(ControlPoint1XProperty, value); }
+    public double ControlPoint1Y { get => (double)GetValue(ControlPoint1YProperty); set => SetValue(ControlPoint1YProperty, value); }
+    public double ControlPoint2X { get => (double)GetValue(ControlPoint2XProperty); set => SetValue(ControlPoint2XProperty, value); }
+    public double ControlPoint2Y { get => (double)GetValue(ControlPoint2YProperty); set => SetValue(ControlPoint2YProperty, value); }
     public double SourceOffsetX { get => (double)GetValue(SourceOffsetXProperty); set => SetValue(SourceOffsetXProperty, value); }
     public double SourceOffsetY { get => (double)GetValue(SourceOffsetYProperty); set => SetValue(SourceOffsetYProperty, value); }
     public double TargetOffsetX { get => (double)GetValue(TargetOffsetXProperty); set => SetValue(TargetOffsetXProperty, value); }

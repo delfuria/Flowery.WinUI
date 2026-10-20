@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Flowery.WinUI.Gallery.Localization;
+using Microsoft.UI.Xaml.Markup;
 
 namespace Flowery.WinUI.Gallery.Examples;
 
@@ -92,7 +93,9 @@ public sealed partial class TourExamples : ScrollableExamplePage
                 DashArray = style == DaisyTourStrokeStyle.Custom ? new DaisyTourDashCollection { 6, 2, 1, 2, 1, 2 } : null,
                 DashOffset = 1
             };
-            AddAnnotationStep(style.ToString(), annotation, connectTargets: true);
+            // Curved and elbow lines start below the first targets, so their course is visible.
+            var source = style is DaisyTourStrokeStyle.Dotted or DaisyTourStrokeStyle.Dashed ? NestedTarget : PrimaryTarget;
+            AddAnnotationStep(style.ToString(), annotation, connectTargets: true, source);
         }
         await Tour.StartAsync();
     }
@@ -120,7 +123,7 @@ public sealed partial class TourExamples : ScrollableExamplePage
             Kind = kind,
             Tail = tail,
             Width = hasText ? 230 : 90,
-            Height = hasText ? 130 : 70,
+            Height = hasText ? double.NaN : 70,
             MaxWidth = 240,
             CornerRadius = tail == DaisyTourAnnotationTail.None ? 0 : 20
         };
@@ -136,8 +139,6 @@ public sealed partial class TourExamples : ScrollableExamplePage
         {
             Kind = DaisyTourAnnotationKind.Custom,
             Geometry = new EllipseGeometry { Center = new Point(60, 35), RadiusX = 58, RadiusY = 33 },
-            Width = 120,
-            Height = 70,
             StrokeThickness = 5,
             Stroke = new SolidColorBrush(Colors.OrangeRed),
             Fill = new SolidColorBrush(Colors.Transparent)
@@ -147,20 +148,96 @@ public sealed partial class TourExamples : ScrollableExamplePage
         await Tour.StartAsync();
     }
 
-    private void AddAnnotationStep(string title, DaisyTourAnnotation annotation, bool connectTargets = false)
+    private async void Regions_Click(object sender, RoutedEventArgs e)
     {
+        if (FindThemeSelection() is not { } themeSelection)
+            return;
+        Tour.Steps.Clear();
+        var step = new DaisyTourStep { Id = "regions", Target = RegionTarget, PrepareAsync = PrepareOverviewAsync };
+        BindText(step, DaisyTourStep.TitleProperty, "Gallery_Tour_RegionsTitle");
+        BindText(step, DaisyTourStep.DescriptionProperty, "Gallery_Tour_RegionsDescription");
+        step.Annotations.Add(new DaisyTourAnnotation
+        {
+            Id = "theme-to-page",
+            Source = themeSelection,
+            Target = RegionTarget,
+            Preset = DaisyTourAnnotationPreset.CurvedArrow,
+            Curvature = 0.15
+        });
+        Tour.Steps.Add(step);
+        await Tour.StartAsync();
+    }
+
+    private async void Paths_Click(object sender, RoutedEventArgs e)
+    {
+        if (FindThemeSelection() is not { } themeSelection)
+            return;
+        Tour.Steps.Clear();
+        var wave = (Geometry)XamlBindingHelper.ConvertValue(typeof(Geometry), "M0,0 C20,-30 30,-30 50,0 C70,30 80,30 100,0");
+        var paths = new[]
+        {
+            new DaisyTourAnnotation { Path = DaisyTourAnnotationPath.Elbow, CornerRadius = 18 },
+            new DaisyTourAnnotation { Path = DaisyTourAnnotationPath.SCurve },
+            new DaisyTourAnnotation
+            {
+                Path = DaisyTourAnnotationPath.Bezier,
+                ControlPoint1X = 0.2, ControlPoint1Y = -0.6, ControlPoint2X = 0.8, ControlPoint2Y = 0.6
+            },
+            new DaisyTourAnnotation { Path = DaisyTourAnnotationPath.Custom, Geometry = wave }
+        };
+        foreach (var annotation in paths)
+        {
+            var step = new DaisyTourStep
+            {
+                Id = $"path-{Tour.Steps.Count}", Title = annotation.Path.ToString(), Target = RegionTarget,
+                PrepareAsync = PrepareOverviewAsync
+            };
+            BindText(step, DaisyTourStep.DescriptionProperty, "Gallery_Tour_PathsDescription");
+            annotation.Id = $"path-shape-{Tour.Steps.Count}";
+            annotation.Source = themeSelection;
+            annotation.Target = RegionTarget;
+            annotation.StrokeThickness = 4;
+            step.Annotations.Add(annotation);
+            Tour.Steps.Add(step);
+        }
+        await Tour.StartAsync();
+    }
+
+    // The theme selection belongs to the window's sidebar, outside this page.
+    private DaisyThemeDropdown? FindThemeSelection()
+    {
+        return XamlRoot?.Content is { } root ? FindDescendant<DaisyThemeDropdown>(root) : null;
+    }
+
+    private static T? FindDescendant<T>(DependencyObject root) where T : DependencyObject
+    {
+        for (var index = 0; index < VisualTreeHelper.GetChildrenCount(root); index++)
+        {
+            var child = VisualTreeHelper.GetChild(root, index);
+            if (child is T match)
+                return match;
+            if (FindDescendant<T>(child) is { } nested)
+                return nested;
+        }
+        return null;
+    }
+
+    private void AddAnnotationStep(string title, DaisyTourAnnotation annotation, bool connectTargets = false,
+        FrameworkElement? source = null)
+    {
+        source ??= PrimaryTarget;
         var step = new DaisyTourStep
         {
             Id = $"annotation-{Tour.Steps.Count}",
             Title = title,
-            Target = PrimaryTarget,
+            Target = source,
             PrepareAsync = PrepareOverviewAsync,
             AnnotationDefaults = new DaisyTourAnnotationStyle { Opacity = 0.95 }
         };
         BindText(step, DaisyTourStep.DescriptionProperty, "Gallery_Tour_AnnotationDescription");
         annotation.Id = $"shape-{Tour.Steps.Count}";
         annotation.Target = connectTargets ? RelatedTarget : PrimaryTarget;
-        annotation.Source = connectTargets ? PrimaryTarget : null;
+        annotation.Source = connectTargets ? source : null;
         step.Annotations.Add(annotation);
         Tour.Steps.Add(step);
     }
@@ -192,11 +269,6 @@ public sealed partial class TourExamples : ScrollableExamplePage
         return Task.CompletedTask;
     }
 
-    private void Tour_Closed(object? sender, DaisyTourClosedEventArgs e)
-    {
-        OutcomeText.Text = string.Format(CultureInfo.CurrentCulture,
-            GalleryLocalization.GetString("Gallery_Tour_Result"), e.Reason, e.StepId ?? "-", e.AnnotationId ?? "-");
-    }
 
     private void BindText(DependencyObject target, DependencyProperty property, string key)
     {

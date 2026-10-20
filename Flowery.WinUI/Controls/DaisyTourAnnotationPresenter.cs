@@ -14,10 +14,17 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
     private readonly Path _tail = CreatePath();
     private readonly Path _startHead = CreatePath();
     private readonly Path _endHead = CreatePath();
+    private readonly GeometryGroup _customRoute = new();
     private readonly ContentPresenter _content = new();
     private readonly TextBlock _text = new() { TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis };
     private readonly Border _contentHost;
     private readonly Path[] _shapes;
+
+    /// <summary>Narrows surfaces that cannot be placed at their preferred width.</summary>
+    internal double WidthLimit { get; set; } = double.PositiveInfinity;
+
+    /// <summary>The last valid placement direction, kept while it still fits.</summary>
+    internal int PlacementDirection { get; set; } = -1;
 
     internal DaisyTourAnnotationPresenter()
     {
@@ -57,6 +64,8 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
             Opacity = 1;
         }
 
+        // Releases a previously fitted custom course before the shapes are rebuilt.
+        _customRoute.Children.Clear();
         foreach (var shape in _shapes)
         {
             shape.Data = null;
@@ -85,7 +94,10 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
 
         if (kind is DaisyTourAnnotationKind.Arrow or DaisyTourAnnotationKind.Line)
         {
-            var midpoint = DrawConnector(style, kind, source, target, fill);
+            (source, target) = AlignAutoAnchors(annotation, style, sourceBounds, targetBounds, source, target);
+            // Heads and block bodies are solid in the stroke color unless a fill is specified.
+            var solid = DaisySystemAppearance.HighContrast ? stroke : style.Get<Brush?>(DaisyTourAnnotationStyle.FillProperty, null) ?? stroke;
+            var midpoint = DrawConnector(annotation, style, kind, source, target, sourceBounds, targetBounds, solid);
             ArrangeContent(annotation, style, midpoint, foreground);
             _contentHost.Background = fill;
             return;
@@ -110,13 +122,37 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         return new Size(rect.Width, rect.Height);
     }
 
-    private Point DrawConnector(EffectiveStyle style, DaisyTourAnnotationKind kind, Point source, Point target, Brush fill)
+    private Point DrawConnector(DaisyTourAnnotation annotation, EffectiveStyle style, DaisyTourAnnotationKind kind,
+        Point source, Point target, Rect sourceBounds, Rect targetBounds, Brush fill)
     {
         var path = style.Get(DaisyTourAnnotationStyle.PathProperty,
             style.Preset == DaisyTourAnnotationPreset.CurvedArrow ? DaisyTourAnnotationPath.Curved : DaisyTourAnnotationPath.Straight);
-        var curvature = style.Number(DaisyTourAnnotationStyle.CurvatureProperty, 0.25);
-        var points = ConnectorPoints(source, target, path, curvature);
-        var block = style.Get(DaisyTourAnnotationStyle.ArrowStyleProperty,
+        var cubic = path is DaisyTourAnnotationPath.SCurve or DaisyTourAnnotationPath.Bezier;
+        var curvature = style.Number(DaisyTourAnnotationStyle.CurvatureProperty, cubic ? 0.5 : 0.25);
+        Geometry? route = null;
+        var custom = false;
+        List<Point> points;
+        if (cubic)
+        {
+            var (first, second) = CubicControls(style, path, source, target, sourceBounds, targetBounds, curvature);
+            points = CubicPoints(source, first, second, target);
+            route = CubicGeometry(source, first, second, target);
+        }
+        else if (path == DaisyTourAnnotationPath.Custom && annotation.Geometry is { } geometry &&
+                 FitCustomRoute(geometry, source, target) is { } fitted)
+        {
+            points = fitted;
+            route = _customRoute;
+            custom = true;
+        }
+        else
+        {
+            points = ConnectorPoints(source, target, path, curvature);
+            if (path == DaisyTourAnnotationPath.Elbow)
+                (route, points) = ElbowRoute(points, Math.Max(0, style.Dimension(DaisyTourAnnotationStyle.CornerRadiusProperty, 0)));
+        }
+        // A fitted custom course keeps its own outline; block bodies follow the sampled course otherwise.
+        var block = !custom && style.Get(DaisyTourAnnotationStyle.ArrowStyleProperty,
             style.Preset == DaisyTourAnnotationPreset.BlockArrow ? DaisyTourArrowStyle.Block : DaisyTourArrowStyle.Line) == DaisyTourArrowStyle.Block;
         var start = style.Get(DaisyTourAnnotationStyle.StartHeadProperty,
             style.Preset == DaisyTourAnnotationPreset.TwoEndedArrow ? DaisyTourArrowHead.Triangle : DaisyTourArrowHead.None);
@@ -127,7 +163,7 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         _body.Data = block
             ? BlockGeometry(TrimEndpoints(points, start == DaisyTourArrowHead.None ? 0 : length, end == DaisyTourArrowHead.None ? 0 : length),
                 Math.Max(1, style.Dimension(DaisyTourAnnotationStyle.BodyWidthProperty, 12)))
-            : ConnectorGeometry(source, target, path, curvature, points);
+            : route ?? ConnectorGeometry(source, target, path, curvature, points);
         _body.Fill = block ? fill : null;
         DrawHead(_startHead, start, points[0], points[1], length, width, fill);
         DrawHead(_endHead, end, points[^1], points[^2], length, width, fill);
@@ -137,13 +173,15 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
     private void DrawSurface(DaisyTourAnnotation annotation, EffectiveStyle style, DaisyTourAnnotationKind kind,
         Rect sourceBounds, Point target, Brush fill, Brush foreground)
     {
-        var rect = ArrangeContent(annotation, style, Center(sourceBounds), foreground);
+        // Custom shapes without content fill their anchor box unless they are sized explicitly.
+        var rect = ArrangeContent(annotation, style, Center(sourceBounds), foreground,
+            kind == DaisyTourAnnotationKind.Custom ? new Size(sourceBounds.Width, sourceBounds.Height) : null);
         _contentHost.Background = null;
         var radius = Math.Clamp(style.Dimension(DaisyTourAnnotationStyle.CornerRadiusProperty, 16), 0, Math.Min(rect.Width, rect.Height) / 2);
         _body.Fill = fill;
         _body.Data = kind switch
         {
-            DaisyTourAnnotationKind.Cloud => CloudGeometry(rect),
+            DaisyTourAnnotationKind.Cloud => CloudGeometry(rect, _contentHost.Padding.Left),
             DaisyTourAnnotationKind.Custom => annotation.Geometry,
             _ => RoundedRectangle(rect, radius)
         };
@@ -160,38 +198,43 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         DrawTail(tail, rect, target, style, fill);
     }
 
-    private Rect ArrangeContent(DaisyTourAnnotation annotation, EffectiveStyle style, Point anchor, Brush foreground)
+    private Rect ArrangeContent(DaisyTourAnnotation annotation, EffectiveStyle style, Point anchor, Brush foreground, Size? emptySize = null)
     {
         var hasContent = annotation.Template is not null || annotation.Content is not null || !string.IsNullOrWhiteSpace(annotation.Text);
         var maxWidth = Math.Max(1, style.Dimension(DaisyTourAnnotationStyle.MaxWidthProperty, 280));
         var maxHeight = Math.Max(1, style.Dimension(DaisyTourAnnotationStyle.MaxHeightProperty, 180));
         if (double.IsFinite(Width)) maxWidth = Math.Min(maxWidth, Math.Max(1, Width - 24));
+        maxWidth = Math.Max(1, Math.Min(maxWidth, WidthLimit));
         if (double.IsFinite(Height)) maxHeight = Math.Min(maxHeight, Math.Max(1, Height - 24));
         _text.Text = annotation.Text;
-        _text.MaxLines = 0;
         _text.FontSize = Math.Max(1, style.Dimension(DaisyTourAnnotationStyle.FontSizeProperty, 16));
         _text.Foreground = foreground;
         _content.ContentTemplate = annotation.Template;
         _content.Content = annotation.Content ?? (annotation.Template is null ? _text : annotation);
+        // Only explicit sizes are fixed. Content-sized hosts are measured with the same
+        // unconstrained size that the canvas arranges, so wrapped text is never re-trimmed.
+        var explicitWidth = style.Number(DaisyTourAnnotationStyle.WidthProperty, double.NaN);
+        var explicitHeight = style.Number(DaisyTourAnnotationStyle.HeightProperty, double.NaN);
         _contentHost.MaxWidth = maxWidth;
         _contentHost.MaxHeight = maxHeight;
-        _contentHost.Width = double.NaN;
-        _contentHost.Height = double.NaN;
+        _contentHost.Width = double.IsNaN(explicitWidth) ? double.NaN : Math.Clamp(explicitWidth, 1, maxWidth);
+        _contentHost.Height = double.IsNaN(explicitHeight) ? double.NaN : Math.Clamp(explicitHeight, 1, maxHeight);
+        _contentHost.MinWidth = double.IsNaN(explicitWidth) ? Math.Min(80 * style.Scale, maxWidth) : 0;
+        _contentHost.MinHeight = double.IsNaN(explicitHeight) ? Math.Min(60 * style.Scale, maxHeight) : 0;
         _contentHost.Padding = new Thickness(16 * style.Scale);
         _contentHost.Visibility = hasContent ? Visibility.Visible : Visibility.Collapsed;
         if (hasContent)
-            _contentHost.Measure(new Size(maxWidth, maxHeight));
+            _contentHost.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
 
-        var width = Math.Clamp(style.Number(DaisyTourAnnotationStyle.WidthProperty,
-            hasContent ? Math.Max(80 * style.Scale, _contentHost.DesiredSize.Width) : 100 * style.Scale), 1, maxWidth);
-        var height = Math.Clamp(style.Number(DaisyTourAnnotationStyle.HeightProperty,
-            hasContent ? Math.Max(60 * style.Scale, _contentHost.DesiredSize.Height) : 64 * style.Scale), 1, maxHeight);
-        _text.MaxLines = Math.Max(1, (int)((height - 32 * style.Scale) / (_text.FontSize * 1.4)));
+        var width = hasContent ? _contentHost.DesiredSize.Width
+            : Math.Clamp(double.IsNaN(explicitWidth) ? emptySize?.Width ?? 100 * style.Scale : explicitWidth, 1,
+                Math.Max(maxWidth, emptySize?.Width ?? 0));
+        var height = hasContent ? _contentHost.DesiredSize.Height
+            : Math.Clamp(double.IsNaN(explicitHeight) ? emptySize?.Height ?? 64 * style.Scale : explicitHeight, 1,
+                Math.Max(maxHeight, emptySize?.Height ?? 0));
         _contentHost.Clip = new RectangleGeometry { Rect = new Rect(0, 0, width, height) };
         var center = Offset(anchor, style.Number(DaisyTourAnnotationStyle.OffsetXProperty, 0), style.Number(DaisyTourAnnotationStyle.OffsetYProperty, 0));
         var rect = new Rect(center.X - width / 2, center.Y - height / 2, width, height);
-        _contentHost.Width = width;
-        _contentHost.Height = height;
         SetLeft(_contentHost, rect.X);
         SetTop(_contentHost, rect.Y);
         AutomationProperties.SetName(_contentHost, annotation.Text);
@@ -393,6 +436,211 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         return geometry;
     }
 
+    // Automatic anchors face the course's first and last direction instead of the other element,
+    // so a bend toward the opposite side cannot run back through its own element.
+    private static (Point Source, Point Target) AlignAutoAnchors(DaisyTourAnnotation annotation, EffectiveStyle style,
+        Rect sourceBounds, Rect targetBounds, Point source, Point target)
+    {
+        var path = style.Get(DaisyTourAnnotationStyle.PathProperty,
+            style.Preset == DaisyTourAnnotationPreset.CurvedArrow ? DaisyTourAnnotationPath.Curved : DaisyTourAnnotationPath.Straight);
+        Point first, last;
+        switch (path)
+        {
+            case DaisyTourAnnotationPath.Curved:
+                var curvature = style.Number(DaisyTourAnnotationStyle.CurvatureProperty, 0.25);
+                first = last = new Point((source.X + target.X) / 2 - (target.Y - source.Y) * curvature,
+                    (source.Y + target.Y) / 2 + (target.X - source.X) * curvature);
+                break;
+            case DaisyTourAnnotationPath.Bezier:
+                (first, last) = CubicControls(style, path, source, target, sourceBounds, targetBounds,
+                    style.Number(DaisyTourAnnotationStyle.CurvatureProperty, 0.5));
+                break;
+            case DaisyTourAnnotationPath.Elbow:
+                var corners = ConnectorPoints(source, target, path, 0);
+                (first, last) = (corners[1], corners[2]);
+                break;
+            default:
+                return (source, target);
+        }
+        if (annotation.SourceAnchor == DaisyTourAnchor.Auto)
+            source = Offset(Anchor(sourceBounds, first, DaisyTourAnchor.Auto),
+                style.Number(DaisyTourAnnotationStyle.SourceOffsetXProperty, 0), style.Number(DaisyTourAnnotationStyle.SourceOffsetYProperty, 0));
+        if (annotation.TargetAnchor == DaisyTourAnchor.Auto)
+            target = Offset(Anchor(targetBounds, last, DaisyTourAnchor.Auto),
+                style.Number(DaisyTourAnnotationStyle.TargetOffsetXProperty, 0), style.Number(DaisyTourAnnotationStyle.TargetOffsetYProperty, 0));
+        return (source, target);
+    }
+
+    // SCurve leaves both anchors perpendicular to their edges. Bezier replaces either
+    // control point that is fully specified in connector coordinates.
+    private static (Point First, Point Second) CubicControls(EffectiveStyle style, DaisyTourAnnotationPath path,
+        Point source, Point target, Rect sourceBounds, Rect targetBounds, double curvature)
+    {
+        var length = Distance(source, target);
+        var along = Unit(source, target);
+        var startNormal = EdgeNormal(sourceBounds, source, along);
+        var endNormal = EdgeNormal(targetBounds, target, new Point(-along.X, -along.Y));
+        var first = Offset(source, startNormal.X * length * curvature, startNormal.Y * length * curvature);
+        var second = Offset(target, endNormal.X * length * curvature, endNormal.Y * length * curvature);
+        if (path != DaisyTourAnnotationPath.Bezier)
+            return (first, second);
+        return (ConnectorPoint(style, DaisyTourAnnotationStyle.ControlPoint1XProperty, DaisyTourAnnotationStyle.ControlPoint1YProperty,
+                source, along, length, first),
+            ConnectorPoint(style, DaisyTourAnnotationStyle.ControlPoint2XProperty, DaisyTourAnnotationStyle.ControlPoint2YProperty,
+                source, along, length, second));
+    }
+
+    private static Point ConnectorPoint(EffectiveStyle style, DependencyProperty xProperty, DependencyProperty yProperty,
+        Point origin, Point along, double length, Point fallback)
+    {
+        var x = style.Number(xProperty, double.NaN);
+        var y = style.Number(yProperty, double.NaN);
+        if (double.IsNaN(x) || double.IsNaN(y))
+            return fallback;
+        // Positive Y bends to the same side as a positive Curvature.
+        return new Point(origin.X + (along.X * x - along.Y * y) * length, origin.Y + (along.Y * x + along.X * y) * length);
+    }
+
+    private static Point EdgeNormal(Rect rect, Point point, Point fallback)
+    {
+        double[] distances = [Math.Abs(point.X - rect.Left), Math.Abs(point.X - rect.Right), Math.Abs(point.Y - rect.Top), Math.Abs(point.Y - rect.Bottom)];
+        var nearest = Array.IndexOf(distances, distances.Min());
+        if (distances[nearest] > 0.5)
+            return fallback;
+        return nearest switch { 0 => new Point(-1, 0), 1 => new Point(1, 0), 2 => new Point(0, -1), _ => new Point(0, 1) };
+    }
+
+    private static List<Point> CubicPoints(Point start, Point first, Point second, Point end)
+    {
+        var points = new List<Point>(25);
+        for (var index = 0; index <= 24; index++)
+            points.Add(Cubic(start, first, second, end, index / 24d));
+        return points;
+    }
+
+    private static PathGeometry CubicGeometry(Point start, Point first, Point second, Point end)
+    {
+        var figure = new PathFigure { StartPoint = start, IsFilled = false };
+        figure.Segments.Add(new BezierSegment { Point1 = first, Point2 = second, Point3 = end });
+        var geometry = new PathGeometry();
+        geometry.Figures.Add(figure);
+        return geometry;
+    }
+
+    private static Point Quadratic(Point start, Point control, Point end, double t)
+    {
+        var u = 1 - t;
+        return new Point(u * u * start.X + 2 * u * t * control.X + t * t * end.X, u * u * start.Y + 2 * u * t * control.Y + t * t * end.Y);
+    }
+
+    private static Point Cubic(Point start, Point first, Point second, Point end, double t)
+    {
+        var u = 1 - t;
+        return new Point(u * u * u * start.X + 3 * u * u * t * first.X + 3 * u * t * t * second.X + t * t * t * end.X,
+            u * u * u * start.Y + 3 * u * u * t * first.Y + 3 * u * t * t * second.Y + t * t * t * end.Y);
+    }
+
+    private static (Geometry Route, List<Point> Points) ElbowRoute(List<Point> points, double radius)
+    {
+        if (radius <= 0 || points.Count != 4)
+            return (LineGeometry(points), points);
+        var figure = new PathFigure { StartPoint = points[0], IsFilled = false };
+        var sampled = new List<Point> { points[0] };
+        for (var index = 1; index < 3; index++)
+        {
+            var corner = points[index];
+            // Each corner may use at most half of its adjacent segments.
+            var cornerRadius = Math.Min(radius, Math.Min(Distance(points[index - 1], corner), Distance(corner, points[index + 1])) / 2);
+            if (cornerRadius < 0.01)
+            {
+                figure.Segments.Add(new LineSegment { Point = corner });
+                sampled.Add(corner);
+                continue;
+            }
+            var before = Unit(points[index - 1], corner);
+            var after = Unit(corner, points[index + 1]);
+            var entry = Offset(corner, -before.X * cornerRadius, -before.Y * cornerRadius);
+            var exit = Offset(corner, after.X * cornerRadius, after.Y * cornerRadius);
+            figure.Segments.Add(new LineSegment { Point = entry });
+            figure.Segments.Add(new ArcSegment
+            {
+                Point = exit, Size = new Size(cornerRadius, cornerRadius),
+                SweepDirection = before.X * after.Y - before.Y * after.X > 0 ? SweepDirection.Clockwise : SweepDirection.Counterclockwise
+            });
+            var center = Offset(entry, after.X * cornerRadius, after.Y * cornerRadius);
+            for (var step = 0; step <= 6; step++)
+            {
+                var angle = step * Math.PI / 12;
+                sampled.Add(new Point(center.X + (entry.X - center.X) * Math.Cos(angle) + (exit.X - center.X) * Math.Sin(angle),
+                    center.Y + (entry.Y - center.Y) * Math.Cos(angle) + (exit.Y - center.Y) * Math.Sin(angle)));
+            }
+        }
+        figure.Segments.Add(new LineSegment { Point = points[3] });
+        sampled.Add(points[3]);
+        var geometry = new PathGeometry();
+        geometry.Figures.Add(figure);
+        return (geometry, sampled);
+    }
+
+    // Rotates and scales a custom course so that it starts at the source and ends at the target.
+    // Geometry parsed from path markup does not expose its figures; the middle of its left and
+    // right bounds edges then marks the course ends.
+    private List<Point>? FitCustomRoute(Geometry geometry, Point source, Point target)
+    {
+        var samples = geometry is PathGeometry { Figures.Count: > 0 } pathGeometry && pathGeometry.Figures[0] is { Segments.Count: > 0 } figure
+            ? Flatten(figure) : null;
+        var bounds = geometry.Bounds;
+        var from = samples?[0] ?? new Point(bounds.Left, bounds.Top + bounds.Height / 2);
+        var to = samples?[^1] ?? new Point(bounds.Right, bounds.Top + bounds.Height / 2);
+        var span = Distance(from, to);
+        var length = Distance(source, target);
+        if (bounds.IsEmpty || span < 0.001 || length < 0.001)
+            return null;
+        var scale = length / span;
+        var angle = Math.Atan2(target.Y - source.Y, target.X - source.X) - Math.Atan2(to.Y - from.Y, to.X - from.X);
+        var cos = Math.Cos(angle) * scale;
+        var sin = Math.Sin(angle) * scale;
+        var matrix = new Matrix(cos, sin, -sin, cos, source.X - (from.X * cos - from.Y * sin), source.Y - (from.X * sin + from.Y * cos));
+        // A geometry transform keeps the stroke thickness and avoids clipping the course in the
+        // path's untransformed bounds. The caller's geometry instance is not modified.
+        _customRoute.Children.Add(geometry);
+        _customRoute.Transform = new MatrixTransform { Matrix = matrix };
+        return samples is null ? [source, target] : samples.ConvertAll(point => Transform(matrix, point));
+    }
+
+    private static Point Transform(Matrix matrix, Point point) =>
+        new(point.X * matrix.M11 + point.Y * matrix.M21 + matrix.OffsetX, point.X * matrix.M12 + point.Y * matrix.M22 + matrix.OffsetY);
+
+    private static List<Point> Flatten(PathFigure figure)
+    {
+        var points = new List<Point> { figure.StartPoint };
+        foreach (var segment in figure.Segments)
+        {
+            var from = points[^1];
+            switch (segment)
+            {
+                case LineSegment line:
+                    points.Add(line.Point);
+                    break;
+                case PolyLineSegment polyline:
+                    points.AddRange(polyline.Points);
+                    break;
+                case QuadraticBezierSegment quadratic:
+                    for (var index = 1; index <= 12; index++)
+                        points.Add(Quadratic(from, quadratic.Point1, quadratic.Point2, index / 12d));
+                    break;
+                case BezierSegment bezier:
+                    for (var index = 1; index <= 12; index++)
+                        points.Add(Cubic(from, bezier.Point1, bezier.Point2, bezier.Point3, index / 12d));
+                    break;
+                case ArcSegment arc:
+                    points.Add(arc.Point);
+                    break;
+            }
+        }
+        return points;
+    }
+
     private static void DrawHead(Path shape, DaisyTourArrowHead head, Point tip, Point neighbor, double length, double width, Brush fill)
     {
         if (head == DaisyTourArrowHead.None)
@@ -411,19 +659,40 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         };
     }
 
-    private static Geometry CloudGeometry(Rect rect)
+    private static Geometry CloudGeometry(Rect rect, double padding)
     {
-        // A smooth, closed scalloped contour; text stays inside its central area.
-        var points = new List<Point>(97);
-        var center = Center(rect);
-        for (var index = 0; index <= 96; index++)
+        // Scallops bulge from an inner rectangle to the outer bounds. Their valleys stay
+        // shallower than the content padding, so the padded text area remains inside.
+        var inset = Math.Min(Math.Max(0, padding) * 0.47, Math.Min(rect.Width, rect.Height) / 4);
+        var spacing = Math.Max(1, padding * 1.75);
+        Point[] corners =
+        [
+            new(rect.Left + inset, rect.Top + inset), new(rect.Right - inset, rect.Top + inset),
+            new(rect.Right - inset, rect.Bottom - inset), new(rect.Left + inset, rect.Bottom - inset)
+        ];
+        var figure = new PathFigure { StartPoint = corners[0], IsClosed = true, IsFilled = true };
+        for (var side = 0; side < corners.Length; side++)
         {
-            var angle = index * Math.PI * 2 / 96;
-            var scallop = 0.9 + 0.1 * Math.Cos(angle * 8);
-            points.Add(new Point(center.X + rect.Width / 2 * Math.Cos(angle) * scallop,
-                center.Y + rect.Height / 2 * Math.Sin(angle) * scallop));
+            var start = corners[side];
+            var end = corners[(side + 1) % corners.Length];
+            var count = Math.Max(1, (int)Math.Ceiling(Distance(start, end) / spacing));
+            var chord = Distance(start, end) / count;
+            var sag = Math.Min(inset, chord / 2);
+            var radius = (chord * chord / 4 + sag * sag) / (2 * sag);
+            for (var index = 1; index <= count; index++)
+            {
+                var fraction = (double)index / count;
+                figure.Segments.Add(new ArcSegment
+                {
+                    Point = new Point(start.X + (end.X - start.X) * fraction, start.Y + (end.Y - start.Y) * fraction),
+                    Size = new Size(radius, radius),
+                    SweepDirection = SweepDirection.Clockwise
+                });
+            }
         }
-        return Polygon(points);
+        var geometry = new PathGeometry();
+        geometry.Figures.Add(figure);
+        return geometry;
     }
 
     private static PathGeometry RoundedRectangle(Rect rect, double radius)

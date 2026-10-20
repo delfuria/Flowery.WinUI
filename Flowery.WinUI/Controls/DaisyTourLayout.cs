@@ -63,9 +63,26 @@ internal static class DaisyTourLayout
         await completion.Task.WaitAsync(token);
     }
 
+    // Loaded handlers can still resize controls created during preparation, and a scroll
+    // viewer that has not rendered yet applies an accepted offset to its content transform
+    // only in the next frame. Bounds are measured after that frame.
+    private static async Task NextFrameAsync(CancellationToken token)
+    {
+        var rendered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        EventHandler<object> handler = (_, _) => rendered.TrySetResult();
+        CompositionTarget.Rendering += handler;
+        try { await rendered.Task.WaitAsync(token); }
+        finally { CompositionTarget.Rendering -= handler; }
+    }
+
     internal static async Task PrepareTargetsAsync(IReadOnlyList<FrameworkElement> targets, FrameworkElement host, CancellationToken token)
     {
         await SettleAsync(host, token);
+        if (targets.Any(target => !target.IsLoaded))
+        {
+            await NextFrameAsync(token);
+            await SettleAsync(host, token);
+        }
         // Innermost scroll containers are adjusted first. Shared containers use the
         // union, so preparing a connector cannot scroll its first endpoint away.
         var viewers = new List<ScrollViewer>();
@@ -80,20 +97,28 @@ internal static class DaisyTourLayout
         foreach (var viewer in viewers.OrderByDescending(Depth))
         {
             Rect? union = null;
+            Rect? primary = null;
             foreach (var target in targets)
             {
                 if (!IsDescendant(target, viewer) || !TryBounds(target, host, out _))
                     continue;
                 var rect = target.TransformToVisual(viewer).TransformBounds(new Rect(0, 0, target.ActualWidth, target.ActualHeight));
+                if (ReferenceEquals(target, targets[0])) primary = rect;
                 if (union is { } previous) { previous.Union(rect); union = previous; }
                 else union = rect;
             }
             if (union is not { } area)
                 continue;
+            // When all targets cannot fit, the step target (listed first) takes precedence.
+            if (primary is { } main && (area.Width > viewer.ViewportWidth || area.Height > viewer.ViewportHeight))
+                area = main;
             var x = ScrollDelta(area.X, area.Width, viewer.ViewportWidth);
             var y = ScrollDelta(area.Y, area.Height, viewer.ViewportHeight);
-            viewer.ChangeView(Math.Clamp(viewer.HorizontalOffset + x, 0, viewer.ScrollableWidth),
-                Math.Clamp(viewer.VerticalOffset + y, 0, viewer.ScrollableHeight), null, true);
+            var horizontal = Math.Clamp(viewer.HorizontalOffset + x, 0, viewer.ScrollableWidth);
+            var vertical = Math.Clamp(viewer.VerticalOffset + y, 0, viewer.ScrollableHeight);
+            var changed = horizontal != viewer.HorizontalOffset || vertical != viewer.VerticalOffset;
+            if (viewer.ChangeView(horizontal, vertical, null, true) && changed)
+                await NextFrameAsync(token);
             await SettleAsync(host, token);
         }
     }
@@ -142,16 +167,57 @@ internal static class DaisyTourLayout
             Math.Clamp(fallback.Y, margin, Math.Max(margin, viewport.Height - card.Height - margin)), card.Width, card.Height);
     }
 
-    internal static Rect PlaceAnnotation(Rect target, Rect card, Size viewport, Size surface)
+    // Directions clockwise from east in 45° steps; positions above the target come first.
+    private static readonly int[] AnnotationOrder = [6, 7, 5, 0, 4, 2, 1, 3];
+
+    internal static Rect PlaceAnnotation(Rect target, Rect card, Size viewport, Size surface) =>
+        PlaceAnnotation(target, card, viewport, surface, [], -1, false, out _);
+
+    /// <summary>
+    /// Places a surface beside the target in one of eight directions. A direction is valid when the
+    /// surface stays inside the viewport and covers neither the target, the card, nor another highlight.
+    /// The previous direction is kept while it remains valid. Direction is -1 when none is valid.
+    /// </summary>
+    internal static Rect PlaceAnnotation(Rect target, Rect card, Size viewport, Size surface,
+        IReadOnlyList<Rect> highlights, int previous, bool rightToLeft, out int direction)
     {
-        var candidates = new List<Rect>();
-        foreach (var obstacle in new[] { target, card })
+        const double margin = 12;
+        var order = AnnotationOrder.Select(index => rightToLeft ? (12 - index) % 8 : index);
+        foreach (var index in previous >= 0 ? order.Prepend(previous) : order)
         {
-            foreach (var side in new[] { DaisyTourPlacement.Top, DaisyTourPlacement.Bottom, DaisyTourPlacement.Left, DaisyTourPlacement.Right })
-                candidates.Add(Place(obstacle, surface, viewport, side));
+            var candidate = AnnotationCandidate(target, surface, index);
+            if (candidate.X >= margin && candidate.Y >= margin && candidate.Right <= viewport.Width - margin &&
+                candidate.Bottom <= viewport.Height - margin && Overlap(candidate, card) == 0 &&
+                highlights.All(highlight => Overlap(candidate, highlight) == 0))
+            {
+                direction = index;
+                return candidate;
+            }
         }
-        return candidates.OrderBy(candidate => Overlap(candidate, card) * 2 + Overlap(candidate, target))
-            .ThenBy(candidate => Math.Abs(candidate.X - target.X) + Math.Abs(candidate.Y - target.Y)).First();
+        // No direction fits: keep the surface in the viewport and cover as little as possible.
+        direction = -1;
+        return order.Select(index => AnnotationCandidate(target, surface, index))
+            .Select(candidate => new Rect(
+                Math.Clamp(candidate.X, margin, Math.Max(margin, viewport.Width - surface.Width - margin)),
+                Math.Clamp(candidate.Y, margin, Math.Max(margin, viewport.Height - surface.Height - margin)),
+                surface.Width, surface.Height))
+            .OrderBy(candidate => Overlap(candidate, target) * 4 + Overlap(candidate, card) * 2 +
+                highlights.Sum(highlight => Overlap(candidate, highlight)))
+            .First();
+    }
+
+    private static Rect AnnotationCandidate(Rect target, Size surface, int direction)
+    {
+        const double gap = 28;
+        var (dx, dy) = direction switch
+        {
+            0 => (1, 0), 1 => (1, 1), 2 => (0, 1), 3 => (-1, 1), 4 => (-1, 0), 5 => (-1, -1), 6 => (0, -1), _ => (1, -1)
+        };
+        // Diagonal positions start at the corner; the tail spans both axes there.
+        var offset = dx != 0 && dy != 0 ? gap / 2 : gap;
+        var x = dx > 0 ? target.Right + offset : dx < 0 ? target.Left - offset - surface.Width : target.X + (target.Width - surface.Width) / 2;
+        var y = dy > 0 ? target.Bottom + offset : dy < 0 ? target.Top - offset - surface.Height : target.Y + (target.Height - surface.Height) / 2;
+        return new Rect(x, y, surface.Width, surface.Height);
     }
 
     private static double Overlap(Rect first, Rect second)

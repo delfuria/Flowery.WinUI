@@ -98,7 +98,10 @@ Each step has an `Annotations` collection.
 Give each annotation an `Id` to identify it in target-error outcomes.
 An annotation uses the step target unless its `Target` supplies another control.
 Set `Source` to connect two distinct controls.
-Both controls must belong to the same `XamlRoot` and fit in the visible area together.
+Both controls must belong to the same `XamlRoot` and be visible in the layout.
+When both cannot fit in a scrolled area, the step target is scrolled into view first.
+A connector then still reaches the other control's real position, even outside the window.
+A collapsed, transparent, detached, or foreign-window endpoint closes the tour with `TargetUnavailable`.
 
 ```csharp
 var step = new DaisyTourStep
@@ -140,12 +143,13 @@ Unset brushes, `Default` enum values, and `NaN` measurements inherit their value
 
 | Properties | Use |
 | --- | --- |
-| `Kind`, `Path` | Choose Arrow, Line, Cloud, SpeechBubble, or Custom; choose Straight, Curved, or Elbow paths. |
+| `Kind`, `Path` | Choose Arrow, Line, Cloud, SpeechBubble, or Custom; choose Straight, Curved, Elbow, SCurve, Bezier, or Custom paths. |
 | `Stroke`, `Fill`, `Foreground`, `Opacity` | Set stroke, shape fill, text color, and opacity. |
 | `StrokeThickness`, `StrokeStyle`, `DashArray`, `DashOffset` | Set stroke width and pattern. Dash values are multiples of stroke thickness. |
 | `StartHead`, `EndHead`, `HeadLength`, `HeadWidth`, `ArrowStyle`, `BodyWidth` | Set each arrowhead and the arrow body independently. |
 | `Width`, `Height`, `MaxWidth`, `MaxHeight`, `FontSize`, `CornerRadius` | Set the shape and text dimensions in DIP. |
 | `Curvature`, anchor offsets, `OffsetX`, `OffsetY` | Adjust the path and its position relative to current target bounds. |
+| `ControlPoint1X`, `ControlPoint1Y`, `ControlPoint2X`, `ControlPoint2Y` | Place the control points of a `Bezier` path. |
 | `Text`, `Content`, `Tail`, `TailWidth`, `TailLength` | Supply optional annotation content and a separate Speech or Thought tail. |
 | `Geometry`, `Template` | Supply custom vector geometry or a custom presentation template. |
 
@@ -164,10 +168,39 @@ step.Annotations.Add(new DaisyTourAnnotation
 });
 ```
 
+## Connector paths
+
+Connectors start and end at the outer edge of each highlight frame.
+For `Curved`, `Elbow`, and `Bezier` paths, automatic anchors face the path's first and last direction, so a bend does not cross its own control.
+Arrowheads and block bodies are filled with `Fill`, or with the stroke color when `Fill` is not set.
+`Curved` bends by `Curvature`, a fraction of the connector length that defaults to 0.25.
+`Elbow` uses right angles; `CornerRadius` rounds both corners.
+`SCurve` leaves each anchor perpendicular to its edge; `Curvature` sets the bend and defaults to 0.5.
+`Bezier` uses two control points in connector coordinates.
+(0,0) is the start, (1,0) is the end, and positive Y bends to the same side as a positive `Curvature`.
+A control point without both coordinates uses the `SCurve` control point.
+`Custom` fits the annotation's `Geometry` between both anchors by rotation and uniform scaling.
+The first and last point of its figure meet the anchors, and the stroke keeps its thickness.
+Path markup such as `Geometry="M0,0 C20,-30 30,-30 50,0"` works the same way.
+A geometry without a path figure, such as an `EllipseGeometry`, meets the anchors at the middle of its left and right bounds edges.
+`ArrowStyle="Block"` is not applied to `Custom` paths.
+
+```xml
+<daisy:DaisyTourAnnotation Source="{x:Bind ThemeSelector}" Target="{x:Bind SaveButton}"
+                           Path="Bezier" ControlPoint1X="0.2" ControlPoint1Y="-0.6"
+                           ControlPoint2X="0.8" ControlPoint2Y="0.6" />
+```
+
+## Surface annotations
+
 Clouds and speech bubbles accept text with or without a tail.
 They also accept a tail without text.
+Without `Width` and `Height`, a shape grows to fit its text up to `MaxWidth` and `MaxHeight`.
+Text that exceeds the available height ends with an ellipsis.
 `Tail="None"` removes the tail independently of the content.
 Custom geometry and templates retain the host's target anchoring and lifecycle.
+A `Custom` shape is centered on its `Source`, or on the step target without a `Source`.
+Without `Width` and `Height`, its box is sized so that an inscribed ellipse encloses the highlighted control.
 
 ## Localization and accessibility
 

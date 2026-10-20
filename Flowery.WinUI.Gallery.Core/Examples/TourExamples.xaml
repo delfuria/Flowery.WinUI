@@ -4,50 +4,56 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:daisy="using:Flowery.Controls"
     xmlns:local="using:Flowery.WinUI.Gallery.Examples">
-    <Grid RowDefinitions="Auto,*" DataContext="{x:Bind Localization, Mode=OneWay}">
-        <StackPanel Margin="24,16" Spacing="12">
-            <local:SectionHeader SectionId="tour" Title="DaisyTour" />
-            <TextBlock Text="{Binding [Gallery_Tour_Description]}" TextWrapping="Wrap"
-                       Foreground="{ThemeResource DaisyBaseContentBrush}" />
-            <daisy:WrapPanel Orientation="Horizontal" Spacing="8">
-                <daisy:DaisyButton Content="{Binding [Gallery_Tour_Start]}" Variant="Primary" Click="StartTour_Click" />
-                <daisy:DaisyButton Content="{Binding [Gallery_Tour_Arrows]}" Click="Arrows_Click" />
-                <daisy:DaisyButton Content="{Binding [Gallery_Tour_Lines]}" Click="Lines_Click" />
-                <daisy:DaisyButton Content="{Binding [Gallery_Tour_Bubbles]}" Click="Bubbles_Click" />
-                <daisy:DaisyButton Content="{Binding [Gallery_Tour_Custom]}" Click="Custom_Click" />
-            </daisy:WrapPanel>
-            <TextBlock x:Name="OutcomeText" Text="{Binding [Gallery_Tour_Ready]}" TextWrapping="Wrap"
-                       AutomationProperties.LiveSetting="Polite" Foreground="{ThemeResource DaisyBaseContentBrush}" />
-        </StackPanel>
-        <ScrollViewer x:Name="MainScrollViewer" Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="24" Spacing="24">
-                <daisy:WrapPanel Orientation="Horizontal" Spacing="24">
-                    <daisy:DaisyButton x:Name="PrimaryTarget" Content="{Binding [Gallery_Tour_Target]}"
-                                       Variant="Primary" MinWidth="220" />
-                    <daisy:DaisyButton x:Name="RelatedTarget" Content="{Binding [Gallery_Tour_Related]}"
-                                       Variant="Secondary" MinWidth="220" />
-                </daisy:WrapPanel>
-                <Border Height="260" Background="{ThemeResource DaisyBase200Brush}" CornerRadius="12">
-                    <TextBlock Text="{Binding [Gallery_Tour_ScrollTitle]}" VerticalAlignment="Center"
-                               HorizontalAlignment="Center" Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                </Border>
-                <ScrollViewer Height="210" VerticalScrollBarVisibility="Auto">
-                    <StackPanel Spacing="24" Padding="16" Background="{ThemeResource DaisyBase200Brush}">
-                        <Border Height="260" />
-                        <daisy:DaisyButton x:Name="NestedTarget" Content="{Binding [Gallery_Tour_NestedTarget]}"
-                                           Variant="Accent" HorizontalAlignment="Left" />
-                    </StackPanel>
-                </ScrollViewer>
-                <TabView x:Name="DemoTabs" IsAddTabButtonVisible="False" Height="240">
-                    <TabViewItem x:Name="OverviewTab" Header="{Binding [Gallery_Tour_Overview]}" IsClosable="False">
-                        <TextBlock Margin="16" Text="{Binding [Gallery_Tour_TabHint]}" TextWrapping="Wrap"
-                                   Foreground="{ThemeResource DaisyBaseContentBrush}" />
-                    </TabViewItem>
-                    <TabViewItem x:Name="DetailsTab" Header="{Binding [Gallery_Tour_Details]}" IsClosable="False" />
-                </TabView>
+    <Grid DataContext="{x:Bind Localization, Mode=OneWay}">
+        <!-- The page header scrolls too, so tour targets remain reachable in short windows. -->
+        <ScrollViewer x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <StackPanel Margin="24,16,24,0" Spacing="12">
+                    <local:SectionHeader SectionId="tour" Title="DaisyTour" />
+                    <TextBlock Text="{Binding [Gallery_Tour_Description]}" TextWrapping="Wrap"
+                               Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                    <daisy:WrapPanel Orientation="Horizontal" Spacing="8">
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Start]}" Variant="Primary" Click="StartTour_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Arrows]}" Click="Arrows_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Lines]}" Click="Lines_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Bubbles]}" Click="Bubbles_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Custom]}" Click="Custom_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Regions]}" Click="Regions_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Paths]}" Click="Paths_Click" />
+                    </daisy:WrapPanel>
+                </StackPanel>
+                <StackPanel Margin="24" Spacing="24">
+                    <!-- Connector demos need visible distance between both targets. -->
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <daisy:DaisyButton x:Name="PrimaryTarget" Content="{Binding [Gallery_Tour_Target]}"
+                                           Variant="Primary" MinWidth="220" />
+                        <daisy:DaisyButton x:Name="RelatedTarget" Grid.Column="2" Content="{Binding [Gallery_Tour_Related]}"
+                                           Variant="Secondary" MinWidth="220" />
+                    </Grid>
+                    <Border Height="120" Background="{ThemeResource DaisyBase200Brush}" CornerRadius="12">
+                        <TextBlock Text="{Binding [Gallery_Tour_ScrollTitle]}" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                    </Border>
+                    <ScrollViewer Height="210" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="24" Padding="16" Background="{ThemeResource DaisyBase200Brush}">
+                            <Border Height="260" />
+                            <daisy:DaisyButton x:Name="NestedTarget" Content="{Binding [Gallery_Tour_NestedTarget]}"
+                                               Variant="Accent" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </ScrollViewer>
+                    <TabView x:Name="DemoTabs" IsAddTabButtonVisible="False" Height="240">
+                        <TabViewItem x:Name="OverviewTab" Header="{Binding [Gallery_Tour_Overview]}" IsClosable="False">
+                            <TextBlock Margin="16" Text="{Binding [Gallery_Tour_TabHint]}" TextWrapping="Wrap"
+                                       Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                        </TabViewItem>
+                        <TabViewItem x:Name="DetailsTab" Header="{Binding [Gallery_Tour_Details]}" IsClosable="False" />
+                    </TabView>
+                    <daisy:DaisyButton x:Name="RegionTarget" Content="{Binding [Gallery_Tour_RegionTarget]}"
+                                       Variant="Accent" HorizontalAlignment="Right" />
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
-        <daisy:DaisyTour x:Name="Tour" Grid.RowSpan="2" Closed="Tour_Closed">
+        <daisy:DaisyTour x:Name="Tour">
             <daisy:DaisyTour.Steps>
                 <daisy:DaisyTourStep Id="welcome" Target="{x:Bind PrimaryTarget}" />
                 <daisy:DaisyTourStep Id="nested-scroll" Target="{x:Bind NestedTarget}" />
