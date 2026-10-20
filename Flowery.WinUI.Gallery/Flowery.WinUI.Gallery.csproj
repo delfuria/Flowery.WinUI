@@ -6,6 +6,7 @@
     <OutputType>WinExe</OutputType>
     <ApplicationTitle>Flowery.WinUI Gallery</ApplicationTitle>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>app_icon.ico</ApplicationIcon>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <WindowsPackageType>None</WindowsPackageType>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>

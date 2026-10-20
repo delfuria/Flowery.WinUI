@@ -9,6 +9,7 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
         Title = "Flowery.WinUI Kiosk";
+        global::Flowery.WinUI.Gallery.ExecutableIcon.Apply(AppWindow);
         LimitWindowSize();
         MainPage.ConfigureManualMode(manual);
         Closed += OnClosed;

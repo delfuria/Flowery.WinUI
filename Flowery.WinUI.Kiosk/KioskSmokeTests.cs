@@ -2,7 +2,9 @@
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Microsoft.UI;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.Storage.Streams;
 using Windows.Graphics.Imaging;
@@ -15,6 +17,9 @@ internal static class KioskSmokeTests
 {
     // WinUI stores several dependency-property values as native single-precision values.
     private const double ResourceValueTolerance = 0.0001;
+    private const uint WmGetIcon = 0x007F;
+    private static readonly IntPtr IconSmall = 0;
+    private static readonly IntPtr IconBig = 1;
 
     internal static async Task RunAsync(KioskMainPage page, KioskSmokeReport report)
     {
@@ -46,6 +51,14 @@ internal static class KioskSmokeTests
                 "The shared SVG pattern assets are incomplete.");
             RequireFile(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "Kiosk", "app_icon.svg"));
             RequireFile(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "Kiosk", "splash_screen.svg"));
+            return Task.CompletedTask;
+        });
+        await CheckAsync(report, "ExecutableWindowIcon", () =>
+        {
+            var window = Win32Interop.GetWindowFromWindowId(page.XamlRoot!.ContentIslandEnvironment.AppWindowId);
+            Require(SendMessage(window, WmGetIcon, IconSmall, IntPtr.Zero) != IntPtr.Zero
+                && SendMessage(window, WmGetIcon, IconBig, IntPtr.Zero) != IntPtr.Zero,
+                "The window does not show the icon embedded in the executable.");
             return Task.CompletedTask;
         });
 
@@ -659,6 +672,9 @@ internal static class KioskSmokeTests
         if (!condition)
             throw new InvalidOperationException(message);
     }
+
+    [DllImport("user32.dll", EntryPoint = "SendMessageW")]
+    private static extern IntPtr SendMessage(IntPtr window, uint message, IntPtr wParam, IntPtr lParam);
 
     private sealed record ScaleState(bool Enabled, double Minimum, double Maximum, double? Override)
     {

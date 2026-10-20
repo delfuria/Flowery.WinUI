@@ -88,6 +88,7 @@ namespace Flowery.WinUI.Gallery
             }
 
             _window = new MainWindow();
+            ExecutableIcon.Apply(_window.AppWindow);
             FlowerySizeManager.MainWindow = _window;
             FloweryScaleManager.MainWindow = _window;
 

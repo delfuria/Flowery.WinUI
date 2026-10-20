@@ -46,3 +46,8 @@ updates:
       time: "06:30"
       timezone: "Europe/Berlin"
     open-pull-requests-limit: 10
+    groups:
+      # Most actions are pinned to a major tag, so updates are mostly major releases.
+      github-actions:
+        patterns:
+          - "*"

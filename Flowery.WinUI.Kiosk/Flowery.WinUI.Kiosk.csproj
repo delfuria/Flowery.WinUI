@@ -6,6 +6,7 @@
     <OutputType>WinExe</OutputType>
     <ApplicationTitle>Flowery.WinUI Kiosk</ApplicationTitle>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\Flowery.WinUI.Gallery\app_icon.ico</ApplicationIcon>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <WindowsPackageType>None</WindowsPackageType>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -20,6 +21,7 @@
     <ProjectReference Include="..\Flowery.WinUI.Win2D\Flowery.WinUI.Win2D.csproj" />
     <ProjectReference Include="..\Flowery.WinUI.Gallery.Core\Flowery.WinUI.Gallery.Core.csproj" />
     <Compile Include="..\Flowery.WinUI.Gallery\NativeWindowPlacement.cs" Link="NativeWindowPlacement.cs" />
+    <Compile Include="..\Flowery.WinUI.Gallery\ExecutableIcon.cs" Link="ExecutableIcon.cs" />
     <Content Include="Assets\Kiosk\*.svg" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Import Project="..\Flowery.WinUI.GalleryAssets.props" />
