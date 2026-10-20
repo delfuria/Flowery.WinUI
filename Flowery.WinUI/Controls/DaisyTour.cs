@@ -60,6 +60,8 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
     private readonly List<DaisyStepItem> _progressItems = [];
     private Session? _session;
     private Rect _visibleArea;
+    // Where the card ended on the previous step; a card that must move off a course returns there when clear.
+    private Rect _previousStepCard;
     private bool _updateQueued;
     private bool? _verticalButtons;
 
@@ -249,6 +251,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             await DaisyTourLayout.PrepareTargetsAsync(targets, _surface, token,
                 Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness);
             if (!ReferenceEquals(_session, session)) return;
+            _previousStepCard = CardBounds;
             CurrentIndex = index;
             CurrentStep = step;
             session.PendingStep = null;
@@ -392,7 +395,6 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         var position = step.CardPosition == DaisyTourCardPosition.Default ? CardPosition : step.CardPosition;
         var frame = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness;
         var targets = Shift(allTargets, -_visibleArea.X, -_visibleArea.Y);
-        var previous = CardBounds;
         CardBounds = Shift(DaisyTourLayout.PlaceStationary(position, _card.DesiredSize, viewport, Inflate(targets, frame))
             ?? DaisyTourLayout.Place(targets, _card.DesiredSize, viewport, step.Placement), _visibleArea.X, _visibleArea.Y);
         Canvas.SetLeft(_card, CardBounds.X);
@@ -434,8 +436,8 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         {
             var obstacles = new List<Rect>(courses);
             foreach (var hole in holes) obstacles.Add(Shift(Inflate(hole, frame), -_visibleArea.X, -_visibleArea.Y));
-            Rect? kept = previous.Width > 0
-                ? new Rect(previous.X - _visibleArea.X, previous.Y - _visibleArea.Y, _card.DesiredSize.Width, _card.DesiredSize.Height)
+            Rect? kept = _previousStepCard.Width > 0
+                ? new Rect(_previousStepCard.X - _visibleArea.X, _previousStepCard.Y - _visibleArea.Y, _card.DesiredSize.Width, _card.DesiredSize.Height)
                 : null;
             if (DaisyTourLayout.AvoidObstacles(position, step.Placement, targets, _card.DesiredSize, viewport, obstacles, kept) is { } clear)
             {
@@ -795,7 +797,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         _progress.Content = null;
         CurrentIndex = -1;
         CurrentStep = null;
-        TargetBounds = CardBounds = default;
+        TargetBounds = CardBounds = _previousStepCard = default;
         session.PendingStep = null;
         session.Cancellation.Dispose();
         if (session.PreviousFocus?.TryGetTarget(out var previous) == true && previous is Control control &&
