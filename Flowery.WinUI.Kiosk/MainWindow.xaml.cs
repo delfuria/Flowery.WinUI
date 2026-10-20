@@ -9,6 +9,7 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
         Title = "Flowery.WinUI Kiosk";
+        AppWindow.SetIcon(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "app_icon.ico"));
         LimitWindowSize();
         MainPage.ConfigureManualMode(manual);
         Closed += OnClosed;

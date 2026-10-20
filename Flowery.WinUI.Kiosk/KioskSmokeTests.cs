@@ -46,6 +46,7 @@ internal static class KioskSmokeTests
                 "The shared SVG pattern assets are incomplete.");
             RequireFile(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "Kiosk", "app_icon.svg"));
             RequireFile(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "Kiosk", "splash_screen.svg"));
+            RequireFile(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "app_icon.ico"));
             return Task.CompletedTask;
         });
 
