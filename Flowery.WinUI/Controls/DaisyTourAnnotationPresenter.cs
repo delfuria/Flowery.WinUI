@@ -73,6 +73,7 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
             shape.StrokeLineJoin = PenLineJoin.Round;
             shape.StrokeStartLineCap = PenLineCap.Round;
             shape.StrokeEndLineCap = PenLineCap.Round;
+            shape.StrokeDashCap = PenLineCap.Round;
             shape.StrokeDashArray = null;
         }
         ApplyDashes(_body, style);

@@ -817,9 +817,17 @@ public class Given_DaisyTour
             var targetBounds = BoundsInRoot(target);
             AssertEndpoints(path, new Point(sourceBounds.Right, sourceBounds.Y + sourceBounds.Height / 2),
                 new Point(targetBounds.Left, targetBounds.Y + targetBounds.Height / 2));
-            source.Margin = new Thickness(400, 180, 0, 0);
-            target.Margin = new Thickness(20, 180, 0, 0);
-            await ArrangeAsync(root);
+            var geometryUpdated = NewCompletion();
+            EventHandler updated = (_, _) => geometryUpdated.TrySetResult();
+            tour.GeometryUpdated += updated;
+            try
+            {
+                source.Margin = new Thickness(400, 180, 0, 0);
+                target.Margin = new Thickness(20, 180, 0, 0);
+                root.UpdateLayout();
+                await geometryUpdated.Task.WaitAsync(Timeout);
+            }
+            finally { tour.GeometryUpdated -= updated; }
             AssertActive(tour, step, 0);
             Assert.AreSame(path, presenter.Children[1]);
             sourceBounds = BoundsInRoot(source);
