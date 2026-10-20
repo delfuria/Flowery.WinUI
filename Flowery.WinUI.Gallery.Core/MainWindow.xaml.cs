@@ -38,7 +38,6 @@ namespace Flowery.WinUI.Gallery
             var appWindow = GetSafeAppWindow();
             if (appWindow != null)
             {
-                appWindow.SetIcon(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "app_icon.ico"));
                 appWindow.Changed += OnAppWindowChanged;
             }
 

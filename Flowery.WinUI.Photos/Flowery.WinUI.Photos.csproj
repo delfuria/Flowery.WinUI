@@ -5,7 +5,7 @@
     <UseWinUI>true</UseWinUI>
     <OutputType>WinExe</OutputType>
     <ApplicationTitle>Flowery Photos</ApplicationTitle>
-    <ApplicationIcon>Assets\app_icon.ico</ApplicationIcon>
+    <ApplicationIcon>..\Flowery.WinUI.Gallery\app_icon.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <WindowsPackageType>None</WindowsPackageType>
@@ -22,6 +22,7 @@
     <ProjectReference Include="..\Flowery.WinUI\Flowery.WinUI.csproj" />
     <PackageReference Include="Microsoft.Graphics.Win2D" />
     <Compile Include="..\Flowery.WinUI.Gallery\NativeWindowPlacement.cs" Link="NativeWindowPlacement.cs" />
+    <Compile Include="..\Flowery.WinUI.Gallery\ExecutableIcon.cs" Link="ExecutableIcon.cs" />
     <EmbeddedResource Include="Localization\*.json" LogicalName="$(AssemblyName).Localization.%(Filename)%(Extension)" />
   </ItemGroup>
 
@@ -36,7 +37,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="Assets\*.svg;Assets\app_icon.ico">
+    <Content Include="Assets\*.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>

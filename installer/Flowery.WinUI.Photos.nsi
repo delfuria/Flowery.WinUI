@@ -21,8 +21,8 @@ VIAddVersionKey /LANG=1033 "LegalCopyright" "Copyright 2026 tobitege"
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\Flowery.WinUI.Photos"
 !define APP_EXE "Flowery.WinUI.Photos.exe"
 !define MUI_LANGDLL_ALLLANGUAGES
-!define MUI_ICON "${__FILEDIR__}\..\Flowery.WinUI.Photos\Assets\app_icon.ico"
-!define MUI_UNICON "${__FILEDIR__}\..\Flowery.WinUI.Photos\Assets\app_icon.ico"
+!define MUI_ICON "${__FILEDIR__}\..\Flowery.WinUI.Gallery\app_icon.ico"
+!define MUI_UNICON "${__FILEDIR__}\..\Flowery.WinUI.Gallery\app_icon.ico"
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
