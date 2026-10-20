@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
 using Flowery.Controls;
@@ -15,6 +16,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Windows.Foundation;
 
@@ -26,7 +28,14 @@ public class Given_DaisyTour
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
 
     [TestMethod]
-    public async Task When_GalleryTourStarts_DeclaredStepsResolveAndNavigationPreparesRealTargets()
+    public Task When_GalleryTourStarts_DeclaredStepsResolveAndNavigationPreparesRealTargets() =>
+        VerifyGalleryTourAsync(900, 600);
+
+    [TestMethod]
+    public Task When_GalleryTourUsesCiViewport_DeclaredStepsResolveAndNavigationPreparesRealTargets() =>
+        VerifyGalleryTourAsync(752, 480);
+
+    private static async Task VerifyGalleryTourAsync(double maxWidth, double maxHeight)
     {
         var previousCulture = FloweryLocalization.CurrentCultureName;
         var previousResolver = FloweryLocalization.CustomResolver;
@@ -35,8 +44,9 @@ public class Given_DaisyTour
         try
         {
             FloweryLocalization.SetCulture("en");
-            page = new TourExamples { Width = 900, Height = 600 };
+            page = new TourExamples { MaxWidth = maxWidth, MaxHeight = maxHeight };
             await LoadAsync(page);
+            AssertInViewport(BoundsInRoot(page), page.XamlRoot.Size, "The Gallery page");
             tour = (DaisyTour)page.FindName("Tour");
             var primary = (DaisyButton)page.FindName("PrimaryTarget");
             var nested = (DaisyButton)page.FindName("NestedTarget");
@@ -72,6 +82,7 @@ public class Given_DaisyTour
             Assert.IsTrue(innerScroll.VerticalOffset > 0);
             AssertFits(nested, innerScroll);
             AssertFits(nested, mainScroll);
+            AssertInViewport(BoundsInRoot(nested), page.XamlRoot.Size, "The nested Gallery target");
             await tour.NextAsync().WaitAsync(Timeout);
             AssertActive(tour, deferred, 2);
             Assert.AreSame(details, tabs.SelectedItem);
@@ -596,6 +607,41 @@ public class Given_DaisyTour
     }
 
     [TestMethod]
+    public async Task When_ArrowAnnotationRenders_NativePixelsContainItsStrokeAndFilledHead()
+    {
+        foreach (var preset in new[]
+        {
+            DaisyTourAnnotationPreset.ThinArrow, DaisyTourAnnotationPreset.ThickArrow,
+            DaisyTourAnnotationPreset.BlockArrow, DaisyTourAnnotationPreset.CurvedArrow,
+            DaisyTourAnnotationPreset.TwoEndedArrow
+        })
+            await VerifyAnnotationPixelsAsync(DaisyTourAnnotationKind.Arrow, preset);
+    }
+
+    [TestMethod]
+    public async Task When_LineAnnotationRenders_NativePixelsContainItsStroke()
+    {
+        foreach (var style in new[]
+        {
+            DaisyTourStrokeStyle.Solid, DaisyTourStrokeStyle.Dotted, DaisyTourStrokeStyle.Dashed,
+            DaisyTourStrokeStyle.DashDot, DaisyTourStrokeStyle.Custom
+        })
+            await VerifyAnnotationPixelsAsync(DaisyTourAnnotationKind.Line, strokeStyle: style);
+    }
+
+    [TestMethod]
+    public Task When_CloudAnnotationRenders_NativePixelsContainItsStrokeAndFill() =>
+        VerifyAnnotationPixelsAsync(DaisyTourAnnotationKind.Cloud);
+
+    [TestMethod]
+    public Task When_SpeechBubbleAnnotationRenders_NativePixelsContainItsStrokeAndFill() =>
+        VerifyAnnotationPixelsAsync(DaisyTourAnnotationKind.SpeechBubble);
+
+    [TestMethod]
+    public Task When_CustomAnnotationRenders_NativePixelsContainItsStrokeAndFill() =>
+        VerifyAnnotationPixelsAsync(DaisyTourAnnotationKind.Custom);
+
+    [TestMethod]
     public void When_ConnectorBoundsChange_RetainedPathsFollowBothAnchorsAndStyleOverrides()
     {
         var presenter = new DaisyTourAnnotationPresenter();
@@ -1043,6 +1089,101 @@ public class Given_DaisyTour
         }
         finally { release.TrySetResult(); await CleanupAsync(root, tour); }
     }
+
+    private static async Task VerifyAnnotationPixelsAsync(DaisyTourAnnotationKind kind,
+        DaisyTourAnnotationPreset preset = DaisyTourAnnotationPreset.Default,
+        DaisyTourStrokeStyle strokeStyle = DaisyTourStrokeStyle.Default)
+    {
+        var root = new Canvas { Width = 600, Height = 400, Background = new SolidColorBrush(Colors.Black) };
+        var calibration = new Border { Width = 20, Height = 20, Background = new SolidColorBrush(Colors.Blue) };
+        Canvas.SetLeft(calibration, 10);
+        Canvas.SetTop(calibration, 10);
+        var presenter = new DaisyTourAnnotationPresenter { Width = 600, Height = 400 };
+        var presenterCalibration = new Border { Width = 20, Height = 20, Background = new SolidColorBrush(Colors.Yellow) };
+        Canvas.SetLeft(presenterCalibration, 10);
+        Canvas.SetTop(presenterCalibration, 40);
+        presenter.Children.Add(presenterCalibration);
+        root.Children.Add(calibration);
+        root.Children.Add(presenter);
+        var annotation = new DaisyTourAnnotation
+        {
+            Kind = kind, Preset = preset, StrokeStyle = strokeStyle,
+            Path = strokeStyle switch
+            {
+                DaisyTourStrokeStyle.Dotted => DaisyTourAnnotationPath.Curved,
+                DaisyTourStrokeStyle.Dashed => DaisyTourAnnotationPath.Elbow,
+                _ => DaisyTourAnnotationPath.Default
+            },
+            DashArray = strokeStyle == DaisyTourStrokeStyle.Custom ? new DaisyTourDashCollection { 6, 2, 1, 2, 1, 2 } : null,
+            Geometry = kind == DaisyTourAnnotationKind.Custom ? new EllipseGeometry { Center = new Point(60, 40), RadiusX = 60, RadiusY = 40 } : null,
+            StrokeThickness = 12, Width = 120, Height = 80, HeadLength = 48, HeadWidth = 44,
+            SourceAnchor = DaisyTourAnchor.Right, TargetAnchor = DaisyTourAnchor.Left,
+            Stroke = new SolidColorBrush(Colors.Red), Fill = new SolidColorBrush(Colors.Lime)
+        };
+        try
+        {
+            await LoadAsync(root);
+            var isSurface = kind is DaisyTourAnnotationKind.Cloud or DaisyTourAnnotationKind.SpeechBubble or DaisyTourAnnotationKind.Custom;
+            var source = isSurface ? new Rect(140, 120, 120, 100) : new Rect(80, 180, 80, 40);
+            var target = new Rect(440, strokeStyle == DaisyTourStrokeStyle.Dashed ? 260 : 180, 80, 40);
+            presenter.Update(annotation, source, target,
+                new SolidColorBrush(Colors.Red), new SolidColorBrush(Colors.Lime), new SolidColorBrush(Colors.White));
+            await ArrangeAsync(root);
+            Assert.AreEqual(Visibility.Collapsed, presenter.Children[4].Visibility,
+                "The rendering probe must contain no annotation text or content.");
+            var bitmap = new RenderTargetBitmap();
+            await bitmap.RenderAsync(root, 600, 400).AsTask().WaitAsync(Timeout);
+            var pixels = (await bitmap.GetPixelsAsync()).ToArray();
+            Assert.IsTrue(bitmap.PixelWidth > 0 && bitmap.PixelHeight > 0);
+            Assert.AreEqual(bitmap.PixelWidth * bitmap.PixelHeight * 4, pixels.Length);
+            var calibrationPixels = CountRenderedColor(pixels, bitmap, new Rect(10, 10, 20, 20), Colors.Blue);
+            var presenterCalibrationPixels = CountRenderedColor(pixels, bitmap, new Rect(10, 40, 20, 20), Colors.Yellow);
+            Assert.IsTrue(calibrationPixels >= 100, "Native bitmap calibration must render before shape pixels are assessed.");
+            var strokeRegion = isSurface
+                ? new Rect(130, 110, 140, 120)
+                : kind == DaisyTourAnnotationKind.Line ? new Rect(170, 150, 260, 150) : new Rect(220, 150, 160, 120);
+            var fillRegion = isSurface
+                ? new Rect(150, 140, 100, 60) : new Rect(388, 170, 60, 60);
+            var strokePixels = CountRenderedColor(pixels, bitmap, strokeRegion, Colors.Red);
+            var fillPixels = CountRenderedColor(pixels, bitmap, fillRegion, Colors.Lime);
+            var startHeadPixels = preset == DaisyTourAnnotationPreset.TwoEndedArrow
+                ? CountRenderedColor(pixels, bitmap, new Rect(150, 170, 60, 60), Colors.Lime) : 0;
+            var paths = presenter.Children.OfType<Path>().Select((path, index) =>
+                $"Path{index}: Actual={path.ActualWidth}x{path.ActualHeight}, Desired={path.DesiredSize}, DataBounds={path.Data?.Bounds}, Canvas={Canvas.GetLeft(path)},{Canvas.GetTop(path)}, Origin={path.TransformToVisual(presenter).TransformPoint(new Point())}, Stroke={DescribeBrush(path.Stroke)}, Fill={DescribeBrush(path.Fill)}, Thickness={path.StrokeThickness}, Visibility={path.Visibility}, Opacity={path.Opacity}");
+            var diagnostic = $"{kind}/{preset}/{strokeStyle}: RedStrokePixels={strokePixels}, LimeFillPixels={fillPixels}, StartHeadPixels={startHeadPixels}, CalibrationPixels={calibrationPixels}, PresenterCalibrationPixels={presenterCalibrationPixels}, PresenterCalibrationActual={presenterCalibration.ActualWidth}x{presenterCalibration.ActualHeight}, PresenterCalibrationDesired={presenterCalibration.DesiredSize}, Bitmap={bitmap.PixelWidth}x{bitmap.PixelHeight}, PresenterActual={presenter.ActualWidth}x{presenter.ActualHeight}, RootActual={root.ActualWidth}x{root.ActualHeight}. {string.Join("; ", paths)}";
+            var renderedCorrectly = strokePixels >= 100 && (kind == DaisyTourAnnotationKind.Line || fillPixels >= 20)
+                && (preset != DaisyTourAnnotationPreset.TwoEndedArrow || startHeadPixels >= 20);
+            Assert.IsTrue(renderedCorrectly, diagnostic);
+        }
+        finally
+        {
+            RuntimeTestHelpers.GetHostPanel().Children.Remove(root);
+            await ArrangeAsync(root);
+        }
+    }
+
+    private static int CountRenderedColor(byte[] pixels, RenderTargetBitmap bitmap, Rect region, Color expected)
+    {
+        var left = Math.Clamp((int)Math.Floor(region.Left * bitmap.PixelWidth / 600), 0, bitmap.PixelWidth);
+        var right = Math.Clamp((int)Math.Ceiling(region.Right * bitmap.PixelWidth / 600), 0, bitmap.PixelWidth);
+        var top = Math.Clamp((int)Math.Floor(region.Top * bitmap.PixelHeight / 400), 0, bitmap.PixelHeight);
+        var bottom = Math.Clamp((int)Math.Ceiling(region.Bottom * bitmap.PixelHeight / 400), 0, bitmap.PixelHeight);
+        var matches = 0;
+        for (var y = top; y < bottom; y++)
+        {
+            for (var x = left; x < right; x++)
+            {
+                var offset = (y * bitmap.PixelWidth + x) * 4;
+                if (pixels[offset + 3] >= 240 && Math.Abs(pixels[offset] - expected.B) <= 20 &&
+                    Math.Abs(pixels[offset + 1] - expected.G) <= 20 && Math.Abs(pixels[offset + 2] - expected.R) <= 20)
+                    matches++;
+            }
+        }
+        return matches;
+    }
+
+    private static string DescribeBrush(Brush? brush) => brush is SolidColorBrush solid
+        ? $"#{solid.Color.A:X2}{solid.Color.R:X2}{solid.Color.G:X2}{solid.Color.B:X2}" : brush?.GetType().Name ?? "null";
 
     private sealed class PreparationGate
     {

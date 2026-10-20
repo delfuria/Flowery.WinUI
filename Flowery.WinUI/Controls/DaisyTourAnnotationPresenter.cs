@@ -62,8 +62,9 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
             shape.Data = null;
             shape.RenderTransform = null;
             shape.Stretch = Stretch.None;
-            shape.Width = double.NaN;
-            shape.Height = double.NaN;
+            // Absolute overlay geometry needs a nonzero native drawing area.
+            shape.Width = Width;
+            shape.Height = Height;
             SetLeft(shape, 0);
             SetTop(shape, 0);
             shape.Stroke = stroke;
