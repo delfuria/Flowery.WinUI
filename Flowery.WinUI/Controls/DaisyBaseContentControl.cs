@@ -426,28 +426,17 @@ namespace Flowery.Controls
             OnLoaded();
             OnThemeChanged(DaisyThemeManager.CurrentThemeName ?? DaisyThemeManager.BaseThemeName);
 
-            // Defer neumorphic attachment until the visual tree is fully laid out.
-            // When Content is set in OnLoaded(), the ContentPresenter doesn't process
-            // it immediately - it happens on the next layout pass. If we call
-            // RefreshNeumorphicEffect() immediately, the helper will find an empty
-            // visual tree and fall back to attaching to the ContentPresenter itself,
-            // causing the composition surface to render ON TOP of the content.
-            LayoutUpdated += OnFirstLayoutForNeumorphic;
-        }
-
-        private void OnFirstLayoutForNeumorphic(object? sender, object e)
-        {
-            LayoutUpdated -= OnFirstLayoutForNeumorphic;
-            if (_isLoaded)
-            {
-                RequestNeumorphicRefresh();
-            }
+            // Neumorphic attachment must wait until Content set in OnLoaded() is laid out;
+            // otherwise the surface attaches to the ContentPresenter and renders ON TOP of
+            // the content. The queued refresh completes pending layout before it attaches.
+            // A LayoutUpdated subscription here contended with WinRT event-source cleanup
+            // and let the waiting UI thread process window messages reentrantly at startup.
+            RequestNeumorphicRefresh();
         }
 
         private void OnBaseUnloaded(object sender, RoutedEventArgs e)
         {
             _isLoaded = false;
-            LayoutUpdated -= OnFirstLayoutForNeumorphic;
 
             if (_themeSubscribed)
             {

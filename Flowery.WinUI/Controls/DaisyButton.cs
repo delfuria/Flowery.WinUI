@@ -578,15 +578,9 @@ namespace Flowery.Controls
 
             DaisyBaseContentControl.GlobalNeumorphicChanged += OnGlobalNeumorphicChanged;
 
-            // Defer neumorphic update until the template is laid out.
-            // The template isn't immediately available after Loaded; wait for first
-            // layout so PART_ShadowContainer is ready.
-            LayoutUpdated += OnFirstLayoutForNeumorphic;
-        }
-
-        private void OnFirstLayoutForNeumorphic(object? sender, object e)
-        {
-            LayoutUpdated -= OnFirstLayoutForNeumorphic;
+            // The template isn't available immediately after Loaded. The queued refresh completes
+            // pending layout first, so PART_ShadowContainer is ready, without a LayoutUpdated
+            // subscription per loaded button.
             RequestNeumorphicRefresh();
         }
 
@@ -855,7 +849,6 @@ namespace Flowery.Controls
         {
             _lifecycle.HandleUnloaded();
             DaisyBaseContentControl.GlobalNeumorphicChanged -= OnGlobalNeumorphicChanged;
-            LayoutUpdated -= OnFirstLayoutForNeumorphic;
             SizeChanged -= OnDashSizeChanged;
             ClearNeumorphicShadows();
             _shadowContainer = null;
