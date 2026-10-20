@@ -75,7 +75,9 @@ internal static class DaisyTourLayout
         finally { CompositionTarget.Rendering -= handler; }
     }
 
-    internal static async Task PrepareTargetsAsync(IReadOnlyList<FrameworkElement> targets, FrameworkElement host, CancellationToken token)
+    /// <param name="frame">Space around each target, such as its highlight frame, that must become visible too.</param>
+    internal static async Task PrepareTargetsAsync(IReadOnlyList<FrameworkElement> targets, FrameworkElement host,
+        CancellationToken token, double frame = 0)
     {
         await SettleAsync(host, token);
         if (targets.Any(target => !target.IsLoaded))
@@ -102,7 +104,8 @@ internal static class DaisyTourLayout
             {
                 if (!IsDescendant(target, viewer) || !TryBounds(target, host, out _))
                     continue;
-                var rect = target.TransformToVisual(viewer).TransformBounds(new Rect(0, 0, target.ActualWidth, target.ActualHeight));
+                var rect = target.TransformToVisual(viewer).TransformBounds(
+                    new Rect(-frame, -frame, target.ActualWidth + 2 * frame, target.ActualHeight + 2 * frame));
                 if (ReferenceEquals(target, targets[0])) primary = rect;
                 if (union is { } previous) { previous.Union(rect); union = previous; }
                 else union = rect;

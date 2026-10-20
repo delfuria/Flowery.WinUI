@@ -232,7 +232,9 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
                 await prepare(step, token).WaitAsync(token);
             token.ThrowIfCancellationRequested();
             var targets = GetTargets(step);
-            await DaisyTourLayout.PrepareTargetsAsync(targets, _surface, token);
+            // The highlight frame around each target is revealed together with the target.
+            await DaisyTourLayout.PrepareTargetsAsync(targets, _surface, token,
+                Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness);
             if (!ReferenceEquals(_session, session)) return;
             CurrentIndex = index;
             CurrentStep = step;

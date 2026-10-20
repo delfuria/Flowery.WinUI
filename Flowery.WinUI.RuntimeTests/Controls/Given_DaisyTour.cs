@@ -875,6 +875,30 @@ public class Given_DaisyTour
     }
 
     [TestMethod]
+    public async Task When_ScrollingRevealsATarget_ItsHighlightFrameIsVisibleToo()
+    {
+        var target = CreateTarget();
+        target.Margin = new Thickness(24, 900, 0, 0);
+        var viewer = new ScrollViewer { Content = new Grid { Height = 1200, Children = { target } } };
+        var step = new DaisyTourStep { Id = "frame", Target = target };
+        var tour = new DaisyTour();
+        tour.Steps.Add(step);
+        var root = CreateRoot(tour, viewer);
+        try
+        {
+            await LoadAsync(root);
+            await tour.StartAsync().WaitAsync(Timeout);
+            AssertActive(tour, step, 0);
+            // The viewer ends at the root's edge, so a frame outside it would be cut off.
+            var margin = tour.HighlightPadding + 2;
+            var bounds = target.TransformToVisual(viewer).TransformBounds(new Rect(0, 0, target.ActualWidth, target.ActualHeight));
+            var frame = new Rect(bounds.X - margin, bounds.Y - margin, bounds.Width + 2 * margin, bounds.Height + 2 * margin);
+            AssertInViewport(frame, new Size(viewer.ActualWidth, viewer.ActualHeight), "The highlight frame");
+        }
+        finally { await CleanupAsync(root, tour); }
+    }
+
+    [TestMethod]
     public async Task When_ScrollViewerHasNotRenderedYet_PreparedBoundsIncludeTheNewOffset()
     {
         // Each pass starts before a new viewer's first frame, as after a tab switch. The first
@@ -1826,8 +1850,17 @@ public class Given_DaisyTour
             var combined = cutouts.Children[1].Bounds;
             Assert.IsTrue(combined.Left <= BoundsInRoot(first).Left && combined.Right >= BoundsInRoot(second).Right);
 
-            second.Margin = new Thickness(300, 24, 0, 0);
-            await ArrangeAsync(root);
+            // Tracking publishes the reflowed geometry asynchronously after layout.
+            var published = NewCompletion();
+            EventHandler handler = (_, _) => published.TrySetResult();
+            tour.GeometryUpdated += handler;
+            try
+            {
+                second.Margin = new Thickness(300, 24, 0, 0);
+                root.UpdateLayout();
+                await published.Task.WaitAsync(Timeout);
+            }
+            finally { tour.GeometryUpdated -= handler; }
             Assert.HasCount(3, ((GeometryGroup)backdrop.Data).Children, "Separated targets need separate visible cutouts.");
         }
         finally { await CleanupAsync(root, tour); }
