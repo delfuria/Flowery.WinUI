@@ -163,6 +163,110 @@ public class Given_DaisyTour
     }
 
     [TestMethod]
+    public async Task When_StartNextAndBackAwaitPreparation_TheCardNeverRendersAtAPlaceholderPosition()
+    {
+        var firstTarget = CreateTarget();
+        var secondTarget = CreateTarget();
+        secondTarget.Margin = new Thickness(400, 240, 0, 0);
+        var startGate = new PreparationGate();
+        var nextGate = new PreparationGate();
+        var backGate = new PreparationGate();
+        var first = new DaisyTourStep
+        {
+            Id = "first-staged", Title = "First prepared target", Target = firstTarget, PrepareAsync = startGate.PrepareAsync
+        };
+        var second = new DaisyTourStep
+        {
+            Id = "second-staged", Title = "Second prepared target", Target = secondTarget, PrepareAsync = nextGate.PrepareAsync
+        };
+        var tour = new DaisyTour();
+        tour.Steps.Add(first);
+        tour.Steps.Add(second);
+        var root = CreateRoot(tour, firstTarget, secondTarget);
+        try
+        {
+            await LoadAsync(root);
+            var starting = tour.StartAsync();
+            await startGate.Entered.Task.WaitAsync(Timeout);
+            var surface = GetSurface(tour);
+            var card = Descendants<Border>(surface).Single(border => AutomationProperties.GetAutomationId(border) == "DaisyTourCard");
+            await RenderFrameAsync(root);
+            Assert.IsTrue(tour.IsTransitioning);
+            Assert.AreEqual(Visibility.Collapsed, card.Visibility, "Initial preparation must not render a centered instruction card.");
+            startGate.Release.TrySetResult();
+            await starting.WaitAsync(Timeout);
+            await RenderFrameAsync(root);
+            AssertActive(tour, first, 0);
+            AssertPlacedCard(tour, card, firstTarget);
+
+            var firstBounds = tour.CardBounds;
+            var navigating = tour.NextAsync();
+            await nextGate.Entered.Task.WaitAsync(Timeout);
+            await RenderFrameAsync(root);
+            AssertRetainedCard(tour, card, first, 0, firstBounds);
+            nextGate.Release.TrySetResult();
+            await navigating.WaitAsync(Timeout);
+            await RenderFrameAsync(root);
+            AssertActive(tour, second, 1);
+            AssertPlacedCard(tour, card, secondTarget);
+
+            first.PrepareAsync = backGate.PrepareAsync;
+            var secondBounds = tour.CardBounds;
+            var returning = tour.BackAsync();
+            await backGate.Entered.Task.WaitAsync(Timeout);
+            await RenderFrameAsync(root);
+            AssertRetainedCard(tour, card, second, 1, secondBounds);
+            backGate.Release.TrySetResult();
+            await returning.WaitAsync(Timeout);
+            await RenderFrameAsync(root);
+            AssertActive(tour, first, 0);
+            AssertPlacedCard(tour, card, firstTarget);
+        }
+        finally
+        {
+            startGate.Release.TrySetResult();
+            nextGate.Release.TrySetResult();
+            backGate.Release.TrySetResult();
+            await CleanupAsync(root, tour);
+        }
+    }
+
+    [TestMethod]
+    public async Task When_InitialPreparationIsCancelled_TheHiddenCardCannotAppearAfterLateCompletion()
+    {
+        var target = CreateTarget();
+        var gate = new PreparationGate();
+        var tour = new DaisyTour();
+        tour.Steps.Add(new DaisyTourStep { Id = "hidden-cancel", Target = target, PrepareAsync = gate.PrepareAsync });
+        var closed = new List<DaisyTourClosedEventArgs>();
+        tour.Closed += (_, args) => closed.Add(args);
+        var root = CreateRoot(tour, target);
+        using var cancellation = new CancellationTokenSource();
+        try
+        {
+            await LoadAsync(root);
+            var starting = tour.StartAsync(cancellation.Token);
+            await gate.Entered.Task.WaitAsync(Timeout);
+            var card = Descendants<Border>(GetSurface(tour)).Single(border => AutomationProperties.GetAutomationId(border) == "DaisyTourCard");
+            await RenderFrameAsync(root);
+            Assert.AreEqual(Visibility.Collapsed, card.Visibility);
+            cancellation.Cancel();
+            AssertClosed(tour);
+            Assert.IsTrue(gate.Token.IsCancellationRequested);
+            gate.Release.TrySetResult();
+            await starting.WaitAsync(Timeout);
+            await RenderFrameAsync(root);
+            AssertClosed(tour);
+            Assert.HasCount(1, closed);
+            Assert.AreEqual(DaisyTourCloseReason.Cancelled, closed[0].Reason);
+            Assert.AreEqual("hidden-cancel", closed[0].StepId);
+            Assert.IsFalse(VisualTreeHelper.GetOpenPopupsForXamlRoot(root.XamlRoot).Any(popup =>
+                Descendants<Border>(popup.Child).Any(border => ReferenceEquals(border, card))));
+        }
+        finally { gate.Release.TrySetResult(); await CleanupAsync(root, tour); }
+    }
+
+    [TestMethod]
     public async Task When_NextIsRepeatedDuringPreparation_ItDoesNotSkipTheDestination()
     {
         var target = CreateTarget();
@@ -222,6 +326,9 @@ public class Given_DaisyTour
             await LoadAsync(root);
             var starting = tour.StartAsync();
             await entered.Task.WaitAsync(Timeout);
+            await RenderFrameAsync(root);
+            var card = Descendants<Border>(GetSurface(tour)).Single(border => AutomationProperties.GetAutomationId(border) == "DaisyTourCard");
+            Assert.AreEqual(Visibility.Collapsed, card.Visibility);
             tour.Skip();
             Assert.IsTrue(token.IsCancellationRequested);
             AssertClosed(tour);
@@ -897,6 +1004,7 @@ public class Given_DaisyTour
         var tour = new DaisyTour();
         var entered = NewCompletion();
         var release = NewCompletion();
+        tour.Steps.Add(new DaisyTourStep { Id = "ready-focus", Target = target });
         tour.Steps.Add(new DaisyTourStep
         {
             Id = "pending-focus", Target = target,
@@ -908,7 +1016,8 @@ public class Given_DaisyTour
             await LoadAsync(root);
             Assert.IsTrue(previous.Focus(FocusState.Programmatic));
             Assert.AreSame(previous, FocusManager.GetFocusedElement(root.XamlRoot));
-            var starting = tour.StartAsync();
+            await tour.StartAsync().WaitAsync(Timeout);
+            var starting = tour.NextAsync();
             await entered.Task.WaitAsync(Timeout);
             await ArrangeAsync(root);
             var surface = GetSurface(tour);
@@ -933,6 +1042,59 @@ public class Given_DaisyTour
             AssertClosed(tour);
         }
         finally { release.TrySetResult(); await CleanupAsync(root, tour); }
+    }
+
+    private sealed class PreparationGate
+    {
+        internal TaskCompletionSource Entered { get; } = NewCompletion();
+        internal TaskCompletionSource Release { get; } = NewCompletion();
+        internal CancellationToken Token { get; private set; }
+
+        internal Task PrepareAsync(DaisyTourStep _, CancellationToken token)
+        {
+            Token = token;
+            Entered.TrySetResult();
+            return Release.Task;
+        }
+    }
+
+    private static void AssertRetainedCard(DaisyTour tour, Border card, DaisyTourStep previous, int index, Rect previousBounds)
+    {
+        Assert.IsTrue(tour.IsTransitioning);
+        Assert.AreEqual(Visibility.Visible, card.Visibility);
+        Assert.AreSame(previous, tour.CurrentStep);
+        Assert.AreEqual(index, tour.CurrentIndex);
+        Assert.AreEqual(index, tour.Progress.SelectedIndex);
+        Assert.AreEqual(previousBounds, tour.CardBounds);
+        Assert.AreEqual(previousBounds.X, Canvas.GetLeft(card), 0.001, "Preparation must retain the last valid card X coordinate.");
+        Assert.AreEqual(previousBounds.Y, Canvas.GetTop(card), 0.001, "Preparation must retain the last valid card Y coordinate.");
+        Assert.IsTrue(Descendants<TextBlock>(card).Any(text => text.Text == previous.Title));
+        var count = string.Format(System.Globalization.CultureInfo.CurrentCulture,
+            FloweryLocalization.GetStringInternal("Tour_StepCount"), index + 1, tour.Steps.Count);
+        Assert.IsTrue(Descendants<TextBlock>(card).Any(text => text.Text == count));
+    }
+
+    private static void AssertPlacedCard(DaisyTour tour, Border card, FrameworkElement target)
+    {
+        Assert.AreEqual(Visibility.Visible, card.Visibility);
+        Assert.AreEqual(tour.CardBounds.X, Canvas.GetLeft(card), 0.001);
+        Assert.AreEqual(tour.CardBounds.Y, Canvas.GetTop(card), 0.001);
+        Assert.IsTrue(tour.CardBounds.Width > 0 && tour.CardBounds.Height > 0);
+        AssertTargetBounds(tour, target);
+    }
+
+    private static async Task RenderFrameAsync(FrameworkElement root)
+    {
+        var rendered = NewCompletion();
+        EventHandler<object> handler = (_, _) => rendered.TrySetResult();
+        Microsoft.UI.Xaml.Media.CompositionTarget.Rendering += handler;
+        try
+        {
+            root.InvalidateArrange();
+            root.UpdateLayout();
+            await rendered.Task.WaitAsync(Timeout);
+        }
+        finally { Microsoft.UI.Xaml.Media.CompositionTarget.Rendering -= handler; }
     }
 
     private static async Task StartGalleryTourAsync(TourExamples page, DaisyTour tour)

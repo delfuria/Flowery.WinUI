@@ -219,14 +219,11 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         _backdrop.Data = new RectangleGeometry { Rect = new Rect(0, 0, _surface.Width, _surface.Height) };
         _surface.IsTabStop = true;
         _surface.Focus(FocusState.Programmatic);
+        if (CurrentStep is null)
+            _card.Visibility = Visibility.Collapsed;
         RefreshPresentation();
-        _progressScroll.Visibility = Visibility.Collapsed;
-        LayoutCard();
-        _card.Visibility = Visibility.Visible;
-        _card.Measure(new Size(_card.Width, _card.MaxHeight));
-        Canvas.SetLeft(_card, Math.Max(12, (_surface.Width - _card.DesiredSize.Width) / 2));
-        Canvas.SetTop(_card, Math.Max(12, (_surface.Height - _card.DesiredSize.Height) / 2));
-        _skip.Focus(FocusState.Programmatic);
+        if (_card.Visibility == Visibility.Visible)
+            _skip.Focus(FocusState.Programmatic);
         var step = session.PendingStep;
         var token = session.Cancellation.Token;
         try
@@ -492,14 +489,13 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         _back.Size = _skip.Size = _next.Size = _progress.Size = Size;
         _title.FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.SectionHeader, Size);
         _description.FontSize = _count.FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.Primary, Size);
-        if ((session.PendingStep ?? CurrentStep) is { } step)
+        if (CurrentStep is { } step)
         {
             _title.Text = step.Title;
             _description.Text = step.Description;
             _customContent.ContentTemplate = step.ContentTemplate;
             _customContent.Content = step.ContentTemplate is null ? null : step;
-            var index = session.PendingStep is null ? CurrentIndex : Array.IndexOf(session.Steps, step);
-            _count.Text = string.Format(CultureInfo.CurrentCulture, FloweryLocalization.GetStringInternal("Tour_StepCount"), index + 1, session.Steps.Length);
+            _count.Text = string.Format(CultureInfo.CurrentCulture, FloweryLocalization.GetStringInternal("Tour_StepCount"), CurrentIndex + 1, session.Steps.Length);
             var descriptions = step.Annotations.Select(annotation => annotation.Text).Where(text => !string.IsNullOrWhiteSpace(text));
             AutomationProperties.SetName(_card, $"{step.Title}. {step.Description}. {_count.Text}. {string.Join(". ", descriptions)}");
         }
