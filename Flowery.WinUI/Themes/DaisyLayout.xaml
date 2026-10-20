@@ -3,6 +3,20 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:Flowery.Controls">
 
+    <ControlTemplate x:Key="DaisyStepsContentTemplate" TargetType="ContentControl">
+        <ContentPresenter
+            Content="{TemplateBinding Content}"
+            ContentTemplate="{TemplateBinding ContentTemplate}"
+            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+    </ControlTemplate>
+    <Style TargetType="controls:DaisySteps">
+        <Setter Property="Template" Value="{StaticResource DaisyStepsContentTemplate}" />
+    </Style>
+    <Style TargetType="controls:DaisyStepItem">
+        <Setter Property="Template" Value="{StaticResource DaisyStepsContentTemplate}" />
+    </Style>
+
     <!-- ===================== DaisyAvatar (code-driven visual tree) ===================== -->
     <Style TargetType="controls:DaisyAvatar">
         <Setter Property="Background" Value="{ThemeResource DaisyNeutralBrush}" />

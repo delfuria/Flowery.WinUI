@@ -1,4 +1,9 @@
 {
+  "Tour_Next": "Next",
+  "Tour_Back": "Back",
+  "Tour_Skip": "Skip",
+  "Tour_Finish": "Finish",
+  "Tour_StepCount": "Step {0} of {1}",
   "Size_ExtraSmall": "Extra Small",
   "Sidebar_Favorite": "Favorite",
   "Common_Selected": "Selected",
