@@ -219,26 +219,29 @@ They also accept a tail without text.
 Without `Width` and `Height`, a shape grows to fit its text up to `MaxWidth` and `MaxHeight`.
 Text that exceeds the available height ends with an ellipsis.
 `Tail="None"` removes the tail independently of the content.
+Without a `Source`, a cloud or speech bubble goes beside its target in one of eight directions, inside the view and clear of the card and other highlights.
+It keeps its direction while that still fits and narrows before it is clamped into view.
 Custom geometry and templates retain the host's target anchoring and lifecycle.
 A `Custom` shape is centered on its `Source`, or on the step target without a `Source`.
 Without `Width` and `Height`, its box is sized so that an inscribed ellipse encloses the highlighted control.
 
-## Localization and accessibility
+## Appearance
 
 The host uses the existing Daisy theme, motion policy, and five `DaisySize` values.
 `HighlightPadding` defaults to 6 DIP, and `HighlightCornerRadius` defaults to 8 DIP.
 
-`DaisyTour.CardPosition` places the step card.
-`Target`, the default, places it beside the highlighted controls and honors each step's `Placement`.
-`TopLeft`, `Top`, `TopRight`, `Left`, `Center`, `Right`, `BottomLeft`, `Bottom`, and `BottomRight` keep it at that window position, 12 DIP from the edges.
-These positions are physical and do not mirror in right-to-left languages.
-The card and annotation surfaces use the part of the window that its display's work area shows, so a window that extends below the taskbar or off the screen keeps them visible.
-`DaisyTourStep.CardPosition` overrides the tour value for one step; `Default` inherits it.
-A fixed position that would cover the highlight slides along its own edge until the highlight is clear: `Left` and `Right` vertically, `Top` and `Bottom` horizontally, corners and `Center` along either axis.
-When that edge has no room, the card goes beside the target as with `Target`.
-A card that would cover a connector course between two controls, or the area its route limit keeps clear, moves away.
-It keeps its position from the previous step when that is still clear; otherwise it follows the same rules, and beside the target it may also move away from the target.
-When no spot is clear, it stays.
+## Card placement
+
+`DaisyTour.CardPosition` sets where the step card appears; `DaisyTourStep.CardPosition` overrides it for one step, and `Default` inherits it.
+
+- `Target`, the default, places the card beside the highlighted controls. `DaisyTourStep.Placement` (`Auto`, `Top`, `Bottom`, `Left`, `Right`) sets the preferred side; the next side that fits follows.
+- `TopLeft`, `Top`, `TopRight`, `Left`, `Center`, `Right`, `BottomLeft`, `Bottom`, and `BottomRight` keep the card at that window position, 12 DIP from the edges. These positions do not mirror in right-to-left languages.
+- A fixed position that would cover the highlight slides along its own edge: `Left` and `Right` vertically, `Top` and `Bottom` horizontally, corners and `Center` along either axis. Without room on that edge, the card goes beside the target.
+- A card that would cover a connector course between two controls, or the area its route limit keeps clear, moves away. It returns to its position from the previous step when that is clear; otherwise it follows the rules above and may also move away from the target. When no spot is clear, it stays.
+- The card and annotation surfaces use the part of the window that its display's work area shows, so a window that extends below the taskbar or off the screen keeps them visible.
+
+## Localization and accessibility
+
 `NextText`, `BackText`, `SkipText`, and `FinishText` provide optional application overrides.
 Without overrides, the host uses the 12 built-in translations.
 `Tour_StepCount` supplies the parameterized step announcement.
@@ -279,13 +282,20 @@ Escape skips the tour.
 Closure restores previous focus when the element can still accept focus.
 The navigation card remains responsible for the main accessible explanation.
 
-## Gallery and acceptance
+## Gallery
 
 Open **Guided Tour** in the Gallery.
-The main example combines typed XAML definitions with a target prepared in C#.
-It includes nested scrolling and a target created in a different tab.
-The other buttons show arrow variants, stroke patterns, cloud and bubble combinations, and a custom vector shape.
-The outcome text shows the closure reason and the affected step and annotation.
+
+| Button | Shows |
+| --- | --- |
+| Start / replay | Typed XAML steps, nested scrolling, and a target created in another tab. |
+| Arrows, Lines | Arrow presets, and stroke patterns on `Straight`, `Curved`, and `Elbow` lines between two controls. |
+| Clouds and bubbles, Custom shape | Surface annotations and a custom vector shape around the target. |
+| Regions | A connector from the sidebar's theme selection to a control on the page. |
+| Paths | `Elbow`, `SCurve`, `Bezier`, and `Custom` paths from the sidebar to the page. |
+| Route limit | Limits set by a control and by a fixed coordinate. |
+
+**Step card position** applies `DaisyTour.CardPosition` to every demo.
 
 Use the Gallery to check these behaviors before release:
 
@@ -298,6 +308,5 @@ Use the Gallery to check these behaviors before release:
 
 Runtime tests establish state and geometry behavior.
 They do not replace visual checks of alignment, clipping, focus indicators, or Narrator output.
-Pixelery and other application integrations own their targets, translations, persistence, and first-run decisions.
 
 ---
