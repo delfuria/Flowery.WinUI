@@ -12,6 +12,22 @@ permissions:
   contents: read
 
 jobs:
+  docs:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Generate and verify documentation
+        run: |
+          set -euo pipefail
+          python Utils/generate_docs.py
+          python Utils/generate_site.py
+          test -s docs/index.html
+          test -s docs/home.html
+          test -s docs/style.css
+
   windows:
     runs-on: windows-2025-vs2026
     strategy:
