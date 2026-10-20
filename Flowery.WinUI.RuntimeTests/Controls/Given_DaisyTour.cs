@@ -969,6 +969,8 @@ public class Given_DaisyTour
                 Assert.AreEqual(index, tour.Progress.SelectedIndex);
                 Assert.AreEqual(Visibility.Visible, viewport.Visibility);
                 var currentItem = items[index];
+                await RuntimeTestHelpers.EnsureLoadedAsync(currentItem).WaitAsync(Timeout);
+                await RenderFrameAsync(root);
                 var indicators = Descendants<Microsoft.UI.Xaml.Shapes.Ellipse>(currentItem).ToArray();
                 if (indicators.Length != 1)
                 {
