@@ -260,8 +260,9 @@ namespace Flowery.WinUI.RuntimeTests.Controls
         private sealed record FrameSample(long ElapsedMs, int Matches, Color[] Pixels);
 
         /// <summary>
-        /// Samples only pixels inside the visible runtime-test host. RenderTargetBitmap
-        /// does not provide evidence for visuals inserted into the native composition tree.
+        /// Samples pixels of the runtime-test host from the composed window. RenderTargetBitmap
+        /// does not provide evidence for visuals inserted into the native composition tree, and
+        /// PrintWindow reads the window itself, so other windows may cover it.
         /// </summary>
         private sealed class WindowPixelSampler
         {
@@ -332,23 +333,32 @@ namespace Flowery.WinUI.RuntimeTests.Controls
             public Color[] ReadColors(bool captureDiagnostic = false)
             {
                 Assert.IsTrue(GetWindowRect(_window, out var currentBounds) && currentBounds.Equals(_windowBounds),
-                    "The runtime-test window moved while its monitor pixels were being sampled.");
-                foreach (var point in _points)
-                {
-                    Assert.AreEqual(_window, GetAncestor(WindowFromPoint(point), 2),
-                        "Another window covers the runtime-test host's sampling area.");
-                }
+                    "The runtime-test window moved while its pixels were being sampled.");
 
                 // Rendering runs before presentation. Fence outstanding compositor updates,
-                // then copy the host once so all samples belong to one presented image.
+                // then copy the window once so all samples belong to one composed image.
                 Marshal.ThrowExceptionForHR(DwmFlush());
                 var screenDc = GetDC(IntPtr.Zero);
-                Assert.AreNotEqual(IntPtr.Zero, screenDc, "Cannot read the visible desktop pixel surface.");
+                Assert.AreNotEqual(IntPtr.Zero, screenDc, "Cannot create a desktop-compatible pixel surface.");
+                var windowDc = IntPtr.Zero;
+                var windowBitmap = IntPtr.Zero;
+                var previousWindowBitmap = IntPtr.Zero;
                 var memoryDc = IntPtr.Zero;
                 var bitmap = IntPtr.Zero;
                 var previousBitmap = IntPtr.Zero;
                 try
                 {
+                    windowDc = CreateCompatibleDC(screenDc);
+                    Assert.AreNotEqual(IntPtr.Zero, windowDc, "Cannot create a native window snapshot DC.");
+                    windowBitmap = CreateCompatibleBitmap(screenDc,
+                        _windowBounds.Right - _windowBounds.Left, _windowBounds.Bottom - _windowBounds.Top);
+                    Assert.AreNotEqual(IntPtr.Zero, windowBitmap, "Cannot create a native window snapshot bitmap.");
+                    previousWindowBitmap = SelectObject(windowDc, windowBitmap);
+                    Assert.IsTrue(previousWindowBitmap != IntPtr.Zero && previousWindowBitmap != new IntPtr(-1),
+                        "Cannot select the native window snapshot bitmap.");
+                    // PW_RENDERFULLCONTENT includes the window's DirectComposition content.
+                    const uint renderFullContent = 2;
+                    Assert.IsTrue(PrintWindow(_window, windowDc, renderFullContent), "Cannot capture the composed runtime-test window.");
                     memoryDc = CreateCompatibleDC(screenDc);
                     Assert.AreNotEqual(IntPtr.Zero, memoryDc, "Cannot create a native snapshot DC.");
                     var width = _captureBounds.Right - _captureBounds.Left;
@@ -358,9 +368,9 @@ namespace Flowery.WinUI.RuntimeTests.Controls
                     previousBitmap = SelectObject(memoryDc, bitmap);
                     Assert.IsTrue(previousBitmap != IntPtr.Zero && previousBitmap != new IntPtr(-1),
                         "Cannot select the native snapshot bitmap.");
-                    const uint sourceCopyWithLayeredWindows = 0x00CC0020 | 0x40000000;
-                    Assert.IsTrue(BitBlt(memoryDc, 0, 0, width, height, screenDc,
-                        _captureBounds.Left, _captureBounds.Top, sourceCopyWithLayeredWindows),
+                    const uint sourceCopy = 0x00CC0020;
+                    Assert.IsTrue(BitBlt(memoryDc, 0, 0, width, height, windowDc,
+                        _captureBounds.Left - _windowBounds.Left, _captureBounds.Top - _windowBounds.Top, sourceCopy),
                         "Cannot capture the presented native test-host rectangle.");
                     Assert.IsTrue(GdiFlush(), "The native snapshot copy did not finish successfully.");
                     var colors = new Color[_points.Length];
@@ -401,6 +411,12 @@ namespace Flowery.WinUI.RuntimeTests.Controls
                         DeleteObject(bitmap);
                     if (memoryDc != IntPtr.Zero)
                         DeleteDC(memoryDc);
+                    if (previousWindowBitmap != IntPtr.Zero && previousWindowBitmap != new IntPtr(-1))
+                        SelectObject(windowDc, previousWindowBitmap);
+                    if (windowBitmap != IntPtr.Zero)
+                        DeleteObject(windowBitmap);
+                    if (windowDc != IntPtr.Zero)
+                        DeleteDC(windowDc);
                     Assert.AreEqual(1, ReleaseDC(IntPtr.Zero, screenDc), "The physical pixel probe must release its screen DC.");
                 }
             }
@@ -504,8 +520,7 @@ namespace Flowery.WinUI.RuntimeTests.Controls
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInformation info);
         [DllImport("user32.dll")]
-        private static extern IntPtr WindowFromPoint(NativePoint point);
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetAncestor(IntPtr window, uint flags);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool PrintWindow(IntPtr window, IntPtr dc, uint flags);
     }
 }
