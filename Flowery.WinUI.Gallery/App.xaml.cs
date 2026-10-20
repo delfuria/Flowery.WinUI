@@ -55,6 +55,10 @@ namespace Flowery.WinUI.Gallery
                 FlowerySizeManager.MainWindow = _window;
                 FloweryScaleManager.MainWindow = _window;
                 ApplyRequestedWindowPlacement(_window);
+                // Runtime tests must not rely on more room than a 1080p screen offers.
+                var size = _window.AppWindow.Size;
+                if (size.Width > 1920 || size.Height > 1080)
+                    _window.AppWindow.Resize(new Windows.Graphics.SizeInt32(Math.Min(size.Width, 1920), Math.Min(size.Height, 1080)));
                 _window.Activate();
                 StartRuntimeTestsIfRequested(args);
                 return;

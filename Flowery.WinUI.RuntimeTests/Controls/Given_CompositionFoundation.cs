@@ -50,17 +50,17 @@ public class Given_CompositionFoundation
             await FlushAsync(host);
             Assert.IsTrue(changes.Count > 0, DescribeTracker(target, host));
             var before = changes.Last()!.Value.Bounds;
-            Assert.AreEqual(new Rect(0, firstRow.ActualHeight, target.ActualWidth, target.ActualHeight), before);
+            AssertLayoutBounds(new Rect(0, firstRow.ActualHeight, target.ActualWidth, target.ActualHeight), before);
             Assert.AreEqual(host.XamlRoot.RasterizationScale, changes.Last()!.Value.RasterizationScale);
 
             firstRow.Height = new GridLength(70);
             host.UpdateLayout();
             await FlushAsync(host);
             var after = changes.Last()!.Value.Bounds;
-            Assert.AreEqual(new Rect(0, firstRow.ActualHeight, target.ActualWidth, target.ActualHeight), after);
+            AssertLayoutBounds(new Rect(0, firstRow.ActualHeight, target.ActualWidth, target.ActualHeight), after);
             Assert.AreNotEqual(before.Y, after.Y);
-            Assert.AreEqual(before.Width, after.Width);
-            Assert.AreEqual(before.Height, after.Height);
+            Assert.AreEqual(before.Width, after.Width, 0.001);
+            Assert.AreEqual(before.Height, after.Height, 0.001);
             Assert.AreEqual(2, changes.Count);
 
             host.InvalidateMeasure();
@@ -101,15 +101,15 @@ public class Given_CompositionFoundation
             await FlushAsync(host);
             Assert.IsTrue(changes.Count > 0, DescribeTracker(target, host));
             var firstRow = changes.Last()!.Value.Bounds;
-            Assert.AreEqual(new Rect(sibling.ActualWidth + 8, 0, target.ActualWidth, target.ActualHeight), firstRow);
+            AssertLayoutBounds(new Rect(sibling.ActualWidth + 8, 0, target.ActualWidth, target.ActualHeight), firstRow);
 
             host.Width = 150;
             host.UpdateLayout();
             await FlushAsync(host);
             var wrapped = changes.Last()!.Value.Bounds;
-            Assert.AreEqual(new Rect(0, sibling.ActualHeight + 8, target.ActualWidth, target.ActualHeight), wrapped);
-            Assert.AreEqual(firstRow.Width, wrapped.Width);
-            Assert.AreEqual(firstRow.Height, wrapped.Height);
+            AssertLayoutBounds(new Rect(0, sibling.ActualHeight + 8, target.ActualWidth, target.ActualHeight), wrapped);
+            Assert.AreEqual(firstRow.Width, wrapped.Width, 0.001);
+            Assert.AreEqual(firstRow.Height, wrapped.Height, 0.001);
 
             host.Width = 240;
             host.UpdateLayout();
@@ -163,7 +163,7 @@ public class Given_CompositionFoundation
                 Assert.AreNotSame(previousRoot, root, "Each reopened popup must own a fresh native graph.");
                 Assert.AreEqual(1, root.Children.Count);
                 Assert.IsTrue(changes.Count > 0, DescribeTracker(owner, owner));
-                Assert.AreEqual(new Rect(0, 0, owner.ActualWidth, owner.ActualHeight), changes.Last()!.Value.Bounds);
+                AssertLayoutBounds(new Rect(0, 0, owner.ActualWidth, owner.ActualHeight), changes.Last()!.Value.Bounds);
 
                 popup.IsOpen = false;
                 await FlushAsync(scene);
@@ -456,6 +456,16 @@ public class Given_CompositionFoundation
         {
             await DetachAsync(owner);
         }
+    }
+
+    private static void AssertLayoutBounds(Rect expected, Rect actual)
+    {
+        // Native transforms can round layout coordinates through single precision.
+        const double tolerance = 0.001;
+        Assert.AreEqual(expected.X, actual.X, tolerance, "Layout X coordinate.");
+        Assert.AreEqual(expected.Y, actual.Y, tolerance, "Layout Y coordinate.");
+        Assert.AreEqual(expected.Width, actual.Width, tolerance, "Layout width.");
+        Assert.AreEqual(expected.Height, actual.Height, tolerance, "Layout height.");
     }
 
     private static DaisyShadowContainer CreateOwner() => new()

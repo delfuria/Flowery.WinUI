@@ -79,5 +79,25 @@ finally {
     [Environment]::SetEnvironmentVariable('FLOWERY_MONITOR_REGION', $previousMonitorRegion, 'Process')
 }
 
+# Inconclusive runtime tests could not set up their scenario here, such as a window without room for it.
+# They do not fail the run, but stay visible: as annotations in GitHub Actions, as warnings locally.
+$reports = Get-ChildItem -LiteralPath $resultsDirectory -Filter 'runtime-tests-windows.xml' -Recurse -File |
+    Where-Object { $_.Directory.Name -like 'native-runtime-*' }
+foreach ($report in $reports) {
+    foreach ($test in ([xml](Get-Content -LiteralPath $report.FullName -Raw -Encoding utf8)).tests.test) {
+        if ($test.outcome -ne 'Inconclusive') {
+            continue
+        }
+        $text = '{0}: {1}' -f $test.name, $test.message
+        if ($env:GITHUB_ACTIONS -eq 'true') {
+            $escaped = $text.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+            Write-Host ('::warning title=Inconclusive runtime test::{0}' -f $escaped)
+        }
+        else {
+            Write-Warning $text
+        }
+    }
+}
+
 Write-Host ('Log: {0}' -f $logPath)
 exit $testExitCode

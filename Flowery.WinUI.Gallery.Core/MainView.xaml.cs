@@ -103,6 +103,7 @@ namespace Flowery.WinUI.Gallery
                 ["Sidebar_Feedback"] = () => new FeedbackExamples(),
                 ["Sidebar_Layout"] = () => new LayoutExamples(),
                 ["Sidebar_Navigation"] = () => new NavigationExamples(),
+                ["Sidebar_Tour"] = () => new TourExamples(),
                 ["Sidebar_Theming"] = () => new ThemingExamples(),
                 ["Sidebar_LightweightStyling"] = () => new StylingExamples(),
                 ["Sidebar_ProductThemes"] = () => new ProductThemesExamples(),

@@ -154,6 +154,11 @@ namespace Flowery.Helpers
                 if (!element.IsLoaded)
                     continue;
 
+                // Content assigned during Loaded must be laid out before the effect attaches;
+                // otherwise the surface attaches to the ContentPresenter and renders on top.
+                // A timer tick alone does not guarantee that layout ran first on a busy UI thread.
+                element.UpdateLayout();
+
                 if (element is DaisyBaseContentControl baseControl)
                 {
                     baseControl.RefreshNeumorphicEffect();

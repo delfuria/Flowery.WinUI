@@ -221,6 +221,15 @@ namespace Flowery.WinUI.Gallery
                 },
                 new()
                 {
+                    Name = "Sidebar_Tour",
+                    IconKey = "DaisyIconNavigation",
+                    Items = new()
+                    {
+                        new() { Id = "tour", Name = "Sidebar_Tour", ControlName = "DaisyTour", TabHeader = "Sidebar_Tour" }
+                    }
+                },
+                new()
+                {
                     Name = "Sidebar_Theming",
                     IconKey = "DaisyIconTheme",
                     Items = new()

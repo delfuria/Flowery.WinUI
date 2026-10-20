@@ -1,0 +1,827 @@
+﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
+using Flowery.Composition;
+using Microsoft.UI.Xaml.Automation;
+using Microsoft.UI.Xaml.Automation.Peers;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Windowing;
+using VirtualKey = Windows.System.VirtualKey;
+
+namespace Flowery.Controls;
+
+/// <summary>A window-scoped, modal guided tour. Add one host to the window's visual tree.</summary>
+public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyPropertyChanged
+{
+    private sealed partial class TourCardPeer(DaisyTour owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(DaisyTour);
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Pane;
+        protected override string GetNameCore() => AutomationProperties.GetName(((DaisyTour)Owner)._card);
+    }
+
+    protected override AutomationPeer OnCreateAutomationPeer() => new TourCardPeer(this);
+
+    private sealed class Session(DaisyTourStep[] steps, CancellationTokenSource cancellation)
+    {
+        internal readonly DaisyTourStep[] Steps = steps;
+        internal readonly CancellationTokenSource Cancellation = cancellation;
+        internal readonly List<IDisposable> Trackers = [];
+        internal readonly List<Action> Unsubscribe = [];
+        internal readonly List<Action> StepUnsubscribe = [];
+        internal WeakReference<DependencyObject>? PreviousFocus;
+        internal CancellationTokenRegistration Registration;
+        internal DaisyTourStep? PendingStep;
+        internal bool Busy;
+    }
+
+    private readonly Popup _popup = new() { IsLightDismissEnabled = false, ShouldConstrainToRootBounds = true };
+    private readonly Canvas _surface = new() { Background = new SolidColorBrush(Colors.Transparent) };
+    private readonly Path _backdrop = new() { IsHitTestVisible = false };
+    private readonly Path _outline = new() { IsHitTestVisible = false, StrokeThickness = 2 };
+    private readonly Canvas _annotations = new() { IsHitTestVisible = false };
+    private readonly Border _card = new() { CornerRadius = new CornerRadius(12), BorderThickness = new Thickness(1) };
+    private readonly Grid _cardLayout = new() { RowSpacing = 12, Padding = new Thickness(20) };
+    private readonly TextBlock _title = new() { TextWrapping = TextWrapping.Wrap, FontWeight = FontWeights.SemiBold };
+    private readonly TextBlock _description = new() { TextWrapping = TextWrapping.Wrap };
+    private readonly TextBlock _count = new() { TextWrapping = TextWrapping.Wrap };
+    private readonly ContentPresenter _customContent = new();
+    private readonly ScrollViewer _textScroll = new() { HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+    private readonly ScrollViewer _progressScroll = new() { HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden, VerticalScrollBarVisibility = ScrollBarVisibility.Disabled, IsTabStop = false };
+    private readonly DaisySteps _progress = new();
+    private readonly DaisyButton _back = new();
+    private readonly DaisyButton _next = new();
+    private readonly DaisyButton _skip = new();
+    private readonly Grid _buttons = new() { ColumnSpacing = 8, RowSpacing = 8 };
+    private readonly DaisyTourAnnotation _defaultAnnotation = new() { Id = "default-pointer" };
+    private readonly List<DaisyTourAnnotationPresenter> _presenters = [];
+    private readonly List<DaisyStepItem> _progressItems = [];
+    private Session? _session;
+    private Rect _visibleArea;
+    // Where the card ended on the previous step; a card that must move off a course returns there when clear.
+    private Rect _previousStepCard;
+    private bool _updateQueued;
+    private bool? _verticalButtons;
+
+    public DaisyTour()
+    {
+        IsTabStop = false;
+        IsHitTestVisible = false;
+        NeumorphicEnabled = false;
+        _popup.Child = _surface;
+        _popup.Closed += OnPopupClosed;
+        _surface.Children.Add(_backdrop);
+        _surface.Children.Add(_outline);
+        _surface.Children.Add(_annotations);
+        _surface.Children.Add(_card);
+        _card.Child = _cardLayout;
+        _card.TabFocusNavigation = KeyboardNavigationMode.Cycle;
+        for (var index = 0; index < 4; index++)
+            _cardLayout.RowDefinitions.Add(new RowDefinition { Height = index == 0 ? new GridLength(1, GridUnitType.Star) : GridLength.Auto });
+        var text = new StackPanel { Spacing = 8 };
+        text.Children.Add(_title);
+        text.Children.Add(_description);
+        text.Children.Add(_customContent);
+        _textScroll.Content = text;
+        _progressScroll.Content = _progress;
+        AddRow(_textScroll, 0);
+        AddRow(_count, 1);
+        AddRow(_progressScroll, 2);
+        AddRow(_buttons, 3);
+        _buttons.Children.Add(_back);
+        _buttons.Children.Add(_skip);
+        _buttons.Children.Add(_next);
+        _back.Click += OnBack;
+        _next.Click += OnNext;
+        _skip.Click += OnSkip;
+        _surface.KeyDown += OnSurfaceKeyDown;
+        _card.SizeChanged += OnCardSizeChanged;
+        AutomationProperties.SetAutomationId(_back, "DaisyTourBack");
+        AutomationProperties.SetAutomationId(_next, "DaisyTourNext");
+        AutomationProperties.SetAutomationId(_skip, "DaisyTourSkip");
+        AutomationProperties.SetAutomationId(_card, "DaisyTourCard");
+        AutomationProperties.SetLiveSetting(_card, AutomationLiveSetting.Polite);
+        Steps.CollectionChanged += OnStepsChanged;
+    }
+
+    public ObservableCollection<DaisyTourStep> Steps { get; } = [];
+    public bool IsOpen => _session is not null;
+    public int CurrentIndex { get; private set; } = -1;
+    public DaisyTourStep? CurrentStep { get; private set; }
+    public event EventHandler<DaisyTourClosedEventArgs>? Closed;
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    internal Rect TargetBounds { get; private set; }
+    internal Rect CardBounds { get; private set; }
+    internal DaisySteps Progress => _progress;
+    internal bool IsTransitioning => _session?.Busy == true;
+    internal event EventHandler? GeometryUpdated;
+
+    public static readonly DependencyProperty SizeProperty = Register(nameof(Size), typeof(DaisySize), DaisySize.Medium);
+    public DaisySize Size { get => (DaisySize)GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
+    public static readonly DependencyProperty HighlightPaddingProperty = Register(nameof(HighlightPadding), typeof(double), 6d);
+    public double HighlightPadding { get => (double)GetValue(HighlightPaddingProperty); set => SetValue(HighlightPaddingProperty, value); }
+    public static readonly DependencyProperty HighlightCornerRadiusProperty = Register(nameof(HighlightCornerRadius), typeof(double), 8d);
+    public double HighlightCornerRadius { get => (double)GetValue(HighlightCornerRadiusProperty); set => SetValue(HighlightCornerRadiusProperty, value); }
+    public static readonly DependencyProperty AnnotationDefaultsProperty = Register(nameof(AnnotationDefaults), typeof(DaisyTourAnnotationStyle), null);
+    public DaisyTourAnnotationStyle? AnnotationDefaults { get => (DaisyTourAnnotationStyle?)GetValue(AnnotationDefaultsProperty); set => SetValue(AnnotationDefaultsProperty, value); }
+    /// <summary>Places the step card beside the target (default) or at a fixed window position.</summary>
+    public static readonly DependencyProperty CardPositionProperty = Register(nameof(CardPosition), typeof(DaisyTourCardPosition), DaisyTourCardPosition.Target);
+    public DaisyTourCardPosition CardPosition { get => (DaisyTourCardPosition)GetValue(CardPositionProperty); set => SetValue(CardPositionProperty, value); }
+    public static readonly DependencyProperty NextTextProperty = Register(nameof(NextText), typeof(string), null);
+    public string? NextText { get => (string?)GetValue(NextTextProperty); set => SetValue(NextTextProperty, value); }
+    public static readonly DependencyProperty BackTextProperty = Register(nameof(BackText), typeof(string), null);
+    public string? BackText { get => (string?)GetValue(BackTextProperty); set => SetValue(BackTextProperty, value); }
+    public static readonly DependencyProperty SkipTextProperty = Register(nameof(SkipText), typeof(string), null);
+    public string? SkipText { get => (string?)GetValue(SkipTextProperty); set => SetValue(SkipTextProperty, value); }
+    public static readonly DependencyProperty FinishTextProperty = Register(nameof(FinishText), typeof(string), null);
+    public string? FinishText { get => (string?)GetValue(FinishTextProperty); set => SetValue(FinishTextProperty, value); }
+
+    private static DependencyProperty Register(string name, Type type, object? value) =>
+        DependencyProperty.Register(name, type, typeof(DaisyTour), new PropertyMetadata(value, OnPresentationChanged));
+
+    private static void OnPresentationChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+    {
+        var tour = (DaisyTour)sender;
+        if (tour._session is { } session && args.Property == AnnotationDefaultsProperty)
+            tour.ObserveCurrentStep(session);
+        tour.RefreshPresentation();
+    }
+
+    protected override DaisySize? GetControlSize() => Size;
+    protected override void SetControlSize(DaisySize size) => Size = size;
+    protected override void OnGlobalSizeChanged(DaisySize size) => Size = size;
+    protected override void OnThemeChanged(string themeName) => RefreshPresentation();
+    protected override void OnUnloaded() { Cancel(); base.OnUnloaded(); }
+
+    /// <summary>Starts a fresh session. Calling again cancels the previous session before replay.</summary>
+    public async Task StartAsync(CancellationToken cancellationToken = default)
+    {
+        VerifyAccess();
+        var steps = Steps.ToArray();
+        var ids = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var step in steps)
+        {
+            if (string.IsNullOrWhiteSpace(step.Id) || !ids.Add(step.Id))
+                throw new InvalidOperationException("Tour step IDs must be nonempty and unique.");
+        }
+        Cancel();
+        if (steps.Length == 0) return;
+        cancellationToken.ThrowIfCancellationRequested();
+        if (CompositionVisualTree.GetConnectedRoot(this) is not { } root)
+        {
+            Closed?.Invoke(this, new(DaisyTourCloseReason.TargetUnavailable, steps[0].Id));
+            return;
+        }
+        var session = new Session(steps, CancellationTokenSource.CreateLinkedTokenSource(cancellationToken));
+        _session = session;
+        session.PreviousFocus = FocusManager.GetFocusedElement(root) is DependencyObject focus ? new(focus) : null;
+        _popup.XamlRoot = root;
+        _surface.RequestedTheme = ActualTheme;
+        _surface.FlowDirection = FlowDirection.LeftToRight;
+        ResizeSurface();
+        _popup.IsOpen = true;
+        root.Changed += OnRootChanged;
+        FloweryLocalization.CultureChanged += OnCultureChanged;
+        FocusManager.GettingFocus += OnGettingFocus;
+        session.Unsubscribe.Add(() => root.Changed -= OnRootChanged);
+        session.Unsubscribe.Add(() => FloweryLocalization.CultureChanged -= OnCultureChanged);
+        session.Unsubscribe.Add(() => FocusManager.GettingFocus -= OnGettingFocus);
+        session.Registration = cancellationToken.Register(() => DispatchCancel(session));
+        // Moving the window changes which part of it the display shows.
+        if (root.ContentIslandEnvironment is { AppWindowId.Value: not 0 } environment &&
+            AppWindow.GetFromWindowId(environment.AppWindowId) is { } window)
+        {
+            window.Changed += OnAppWindowChanged;
+            session.Unsubscribe.Add(() => window.Changed -= OnAppWindowChanged);
+        }
+        NotifyState();
+        if (!ReferenceEquals(_session, session)) return;
+        await TransitionAsync(session, 0);
+    }
+
+    public Task NextAsync()
+    {
+        VerifyAccess();
+        if (_session is not { Busy: false } session) return Task.CompletedTask;
+        if (CurrentIndex == session.Steps.Length - 1)
+        {
+            Close(session, DaisyTourCloseReason.Completed);
+            return Task.CompletedTask;
+        }
+        return TransitionAsync(session, CurrentIndex + 1);
+    }
+
+    public Task BackAsync()
+    {
+        VerifyAccess();
+        return _session is { Busy: false } session && CurrentIndex > 0
+            ? TransitionAsync(session, CurrentIndex - 1) : Task.CompletedTask;
+    }
+
+    public void Skip() { VerifyAccess(); if (_session is { } session) Close(session, DaisyTourCloseReason.Skipped); }
+    public void Cancel() { VerifyAccess(); if (_session is { } session) Close(session, DaisyTourCloseReason.Cancelled); }
+
+    private async Task TransitionAsync(Session session, int index)
+    {
+        session.Busy = true;
+        session.PendingStep = session.Steps[index];
+        ClearStepObservers(session);
+        _annotations.Children.Clear();
+        _outline.Data = null;
+        _backdrop.Data = new RectangleGeometry { Rect = new Rect(0, 0, _surface.Width, _surface.Height) };
+        _surface.IsTabStop = true;
+        _surface.Focus(FocusState.Programmatic);
+        if (CurrentStep is null)
+            _card.Visibility = Visibility.Collapsed;
+        RefreshPresentation();
+        if (_card.Visibility == Visibility.Visible)
+            _skip.Focus(FocusState.Programmatic);
+        var step = session.PendingStep;
+        var token = session.Cancellation.Token;
+        try
+        {
+            if (step.PrepareAsync is { } prepare)
+                await prepare(step, token).WaitAsync(token);
+            token.ThrowIfCancellationRequested();
+            var targets = GetTargets(step);
+            // The highlight frame around each target is revealed together with the target.
+            await DaisyTourLayout.PrepareTargetsAsync(targets, _surface, token,
+                Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness);
+            if (!ReferenceEquals(_session, session)) return;
+            _previousStepCard = CardBounds;
+            CurrentIndex = index;
+            CurrentStep = step;
+            session.PendingStep = null;
+            BuildProgress(session);
+            ObserveCurrentStep(session);
+            _card.Visibility = Visibility.Visible;
+            RefreshPresentation();
+            if (!UpdateGeometry(session)) return;
+            await DaisyTourLayout.SettleAsync(_surface, token);
+            if (!ReferenceEquals(_session, session)) return;
+            session.Busy = false;
+            RefreshPresentation();
+            ShowCurrentIndicator();
+            _next.Focus(FocusState.Programmatic);
+            _surface.IsTabStop = false;
+            NotifyState();
+            var peer = FrameworkElementAutomationPeer.FromElement(this) ?? FrameworkElementAutomationPeer.CreatePeerForElement(this);
+            peer?.RaiseNotificationEvent(AutomationNotificationKind.Other, AutomationNotificationProcessing.ImportantMostRecent,
+                AutomationProperties.GetName(_card), "DaisyTourStep");
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+        catch (Exception error)
+        {
+            if (ReferenceEquals(_session, session))
+                Close(session, DaisyTourCloseReason.TargetUnavailable, step.Target, error: error);
+        }
+        finally
+        {
+            session.Busy = false;
+        }
+    }
+
+    private static List<FrameworkElement> GetTargets(DaisyTourStep step)
+    {
+        var targets = new List<FrameworkElement>();
+        if (step.Target is { } target) targets.Add(target);
+        foreach (var annotation in step.Annotations)
+        {
+            if (annotation.Source is { } source && !targets.Contains(source)) targets.Add(source);
+            if (annotation.Target is { } end && !targets.Contains(end)) targets.Add(end);
+        }
+        return targets;
+    }
+
+    private void ObserveCurrentStep(Session session)
+    {
+        ClearStepObservers(session);
+        if (CurrentStep is not { } step) return;
+        step.Changed += OnStepChanged;
+        session.StepUnsubscribe.Add(() => step.Changed -= OnStepChanged);
+        foreach (var annotation in step.Annotations)
+        {
+            annotation.Changed += OnAnnotationChanged;
+            session.StepUnsubscribe.Add(() => annotation.Changed -= OnAnnotationChanged);
+        }
+        foreach (var style in new[] { AnnotationDefaults, step.AnnotationDefaults }.OfType<DaisyTourAnnotationStyle>())
+        {
+            style.Changed += OnAnnotationChanged;
+            session.StepUnsubscribe.Add(() => style.Changed -= OnAnnotationChanged);
+        }
+        foreach (var target in GetTargets(step))
+            session.Trackers.Add(new CompositionElementTracker(target, _surface, _ => QueueGeometry()));
+        // Route limit controls move connectors without being highlighted or scrolled into view.
+        foreach (var limit in step.Annotations.Select(annotation => annotation.RouteLimit).OfType<FrameworkElement>().Distinct())
+            session.Trackers.Add(new CompositionElementTracker(limit, _surface, _ => QueueGeometry()));
+    }
+
+    private static void ClearStepObservers(Session session)
+    {
+        foreach (var tracker in session.Trackers) tracker.Dispose();
+        session.Trackers.Clear();
+        foreach (var unsubscribe in session.StepUnsubscribe) unsubscribe();
+        session.StepUnsubscribe.Clear();
+    }
+
+    private void OnStepChanged(object? sender, EventArgs args)
+    {
+        if (_session is not { Busy: false } session) return;
+        ObserveCurrentStep(session);
+        RefreshPresentation();
+    }
+
+    private void OnAnnotationChanged(object? sender, EventArgs args) => OnStepChanged(sender, args);
+
+    private void QueueGeometry()
+    {
+        if (_updateQueued || _session is not { Busy: false } session) return;
+        _updateQueued = true;
+        if (!DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, async () =>
+        {
+            if (!ReferenceEquals(_session, session) || session.Busy) { _updateQueued = false; return; }
+            try
+            {
+                await DaisyTourLayout.SettleAsync(_surface, session.Cancellation.Token);
+                if (ReferenceEquals(_session, session) && !session.Busy) UpdateGeometry(session);
+            }
+            catch (OperationCanceledException) { }
+            finally { _updateQueued = false; }
+        })) _updateQueued = false;
+    }
+
+    private bool UpdateGeometry(Session session)
+    {
+        if (CurrentStep is not { } step || step.Target is not { } target ||
+            !DaisyTourLayout.TryBounds(target, _surface, out var primary))
+        {
+            Close(session, DaisyTourCloseReason.TargetUnavailable, CurrentStep?.Target,
+                error: new InvalidOperationException("The tour target is unavailable. " + DaisyTourLayout.Describe(CurrentStep?.Target, _surface)));
+            return false;
+        }
+        var visible = DaisyTourLayout.VisibleBounds(target, _surface, primary);
+        if (visible.IsEmpty || visible.Width <= 0 || visible.Height <= 0)
+        {
+            Close(session, DaisyTourCloseReason.TargetUnavailable, target,
+                error: new InvalidOperationException($"The tour target is outside the visible area. Bounds={primary}; viewport={_surface.ActualWidth}x{_surface.ActualHeight}."));
+            return false;
+        }
+        TargetBounds = visible;
+        var holes = new List<Rect> { visible };
+        var bounds = new Dictionary<FrameworkElement, Rect> { [target] = visible };
+        foreach (var annotation in step.Annotations)
+        {
+            foreach (var endpoint in new[] { annotation.Source, annotation.Target }.OfType<FrameworkElement>())
+            {
+                if (!DaisyTourLayout.TryBounds(endpoint, _surface, out var full))
+                    return Unavailable(session, annotation, endpoint);
+                // Connectors keep the endpoint's real position, even partly outside the visible area.
+                // Only its visible part is highlighted.
+                if (!bounds.ContainsKey(endpoint)) bounds[endpoint] = full;
+                var clipped = DaisyTourLayout.VisibleBounds(endpoint, _surface, full);
+                if (!clipped.IsEmpty && clipped.Width > 0 && clipped.Height > 0 && !holes.Contains(clipped)) holes.Add(clipped);
+            }
+        }
+        _visibleArea = _popup.XamlRoot is { } root ? DaisyTourLayout.VisibleArea(root) : new Rect(0, 0, _surface.Width, _surface.Height);
+        LayoutCard();
+        _card.Measure(new Size(_card.Width, _card.MaxHeight));
+        var allTargets = visible;
+        foreach (var hole in holes) allTargets.Union(hole);
+        // The card is placed in the visible part of the window, in coordinates relative to that part.
+        var viewport = new Size(_visibleArea.Width, _visibleArea.Height);
+        var position = step.CardPosition == DaisyTourCardPosition.Default ? CardPosition : step.CardPosition;
+        var frame = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness;
+        var targets = Shift(allTargets, -_visibleArea.X, -_visibleArea.Y);
+        CardBounds = Shift(DaisyTourLayout.PlaceStationary(position, _card.DesiredSize, viewport, Inflate(targets, frame))
+            ?? DaisyTourLayout.Place(targets, _card.DesiredSize, viewport, step.Placement), _visibleArea.X, _visibleArea.Y);
+        Canvas.SetLeft(_card, CardBounds.X);
+        Canvas.SetTop(_card, CardBounds.Y);
+        var cutout = new GeometryGroup { FillRule = FillRule.EvenOdd };
+        cutout.Children.Add(new RectangleGeometry { Rect = new Rect(0, 0, _surface.Width, _surface.Height) });
+        var outlines = new GeometryGroup { FillRule = FillRule.Nonzero };
+        var expandedHoles = new List<Rect>();
+        foreach (var hole in holes)
+        {
+            var padding = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0);
+            var expanded = new Rect(hole.X - padding, hole.Y - padding, hole.Width + 2 * padding, hole.Height + 2 * padding);
+            // Adjacent/overlapping targets share one highlight. Disjoint cutouts must
+            // never toggle each other's opacity in the even-odd backdrop geometry.
+            for (var index = expandedHoles.Count - 1; index >= 0; index--)
+            {
+                var intersection = expanded;
+                intersection.Intersect(expandedHoles[index]);
+                if (intersection.IsEmpty) continue;
+                expanded.Union(expandedHoles[index]);
+                expandedHoles.RemoveAt(index);
+                index = expandedHoles.Count;
+            }
+            expandedHoles.Add(expanded);
+        }
+        foreach (var expanded in expandedHoles)
+        {
+            var geometry = RoundedRectangle(expanded, HighlightCornerRadius);
+            cutout.Children.Add(geometry);
+            outlines.Children.Add(RoundedRectangle(expanded, HighlightCornerRadius));
+        }
+        _backdrop.Data = cutout;
+        _outline.Data = outlines;
+        UpdateAnnotations(step, bounds);
+        // A card covering a course between controls, or the area its route limit keeps clear, moves away.
+        // Courses from the card itself follow it.
+        var courses = CourseBounds(step, bounds, -_visibleArea.X, -_visibleArea.Y);
+        if (courses.Count > 0 && DaisyTourLayout.Covers(Shift(CardBounds, -_visibleArea.X, -_visibleArea.Y), courses))
+        {
+            var obstacles = new List<Rect>(courses);
+            foreach (var hole in holes) obstacles.Add(Shift(Inflate(hole, frame), -_visibleArea.X, -_visibleArea.Y));
+            Rect? kept = _previousStepCard.Width > 0
+                ? new Rect(_previousStepCard.X - _visibleArea.X, _previousStepCard.Y - _visibleArea.Y, _card.DesiredSize.Width, _card.DesiredSize.Height)
+                : null;
+            if (DaisyTourLayout.AvoidObstacles(position, step.Placement, targets, _card.DesiredSize, viewport, obstacles, kept) is { } clear)
+            {
+                CardBounds = Shift(clear, _visibleArea.X, _visibleArea.Y);
+                Canvas.SetLeft(_card, CardBounds.X);
+                Canvas.SetTop(_card, CardBounds.Y);
+                UpdateAnnotations(step, bounds);
+            }
+        }
+        GeometryUpdated?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
+
+    // Segment bounds of the connector courses between controls, padded by half the stroke plus 4 DIP
+    // of clearance, and the areas their route limits keep clear.
+    private List<Rect> CourseBounds(DaisyTourStep step, Dictionary<FrameworkElement, Rect> bounds, double x, double y)
+    {
+        var courses = new List<Rect>();
+        for (var index = 0; index < step.Annotations.Count && index < _presenters.Count; index++)
+        {
+            var annotation = step.Annotations[index];
+            if (annotation.Source is not { } source) continue;
+            var presenter = _presenters[index];
+            var course = presenter.Course;
+            for (var point = 1; point < course.Count; point++)
+                courses.Add(Shift(Inflate(new Rect(course[point - 1], course[point]), presenter.CourseThickness / 2 + 4), x, y));
+            // Without its own target, a connector ends at the step target.
+            var end = annotation.Target is { } target ? bounds[target] : TargetBounds;
+            if (course.Count > 0 && RouteZone(annotation, bounds[source], end) is { } zone)
+                courses.Add(Shift(zone, x, y));
+        }
+        return courses;
+    }
+
+    // Beyond the route limit, between the centers of both ends, up to the farther end.
+    private Rect? RouteZone(DaisyTourAnnotation annotation, Rect source, Rect target)
+    {
+        if (RouteLimitFor(annotation) is not { } limit)
+            return null;
+        var a = new Point(source.X + source.Width / 2, source.Y + source.Height / 2);
+        var b = new Point(target.X + target.Width / 2, target.Y + target.Height / 2);
+        var value = limit.Value;
+        return limit.Side switch
+        {
+            DaisyTourRouteSide.Above when Math.Max(a.Y, b.Y) > value =>
+                new Rect(new Point(Math.Min(a.X, b.X), value), new Point(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y))),
+            DaisyTourRouteSide.Below when Math.Min(a.Y, b.Y) < value =>
+                new Rect(new Point(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y)), new Point(Math.Max(a.X, b.X), value)),
+            DaisyTourRouteSide.LeftOf when Math.Max(a.X, b.X) > value =>
+                new Rect(new Point(value, Math.Min(a.Y, b.Y)), new Point(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y))),
+            DaisyTourRouteSide.RightOf when Math.Min(a.X, b.X) < value =>
+                new Rect(new Point(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y)), new Point(value, Math.Max(a.Y, b.Y))),
+            _ => null
+        };
+    }
+
+    private bool Unavailable(Session session, DaisyTourAnnotation annotation, FrameworkElement endpoint)
+    {
+        Close(session, DaisyTourCloseReason.TargetUnavailable, endpoint, annotation.Id);
+        return false;
+    }
+
+    private void UpdateAnnotations(DaisyTourStep step, Dictionary<FrameworkElement, Rect> bounds)
+    {
+        var definitions = step.Annotations.Count == 0 ? new[] { _defaultAnnotation } : step.Annotations.ToArray();
+        if (_presenters.Count != definitions.Length || _annotations.Children.Count != definitions.Length)
+        {
+            _presenters.Clear();
+            _annotations.Children.Clear();
+            foreach (var _ in definitions)
+            {
+                var presenter = new DaisyTourAnnotationPresenter();
+                _presenters.Add(presenter);
+                _annotations.Children.Add(presenter);
+            }
+        }
+        for (var index = 0; index < definitions.Length; index++)
+        {
+            var annotation = definitions[index];
+            var presenter = _presenters[index];
+            presenter.Width = _surface.Width;
+            presenter.Height = _surface.Height;
+            var foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+            var scale = Size switch
+            {
+                DaisySize.ExtraSmall => 0.8, DaisySize.Small => 0.9, DaisySize.Large => 1.15, DaisySize.ExtraLarge => 1.3, _ => 1
+            };
+            var end = annotation.Target is { } target ? bounds[target] : TargetBounds;
+            var kind = DaisyTourAnnotationPresenter.ResolveKind(annotation, AnnotationDefaults, step.AnnotationDefaults);
+            var source = annotation.Source is { } start ? bounds[start] : CardBounds;
+            if (kind != DaisyTourAnnotationKind.Custom)
+            {
+                // Connectors and tails start and end at the highlight frame instead of crossing it.
+                var frame = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness / 2;
+                end = Inflate(end, frame);
+                if (annotation.Source is not null) source = Inflate(source, frame);
+            }
+            if (kind == DaisyTourAnnotationKind.Custom)
+                source = MarkerBounds(annotation.Source is null ? end : source);
+            presenter.WidthLimit = double.PositiveInfinity;
+            if (annotation.Source is null && kind is DaisyTourAnnotationKind.Cloud or DaisyTourAnnotationKind.SpeechBubble)
+                source = PlaceSurface(presenter, annotation, step, end, bounds.Values, foreground, scale);
+            presenter.Update(annotation, source, end,
+                DaisyResourceLookup.GetBrush("DaisyPrimaryBrush"), DaisyResourceLookup.GetBrush("DaisyBase100Brush"),
+                foreground, AnnotationDefaults, step.AnnotationDefaults, scale, _card.FlowDirection, RouteLimitFor(annotation));
+        }
+    }
+
+    // Surfaces go beside their target in one of eight directions. Without a fitting direction,
+    // the surface narrows in steps down to its minimum width before it is clamped into view.
+    private Rect PlaceSurface(DaisyTourAnnotationPresenter presenter, DaisyTourAnnotation annotation, DaisyTourStep step,
+        Rect target, IEnumerable<Rect> highlighted, Brush foreground, double scale)
+    {
+        var frame = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness;
+        var highlights = highlighted.Select(rect => Inflate(rect, frame)).ToArray();
+        var viewport = new Size(_visibleArea.Width, _visibleArea.Height);
+        var (dx, dy) = (_visibleArea.X, _visibleArea.Y);
+        var visibleTarget = Shift(target, -dx, -dy);
+        var card = Shift(CardBounds, -dx, -dy);
+        highlights = Array.ConvertAll(highlights, highlight => Shift(highlight, -dx, -dy));
+        var rightToLeft = _card.FlowDirection == FlowDirection.RightToLeft;
+        for (var limit = double.PositiveInfinity; ; )
+        {
+            presenter.WidthLimit = limit;
+            var measured = presenter.MeasureSurface(annotation, foreground, AnnotationDefaults, step.AnnotationDefaults, scale, _card.FlowDirection);
+            var placed = DaisyTourLayout.PlaceAnnotation(visibleTarget, card, viewport, measured, highlights,
+                presenter.PlacementDirection, rightToLeft, out var direction);
+            if (direction >= 0)
+                presenter.PlacementDirection = direction;
+            // The limit falls strictly, so content with a fixed width ends the search as well.
+            limit = Math.Min(limit, measured.Width) * 0.8;
+            if (direction >= 0 || limit < 80 * scale)
+                return Shift(placed, dx, dy);
+        }
+    }
+
+    // A custom marker is centered on its anchor. An ellipse inscribed in this box
+    // encloses the anchor's complete highlight, including its corners.
+    private Rect MarkerBounds(Rect anchor)
+    {
+        var margin = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness;
+        var width = (anchor.Width + 2 * margin) * Math.Sqrt(2);
+        var height = (anchor.Height + 2 * margin) * Math.Sqrt(2);
+        return new Rect(anchor.X + anchor.Width / 2 - width / 2, anchor.Y + anchor.Height / 2 - height / 2, width, height);
+    }
+
+    // A limit control that cannot be measured leaves the connector unrestricted.
+    private DaisyTourRouteLimit? RouteLimitFor(DaisyTourAnnotation annotation)
+    {
+        var side = annotation.RouteLimitSide;
+        if (side == DaisyTourRouteSide.None)
+            return null;
+        if (annotation.RouteLimit is not { } element)
+            return double.IsFinite(annotation.RouteLimitCoordinate) ? new DaisyTourRouteLimit(side, annotation.RouteLimitCoordinate) : null;
+        if (!DaisyTourLayout.TryBounds(element, _surface, out var bounds))
+            return null;
+        var margin = double.IsFinite(annotation.RouteLimitMargin) ? Math.Max(0, annotation.RouteLimitMargin) : 12;
+        return new DaisyTourRouteLimit(side, side switch
+        {
+            DaisyTourRouteSide.Above => bounds.Top - margin,
+            DaisyTourRouteSide.Below => bounds.Bottom + margin,
+            DaisyTourRouteSide.LeftOf => bounds.Left - margin,
+            _ => bounds.Right + margin
+        });
+    }
+
+    private static Rect Shift(Rect rect, double x, double y) => new(rect.X + x, rect.Y + y, rect.Width, rect.Height);
+
+    private static Rect Inflate(Rect rect, double margin) =>
+        new(rect.X - margin, rect.Y - margin, rect.Width + 2 * margin, rect.Height + 2 * margin);
+
+    private void BuildProgress(Session session)
+    {
+        var panel = new StackPanel { Orientation = Orientation.Horizontal };
+        _progressItems.Clear();
+        for (var index = 0; index < session.Steps.Length; index++)
+        {
+            var item = new DaisyStepItem { DataContent = (index + 1).ToString(CultureInfo.CurrentCulture), IsCompact = true };
+            _progressItems.Add(item);
+            panel.Children.Add(item);
+        }
+        _progress.Content = panel;
+        _progress.SelectedIndex = CurrentIndex;
+    }
+
+    private void RefreshPresentation()
+    {
+        if (_session is not { } session) return;
+        _surface.RequestedTheme = ActualTheme;
+        _surface.FlowDirection = FlowDirection.LeftToRight;
+        _card.FlowDirection = FloweryLocalization.Instance.IsRtl ? FlowDirection.RightToLeft : FlowDirection;
+        _progress.FlowDirection = FlowDirection.LeftToRight;
+        _card.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+        _card.BorderBrush = DaisyResourceLookup.GetBorderBrush();
+        var foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+        _title.Foreground = _description.Foreground = _count.Foreground = foreground;
+        _outline.Stroke = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
+        _backdrop.Fill = new SolidColorBrush(Color.FromArgb(170, 0, 0, 0));
+        _back.Content = BackText ?? FloweryLocalization.GetStringInternal("Tour_Back");
+        _skip.Content = SkipText ?? FloweryLocalization.GetStringInternal("Tour_Skip");
+        _next.Content = CurrentIndex == session.Steps.Length - 1
+            ? FinishText ?? FloweryLocalization.GetStringInternal("Tour_Finish")
+            : NextText ?? FloweryLocalization.GetStringInternal("Tour_Next");
+        _back.IsEnabled = !session.Busy && CurrentIndex > 0;
+        _next.IsEnabled = !session.Busy;
+        _back.Size = _skip.Size = _next.Size = _progress.Size = Size;
+        _title.FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.SectionHeader, Size);
+        _description.FontSize = _count.FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.Primary, Size);
+        if (CurrentStep is { } step)
+        {
+            _title.Text = step.Title;
+            _description.Text = step.Description;
+            _customContent.ContentTemplate = step.ContentTemplate;
+            _customContent.Content = step.ContentTemplate is null ? null : step;
+            _count.Text = string.Format(CultureInfo.CurrentCulture, FloweryLocalization.GetStringInternal("Tour_StepCount"), CurrentIndex + 1, session.Steps.Length);
+            var descriptions = step.Annotations.Select(annotation => annotation.Text).Where(text => !string.IsNullOrWhiteSpace(text));
+            AutomationProperties.SetName(_card, $"{step.Title}. {step.Description}. {_count.Text}. {string.Join(". ", descriptions)}");
+        }
+        QueueGeometry();
+    }
+
+    private void LayoutCard()
+    {
+        var width = Math.Max(1, Math.Min(480, _visibleArea.Width - 24));
+        _card.Width = width;
+        _card.MaxHeight = Math.Max(1, _visibleArea.Height - 24);
+        _cardLayout.Padding = new Thickness(width < 300 ? 12 : 20);
+        _textScroll.MaxHeight = Math.Max(24, _visibleArea.Height * 0.38);
+        _progressScroll.MaxWidth = Math.Max(1, width - 40);
+        _progressScroll.Visibility = width >= 240 ? Visibility.Visible : Visibility.Collapsed;
+        // Numbered DaisySteps remain at the selected size and can scroll horizontally.
+        var vertical = width < 340 || Size == DaisySize.ExtraLarge;
+        if (_verticalButtons == vertical) return;
+        _verticalButtons = vertical;
+        _buttons.ColumnDefinitions.Clear();
+        _buttons.RowDefinitions.Clear();
+        for (var index = 0; index < 3; index++)
+        {
+            if (vertical) _buttons.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            else _buttons.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            var button = (FrameworkElement)_buttons.Children[index];
+            Grid.SetRow(button, vertical ? index : 0);
+            Grid.SetColumn(button, vertical ? 0 : index);
+        }
+    }
+
+    private void ShowCurrentIndicator()
+    {
+        if (CurrentIndex >= 0 && CurrentIndex < _progressItems.Count)
+            _progressItems[CurrentIndex].StartBringIntoView(new BringIntoViewOptions { AnimationDesired = false, HorizontalAlignmentRatio = 0.5 });
+    }
+
+    private static PathGeometry RoundedRectangle(Rect rect, double requestedRadius)
+    {
+        var radius = Math.Clamp(double.IsFinite(requestedRadius) ? requestedRadius : 0, 0, Math.Min(rect.Width, rect.Height) / 2);
+        var figure = new PathFigure { StartPoint = new Point(rect.Left + radius, rect.Top), IsClosed = true, IsFilled = true };
+        figure.Segments.Add(new LineSegment { Point = new Point(rect.Right - radius, rect.Top) });
+        figure.Segments.Add(new QuadraticBezierSegment { Point1 = new Point(rect.Right, rect.Top), Point2 = new Point(rect.Right, rect.Top + radius) });
+        figure.Segments.Add(new LineSegment { Point = new Point(rect.Right, rect.Bottom - radius) });
+        figure.Segments.Add(new QuadraticBezierSegment { Point1 = new Point(rect.Right, rect.Bottom), Point2 = new Point(rect.Right - radius, rect.Bottom) });
+        figure.Segments.Add(new LineSegment { Point = new Point(rect.Left + radius, rect.Bottom) });
+        figure.Segments.Add(new QuadraticBezierSegment { Point1 = new Point(rect.Left, rect.Bottom), Point2 = new Point(rect.Left, rect.Bottom - radius) });
+        figure.Segments.Add(new LineSegment { Point = new Point(rect.Left, rect.Top + radius) });
+        figure.Segments.Add(new QuadraticBezierSegment { Point1 = new Point(rect.Left, rect.Top), Point2 = new Point(rect.Left + radius, rect.Top) });
+        var geometry = new PathGeometry();
+        geometry.Figures.Add(figure);
+        return geometry;
+    }
+
+    private void ResizeSurface()
+    {
+        if (_popup.XamlRoot is not { } root) return;
+        _surface.Width = root.Size.Width;
+        _surface.Height = root.Size.Height;
+        _annotations.Width = root.Size.Width;
+        _annotations.Height = root.Size.Height;
+    }
+
+    private void OnRootChanged(XamlRoot sender, XamlRootChangedEventArgs args)
+    {
+        if (CompositionVisualTree.GetConnectedRoot(this) != sender) { Cancel(); return; }
+        ResizeSurface();
+        if (_surface.Width <= 0 || _surface.Height <= 0) return;
+        QueueGeometry();
+    }
+
+    // Content that loads after placement, such as the progress items, can still change the card's size.
+    // Layout raises this before the frame renders, so the card is placed again without a visible jump.
+    private void OnCardSizeChanged(object sender, SizeChangedEventArgs args)
+    {
+        if (_session is { PendingStep: null } session && CurrentStep is not null &&
+            (Math.Abs(args.NewSize.Height - CardBounds.Height) > 0.5 || Math.Abs(args.NewSize.Width - CardBounds.Width) > 0.5))
+            UpdateGeometry(session);
+    }
+
+    private void OnAppWindowChanged(AppWindow sender, AppWindowChangedEventArgs args)
+    {
+        if (args.DidPositionChange || args.DidSizeChange) QueueGeometry();
+    }
+
+    private void OnCultureChanged(object? sender, string culture)
+    {
+        if (DispatcherQueue.HasThreadAccess) RefreshPresentation();
+        else DispatcherQueue.TryEnqueue(RefreshPresentation);
+    }
+
+    private void OnGettingFocus(object? sender, GettingFocusEventArgs args)
+    {
+        if (_session is not null && args.NewFocusedElement is DependencyObject element &&
+            element is FrameworkElement { XamlRoot: var root } && root == XamlRoot &&
+            !DaisyTourLayout.IsDescendant(element, _surface))
+            args.TrySetNewFocusedElement(_session.Busy ? _surface : _next);
+    }
+
+    private void OnSurfaceKeyDown(object sender, KeyRoutedEventArgs args)
+    {
+        if (args.Key == VirtualKey.Escape) { Skip(); args.Handled = true; }
+    }
+
+    private async void OnBack(object sender, RoutedEventArgs args) => await BackAsync();
+    private async void OnNext(object sender, RoutedEventArgs args) => await NextAsync();
+    private void OnSkip(object sender, RoutedEventArgs args) => Skip();
+    private void OnPopupClosed(object? sender, object args)
+    {
+        // Closed is queued by WinUI. Replay can reopen the popup before that event arrives.
+        if (!_popup.IsOpen) Cancel();
+    }
+    private void OnStepsChanged(object? sender, NotifyCollectionChangedEventArgs args) => Cancel();
+
+    private void DispatchCancel(Session session)
+    {
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            if (ReferenceEquals(_session, session)) Close(session, DaisyTourCloseReason.Cancelled);
+        }
+        else DispatcherQueue.TryEnqueue(() => { if (ReferenceEquals(_session, session)) Close(session, DaisyTourCloseReason.Cancelled); });
+    }
+
+    private void Close(Session session, DaisyTourCloseReason reason, FrameworkElement? target = null, string? annotationId = null, Exception? error = null)
+    {
+        if (!ReferenceEquals(_session, session)) return;
+        var stepId = (session.PendingStep ?? CurrentStep)?.Id;
+        _session = null;
+        _updateQueued = false;
+        try { session.Cancellation.Cancel(); }
+        catch (AggregateException cancellationError) { error ??= cancellationError; }
+        session.Registration.Dispose();
+        ClearStepObservers(session);
+        foreach (var unsubscribe in session.Unsubscribe) unsubscribe();
+        session.Unsubscribe.Clear();
+        _popup.IsOpen = false;
+        _annotations.Children.Clear();
+        _presenters.Clear();
+        _progressItems.Clear();
+        _backdrop.Data = _outline.Data = null;
+        _customContent.Content = null;
+        _progress.Content = null;
+        CurrentIndex = -1;
+        CurrentStep = null;
+        TargetBounds = CardBounds = _previousStepCard = default;
+        session.PendingStep = null;
+        session.Cancellation.Dispose();
+        if (session.PreviousFocus?.TryGetTarget(out var previous) == true && previous is Control control &&
+            CompositionVisualTree.GetConnectedRoot(control) is not null && control.IsEnabled && control.Visibility == Visibility.Visible)
+            control.Focus(FocusState.Programmatic);
+        NotifyState();
+        Closed?.Invoke(this, new(reason, stepId, annotationId, target, error));
+    }
+
+    private void NotifyState()
+    {
+        PropertyChanged?.Invoke(this, new(nameof(IsOpen)));
+        PropertyChanged?.Invoke(this, new(nameof(CurrentIndex)));
+        PropertyChanged?.Invoke(this, new(nameof(CurrentStep)));
+    }
+
+    private void VerifyAccess()
+    {
+        if (!DispatcherQueue.HasThreadAccess) throw new InvalidOperationException("Tour operations require the WinUI dispatcher thread.");
+    }
+
+    private void AddRow(FrameworkElement element, int row)
+    {
+        Grid.SetRow(element, row);
+        _cardLayout.Children.Add(element);
+    }
+}

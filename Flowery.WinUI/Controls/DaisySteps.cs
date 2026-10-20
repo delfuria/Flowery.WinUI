@@ -29,9 +29,11 @@ namespace Flowery.Controls
         private StackPanel? _itemsPanel;
         private readonly List<DaisyStepItem> _stepItems = [];
         private bool _isUpdatingFromJson;
+        private bool _collectQueued;
 
         public DaisySteps()
         {
+            DefaultStyleKey = typeof(DaisySteps);
             IsTabStop = false;
         }
 
@@ -43,15 +45,31 @@ namespace Flowery.Controls
             // and the new content isn't our own internal items panel.
             if (!_isUpdatingFromJson && newContent != null && !ReferenceEquals(newContent, _itemsPanel))
             {
-                CollectAndDisplay();
+                QueueCollectAndDisplay();
             }
+        }
+
+        private void QueueCollectAndDisplay()
+        {
+            // Replacing Content inside its notification leaves WinUI's presenter
+            // holding the emptied source panel. Finish the native update first.
+            if (!IsLoaded || _collectQueued)
+                return;
+            _collectQueued = true;
+            if (!DispatcherQueue.TryEnqueue(() =>
+            {
+                _collectQueued = false;
+                if (IsLoaded && Content is Panel && !ReferenceEquals(Content, _itemsPanel))
+                    CollectAndDisplay();
+            }))
+                _collectQueued = false;
         }
 
         protected override void OnLoaded()
         {
             base.OnLoaded();
 
-            if (_itemsPanel != null)
+            if (_itemsPanel != null && ReferenceEquals(Content, _itemsPanel))
             {
                 ApplyTheme();
                 return;
@@ -315,6 +333,7 @@ namespace Flowery.Controls
 
         public DaisyStepItem()
         {
+            DefaultStyleKey = typeof(DaisyStepItem);
             IsTabStop = false;
             IsEnabledChanged += (_, _) => RebuildVisual();
         }
@@ -436,6 +455,7 @@ namespace Flowery.Controls
 
         #region Internal Properties
         internal bool IsFirst { get; set; }
+        internal bool IsCompact { get; set; }
         internal bool IsLast { get; set; }
         internal int Index { get; set; }
         internal Orientation Orientation { get; set; } = Orientation.Horizontal;
@@ -536,8 +556,10 @@ namespace Flowery.Controls
                 Grid.SetColumn(_labelBlock, 0);
                 Grid.SetColumnSpan(_labelBlock, 3);
                 _rootGrid.Children.Add(_labelBlock);
+                // Compact indicators have no label; an empty label row would still add its height.
+                if (IsCompact) _labelBlock.Visibility = Visibility.Collapsed;
 
-                _rootGrid.MinWidth = GetMinStepSize(Size);
+                _rootGrid.MinWidth = IsCompact ? indSize + 8 : GetMinStepSize(Size);
             }
             else
             {

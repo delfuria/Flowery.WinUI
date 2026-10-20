@@ -1,0 +1,77 @@
+<local:ScrollableExamplePage
+    x:Class="Flowery.WinUI.Gallery.Examples.TourExamples"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:daisy="using:Flowery.Controls"
+    xmlns:local="using:Flowery.WinUI.Gallery.Examples">
+    <Grid DataContext="{x:Bind Localization, Mode=OneWay}">
+        <!-- The page header scrolls too, so tour targets remain reachable in short windows. -->
+        <ScrollViewer x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <StackPanel Margin="24,16,24,0" Spacing="12">
+                    <local:SectionHeader SectionId="tour" Title="DaisyTour" />
+                    <TextBlock Text="{Binding [Gallery_Tour_Description]}" TextWrapping="Wrap"
+                               Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                    <daisy:WrapPanel Orientation="Horizontal" Spacing="8">
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Start]}" Variant="Primary" Click="StartTour_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Arrows]}" Click="Arrows_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Lines]}" Click="Lines_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Bubbles]}" Click="Bubbles_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Custom]}" Click="Custom_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Regions]}" Click="Regions_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Paths]}" Click="Paths_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_RouteLimit]}" Click="RouteLimit_Click" />
+                    </daisy:WrapPanel>
+                    <ComboBox x:Name="CardPositionSelector" Header="{Binding [Gallery_Tour_CardPosition]}" MinWidth="200"
+                              SelectionChanged="CardPosition_SelectionChanged" />
+                </StackPanel>
+                <StackPanel Margin="24" Spacing="24">
+                    <!-- Connector demos need visible distance between both targets. -->
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <daisy:DaisyButton x:Name="PrimaryTarget" Content="{Binding [Gallery_Tour_Target]}"
+                                           Variant="Primary" MinWidth="220" />
+                        <daisy:DaisyButton x:Name="RelatedTarget" Grid.Column="2" Content="{Binding [Gallery_Tour_Related]}"
+                                           Variant="Secondary" MinWidth="220" />
+                    </Grid>
+                    <Border Height="170" Background="{ThemeResource DaisyBase200Brush}" CornerRadius="12">
+                        <Grid>
+                            <TextBlock Text="{Binding [Gallery_Tour_ScrollTitle]}" Margin="0,12,0,0" VerticalAlignment="Top"
+                                       HorizontalAlignment="Center" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                            <!-- Route limit demos keep this area free between the lower left target and the targets on the right. -->
+                            <Border x:Name="KeepClearArea" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,66"
+                                    Padding="12,6" CornerRadius="8" Background="{ThemeResource DaisyBase300Brush}">
+                                <TextBlock Text="{Binding [Gallery_Tour_KeepClear]}" Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                            </Border>
+                            <!-- Below the fixed coordinate, so that the coordinate demo's course bridges over the area. -->
+                            <daisy:DaisyButton x:Name="LimitTarget" Content="{Binding [Gallery_Tour_LimitTarget]}" Variant="Secondary"
+                                               HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,16,4" />
+                        </Grid>
+                    </Border>
+                    <ScrollViewer Height="210" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="24" Padding="16" Background="{ThemeResource DaisyBase200Brush}">
+                            <Border Height="260" />
+                            <daisy:DaisyButton x:Name="NestedTarget" Content="{Binding [Gallery_Tour_NestedTarget]}"
+                                               Variant="Accent" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </ScrollViewer>
+                    <TabView x:Name="DemoTabs" IsAddTabButtonVisible="False" Height="240">
+                        <TabViewItem x:Name="OverviewTab" Header="{Binding [Gallery_Tour_Overview]}" IsClosable="False">
+                            <TextBlock Margin="16" Text="{Binding [Gallery_Tour_TabHint]}" TextWrapping="Wrap"
+                                       Foreground="{ThemeResource DaisyBaseContentBrush}" />
+                        </TabViewItem>
+                        <TabViewItem x:Name="DetailsTab" Header="{Binding [Gallery_Tour_Details]}" IsClosable="False" />
+                    </TabView>
+                    <daisy:DaisyButton x:Name="RegionTarget" Content="{Binding [Gallery_Tour_RegionTarget]}"
+                                       Variant="Accent" HorizontalAlignment="Right" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+        <daisy:DaisyTour x:Name="Tour">
+            <daisy:DaisyTour.Steps>
+                <daisy:DaisyTourStep Id="welcome" Target="{x:Bind PrimaryTarget}" />
+                <daisy:DaisyTourStep Id="nested-scroll" Target="{x:Bind NestedTarget}" />
+                <daisy:DaisyTourStep Id="deferred-tab" />
+            </daisy:DaisyTour.Steps>
+        </daisy:DaisyTour>
+    </Grid>
+</local:ScrollableExamplePage>

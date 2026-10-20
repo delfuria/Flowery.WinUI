@@ -450,6 +450,13 @@ Common_Clear
 Common_Delete
 Common_ConfirmDelete
 Common_Disconnect
+
+# Guided tour
+Tour_Next
+Tour_Back
+Tour_Skip
+Tour_Finish
+Tour_StepCount
 ```
 
 ---

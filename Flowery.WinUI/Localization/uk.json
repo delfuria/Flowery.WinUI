@@ -1,4 +1,9 @@
 {
+  "Tour_Next": "Далі",
+  "Tour_Back": "Назад",
+  "Tour_Skip": "Пропустити",
+  "Tour_Finish": "Завершити",
+  "Tour_StepCount": "Крок {0} із {1}",
   "Size_ExtraSmall": "Дуже малий",
   "Sidebar_Favorite": "Обране",
   "Common_Selected": "Вибрано",

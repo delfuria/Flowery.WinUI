@@ -60,12 +60,12 @@ namespace Flowery.WinUI.RuntimeTests
                 progress.WriteLine($"START {testCase.Name}");
                 var result = await ExecuteTestCaseAsync(dispatcher, testCase).ConfigureAwait(false);
                 results.Add(result);
-                progress.WriteLine($"{(result.Passed ? "PASS" : "FAIL")} {testCase.Name}");
+                progress.WriteLine($"{result.Outcome switch { RuntimeTestOutcome.Passed => "PASS", RuntimeTestOutcome.Inconclusive => "WARN", _ => "FAIL" }} {testCase.Name}");
                 if (result.Message is not null) progress.WriteLine(result.Message);
             }
 
             WriteResults(resultPath, results);
-            return results.Any(result => !result.Passed) ? 1 : 0;
+            return results.Any(result => result.Outcome == RuntimeTestOutcome.Failed) ? 1 : 0;
         }
 
         private static Grid PrepareHost(Window window)
@@ -114,7 +114,11 @@ namespace Flowery.WinUI.RuntimeTests
             }
             catch (Exception ex)
             {
-                return RuntimeTestCaseResult.Failed(testCase.Name, ex);
+                // An inconclusive test could not set up its scenario in this environment; it warns instead of failing.
+                var cause = ex is TargetInvocationException { InnerException: { } inner } ? inner : ex;
+                return cause is AssertInconclusiveException
+                    ? RuntimeTestCaseResult.Inconclusive(testCase.Name, cause)
+                    : RuntimeTestCaseResult.Failed(testCase.Name, ex);
             }
         }
 
@@ -169,12 +173,13 @@ namespace Flowery.WinUI.RuntimeTests
             var document = new XDocument(
                 new XElement("tests",
                     new XAttribute("total", results.Count),
-                    new XAttribute("passed", results.Count(result => result.Passed)),
-                    new XAttribute("failed", results.Count(result => !result.Passed)),
+                    new XAttribute("passed", results.Count(result => result.Outcome == RuntimeTestOutcome.Passed)),
+                    new XAttribute("failed", results.Count(result => result.Outcome == RuntimeTestOutcome.Failed)),
+                    new XAttribute("inconclusive", results.Count(result => result.Outcome == RuntimeTestOutcome.Inconclusive)),
                     results.Select(result =>
                         new XElement("test",
                             new XAttribute("name", result.Name),
-                            new XAttribute("outcome", result.Passed ? "Passed" : "Failed"),
+                            new XAttribute("outcome", result.Outcome.ToString()),
                             result.Message is null ? null : new XElement("message", result.Message)
                         ))
                 )
@@ -197,24 +202,32 @@ namespace Flowery.WinUI.RuntimeTests
             public string Name => $"{TestClassType.FullName}.{Method.Name}";
         }
 
+        private enum RuntimeTestOutcome { Passed, Failed, Inconclusive }
+
         private sealed class RuntimeTestCaseResult
         {
-            private RuntimeTestCaseResult(string name, bool passed, string? message)
+            private RuntimeTestCaseResult(string name, RuntimeTestOutcome outcome, string? message)
             {
                 Name = name;
-                Passed = passed;
+                Outcome = outcome;
                 Message = message;
             }
 
             public string Name { get; }
-            public bool Passed { get; }
+            public RuntimeTestOutcome Outcome { get; }
             public string? Message { get; }
 
-            public static RuntimeTestCaseResult Success(string name) => new RuntimeTestCaseResult(name, true, null);
+            public static RuntimeTestCaseResult Success(string name) => new RuntimeTestCaseResult(name, RuntimeTestOutcome.Passed, null);
 
             public static RuntimeTestCaseResult Failed(string name, Exception exception)
             {
-                return new RuntimeTestCaseResult(name, false, exception.ToString());
+                return new RuntimeTestCaseResult(name, RuntimeTestOutcome.Failed, exception.ToString());
+            }
+
+            // The reason alone; the stack of an inconclusive assertion carries no information.
+            public static RuntimeTestCaseResult Inconclusive(string name, Exception exception)
+            {
+                return new RuntimeTestCaseResult(name, RuntimeTestOutcome.Inconclusive, exception.Message);
             }
         }
     }

@@ -1,4 +1,9 @@
 {
+  "Tour_Next": "다음",
+  "Tour_Back": "뒤로",
+  "Tour_Skip": "건너뛰기",
+  "Tour_Finish": "완료",
+  "Tour_StepCount": "{1}단계 중 {0}단계",
   "Size_ExtraSmall": "아주 작은",
   "Sidebar_Favorite": "즐겨찾기",
   "Common_Selected": "선택됨",

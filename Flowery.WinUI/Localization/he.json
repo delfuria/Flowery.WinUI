@@ -1,4 +1,9 @@
 {
+  "Tour_Next": "הבא",
+  "Tour_Back": "הקודם",
+  "Tour_Skip": "דלג",
+  "Tour_Finish": "סיום",
+  "Tour_StepCount": "שלב {0} מתוך {1}",
   "Size_ExtraSmall": "קטן במיוחד",
   "Sidebar_Favorite": "מועדף",
   "Common_Selected": "נבחר",

@@ -1,4 +1,9 @@
 {
+  "Tour_Next": "次へ",
+  "Tour_Back": "戻る",
+  "Tour_Skip": "スキップ",
+  "Tour_Finish": "完了",
+  "Tour_StepCount": "全 {1} ステップ中 {0} ステップ",
   "Size_ExtraSmall": "極小",
   "Sidebar_Favorite": "お気に入り",
   "Common_Selected": "選択済み",

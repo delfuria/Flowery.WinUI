@@ -251,6 +251,7 @@ See [Shader effects](llms-static/FloweryCarouselGL.md) for the native host API a
 - **Expandable Card** (`DaisyExpandableCard`): Card that expands to reveal secondary content.
 - **OTP Input** (`DaisyOtpInput`): Multi-slot verification-code input with auto-advance.
 - **Tag Picker** (`DaisyTagPicker`): Multi-select chip/tag picker with add/remove icons.
+- **Guided Tour** (`DaisyTour`): Localized, replayable tours with live target highlights and configurable arrows, connectors, clouds, and speech bubbles. See the [API and Gallery guide](llms-static/DaisyTour.md).
 
 ### Color Picker Suite
 

@@ -1,4 +1,9 @@
 {
+  "Tour_Next": "下一步",
+  "Tour_Back": "上一步",
+  "Tour_Skip": "跳过",
+  "Tour_Finish": "完成",
+  "Tour_StepCount": "第 {0} 步，共 {1} 步",
   "Size_ExtraSmall": "超小",
   "Sidebar_Favorite": "收藏",
   "Common_Selected": "已选择",
