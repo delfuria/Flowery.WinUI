@@ -171,11 +171,15 @@ step.Annotations.Add(new DaisyTourAnnotation
 ## Connector paths
 
 Connectors start and end at the outer edge of each highlight frame.
-For `Curved`, `Elbow`, and `Bezier` paths, automatic anchors face the path's first and last direction, so a bend does not cross its own control.
+Automatic anchors dock at the facing side centers along the main direction.
+When the controls overlap on that axis, the other axis is used.
+`Elbow` paths leave and enter perpendicular to those sides.
+When a course would run back through its own control, that anchor faces the course's first direction instead.
 Arrowheads and block bodies are filled with `Fill`, or with the stroke color when `Fill` is not set.
 `Curved` bends by `Curvature`, a fraction of the connector length that defaults to 0.25.
 `Elbow` uses right angles; `CornerRadius` rounds both corners.
-`SCurve` leaves each anchor perpendicular to its edge; `Curvature` sets the bend and defaults to 0.5.
+`SCurve` leaves each anchor perpendicular to its edge.
+Its `Curvature`, 0.5 by default, scales each control's reach by the distance along that edge's direction.
 `Bezier` uses two control points in connector coordinates.
 (0,0) is the start, (1,0) is the end, and positive Y bends to the same side as a positive `Curvature`.
 A control point without both coordinates uses the `SCurve` control point.
@@ -189,6 +193,23 @@ A geometry without a path figure, such as an `EllipseGeometry`, meets the anchor
 <daisy:DaisyTourAnnotation Source="{x:Bind ThemeSelector}" Target="{x:Bind SaveButton}"
                            Path="Bezier" ControlPoint1X="0.2" ControlPoint1Y="-0.6"
                            ControlPoint2X="0.8" ControlPoint2Y="0.6" />
+```
+
+## Route limits
+
+A connector can keep an area between its two ends clear.
+`RouteLimitSide` is `Above`, `Below`, `LeftOf`, or `RightOf` and names the side of a limit line that the course stays on.
+`RouteLimit` places that line `RouteLimitMargin` (12 DIP by default) beyond the matching edge of a control, and the line follows that control.
+Without `RouteLimit`, `RouteLimitCoordinate` sets a fixed window coordinate in DIP: y for `Above` and `Below`, x for `LeftOf` and `RightOf`.
+When an end lies beyond the line, the course leaves that end perpendicular to the line, crosses on the allowed side, and returns to the other end.
+`Straight` and `Elbow` paths use right-angle corners rounded by `CornerRadius`; curve paths use smooth corners.
+When both ends are on the allowed side, the path keeps its shape and curves do not bend across the line.
+The ends never belong to the kept-clear area, and a limit control that cannot be measured is ignored.
+
+```xml
+<daisy:DaisyTourAnnotation Source="{x:Bind SaveButton}" Target="{x:Bind PublishButton}"
+                           Path="Elbow" CornerRadius="12"
+                           RouteLimit="{x:Bind StatusBadge}" RouteLimitSide="Above" />
 ```
 
 ## Surface annotations
@@ -206,6 +227,18 @@ Without `Width` and `Height`, its box is sized so that an inscribed ellipse encl
 
 The host uses the existing Daisy theme, motion policy, and five `DaisySize` values.
 `HighlightPadding` defaults to 6 DIP, and `HighlightCornerRadius` defaults to 8 DIP.
+
+`DaisyTour.CardPosition` places the step card.
+`Target`, the default, places it beside the highlighted controls and honors each step's `Placement`.
+`TopLeft`, `Top`, `TopRight`, `Left`, `Center`, `Right`, `BottomLeft`, `Bottom`, and `BottomRight` keep it at that window position, 12 DIP from the edges.
+These positions are physical and do not mirror in right-to-left languages.
+The card and annotation surfaces use the part of the window that its display's work area shows, so a window that extends below the taskbar or off the screen keeps them visible.
+`DaisyTourStep.CardPosition` overrides the tour value for one step; `Default` inherits it.
+A fixed position that would cover the highlight slides along its own edge until the highlight is clear: `Left` and `Right` vertically, `Top` and `Bottom` horizontally, corners and `Center` along either axis.
+When that edge has no room, the card goes beside the target as with `Target`.
+A card that would cover a connector course between two controls, or the area its route limit keeps clear, moves away.
+It keeps its position from the previous step when that is still clear; otherwise it follows the same rules, and beside the target it may also move away from the target.
+When no spot is clear, it stays.
 `NextText`, `BackText`, `SkipText`, and `FinishText` provide optional application overrides.
 Without overrides, the host uses the 12 built-in translations.
 `Tour_StepCount` supplies the parameterized step announcement.

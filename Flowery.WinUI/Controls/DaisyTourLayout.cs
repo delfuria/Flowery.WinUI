@@ -1,12 +1,58 @@
-﻿using System.Threading;
+﻿using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Flowery.Composition;
+using Microsoft.UI;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Windowing;
+using Windows.Graphics;
 
 namespace Flowery.Controls;
 
-internal static class DaisyTourLayout
+internal static partial class DaisyTourLayout
 {
+    /// <summary>
+    /// The part of the window content that its display's work area shows, in content DIP. A window that
+    /// extends below the taskbar or off the screen must not receive the card or annotations there.
+    /// </summary>
+    internal static Rect VisibleArea(XamlRoot root)
+    {
+        var content = new Rect(0, 0, root.Size.Width, root.Size.Height);
+        if (root.ContentIslandEnvironment is not { AppWindowId.Value: not 0 } environment ||
+            DisplayArea.GetFromWindowId(environment.AppWindowId, DisplayAreaFallback.Nearest) is not { } display)
+            return content;
+        var origin = new NativePoint();
+        return ClientToScreen(Win32Interop.GetWindowFromWindowId(environment.AppWindowId), ref origin)
+            ? VisibleArea(content, origin.X, origin.Y, display.WorkArea, root.RasterizationScale)
+            : content;
+    }
+
+    /// <param name="content">The window content in DIP.</param>
+    /// <param name="clientX">The content's left edge on the screen in physical pixels.</param>
+    /// <param name="clientY">The content's top edge on the screen in physical pixels.</param>
+    /// <param name="workArea">The display's work area in physical pixels.</param>
+    /// <param name="scale">The content's rasterization scale.</param>
+    internal static Rect VisibleArea(Rect content, int clientX, int clientY, RectInt32 workArea, double scale)
+    {
+        if (!(scale > 0))
+            return content;
+        var visible = new Rect((workArea.X - clientX) / scale, (workArea.Y - clientY) / scale, workArea.Width / scale, workArea.Height / scale);
+        visible.Intersect(content);
+        // A window that is mostly outside its display keeps its full content area.
+        return visible.IsEmpty || visible.Width < content.Width / 4 || visible.Height < content.Height / 4 ? content : visible;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativePoint
+    {
+        public int X;
+        public int Y;
+    }
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool ClientToScreen(nint window, ref NativePoint point);
+
     internal static string Describe(FrameworkElement? target, FrameworkElement host)
     {
         if (target is null) return "No target was supplied.";
@@ -147,27 +193,161 @@ internal static class DaisyTourLayout
 
     internal static Rect Place(Rect target, Size card, Size viewport, DaisyTourPlacement preferred)
     {
-        const double gap = 32;
         const double margin = 12;
+        var candidates = SideCandidates(target, card);
+        foreach (var side in SideOrder(preferred))
+        {
+            if (candidates.TryGetValue(side, out var rect) && InView(rect, viewport))
+                return rect;
+        }
+        var fallback = candidates[preferred == DaisyTourPlacement.Auto ? DaisyTourPlacement.Bottom : preferred];
+        return new Rect(Math.Clamp(fallback.X, margin, Math.Max(margin, viewport.Width - card.Width - margin)),
+            Math.Clamp(fallback.Y, margin, Math.Max(margin, viewport.Height - card.Height - margin)), card.Width, card.Height);
+    }
+
+    private static Dictionary<DaisyTourPlacement, Rect> SideCandidates(Rect target, Size card)
+    {
+        const double gap = 32;
         var centeredX = target.X + (target.Width - card.Width) / 2;
         var centeredY = target.Y + (target.Height - card.Height) / 2;
-        var candidates = new Dictionary<DaisyTourPlacement, Rect>
+        return new Dictionary<DaisyTourPlacement, Rect>
         {
             [DaisyTourPlacement.Bottom] = new(centeredX, target.Bottom + gap, card.Width, card.Height),
             [DaisyTourPlacement.Top] = new(centeredX, target.Top - card.Height - gap, card.Width, card.Height),
             [DaisyTourPlacement.Right] = new(target.Right + gap, centeredY, card.Width, card.Height),
             [DaisyTourPlacement.Left] = new(target.Left - card.Width - gap, centeredY, card.Width, card.Height)
         };
-        var order = new[] { preferred, DaisyTourPlacement.Bottom, DaisyTourPlacement.Top, DaisyTourPlacement.Right, DaisyTourPlacement.Left };
-        foreach (var side in order.Distinct())
+    }
+
+    private static IEnumerable<DaisyTourPlacement> SideOrder(DaisyTourPlacement preferred) =>
+        new[] { preferred, DaisyTourPlacement.Bottom, DaisyTourPlacement.Top, DaisyTourPlacement.Right, DaisyTourPlacement.Left }.Distinct();
+
+    private static bool InView(Rect rect, Size viewport)
+    {
+        const double margin = 12;
+        return rect.X >= margin && rect.Y >= margin && rect.Right <= viewport.Width - margin && rect.Bottom <= viewport.Height - margin;
+    }
+
+    internal static bool Covers(Rect card, IEnumerable<Rect> obstacles)
+    {
+        foreach (var obstacle in obstacles)
         {
-            if (candidates.TryGetValue(side, out var rect) && rect.X >= margin && rect.Y >= margin &&
-                rect.Right <= viewport.Width - margin && rect.Bottom <= viewport.Height - margin)
-                return rect;
+            if (Overlap(card, obstacle) > 0) return true;
         }
-        var fallback = candidates[preferred == DaisyTourPlacement.Auto ? DaisyTourPlacement.Bottom : preferred];
-        return new Rect(Math.Clamp(fallback.X, margin, Math.Max(margin, viewport.Width - card.Width - margin)),
-            Math.Clamp(fallback.Y, margin, Math.Max(margin, viewport.Height - card.Height - margin)), card.Width, card.Height);
+        return false;
+    }
+
+    /// <summary>
+    /// Moves a card off connector courses; the obstacles are the highlighted targets, the courses, and the
+    /// areas their route limits keep clear. A fixed position slides along its own edge. Otherwise a previous
+    /// position that is still clear is kept; else the card goes beside the target: on a clear side, then
+    /// moved along or away from a side, then at the nearest clear spot in view. Null when nothing is clear.
+    /// </summary>
+    internal static Rect? AvoidObstacles(DaisyTourCardPosition position, DaisyTourPlacement preferred, Rect target,
+        Size card, Size viewport, IReadOnlyList<Rect> obstacles, Rect? previous = null)
+    {
+        if (position is not (DaisyTourCardPosition.Default or DaisyTourCardPosition.Target) &&
+            SlideStationary(position, card, viewport, obstacles) is { } stationary)
+            return stationary;
+        if (previous is { } kept && InView(kept, viewport) && !Covers(kept, obstacles))
+            return kept;
+        var candidates = SideCandidates(target, card);
+        var sides = SideOrder(preferred).Where(candidates.ContainsKey).ToList();
+        foreach (var side in sides)
+        {
+            if (InView(candidates[side], viewport) && !Covers(candidates[side], obstacles))
+                return candidates[side];
+        }
+        foreach (var side in sides)
+        {
+            if (Clear(candidates[side], viewport, obstacles, true, true, combined: true, side) is { } moved)
+                return moved;
+        }
+        var start = candidates[preferred == DaisyTourPlacement.Auto ? DaisyTourPlacement.Bottom : preferred];
+        return Clear(start, viewport, obstacles, true, true, combined: true);
+    }
+
+    // The nearest position clear of all obstacles. Candidate coordinates are the start, the view edges,
+    // and the positions just before and after each obstacle; without combined moves, only one axis changes.
+    // A side keeps the card on that side of its start: Top moves it only up, Left only left, and so on.
+    private static Rect? Clear(Rect start, Size viewport, IReadOnlyList<Rect> obstacles, bool horizontal, bool vertical,
+        bool combined = false, DaisyTourPlacement side = DaisyTourPlacement.Auto)
+    {
+        const double margin = 12;
+        const double gap = 12;
+        var xs = new List<double> { start.X };
+        var ys = new List<double> { start.Y };
+        foreach (var obstacle in obstacles)
+        {
+            if (horizontal) { xs.Add(obstacle.Left - gap - start.Width); xs.Add(obstacle.Right + gap); }
+            if (vertical) { ys.Add(obstacle.Top - gap - start.Height); ys.Add(obstacle.Bottom + gap); }
+        }
+        if (horizontal) { xs.Add(margin); xs.Add(viewport.Width - start.Width - margin); }
+        if (vertical) { ys.Add(margin); ys.Add(viewport.Height - start.Height - margin); }
+        var positions = new List<Point>();
+        foreach (var x in xs)
+        {
+            if (!combined) { positions.Add(new Point(x, start.Y)); continue; }
+            foreach (var y in ys) positions.Add(new Point(x, y));
+        }
+        if (!combined)
+        {
+            foreach (var y in ys) positions.Add(new Point(start.X, y));
+        }
+        Rect? best = null;
+        var distance = double.PositiveInfinity;
+        foreach (var position in positions)
+        {
+            var moved = Math.Abs(position.X - start.X) + Math.Abs(position.Y - start.Y);
+            if (moved >= distance || side switch
+                {
+                    DaisyTourPlacement.Top => position.Y > start.Y,
+                    DaisyTourPlacement.Bottom => position.Y < start.Y,
+                    DaisyTourPlacement.Left => position.X > start.X,
+                    DaisyTourPlacement.Right => position.X < start.X,
+                    _ => false
+                }) continue;
+            var candidate = new Rect(position.X, position.Y, start.Width, start.Height);
+            if (!InView(candidate, viewport) || Covers(candidate, obstacles)) continue;
+            best = candidate;
+            distance = moved;
+        }
+        return best;
+    }
+
+    /// <summary>
+    /// Places the card at a fixed window position; null requests target-relative placement. A card that
+    /// would cover the highlighted targets slides along its own edge until they are clear: Left and Right
+    /// vertically, Top and Bottom horizontally, corners and Center along either axis. Without room on that
+    /// edge, the card goes beside the target.
+    /// </summary>
+    internal static Rect? PlaceStationary(DaisyTourCardPosition position, Size card, Size viewport, Rect highlighted) =>
+        position is DaisyTourCardPosition.Default or DaisyTourCardPosition.Target
+            ? null
+            : SlideStationary(position, card, viewport, [highlighted]);
+
+    // The smallest slide along the position's own edge that keeps the card in view and clear.
+    private static Rect? SlideStationary(DaisyTourCardPosition position, Size card, Size viewport, IReadOnlyList<Rect> obstacles) =>
+        Clear(StationaryRect(position, card, viewport), viewport, obstacles,
+            position is not (DaisyTourCardPosition.Left or DaisyTourCardPosition.Right),
+            position is not (DaisyTourCardPosition.Top or DaisyTourCardPosition.Bottom));
+
+    private static Rect StationaryRect(DaisyTourCardPosition position, Size card, Size viewport)
+    {
+        const double margin = 12;
+        var x = position switch
+        {
+            DaisyTourCardPosition.TopLeft or DaisyTourCardPosition.Left or DaisyTourCardPosition.BottomLeft => margin,
+            DaisyTourCardPosition.TopRight or DaisyTourCardPosition.Right or DaisyTourCardPosition.BottomRight => viewport.Width - card.Width - margin,
+            _ => (viewport.Width - card.Width) / 2
+        };
+        var y = position switch
+        {
+            DaisyTourCardPosition.TopLeft or DaisyTourCardPosition.Top or DaisyTourCardPosition.TopRight => margin,
+            DaisyTourCardPosition.BottomLeft or DaisyTourCardPosition.Bottom or DaisyTourCardPosition.BottomRight => viewport.Height - card.Height - margin,
+            _ => (viewport.Height - card.Height) / 2
+        };
+        return new Rect(Math.Max(margin, x), Math.Max(margin, y), card.Width, card.Height);
     }
 
     // Directions clockwise from east in 45° steps; positions above the target come first.

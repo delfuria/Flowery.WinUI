@@ -7,6 +7,9 @@ using Windows.Foundation;
 
 namespace Flowery.Controls;
 
+/// <summary>A connector route limit in overlay coordinates: y for Above and Below, x for LeftOf and RightOf.</summary>
+internal readonly record struct DaisyTourRouteLimit(DaisyTourRouteSide Side, double Value);
+
 /// <summary>Retained XAML vectors in the tour overlay's DIP coordinate space.</summary>
 internal sealed partial class DaisyTourAnnotationPresenter : Canvas
 {
@@ -26,6 +29,11 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
     /// <summary>The last valid placement direction, kept while it still fits.</summary>
     internal int PlacementDirection { get; set; } = -1;
 
+    /// <summary>The drawn connector course; empty for surfaces.</summary>
+    internal IReadOnlyList<Point> Course { get; private set; } = [];
+
+    internal double CourseThickness { get; private set; }
+
     internal DaisyTourAnnotationPresenter()
     {
         IsHitTestVisible = false;
@@ -44,7 +52,7 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
     internal void Update(DaisyTourAnnotation annotation, Rect sourceBounds, Rect targetBounds,
         Brush defaultStroke, Brush defaultFill, Brush defaultForeground,
         DaisyTourAnnotationStyle? hostDefaults = null, DaisyTourAnnotationStyle? stepDefaults = null, double scale = 1,
-        FlowDirection textFlowDirection = FlowDirection.LeftToRight)
+        FlowDirection textFlowDirection = FlowDirection.LeftToRight, DaisyTourRouteLimit? routeLimit = null)
     {
         _contentHost.FlowDirection = textFlowDirection;
         var style = new EffectiveStyle(annotation, stepDefaults, hostDefaults, scale);
@@ -66,6 +74,8 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
 
         // Releases a previously fitted custom course before the shapes are rebuilt.
         _customRoute.Children.Clear();
+        Course = [];
+        CourseThickness = thickness;
         foreach (var shape in _shapes)
         {
             shape.Data = null;
@@ -97,7 +107,7 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
             (source, target) = AlignAutoAnchors(annotation, style, sourceBounds, targetBounds, source, target);
             // Heads and block bodies are solid in the stroke color unless a fill is specified.
             var solid = DaisySystemAppearance.HighContrast ? stroke : style.Get<Brush?>(DaisyTourAnnotationStyle.FillProperty, null) ?? stroke;
-            var midpoint = DrawConnector(annotation, style, kind, source, target, sourceBounds, targetBounds, solid);
+            var midpoint = DrawConnector(annotation, style, kind, source, target, sourceBounds, targetBounds, solid, routeLimit);
             ArrangeContent(annotation, style, midpoint, foreground);
             _contentHost.Background = fill;
             return;
@@ -123,7 +133,7 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
     }
 
     private Point DrawConnector(DaisyTourAnnotation annotation, EffectiveStyle style, DaisyTourAnnotationKind kind,
-        Point source, Point target, Rect sourceBounds, Rect targetBounds, Brush fill)
+        Point source, Point target, Rect sourceBounds, Rect targetBounds, Brush fill, DaisyTourRouteLimit? limit)
     {
         var path = style.Get(DaisyTourAnnotationStyle.PathProperty,
             style.Preset == DaisyTourAnnotationPreset.CurvedArrow ? DaisyTourAnnotationPath.Curved : DaisyTourAnnotationPath.Straight);
@@ -132,9 +142,28 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         Geometry? route = null;
         var custom = false;
         List<Point> points;
-        if (cubic)
+        if (limit is { } routeLimit && RouteAround(routeLimit, sourceBounds, targetBounds) is { } corners)
+        {
+            // A route around the limit replaces the path's shape. Curve paths get smooth corners.
+            var radius = path is DaisyTourAnnotationPath.Straight or DaisyTourAnnotationPath.Elbow
+                ? Math.Max(0, style.Dimension(DaisyTourAnnotationStyle.CornerRadiusProperty, 0)) : double.PositiveInfinity;
+            (route, points) = RoundedPolyline(corners, radius);
+        }
+        else if (cubic)
         {
             var (first, second) = CubicControls(style, path, source, target, sourceBounds, targetBounds, curvature);
+            // Both ends are on the allowed side; the curve stays within its controls' hull there.
+            if (limit is { } bound) (first, second) = (ClampToLimit(first, bound), ClampToLimit(second, bound));
+            points = CubicPoints(source, first, second, target);
+            route = CubicGeometry(source, first, second, target);
+        }
+        else if (path == DaisyTourAnnotationPath.Curved && limit is { } curveLimit)
+        {
+            var control = ClampToLimit(new Point((source.X + target.X) / 2 - (target.Y - source.Y) * curvature,
+                (source.Y + target.Y) / 2 + (target.X - source.X) * curvature), curveLimit);
+            // The quadratic curve as an equivalent cubic curve.
+            var first = Lerp(source, control, 2d / 3);
+            var second = Lerp(target, control, 2d / 3);
             points = CubicPoints(source, first, second, target);
             route = CubicGeometry(source, first, second, target);
         }
@@ -147,9 +176,10 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         }
         else
         {
-            points = ConnectorPoints(source, target, path, curvature);
+            points = path == DaisyTourAnnotationPath.Elbow
+                ? ElbowPoints(source, target, sourceBounds) : ConnectorPoints(source, target, path, curvature);
             if (path == DaisyTourAnnotationPath.Elbow)
-                (route, points) = ElbowRoute(points, Math.Max(0, style.Dimension(DaisyTourAnnotationStyle.CornerRadiusProperty, 0)));
+                (route, points) = RoundedPolyline(points, Math.Max(0, style.Dimension(DaisyTourAnnotationStyle.CornerRadiusProperty, 0)));
         }
         // A fitted custom course keeps its own outline; block bodies follow the sampled course otherwise.
         var block = !custom && style.Get(DaisyTourAnnotationStyle.ArrowStyleProperty,
@@ -158,6 +188,7 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
             style.Preset == DaisyTourAnnotationPreset.TwoEndedArrow ? DaisyTourArrowHead.Triangle : DaisyTourArrowHead.None);
         var end = style.Get(DaisyTourAnnotationStyle.EndHeadProperty,
             kind == DaisyTourAnnotationKind.Line ? DaisyTourArrowHead.None : DaisyTourArrowHead.Triangle);
+        Course = points;
         var length = Math.Clamp(style.Dimension(DaisyTourAnnotationStyle.HeadLengthProperty, 22), 0, PolylineLength(points) / 3);
         var width = Math.Max(0, style.Dimension(DaisyTourAnnotationStyle.HeadWidthProperty, 18));
         _body.Data = block
@@ -436,39 +467,146 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         return geometry;
     }
 
-    // Automatic anchors face the course's first and last direction instead of the other element,
-    // so a bend toward the opposite side cannot run back through its own element.
+    // A route limit is solved in a space where the course must stay at y <= limit; the other
+    // three sides are mirrored or transposed into that space and back.
+    private static Point ToRouteSpace(Point point, DaisyTourRouteSide side) => side switch
+    {
+        DaisyTourRouteSide.Below => new Point(point.X, -point.Y),
+        DaisyTourRouteSide.LeftOf => new Point(point.Y, point.X),
+        DaisyTourRouteSide.RightOf => new Point(point.Y, -point.X),
+        _ => point
+    };
+
+    private static Point FromRouteSpace(Point point, DaisyTourRouteSide side) => side switch
+    {
+        DaisyTourRouteSide.Below => new Point(point.X, -point.Y),
+        DaisyTourRouteSide.LeftOf => new Point(point.Y, point.X),
+        DaisyTourRouteSide.RightOf => new Point(-point.Y, point.X),
+        _ => point
+    };
+
+    private static double RouteSpaceLimit(DaisyTourRouteLimit limit) =>
+        limit.Side is DaisyTourRouteSide.Below or DaisyTourRouteSide.RightOf ? -limit.Value : limit.Value;
+
+    private static Point ClampToLimit(Point point, DaisyTourRouteLimit limit)
+    {
+        var routed = ToRouteSpace(point, limit.Side);
+        return FromRouteSpace(new Point(routed.X, Math.Min(routed.Y, RouteSpaceLimit(limit))), limit.Side);
+    }
+
+    // Returns right-angle corners around the limit when an end lies beyond it, or null when both
+    // ends are on the allowed side. The ends never belong to the area kept clear.
+    private static List<Point>? RouteAround(DaisyTourRouteLimit limit, Rect sourceBounds, Rect targetBounds)
+    {
+        const double clearance = 12;
+        var value = RouteSpaceLimit(limit);
+        var source = new Rect(ToRouteSpace(new Point(sourceBounds.Left, sourceBounds.Top), limit.Side),
+            ToRouteSpace(new Point(sourceBounds.Right, sourceBounds.Bottom), limit.Side));
+        var target = new Rect(ToRouteSpace(new Point(targetBounds.Left, targetBounds.Top), limit.Side),
+            ToRouteSpace(new Point(targetBounds.Right, targetBounds.Bottom), limit.Side));
+        var sourceBeyond = source.Bottom > value;
+        var targetBeyond = target.Bottom > value;
+        if (!sourceBeyond && !targetBeyond)
+            return null;
+        // Both beyond: legs rise above both ends. One beyond: the course runs at the other end's middle.
+        var level = sourceBeyond && targetBeyond
+            ? Math.Min(value, Math.Min(source.Top, target.Top) - clearance)
+            : Center(sourceBeyond ? target : source).Y;
+        var start = RouteEnd(source, target, level);
+        var end = RouteEnd(target, source, level);
+        var points = new List<Point> { start };
+        if (Math.Abs(start.Y - level) > 0.01) points.Add(new Point(start.X, level));
+        if (Math.Abs(end.Y - level) > 0.01) points.Add(new Point(end.X, level));
+        points.Add(end);
+        return points.ConvertAll(point => FromRouteSpace(point, limit.Side));
+    }
+
+    // An end meets the course from its facing side when the course level crosses it, otherwise from its top.
+    private static Point RouteEnd(Rect end, Rect other, double level) => level > end.Top && level <= end.Bottom
+        ? new Point(Center(other).X >= Center(end).X ? end.Right : end.Left, level)
+        : new Point(Center(end).X, end.Top);
+
+    private static Point Lerp(Point from, Point to, double amount) =>
+        new(from.X + (to.X - from.X) * amount, from.Y + (to.Y - from.Y) * amount);
+
+    // Automatic anchors dock at the facing side centers. A course that would run back through its own
+    // element faces its first direction instead.
     private static (Point Source, Point Target) AlignAutoAnchors(DaisyTourAnnotation annotation, EffectiveStyle style,
         Rect sourceBounds, Rect targetBounds, Point source, Point target)
     {
         var path = style.Get(DaisyTourAnnotationStyle.PathProperty,
             style.Preset == DaisyTourAnnotationPreset.CurvedArrow ? DaisyTourAnnotationPath.Curved : DaisyTourAnnotationPath.Straight);
+        var autoSource = annotation.SourceAnchor == DaisyTourAnchor.Auto;
+        var autoTarget = annotation.TargetAnchor == DaisyTourAnchor.Auto;
+        var sourceOffset = new Point(style.Number(DaisyTourAnnotationStyle.SourceOffsetXProperty, 0), style.Number(DaisyTourAnnotationStyle.SourceOffsetYProperty, 0));
+        var targetOffset = new Point(style.Number(DaisyTourAnnotationStyle.TargetOffsetXProperty, 0), style.Number(DaisyTourAnnotationStyle.TargetOffsetYProperty, 0));
         Point first, last;
-        switch (path)
+        var (sourceSide, targetSide) = FacingSides(sourceBounds, targetBounds);
+        if (autoSource) source = Offset(sourceSide, sourceOffset.X, sourceOffset.Y);
+        if (autoTarget) target = Offset(targetSide, targetOffset.X, targetOffset.Y);
+        if (path == DaisyTourAnnotationPath.SCurve)
+            return (source, target);
+        if (path == DaisyTourAnnotationPath.Elbow)
         {
-            case DaisyTourAnnotationPath.Curved:
-                var curvature = style.Number(DaisyTourAnnotationStyle.CurvatureProperty, 0.25);
-                first = last = new Point((source.X + target.X) / 2 - (target.Y - source.Y) * curvature,
-                    (source.Y + target.Y) / 2 + (target.X - source.X) * curvature);
-                break;
-            case DaisyTourAnnotationPath.Bezier:
-                (first, last) = CubicControls(style, path, source, target, sourceBounds, targetBounds,
-                    style.Number(DaisyTourAnnotationStyle.CurvatureProperty, 0.5));
-                break;
-            case DaisyTourAnnotationPath.Elbow:
-                var corners = ConnectorPoints(source, target, path, 0);
-                (first, last) = (corners[1], corners[2]);
-                break;
-            default:
-                return (source, target);
+            var corners = ElbowPoints(source, target, sourceBounds);
+            (first, last) = (corners[1], corners[2]);
         }
-        if (annotation.SourceAnchor == DaisyTourAnchor.Auto)
-            source = Offset(Anchor(sourceBounds, first, DaisyTourAnchor.Auto),
-                style.Number(DaisyTourAnnotationStyle.SourceOffsetXProperty, 0), style.Number(DaisyTourAnnotationStyle.SourceOffsetYProperty, 0));
-        if (annotation.TargetAnchor == DaisyTourAnchor.Auto)
-            target = Offset(Anchor(targetBounds, last, DaisyTourAnchor.Auto),
-                style.Number(DaisyTourAnnotationStyle.TargetOffsetXProperty, 0), style.Number(DaisyTourAnnotationStyle.TargetOffsetYProperty, 0));
+        else if (path == DaisyTourAnnotationPath.Curved)
+        {
+            var curvature = style.Number(DaisyTourAnnotationStyle.CurvatureProperty, 0.25);
+            first = last = new Point((source.X + target.X) / 2 - (target.Y - source.Y) * curvature,
+                (source.Y + target.Y) / 2 + (target.X - source.X) * curvature);
+        }
+        else if (path == DaisyTourAnnotationPath.Bezier)
+        {
+            (first, last) = CubicControls(style, path, source, target, sourceBounds, targetBounds,
+                style.Number(DaisyTourAnnotationStyle.CurvatureProperty, 0.5));
+        }
+        else
+        {
+            // Straight and custom courses head from one anchor toward the other.
+            (first, last) = (target, source);
+        }
+        // Keep the facing side while the course leaves it outward.
+        autoSource &= !LeavesOutward(sourceBounds, source, first);
+        autoTarget &= !LeavesOutward(targetBounds, target, last);
+        if (autoSource)
+            source = Offset(Anchor(sourceBounds, first, DaisyTourAnchor.Auto), sourceOffset.X, sourceOffset.Y);
+        if (autoTarget)
+            target = Offset(Anchor(targetBounds, last, DaisyTourAnchor.Auto), targetOffset.X, targetOffset.Y);
         return (source, target);
+    }
+
+    // The side pair along the main direction, unless the controls overlap on that axis and leave
+    // room only along the other one.
+    private static (Point Source, Point Target) FacingSides(Rect source, Rect target)
+    {
+        var dx = Center(target).X - Center(source).X;
+        var dy = Center(target).Y - Center(source).Y;
+        var horizontalGap = dx >= 0 ? target.Left - source.Right : source.Left - target.Right;
+        var verticalGap = dy >= 0 ? target.Top - source.Bottom : source.Top - target.Bottom;
+        var horizontal = Math.Abs(dx) >= Math.Abs(dy)
+            ? horizontalGap >= 0 || verticalGap < 0
+            : verticalGap < 0 && horizontalGap >= 0;
+        return horizontal
+            ? (new Point(dx >= 0 ? source.Right : source.Left, Center(source).Y), new Point(dx >= 0 ? target.Left : target.Right, Center(target).Y))
+            : (new Point(Center(source).X, dy >= 0 ? source.Bottom : source.Top), new Point(Center(target).X, dy >= 0 ? target.Top : target.Bottom));
+    }
+
+    // Right-angle corners that leave and enter perpendicular to the anchored sides.
+    private static List<Point> ElbowPoints(Point start, Point end, Rect sourceBounds)
+    {
+        var normal = EdgeNormal(sourceBounds, start, new Point());
+        var horizontal = normal.X != 0 || normal.Y == 0 && Math.Abs(end.X - start.X) >= Math.Abs(end.Y - start.Y);
+        return horizontal
+            ? [start, new Point((start.X + end.X) / 2, start.Y), new Point((start.X + end.X) / 2, end.Y), end]
+            : [start, new Point(start.X, (start.Y + end.Y) / 2), new Point(end.X, (start.Y + end.Y) / 2), end];
+    }
+
+    private static bool LeavesOutward(Rect rect, Point anchor, Point toward)
+    {
+        var normal = EdgeNormal(rect, anchor, new Point());
+        return (toward.X - anchor.X) * normal.X + (toward.Y - anchor.Y) * normal.Y > 0;
     }
 
     // SCurve leaves both anchors perpendicular to their edges. Bezier replaces either
@@ -480,8 +618,12 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         var along = Unit(source, target);
         var startNormal = EdgeNormal(sourceBounds, source, along);
         var endNormal = EdgeNormal(targetBounds, target, new Point(-along.X, -along.Y));
-        var first = Offset(source, startNormal.X * length * curvature, startNormal.Y * length * curvature);
-        var second = Offset(target, endNormal.X * length * curvature, endNormal.Y * length * curvature);
+        // Each control reaches out by the distance along its edge normal, not the full diagonal,
+        // so curves between distant controls do not overshoot.
+        var startReach = Math.Max(16, Math.Abs((target.X - source.X) * startNormal.X + (target.Y - source.Y) * startNormal.Y)) * curvature;
+        var endReach = Math.Max(16, Math.Abs((target.X - source.X) * endNormal.X + (target.Y - source.Y) * endNormal.Y)) * curvature;
+        var first = Offset(source, startNormal.X * startReach, startNormal.Y * startReach);
+        var second = Offset(target, endNormal.X * endReach, endNormal.Y * endReach);
         if (path != DaisyTourAnnotationPath.Bezier)
             return (first, second);
         return (ConnectorPoint(style, DaisyTourAnnotationStyle.ControlPoint1XProperty, DaisyTourAnnotationStyle.ControlPoint1YProperty,
@@ -540,13 +682,14 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
             u * u * u * start.Y + 3 * u * u * t * first.Y + 3 * u * t * t * second.Y + t * t * t * end.Y);
     }
 
-    private static (Geometry Route, List<Point> Points) ElbowRoute(List<Point> points, double radius)
+    // Rounds the right-angle corners of an elbow or route polyline.
+    private static (Geometry Route, List<Point> Points) RoundedPolyline(List<Point> points, double radius)
     {
-        if (radius <= 0 || points.Count != 4)
+        if (radius <= 0 || points.Count < 3)
             return (LineGeometry(points), points);
         var figure = new PathFigure { StartPoint = points[0], IsFilled = false };
         var sampled = new List<Point> { points[0] };
-        for (var index = 1; index < 3; index++)
+        for (var index = 1; index < points.Count - 1; index++)
         {
             var corner = points[index];
             // Each corner may use at most half of its adjacent segments.
@@ -575,8 +718,8 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
                     center.Y + (entry.Y - center.Y) * Math.Cos(angle) + (exit.Y - center.Y) * Math.Sin(angle)));
             }
         }
-        figure.Segments.Add(new LineSegment { Point = points[3] });
-        sampled.Add(points[3]);
+        figure.Segments.Add(new LineSegment { Point = points[^1] });
+        sampled.Add(points[^1]);
         var geometry = new PathGeometry();
         geometry.Figures.Add(figure);
         return (geometry, sampled);

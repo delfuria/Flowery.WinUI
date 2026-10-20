@@ -556,6 +556,8 @@ namespace Flowery.Controls
                 Grid.SetColumn(_labelBlock, 0);
                 Grid.SetColumnSpan(_labelBlock, 3);
                 _rootGrid.Children.Add(_labelBlock);
+                // Compact indicators have no label; an empty label row would still add its height.
+                if (IsCompact) _labelBlock.Visibility = Visibility.Collapsed;
 
                 _rootGrid.MinWidth = IsCompact ? indSize + 8 : GetMinStepSize(Size);
             }

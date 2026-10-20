@@ -142,28 +142,59 @@ public class Given_DaisyTour
             await LoadAsync(page);
             tour = (DaisyTour)page.FindName("Tour");
             var related = (FrameworkElement)page.FindName("RelatedTarget");
+            var limitTarget = (FrameworkElement)page.FindName("LimitTarget");
             tour.Closed += (_, args) => tour.Tag = args;
-            foreach (var demo in new[] { "Gallery_Tour_Arrows", "Gallery_Tour_Lines" })
+            var keepClear = (FrameworkElement)page.FindName("KeepClearArea");
+            foreach (var demo in new[] { "Gallery_Tour_Arrows", "Gallery_Tour_Lines", "Gallery_Tour_RouteLimit" })
             {
                 await StartGalleryTourAsync(page, tour, demo);
+                var cards = new List<Rect>();
                 for (var index = 0; index < tour.Steps.Count; index++)
                 {
                     if (index > 0) await tour.NextAsync().WaitAsync(Timeout);
                     AssertActive(tour, tour.Steps[index], index);
                     await RenderFrameAsync(page);
+                    cards.Add(tour.CardBounds);
                     var connector = tour.CurrentStep!.Annotations.Single();
                     var start = BoundsInRoot(connector.Source!);
                     var end = BoundsInRoot(connector.Target!);
                     var diagnostic = $"{demo}/{tour.CurrentStep.Title}: source={start}, target={end}";
-                    Assert.AreSame(related, connector.Target);
+                    if (connector.RouteLimit is null && connector.RouteLimitSide != DaisyTourRouteSide.None)
+                    {
+                        Assert.AreSame(limitTarget, connector.Target);
+                        Assert.IsTrue(start.Top > connector.RouteLimitCoordinate && end.Top > connector.RouteLimitCoordinate,
+                            $"{diagnostic}, limit={connector.RouteLimitCoordinate}: both ends must lie below the coordinate.");
+                    }
+                    else
+                        Assert.AreSame(related, connector.Target);
                     var gap = Math.Max(Math.Max(end.Left - start.Right, start.Left - end.Right), Math.Max(end.Top - start.Bottom, start.Top - end.Bottom));
                     Assert.IsTrue(gap >= 120, $"{diagnostic}: connector targets must be visibly apart.");
                     var stroke = (connector.Stroke as SolidColorBrush
                         ?? (SolidColorBrush)DaisyResourceLookup.GetBrush("DaisyPrimaryBrush")).Color;
                     // Visible connector pixels outside both highlight frames and the card.
                     var matches = await CountConnectorPixelsAsync(tour, stroke, start, end);
+                    if (connector.RouteLimitSide != DaisyTourRouteSide.None)
+                        Assert.AreEqual(0, await CountSurfacePixelsAsync(tour, stroke, BoundsInRoot(keepClear)),
+                            $"{diagnostic}: the route limit must keep the marked area clear.");
+                    if (connector.RouteLimit is null && connector.RouteLimitSide != DaisyTourRouteSide.None)
+                    {
+                        // The course bridges both ends just above the limit, which lies above both ends.
+                        var level = Math.Min(connector.RouteLimitCoordinate, Math.Min(start.Top, end.Top));
+                        var bridge = new Rect(start.Right, level - 40, Math.Max(0, end.Left - start.Right), 46);
+                        Assert.IsTrue(await CountSurfacePixelsAsync(tour, stroke, bridge) >= 50, $"{diagnostic}: no course along the limit.");
+                    }
                     Assert.IsTrue(matches >= 100, $"{diagnostic}: rendered connector pixels={matches}.");
+                    var presenter = Descendants<DaisyTourAnnotationPresenter>(GetSurface(tour)).Single();
+                    for (var point = 1; point < presenter.Course.Count; point++)
+                    {
+                        var segment = new Rect(presenter.Course[point - 1], presenter.Course[point]);
+                        segment.Intersect(tour.CardBounds);
+                        Assert.IsTrue(segment.IsEmpty, $"{diagnostic}: the card {tour.CardBounds} covers the course at {segment}.");
+                    }
                 }
+                // Each route limit step has room for the card where the first one put it.
+                if (demo == "Gallery_Tour_RouteLimit")
+                    Assert.IsTrue(cards.All(card => card.X == cards[0].X && card.Y == cards[0].Y), $"cards: {string.Join(", ", cards)}");
                 tour.Cancel();
             }
         }
@@ -383,6 +414,7 @@ public class Given_DaisyTour
         {
             LineSegment line => line.Point,
             QuadraticBezierSegment curve => curve.Point2,
+            BezierSegment cubic => cubic.Point3,
             var segment => throw new AssertFailedException($"Unexpected connector segment {segment.GetType().Name}.")
         };
         Assert.IsTrue(OnBoundary(figure.StartPoint, sourceFrame), $"Start {figure.StartPoint} must lie on the source frame {sourceFrame}.");
@@ -394,24 +426,46 @@ public class Given_DaisyTour
         (Math.Abs(point.X - rect.Left) <= 0.5 || Math.Abs(point.X - rect.Right) <= 0.5 ||
          Math.Abs(point.Y - rect.Top) <= 0.5 || Math.Abs(point.Y - rect.Bottom) <= 0.5);
 
-    // Counts stroke-colored overlay pixels outside both highlight frames and the card.
-    private static async Task<int> CountConnectorPixelsAsync(DaisyTour tour, Color stroke, Rect source, Rect target)
+    // Renders the tour overlay; Scale converts overlay DIP to bitmap pixels.
+    private static async Task<(byte[] Pixels, int Width, int Height, double Scale)> RenderSurfaceAsync(DaisyTour tour)
     {
         var surface = GetSurface(tour);
         var bitmap = new RenderTargetBitmap();
         await bitmap.RenderAsync(surface).AsTask().WaitAsync(Timeout);
-        var pixels = (await bitmap.GetPixelsAsync()).ToArray();
-        var scale = bitmap.PixelWidth / surface.ActualWidth;
+        return ((await bitmap.GetPixelsAsync()).ToArray(), bitmap.PixelWidth, bitmap.PixelHeight, bitmap.PixelWidth / surface.ActualWidth);
+    }
+
+    // An opaque BGRA pixel close to the color.
+    private static bool IsColor(byte[] pixels, int offset, Color color) =>
+        pixels[offset + 3] >= 240 && Math.Abs(pixels[offset] - color.B) <= 20 &&
+        Math.Abs(pixels[offset + 1] - color.G) <= 20 && Math.Abs(pixels[offset + 2] - color.R) <= 20;
+
+    private static async Task<int> CountSurfacePixelsAsync(DaisyTour tour, Color color, Rect area)
+    {
+        var (pixels, width, height, scale) = await RenderSurfaceAsync(tour);
+        var matches = 0;
+        for (var y = Math.Max(0, (int)(area.Top * scale)); y < Math.Min(height, (int)(area.Bottom * scale)); y++)
+        {
+            for (var x = Math.Max(0, (int)(area.Left * scale)); x < Math.Min(width, (int)(area.Right * scale)); x++)
+            {
+                if (IsColor(pixels, (y * width + x) * 4, color)) matches++;
+            }
+        }
+        return matches;
+    }
+
+    // Counts stroke-colored overlay pixels outside both highlight frames and the card.
+    private static async Task<int> CountConnectorPixelsAsync(DaisyTour tour, Color stroke, Rect source, Rect target)
+    {
+        var (pixels, width, height, scale) = await RenderSurfaceAsync(tour);
         var excluded = new[] { Frame(tour, source), Frame(tour, target), tour.CardBounds }
             .Select(rect => new Rect(rect.X - 3, rect.Y - 3, rect.Width + 6, rect.Height + 6)).ToArray();
         var matches = 0;
-        for (var y = 0; y < bitmap.PixelHeight; y++)
+        for (var y = 0; y < height; y++)
         {
-            for (var x = 0; x < bitmap.PixelWidth; x++)
+            for (var x = 0; x < width; x++)
             {
-                var offset = (y * bitmap.PixelWidth + x) * 4;
-                if (pixels[offset + 3] < 240 || Math.Abs(pixels[offset] - stroke.B) > 20 ||
-                    Math.Abs(pixels[offset + 1] - stroke.G) > 20 || Math.Abs(pixels[offset + 2] - stroke.R) > 20)
+                if (!IsColor(pixels, (y * width + x) * 4, stroke))
                     continue;
                 var point = new Point((x + 0.5) / scale, (y + 0.5) / scale);
                 if (!excluded.Any(rect => rect.Contains(point))) matches++;
@@ -1103,6 +1157,169 @@ public class Given_DaisyTour
     }
 
     [TestMethod]
+    public async Task When_RouteLimitIsSet_TheCourseKeepsTheAreaBetweenBothEndsClear()
+    {
+        var root = new Canvas { Width = 600, Height = 400, Background = new SolidColorBrush(Colors.Black) };
+        var presenter = new DaisyTourAnnotationPresenter { Width = 600, Height = 400 };
+        root.Children.Add(presenter);
+        // Every pair is offset across the limit, so a direct line would cross the area kept clear.
+        var cases = new (string Name, DaisyTourAnnotationPath Path, (Rect Source, Rect Target) Ends, DaisyTourRouteSide Side, double Limit, Rect Clear, Rect Allowed)[]
+        {
+            // Both ends beyond: legs of different lengths rise to the limit (uneven ⊓).
+            ("Above, both beyond", DaisyTourAnnotationPath.Elbow, (new Rect(40, 220, 100, 40), new Rect(460, 300, 100, 40)),
+                DaisyTourRouteSide.Above, 180, new(150, 184, 300, 216), new(150, 0, 300, 180)),
+            ("Above, both beyond, curve", DaisyTourAnnotationPath.SCurve, (new Rect(40, 220, 100, 40), new Rect(460, 300, 100, 40)),
+                DaisyTourRouteSide.Above, 180, new(150, 184, 300, 216), new(150, 0, 300, 180)),
+            // One end beyond: the course runs at the other end's height, then turns down (┐).
+            ("Above, one beyond", DaisyTourAnnotationPath.Elbow, (new Rect(40, 40, 100, 40), new Rect(460, 300, 100, 40)),
+                DaisyTourRouteSide.Above, 180, new(150, 184, 300, 216), new(150, 0, 300, 180)),
+            ("Below, both beyond", DaisyTourAnnotationPath.Elbow, (new Rect(40, 140, 100, 40), new Rect(460, 60, 100, 40)),
+                DaisyTourRouteSide.Below, 220, new(150, 0, 300, 216), new(150, 220, 300, 180)),
+            ("Below, one beyond", DaisyTourAnnotationPath.Elbow, (new Rect(40, 300, 100, 40), new Rect(460, 60, 100, 40)),
+                DaisyTourRouteSide.Below, 220, new(150, 0, 300, 216), new(150, 220, 300, 180)),
+            ("LeftOf, both beyond", DaisyTourAnnotationPath.Elbow, (new Rect(260, 20, 100, 40), new Rect(340, 330, 100, 40)),
+                DaisyTourRouteSide.LeftOf, 220, new(224, 65, 376, 260), new(0, 65, 220, 260)),
+            ("RightOf, one beyond", DaisyTourAnnotationPath.Elbow, (new Rect(60, 20, 100, 40), new Rect(460, 330, 100, 40)),
+                DaisyTourRouteSide.RightOf, 420, new(0, 65, 416, 260), new(420, 65, 180, 260)),
+            // Both ends allowed: the curve keeps its shape but may not bend across the limit.
+            ("Curve inside", DaisyTourAnnotationPath.Curved, (new Rect(40, 60, 100, 40), new Rect(460, 90, 100, 40)),
+                DaisyTourRouteSide.Above, 150, new(150, 154, 300, 246), new(150, 0, 300, 150))
+        };
+        try
+        {
+            await LoadAsync(root);
+            foreach (var (name, path, ends, side, limit, clear, allowed) in cases)
+            {
+                var annotation = new DaisyTourAnnotation { Kind = DaisyTourAnnotationKind.Line, Path = path, StrokeThickness = 4, CornerRadius = 10, Curvature = 0.6 };
+                presenter.Update(annotation, ends.Source, ends.Target,
+                    new SolidColorBrush(Colors.Red), new SolidColorBrush(Colors.Lime), new SolidColorBrush(Colors.White),
+                    routeLimit: new DaisyTourRouteLimit(side, limit));
+                await ArrangeAsync(root);
+                var bitmap = new RenderTargetBitmap();
+                await bitmap.RenderAsync(root, 600, 400).AsTask().WaitAsync(Timeout);
+                var pixels = (await bitmap.GetPixelsAsync()).ToArray();
+                Assert.AreEqual(0, CountRenderedColor(pixels, bitmap, clear, Colors.Red), $"{name}: the course must keep {clear} clear.");
+                Assert.IsTrue(CountRenderedColor(pixels, bitmap, allowed, Colors.Red) >= 50, $"{name}: the course must cross on the allowed side.");
+            }
+        }
+        finally
+        {
+            RuntimeTestHelpers.GetHostPanel().Children.Remove(root);
+            await ArrangeAsync(root);
+        }
+    }
+
+    [TestMethod]
+    public async Task When_RouteLimitControlMoves_TheRoutedCourseFollowsIt()
+    {
+        // Source top left, target bottom right, obstacle between: a direct line would cross it.
+        var source = CreateTarget();
+        source.Margin = new Thickness(24, 40, 0, 0);
+        var target = CreateTarget();
+        target.Margin = new Thickness(476, 300, 0, 0);
+        var obstacle = new Border
+        {
+            Width = 120, Height = 60, Margin = new Thickness(240, 170, 0, 0),
+            HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top
+        };
+        var annotation = new DaisyTourAnnotation
+        {
+            Id = "around", Source = source, Target = target, Kind = DaisyTourAnnotationKind.Line, Path = DaisyTourAnnotationPath.Elbow,
+            RouteLimit = obstacle, RouteLimitSide = DaisyTourRouteSide.Above, Stroke = new SolidColorBrush(Colors.Red), StrokeThickness = 4
+        };
+        var step = new DaisyTourStep { Id = "around", Target = source, CardPosition = DaisyTourCardPosition.BottomLeft };
+        step.Annotations.Add(annotation);
+        var tour = new DaisyTour();
+        tour.Steps.Add(step);
+        var root = CreateRoot(tour, source, target, obstacle);
+        try
+        {
+            await LoadAsync(root);
+            await tour.StartAsync().WaitAsync(Timeout);
+            AssertActive(tour, step, 0);
+            await AssertClearAsync("initial");
+            var published = NewCompletion();
+            EventHandler handler = (_, _) => published.TrySetResult();
+            tour.GeometryUpdated += handler;
+            try
+            {
+                // Now both ends lie beyond the limit, so the course turns into a bracket above both.
+                obstacle.Margin = new Thickness(240, 20, 0, 0);
+                root.UpdateLayout();
+                await published.Task.WaitAsync(Timeout);
+            }
+            finally { tour.GeometryUpdated -= handler; }
+            AssertActive(tour, step, 0);
+            await AssertClearAsync("moved");
+
+            async Task AssertClearAsync(string phase)
+            {
+                await RenderFrameAsync(root);
+                var area = BoundsInRoot(obstacle);
+                // The limit lies 12 DIP above the control; the line keeps the control and that margin clear.
+                var clear = new Rect(area.X, area.Y - 8, area.Width, area.Height + 8);
+                Assert.AreEqual(0, await CountSurfacePixelsAsync(tour, Colors.Red, clear), $"{phase}: the course must stay above {clear}.");
+                Assert.IsTrue(await CountConnectorPixelsAsync(tour, Colors.Red, BoundsInRoot(source), BoundsInRoot(target)) >= 100, phase);
+            }
+        }
+        finally { await CleanupAsync(root, tour); }
+    }
+
+    [TestMethod]
+    public async Task When_CurveTargetsAWideControlBelowAndRight_ItDocksAtTheFacingSides()
+    {
+        var root = new Canvas { Width = 600, Height = 400, Background = new SolidColorBrush(Colors.Black) };
+        var presenter = new DaisyTourAnnotationPresenter { Width = 600, Height = 400 };
+        root.Children.Add(presenter);
+        var source = new Rect(60, 40, 80, 40);
+        var target = new Rect(400, 300, 175, 28);
+        try
+        {
+            await LoadAsync(root);
+            var wave = new PathGeometry();
+            var waveFigure = new PathFigure { StartPoint = new Point(0, 0) };
+            waveFigure.Segments.Add(new BezierSegment { Point1 = new Point(20, -30), Point2 = new Point(80, 30), Point3 = new Point(100, 0) });
+            wave.Figures.Add(waveFigure);
+            foreach (var path in new[]
+            {
+                DaisyTourAnnotationPath.Straight, DaisyTourAnnotationPath.Elbow, DaisyTourAnnotationPath.Curved,
+                DaisyTourAnnotationPath.SCurve, DaisyTourAnnotationPath.Bezier, DaisyTourAnnotationPath.Custom
+            })
+            {
+                var annotation = new DaisyTourAnnotation
+                {
+                    Kind = DaisyTourAnnotationKind.Arrow, Path = path, StrokeThickness = 4,
+                    ControlPoint1X = 0.25, ControlPoint1Y = -0.25, ControlPoint2X = 0.75, ControlPoint2Y = 0.25,
+                    Geometry = path == DaisyTourAnnotationPath.Custom ? wave : null
+                };
+                presenter.Update(annotation, source, target,
+                    new SolidColorBrush(Colors.Red), new SolidColorBrush(Colors.Lime), new SolidColorBrush(Colors.White));
+                await ArrangeAsync(root);
+                // The arrowhead's tip is the course's end; a custom course is drawn through a geometry transform.
+                var tip = ((PathGeometry)((Path)presenter.Children[3]).Data).Figures.Single().StartPoint;
+                // The horizontal distance dominates: right side of the source, left side of the target.
+                Assert.AreEqual(400, tip.X, 0.001, $"{path}: end must dock at the target's left side");
+                Assert.AreEqual(314, tip.Y, 0.001, $"{path}: end must dock at the target's left side");
+                if (((Path)presenter.Children[1]).Data is PathGeometry body)
+                    Assert.AreEqual(new Point(140, 60), body.Figures.Single().StartPoint, $"{path}: start");
+                var bitmap = new RenderTargetBitmap();
+                await bitmap.RenderAsync(root, 600, 400).AsTask().WaitAsync(Timeout);
+                var pixels = (await bitmap.GetPixelsAsync()).ToArray();
+                foreach (var rect in new[] { source, target })
+                {
+                    var inside = new Rect(rect.X + 4, rect.Y + 4, rect.Width - 8, rect.Height - 8);
+                    Assert.AreEqual(0, CountRenderedColor(pixels, bitmap, inside, Colors.Red), $"{path}: the curve must not cross {rect}.");
+                }
+            }
+        }
+        finally
+        {
+            RuntimeTestHelpers.GetHostPanel().Children.Remove(root);
+            await ArrangeAsync(root);
+        }
+    }
+
+    [TestMethod]
     public async Task When_ConnectorBendsAwayFromItsAnchors_ItDoesNotCrossItsOwnEndpoints()
     {
         var root = new Canvas { Width = 600, Height = 400, Background = new SolidColorBrush(Colors.Black) };
@@ -1173,8 +1390,9 @@ public class Given_DaisyTour
         humpFigure.Segments.Add(new LineSegment { Point = new Point(50, -40) });
         humpFigure.Segments.Add(new LineSegment { Point = new Point(100, 0) });
         hump.Figures.Add(humpFigure);
-        var scurveFirst = new Point(start.X + length * 0.5, start.Y);
-        var scurveSecond = new Point(end.X - length * 0.5, end.Y);
+        // SCurve controls reach out by half the distance along each edge normal (here: horizontal).
+        var scurveFirst = new Point(start.X + 300 * 0.5, start.Y);
+        var scurveSecond = new Point(end.X - 300 * 0.5, end.Y);
         var cases = new (string Name, DaisyTourAnnotation Annotation, Point[] Drawn, Point[] Empty)[]
         {
             ("SCurve", new DaisyTourAnnotation { Path = DaisyTourAnnotationPath.SCurve },
@@ -1678,6 +1896,150 @@ public class Given_DaisyTour
     }
 
     [TestMethod]
+    public void When_CardPositionIsStationary_EachOfTheNinePositionsUsesItsWindowSpot()
+    {
+        var viewport = new Size(600, 400);
+        var card = new Size(200, 100);
+        var away = new Rect(-500, -500, 10, 10);
+        var expected = new Dictionary<DaisyTourCardPosition, Point>
+        {
+            [DaisyTourCardPosition.TopLeft] = new(12, 12), [DaisyTourCardPosition.Top] = new(200, 12),
+            [DaisyTourCardPosition.TopRight] = new(388, 12), [DaisyTourCardPosition.Left] = new(12, 150),
+            [DaisyTourCardPosition.Center] = new(200, 150), [DaisyTourCardPosition.Right] = new(388, 150),
+            [DaisyTourCardPosition.BottomLeft] = new(12, 288), [DaisyTourCardPosition.Bottom] = new(200, 288),
+            [DaisyTourCardPosition.BottomRight] = new(388, 288)
+        };
+        foreach (var (position, origin) in expected)
+            Assert.AreEqual(new Rect(origin.X, origin.Y, 200, 100), DaisyTourLayout.PlaceStationary(position, card, viewport, away), position.ToString());
+        Assert.IsNull(DaisyTourLayout.PlaceStationary(DaisyTourCardPosition.Target, card, viewport, away));
+        Assert.IsNull(DaisyTourLayout.PlaceStationary(DaisyTourCardPosition.Default, card, viewport, away));
+
+        // A covered position slides along its own edge by the smallest clear distance.
+        Assert.AreEqual(new Rect(12, 82, 200, 100),
+            DaisyTourLayout.PlaceStationary(DaisyTourCardPosition.TopLeft, card, viewport, new Rect(40, 40, 60, 30)));
+        Assert.AreEqual(new Rect(68, 288, 200, 100),
+            DaisyTourLayout.PlaceStationary(DaisyTourCardPosition.Bottom, card, viewport, new Rect(280, 320, 40, 30)));
+        Assert.AreEqual(new Rect(200, 78, 200, 100),
+            DaisyTourLayout.PlaceStationary(DaisyTourCardPosition.Center, card, viewport, new Rect(280, 190, 40, 20)));
+        // Without room on that edge, the card goes beside the target.
+        Assert.IsNull(DaisyTourLayout.PlaceStationary(DaisyTourCardPosition.Left, card, viewport, new Rect(20, 20, 60, 360)));
+    }
+
+    [TestMethod]
+    public void When_CardWouldCoverACourse_ItMovesToTheNearestClearSpot()
+    {
+        var viewport = new Size(600, 400);
+        var card = new Size(200, 100);
+        var target = new Rect(250, 300, 100, 30);
+        // A course runs where the card above the target would go; the right side is clear.
+        var course = new Rect(0, 180, 600, 10);
+        Assert.AreEqual(new Rect(382, 265, 200, 100), DaisyTourLayout.AvoidObstacles(DaisyTourCardPosition.Target,
+            DaisyTourPlacement.Auto, target, card, viewport, [target, course]));
+        // A fixed position slides along its edge past the course.
+        var band = new Rect(0, 0, 300, 130);
+        Assert.AreEqual(new Rect(12, 142, 200, 100), DaisyTourLayout.AvoidObstacles(DaisyTourCardPosition.TopLeft,
+            DaisyTourPlacement.Auto, target, card, viewport, [target, band]));
+        // Without a clear side, the card above the target moves up past the course.
+        var low = new Rect(200, 400, 200, 30);
+        var tall = new Size(600, 500);
+        var crossing = new Rect(0, 300, 600, 10);
+        Assert.AreEqual(new Rect(200, 188, 200, 100), DaisyTourLayout.AvoidObstacles(DaisyTourCardPosition.Target,
+            DaisyTourPlacement.Auto, low, card, tall, [low, crossing]));
+        // A previous position that is still clear is kept.
+        Assert.AreEqual(new Rect(12, 12, 200, 100), DaisyTourLayout.AvoidObstacles(DaisyTourCardPosition.Target,
+            DaisyTourPlacement.Auto, low, card, tall, [low, crossing], new Rect(12, 12, 200, 100)));
+        // Courses everywhere leave no clear spot.
+        Assert.IsNull(DaisyTourLayout.AvoidObstacles(DaisyTourCardPosition.Target, DaisyTourPlacement.Auto, target, card,
+            viewport, [new Rect(0, 0, 600, 400)]));
+    }
+
+    [TestMethod]
+    public async Task When_CardContentGrowsAfterPlacement_TheCardIsPlacedForItsFinalSize()
+    {
+        var target = CreateTarget();
+        // Content that grows later without notifying the tour, like progress items that load after placement.
+        var template = (DataTemplate)Microsoft.UI.Xaml.Markup.XamlReader.Load(
+            "<DataTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'><Border Height='20' Tag='grows' /></DataTemplate>");
+        var step = new DaisyTourStep { Id = "grows", Target = target, Title = "Final card size", ContentTemplate = template };
+        var tour = new DaisyTour { CardPosition = DaisyTourCardPosition.Bottom };
+        tour.Steps.Add(step);
+        var root = CreateRoot(tour, target);
+        try
+        {
+            await LoadAsync(root);
+            await tour.StartAsync().WaitAsync(Timeout);
+            // Let the update queued at the end of the transition finish first; the growth comes later.
+            await RenderFrameAsync(root);
+            await ArrangeAsync(root);
+            await ArrangeAsync(root);
+            var card = Descendants<Border>(GetSurface(tour)).Single(border => AutomationProperties.GetAutomationId(border) == "DaisyTourCard");
+            var placedHeight = tour.CardBounds.Height;
+            Descendants<Border>(card).Single(border => Equals(border.Tag, "grows")).Height = 120;
+            await RenderFrameAsync(root);
+            await RenderFrameAsync(root);
+            var visible = DaisyTourLayout.VisibleArea(root.XamlRoot);
+            Assert.IsTrue(card.ActualHeight > placedHeight + 50, $"The card must have grown: {placedHeight} -> {card.ActualHeight}.");
+            Assert.AreEqual(card.ActualHeight, tour.CardBounds.Height, 0.5, "The placement must use the card's final height.");
+            Assert.AreEqual(visible.Bottom - 12, Canvas.GetTop(card) + card.ActualHeight, 0.5, "The bottom card must end 12 DIP above the visible edge.");
+        }
+        finally { await CleanupAsync(root, tour); }
+    }
+
+    [TestMethod]
+    public void When_WindowExtendsBeyondItsDisplay_OnlyTheShownPartIsUsedForPlacement()
+    {
+        var content = new Rect(0, 0, 1000, 800);
+        // At 125 %, content starting at (100, 200) on a 1000 px high work area shows its top 640 DIP.
+        Assert.AreEqual(new Rect(0, 0, 1000, 640),
+            DaisyTourLayout.VisibleArea(content, 100, 200, new Windows.Graphics.RectInt32 { X = 0, Y = 0, Width = 1920, Height = 1000 }, 1.25));
+        // Content starting left of the screen loses its left part.
+        Assert.AreEqual(new Rect(80, 0, 920, 800),
+            DaisyTourLayout.VisibleArea(content, -100, 0, new Windows.Graphics.RectInt32 { X = 0, Y = 0, Width = 1920, Height = 1080 }, 1.25));
+        Assert.AreEqual(content,
+            DaisyTourLayout.VisibleArea(content, 0, 0, new Windows.Graphics.RectInt32 { X = 0, Y = 0, Width = 3000, Height = 3000 }, 1.25));
+        // A window that is mostly off its display keeps its full content area.
+        Assert.AreEqual(content,
+            DaisyTourLayout.VisibleArea(content, 0, 950, new Windows.Graphics.RectInt32 { X = 0, Y = 0, Width = 3000, Height = 1000 }, 1));
+    }
+
+    [TestMethod]
+    public async Task When_TourUsesAStationaryCardPosition_StepsInheritOverrideAndAvoidTheTarget()
+    {
+        // The root is centered in the host window, whatever its size: the side target stays clear of
+        // top-left and bottom-right cards, and the middle target lies under a centered card.
+        var side = CreateTarget();
+        side.Margin = new Thickness(24, 300, 0, 0);
+        var middle = CreateTarget();
+        middle.Margin = new Thickness(250, 180, 0, 0);
+        var inherited = new DaisyTourStep { Id = "inherited", Target = side };
+        var overridden = new DaisyTourStep { Id = "overridden", Target = side, CardPosition = DaisyTourCardPosition.TopLeft };
+        var covered = new DaisyTourStep { Id = "covered", Target = middle, CardPosition = DaisyTourCardPosition.Center };
+        var tour = new DaisyTour { CardPosition = DaisyTourCardPosition.BottomRight };
+        tour.Steps.Add(inherited);
+        tour.Steps.Add(overridden);
+        tour.Steps.Add(covered);
+        var root = CreateRoot(tour, side, middle);
+        try
+        {
+            await LoadAsync(root);
+            // Positions refer to the part of the window that the display shows.
+            var visible = DaisyTourLayout.VisibleArea(root.XamlRoot);
+            await tour.StartAsync().WaitAsync(Timeout);
+            AssertActive(tour, inherited, 0);
+            Assert.AreEqual(visible.Right - 12, tour.CardBounds.Right, 0.5, "The tour position applies to steps that inherit it.");
+            Assert.AreEqual(visible.Bottom - 12, tour.CardBounds.Bottom, 0.5);
+            await tour.NextAsync().WaitAsync(Timeout);
+            AssertActive(tour, overridden, 1);
+            Assert.AreEqual(new Point(visible.X + 12, visible.Y + 12), new Point(tour.CardBounds.X, tour.CardBounds.Y), "A step position overrides the tour.");
+            await tour.NextAsync().WaitAsync(Timeout);
+            AssertActive(tour, covered, 2);
+            Assert.IsFalse(Overlaps(tour.CardBounds, Frame(tour, BoundsInRoot(middle))),
+                $"A centered card that would cover the target returns to target-relative placement: card={tour.CardBounds}");
+        }
+        finally { await CleanupAsync(root, tour); }
+    }
+
+    [TestMethod]
     public void When_SurfaceTargetsSitAtEdgesOrCorners_EightDirectionsKeepTheSurfaceBesideAndInView()
     {
         var viewport = new Size(600, 400);
@@ -1795,6 +2157,8 @@ public class Given_DaisyTour
                 }
                 var indicator = indicators.Single();
                 AssertFits(indicator, viewport);
+                // Compact indicators have no label row below the circle.
+                Assert.AreEqual(indicator.ActualHeight, currentItem.ActualHeight, 1, "A compact indicator must not reserve label space.");
             }
         }
         finally { await CleanupAsync(root, tour); }

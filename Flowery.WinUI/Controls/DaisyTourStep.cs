@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 namespace Flowery.Controls;
 
 public enum DaisyTourPlacement { Auto, Top, Bottom, Left, Right }
+
+/// <summary>Where the step card appears: beside the target, or at a fixed window position.</summary>
+public enum DaisyTourCardPosition { Default, Target, TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight }
 public enum DaisyTourCloseReason { Completed, Skipped, Cancelled, TargetUnavailable }
 
 /// <summary>The result of one tour session. Target failures identify the affected step and annotation.</summary>
@@ -49,6 +52,9 @@ public sealed partial class DaisyTourStep : DependencyObject
     public string Description { get => (string)GetValue(DescriptionProperty); set => SetValue(DescriptionProperty, value); }
     public static readonly DependencyProperty PlacementProperty = Register(nameof(Placement), typeof(DaisyTourPlacement), DaisyTourPlacement.Auto);
     public DaisyTourPlacement Placement { get => (DaisyTourPlacement)GetValue(PlacementProperty); set => SetValue(PlacementProperty, value); }
+    /// <summary>Overrides the tour's card position for this step; Default inherits it.</summary>
+    public static readonly DependencyProperty CardPositionProperty = Register(nameof(CardPosition), typeof(DaisyTourCardPosition), DaisyTourCardPosition.Default);
+    public DaisyTourCardPosition CardPosition { get => (DaisyTourCardPosition)GetValue(CardPositionProperty); set => SetValue(CardPositionProperty, value); }
     public static readonly DependencyProperty ContentTemplateProperty = Register(nameof(ContentTemplate), typeof(DataTemplate), null);
     public DataTemplate? ContentTemplate { get => (DataTemplate?)GetValue(ContentTemplateProperty); set => SetValue(ContentTemplateProperty, value); }
     public static readonly DependencyProperty AnnotationDefaultsProperty = Register(nameof(AnnotationDefaults), typeof(DaisyTourAnnotationStyle), null);

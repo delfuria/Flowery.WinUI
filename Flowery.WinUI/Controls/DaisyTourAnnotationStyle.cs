@@ -14,6 +14,8 @@ public enum DaisyTourArrowStyle { Default, Line, Block }
 public enum DaisyTourStrokeStyle { Default, Solid, Dotted, Dashed, DashDot, Custom }
 public enum DaisyTourAnnotationTail { Default, None, Speech, Thought }
 public enum DaisyTourAnchor { Auto, Top, Bottom, Left, Right, Center }
+/// <summary>The side of a route limit that a connector's course must stay on.</summary>
+public enum DaisyTourRouteSide { None, Above, Below, LeftOf, RightOf }
 
 /// <summary>A live dash pattern whose values are multiples of stroke thickness.</summary>
 public sealed class DaisyTourDashCollection : ObservableCollection<double>

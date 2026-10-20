@@ -22,9 +22,20 @@ public sealed partial class TourExamples : ScrollableExamplePage
         _standardSteps[0].PrepareAsync = PrepareOverviewAsync;
         _standardSteps[1].PrepareAsync = PrepareOverviewAsync;
         _standardSteps[2].PrepareAsync = PrepareDetailsAsync;
+        // Positions are API names and stay untranslated.
+        CardPositionSelector.ItemsSource = Enum.GetValues<DaisyTourCardPosition>()
+            .Where(position => position != DaisyTourCardPosition.Default).ToArray();
+        CardPositionSelector.SelectedItem = Tour.CardPosition;
     }
 
     public GalleryLocalization Localization => GalleryLocalization.Instance;
+
+    private void CardPosition_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (CardPositionSelector.SelectedItem is DaisyTourCardPosition position)
+            Tour.CardPosition = position;
+    }
+
     protected override ScrollViewer? ScrollViewer => MainScrollViewer;
 
     private async void StartTour_Click(object sender, RoutedEventArgs e)
@@ -181,7 +192,7 @@ public sealed partial class TourExamples : ScrollableExamplePage
             new DaisyTourAnnotation
             {
                 Path = DaisyTourAnnotationPath.Bezier,
-                ControlPoint1X = 0.2, ControlPoint1Y = -0.6, ControlPoint2X = 0.8, ControlPoint2Y = 0.6
+                ControlPoint1X = 0.25, ControlPoint1Y = -0.25, ControlPoint2X = 0.75, ControlPoint2Y = 0.25
             },
             new DaisyTourAnnotation { Path = DaisyTourAnnotationPath.Custom, Geometry = wave }
         };
@@ -199,6 +210,42 @@ public sealed partial class TourExamples : ScrollableExamplePage
             annotation.StrokeThickness = 4;
             step.Annotations.Add(annotation);
             Tour.Steps.Add(step);
+        }
+        await Tour.StartAsync();
+    }
+
+    private async void RouteLimit_Click(object sender, RoutedEventArgs e)
+    {
+        Tour.Steps.Clear();
+        // The fixed coordinate is taken once; unlike the control limit, it does not follow scrolling.
+        var keepClear = KeepClearArea.TransformToVisual(XamlRoot.Content)
+            .TransformBounds(new Rect(0, 0, KeepClearArea.ActualWidth, KeepClearArea.ActualHeight));
+        var limits = new[]
+        {
+            new DaisyTourAnnotation
+            {
+                Path = DaisyTourAnnotationPath.Elbow, CornerRadius = 12,
+                RouteLimit = KeepClearArea, RouteLimitSide = DaisyTourRouteSide.Above
+            },
+            new DaisyTourAnnotation
+            {
+                Path = DaisyTourAnnotationPath.SCurve, RouteLimit = KeepClearArea, RouteLimitSide = DaisyTourRouteSide.Below
+            },
+            new DaisyTourAnnotation
+            {
+                Path = DaisyTourAnnotationPath.Elbow, CornerRadius = 12,
+                RouteLimitCoordinate = keepClear.Top - 12, RouteLimitSide = DaisyTourRouteSide.Above
+            }
+        };
+        foreach (var annotation in limits)
+        {
+            annotation.StrokeThickness = 4;
+            var title = annotation.RouteLimit is null ? nameof(DaisyTourAnnotation.RouteLimitCoordinate) : annotation.RouteLimitSide.ToString();
+            // The lower left and upper right targets have the keep-clear area between them.
+            AddAnnotationStep(title, annotation, connectTargets: true, NestedTarget);
+            // Both ends of the coordinate demo lie below the limit, so its route bridges over it.
+            if (annotation.RouteLimit is null) annotation.Target = LimitTarget;
+            BindText(Tour.Steps[^1], DaisyTourStep.DescriptionProperty, "Gallery_Tour_RouteLimitDescription");
         }
         await Tour.StartAsync();
     }
