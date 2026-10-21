@@ -229,6 +229,10 @@ Without `Width` and `Height`, its box is sized so that an inscribed ellipse encl
 
 The host uses the existing Daisy theme, motion policy, and five `DaisySize` values.
 `HighlightPadding` defaults to 6 DIP, and `HighlightCornerRadius` defaults to 8 DIP.
+The highlight frame uses the theme's Primary color.
+The step card's border uses the theme's text color at 45% opacity, so it stands apart from the highlight and from Base300 borders.
+`CardBorderBrush` replaces it for one tour; a `DaisyTourCardBorderBrush` resource replaces it for the whole application.
+Windows contrast themes use the system border color instead.
 
 ## Card placement
 

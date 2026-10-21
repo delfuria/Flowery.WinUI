@@ -193,7 +193,7 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         var width = Math.Max(0, style.Dimension(DaisyTourAnnotationStyle.HeadWidthProperty, 18));
         _body.Data = block
             ? BlockGeometry(TrimEndpoints(points, start == DaisyTourArrowHead.None ? 0 : length, end == DaisyTourArrowHead.None ? 0 : length),
-                Math.Max(1, style.Dimension(DaisyTourAnnotationStyle.BodyWidthProperty, 12)))
+                Math.Max(1, style.Dimension(DaisyTourAnnotationStyle.BodyWidthProperty, 6)))
             : route ?? ConnectorGeometry(source, target, path, curvature, points);
         _body.Fill = block ? fill : null;
         DrawHead(_startHead, start, points[0], points[1], length, width, fill);
