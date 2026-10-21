@@ -6,6 +6,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-10-21
+
+### Added
+
+- `DaisyTour` and `DaisyTourStep`: window-scoped guided tours with typed steps in XAML or C#, live target highlights, modal input, Next/Back/Skip/Finish, replay, cancellable target preparation through `PrepareAsync`, and one `Closed` outcome per session (`Completed`, `Skipped`, `Cancelled`, `TargetUnavailable`) (#25, #27).
+- `DaisyTourAnnotation`: arrows, two-control connectors, stroke patterns, clouds, speech bubbles, and custom geometry or templates, with defaults inherited from the tour and the step (#25, #27).
+- Connector paths `Straight`, `Curved`, `Elbow`, `SCurve`, `Bezier`, and `Custom`, plus route limits that keep an area between both ends clear (#27).
+- `DaisyTour.CardPosition` and `DaisyTourStep.CardPosition` place the step card beside the target or at one of nine fixed window positions. The card avoids connector courses where it can (#27).
+- Tour navigation texts in all 12 languages; the DaisyTour documentation in `llms-static/DaisyTour.md` (#27, #28).
+- Gallery: a Guided Tour page with demos for steps, arrows, lines, clouds and bubbles, custom shapes, regions, paths, and route limits (#27).
+- Gallery, Kiosk, and Photos embed the Flowery icon and show it on their windows (#29).
+
+### Changed
+
+- Dependabot groups GitHub Actions updates into one pull request. CI generates the documentation site on every pull request (#29).
+- Runtime tests that have no room for their scenario report a warning instead of a failure (#27).
+
+### Fixed
+
+- Daisy controls no longer subscribe to `LayoutUpdated` on load. On a large restored window, these subscriptions could block the UI thread and crash the app during startup (#27).
+- `DaisySteps` renders its native templates correctly, and compact indicators no longer reserve an empty label row (#27).
+
 ## [1.6.0] - 2026-10-19
 
 ### Added
