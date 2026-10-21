@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `DaisyTourAnnotation`: arrows, two-control connectors, stroke patterns, clouds, speech bubbles, and custom geometry or templates, with defaults inherited from the tour and the step (#25, #27).
 - Connector paths `Straight`, `Curved`, `Elbow`, `SCurve`, `Bezier`, and `Custom`, plus route limits that keep an area between both ends clear (#27).
 - `DaisyTour.CardPosition` and `DaisyTourStep.CardPosition` place the step card beside the target or at one of nine fixed window positions. The card avoids connector courses where it can (#27).
+- `DaisyTour.CardBorderBrush` and the `DaisyTourCardBorderBrush` resource set the step card's border. By default, it uses the muted theme text color, which stands apart from the Primary highlight frame.
 - Tour navigation texts in all 12 languages; the DaisyTour documentation in `llms-static/DaisyTour.md` (#27, #28).
 - Gallery: a Guided Tour page with demos for steps, arrows, lines, clouds and bubbles, custom shapes, regions, paths, and route limits (#27).
 - Gallery, Kiosk, and Photos embed the Flowery icon and show it on their windows (#29).

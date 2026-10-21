@@ -130,6 +130,9 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
     /// <summary>Places the step card beside the target (default) or at a fixed window position.</summary>
     public static readonly DependencyProperty CardPositionProperty = Register(nameof(CardPosition), typeof(DaisyTourCardPosition), DaisyTourCardPosition.Target);
     public DaisyTourCardPosition CardPosition { get => (DaisyTourCardPosition)GetValue(CardPositionProperty); set => SetValue(CardPositionProperty, value); }
+    /// <summary>Border of the step card. Without a brush, the <c>DaisyTourCardBorderBrush</c> resource or the muted theme text color applies.</summary>
+    public static readonly DependencyProperty CardBorderBrushProperty = Register(nameof(CardBorderBrush), typeof(Brush), null);
+    public Brush? CardBorderBrush { get => (Brush?)GetValue(CardBorderBrushProperty); set => SetValue(CardBorderBrushProperty, value); }
     public static readonly DependencyProperty NextTextProperty = Register(nameof(NextText), typeof(string), null);
     public string? NextText { get => (string?)GetValue(NextTextProperty); set => SetValue(NextTextProperty, value); }
     public static readonly DependencyProperty BackTextProperty = Register(nameof(BackText), typeof(string), null);
@@ -631,8 +634,8 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         _card.FlowDirection = FloweryLocalization.Instance.IsRtl ? FlowDirection.RightToLeft : FlowDirection;
         _progress.FlowDirection = FlowDirection.LeftToRight;
         _card.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
-        _card.BorderBrush = DaisyResourceLookup.GetBorderBrush();
         var foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+        _card.BorderBrush = CardBorder(foreground);
         _title.Foreground = _description.Foreground = _count.Foreground = foreground;
         _outline.Stroke = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
         _backdrop.Fill = new SolidColorBrush(Color.FromArgb(170, 0, 0, 0));
@@ -657,6 +660,19 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             AutomationProperties.SetName(_card, $"{step.Title}. {step.Description}. {_count.Text}. {string.Join(". ", descriptions)}");
         }
         QueueGeometry();
+    }
+
+    // The card frame differs from the Primary highlight and from the Base300 borders around it.
+    // Windows contrast colors take precedence over the decorative color.
+    private Brush CardBorder(Brush foreground)
+    {
+        if (Flowery.Services.DaisySystemAppearance.HighContrast)
+            return DaisyResourceLookup.GetBorderBrush();
+        if ((CardBorderBrush ?? DaisyResourceLookup.TryGetControlBrush(this, "DaisyTour", "CardBorderBrush")) is { } brush)
+            return brush;
+        return foreground is SolidColorBrush solid
+            ? new SolidColorBrush(solid.Color) { Opacity = 0.45 }
+            : DaisyResourceLookup.GetBorderBrush();
     }
 
     private void LayoutCard()
