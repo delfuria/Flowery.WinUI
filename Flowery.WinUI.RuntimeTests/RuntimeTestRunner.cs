@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -96,18 +97,33 @@ namespace Flowery.WinUI.RuntimeTests
 
         private static async Task<RuntimeTestCaseResult> ExecuteTestCaseAsync(DispatcherQueue dispatcher, RuntimeTestCase testCase)
         {
+            var layoutTrace = new List<string>();
+            var elapsed = Stopwatch.StartNew();
             try
             {
                 await RunOnDispatcherAsync(dispatcher, async () =>
                 {
-                    var instance = Activator.CreateInstance(testCase.TestClassType)
-                                   ?? throw new InvalidOperationException($"Failed to create {testCase.TestClassType.FullName}.");
-
-                    var result = testCase.Method.Invoke(instance, null);
-                    if (result is Task task)
+                    // Temporary opt-in diagnosis for the intermittent CI tour timeouts.
+                    if (testCase.TestClassType.Name.StartsWith("Given_DaisyTour", StringComparison.Ordinal))
                     {
-                        await task.ConfigureAwait(true);
+                        DaisyTourLayout.DiagnosticTrace = message =>
+                        {
+                            if (layoutTrace.Count == 64) layoutTrace.RemoveAt(0);
+                            layoutTrace.Add($"{elapsed.ElapsedMilliseconds} ms: {message}");
+                        };
                     }
+                    try
+                    {
+                        var instance = Activator.CreateInstance(testCase.TestClassType)
+                                       ?? throw new InvalidOperationException($"Failed to create {testCase.TestClassType.FullName}.");
+
+                        var result = testCase.Method.Invoke(instance, null);
+                        if (result is Task task)
+                        {
+                            await task.ConfigureAwait(true);
+                        }
+                    }
+                    finally { DaisyTourLayout.DiagnosticTrace = null; }
                 }).ConfigureAwait(false);
 
                 return RuntimeTestCaseResult.Success(testCase.Name);
@@ -116,6 +132,9 @@ namespace Flowery.WinUI.RuntimeTests
             {
                 // An inconclusive test could not set up its scenario in this environment; it warns instead of failing.
                 var cause = ex is TargetInvocationException { InnerException: { } inner } ? inner : ex;
+                if (cause is TimeoutException && layoutTrace.Count > 0)
+                    return RuntimeTestCaseResult.Failed(testCase.Name,
+                        new TimeoutException("Tour layout trace (last 64 entries):\n" + string.Join("\n", layoutTrace), ex));
                 return cause is AssertInconclusiveException
                     ? RuntimeTestCaseResult.Inconclusive(testCase.Name, cause)
                     : RuntimeTestCaseResult.Failed(testCase.Name, ex);
