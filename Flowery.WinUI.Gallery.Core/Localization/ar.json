@@ -1,4 +1,12 @@
 {
+  "Gallery_Tour_Design": "تصميم الجولة",
+  "Gallery_Tour_DesignReplay": "تشغيل التصميم المطبق",
+  "Gallery_Tour_DesignDescription": "حدد تعليقًا توضيحيًا وغيّر نمطه. يحفظ التطبيق التصميم؛ ويحفظ التصدير المسودة بصيغة JSON.",
+  "Gallery_Tour_Import": "استيراد JSON",
+  "Gallery_Tour_Export": "تصدير JSON",
+  "Gallery_Tour_Imported": "تم استيراد الملف. طبّق التصميم للاحتفاظ به.",
+  "Gallery_Tour_Exported": "تم تصدير المسودة. طبّق التصميم للاحتفاظ به.",
+  "Gallery_Tour_FileError": "فشلت عملية ملف التعريف.",
   "Sidebar_Tour": "جولة إرشادية",
   "Gallery_Tour_Description": "تتبع الجولة عناصر التحكم أثناء التمرير وتغييرات التخطيط. اختر جولة، واستخدم السابق والتالي، أو اضغط Escape للتخطي.",
   "Gallery_Tour_Start": "بدء / إعادة",

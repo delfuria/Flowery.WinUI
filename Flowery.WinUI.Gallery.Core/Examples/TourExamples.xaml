@@ -14,6 +14,8 @@
                                Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <daisy:WrapPanel Orientation="Horizontal" Spacing="8">
                         <daisy:DaisyButton Content="{Binding [Gallery_Tour_Start]}" Variant="Primary" Click="StartTour_Click" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_Design]}" Click="DesignTour_Click" AutomationProperties.AutomationId="TourDesignerOpen" />
+                        <daisy:DaisyButton Content="{Binding [Gallery_Tour_DesignReplay]}" Click="ReplayDesign_Click" />
                         <daisy:DaisyButton Content="{Binding [Gallery_Tour_Arrows]}" Click="Arrows_Click" />
                         <daisy:DaisyButton Content="{Binding [Gallery_Tour_Lines]}" Click="Lines_Click" />
                         <daisy:DaisyButton Content="{Binding [Gallery_Tour_Bubbles]}" Click="Bubbles_Click" />
@@ -22,6 +24,9 @@
                         <daisy:DaisyButton Content="{Binding [Gallery_Tour_Paths]}" Click="Paths_Click" />
                         <daisy:DaisyButton Content="{Binding [Gallery_Tour_RouteLimit]}" Click="RouteLimit_Click" />
                     </daisy:WrapPanel>
+                    <TextBlock x:Name="DesignerStatus" TextWrapping="Wrap"
+                               AutomationProperties.LiveSetting="Polite"
+                               Foreground="{ThemeResource DaisyBaseContentBrush}" />
                     <ComboBox x:Name="CardPositionSelector" Header="{Binding [Gallery_Tour_CardPosition]}" MinWidth="200"
                               SelectionChanged="CardPosition_SelectionChanged" />
                 </StackPanel>
@@ -73,5 +78,6 @@
                 <daisy:DaisyTourStep Id="deferred-tab" />
             </daisy:DaisyTour.Steps>
         </daisy:DaisyTour>
+        <daisy:DaisyTour x:Name="EditorTour" Id="gallery-tour" />
     </Grid>
 </local:ScrollableExamplePage>

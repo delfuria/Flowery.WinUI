@@ -29,6 +29,15 @@
   <Import Project="..\Flowery.WinUI.GalleryAssets.props" />
   <Import Project="..\Flowery.WinUI.PatternAssets.props" />
 
+  <!-- The Gallery uses variable fonts. Other apps still use the shared static fonts. -->
+  <ItemGroup>
+    <Content Remove="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\NotoSans-Regular.ttf" />
+    <Content Remove="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\NotoSansArabic-Regular.ttf" />
+    <Content Remove="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\NotoSansSC-Regular.otf" />
+    <Content Remove="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\NotoSansJP-Regular.otf" />
+    <Content Remove="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\NotoSansKR-Regular.otf" />
+  </ItemGroup>
+
   <!-- Without MSIX tooling, publish omits the app's own PRI file, and the app cannot load its XAML. -->
   <Target Name="PublishProjectPriFile" AfterTargets="ComputeResolvedFilesToPublishList">
     <ItemGroup>

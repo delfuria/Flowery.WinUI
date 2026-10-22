@@ -55,6 +55,12 @@ public sealed partial class DaisyTourStep : DependencyObject
     /// <summary>Overrides the tour's card position for this step; Default inherits it.</summary>
     public static readonly DependencyProperty CardPositionProperty = Register(nameof(CardPosition), typeof(DaisyTourCardPosition), DaisyTourCardPosition.Default);
     public DaisyTourCardPosition CardPosition { get => (DaisyTourCardPosition)GetValue(CardPositionProperty); set => SetValue(CardPositionProperty, value); }
+    /// <summary>Horizontal card position within its available travel area, from 0 to 1. NaN uses automatic placement.</summary>
+    public static readonly DependencyProperty CardXProperty = Register(nameof(CardX), typeof(double), double.NaN);
+    public double CardX { get => (double)GetValue(CardXProperty); set => SetValue(CardXProperty, value); }
+    /// <summary>Vertical card position within its available travel area, from 0 to 1. NaN uses automatic placement.</summary>
+    public static readonly DependencyProperty CardYProperty = Register(nameof(CardY), typeof(double), double.NaN);
+    public double CardY { get => (double)GetValue(CardYProperty); set => SetValue(CardYProperty, value); }
     public static readonly DependencyProperty ContentTemplateProperty = Register(nameof(ContentTemplate), typeof(DataTemplate), null);
     public DataTemplate? ContentTemplate { get => (DataTemplate?)GetValue(ContentTemplateProperty); set => SetValue(ContentTemplateProperty, value); }
     public static readonly DependencyProperty AnnotationDefaultsProperty = Register(nameof(AnnotationDefaults), typeof(DaisyTourAnnotationStyle), null);

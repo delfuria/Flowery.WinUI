@@ -27,7 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\*.ttf;..\Flowery.WinUI.Gallery.Core\Assets\Fonts\*.otf">
+    <Content Include="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\*.ttf;..\Flowery.WinUI.Gallery.Core\Assets\Fonts\*.otf"
+             Exclude="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\*-Variable.ttf">
       <Link>Assets\Fonts\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

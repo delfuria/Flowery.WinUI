@@ -127,7 +127,8 @@ public class Given_GalleryHeaderLayout
     private static async Task Arrange(FrameworkElement element)
     {
         var ready = new TaskCompletionSource();
-        Assert.IsTrue(element.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () => ready.SetResult()));
+        // Header changes run in Loaded/SizeChanged; UpdateLayout below settles the measured bounds.
+        Assert.IsTrue(element.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Normal, () => ready.SetResult()));
         await ready.Task.WaitAsync(TimeSpan.FromSeconds(5));
         element.UpdateLayout();
     }

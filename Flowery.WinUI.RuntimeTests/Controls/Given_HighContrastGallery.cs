@@ -55,7 +55,9 @@ public class Given_HighContrastGallery
         try
         {
             SetContrast(false);
-            await Load(page);
+            RuntimeTestHelpers.AttachToHost(page);
+            await RuntimeTestHelpers.EnsureLoadedAsync(page).WaitAsync(TimeSpan.FromSeconds(5));
+            page.UpdateLayout();
             var container = (StackPanel)page.FindName("FormContainer");
             var form = container.Children.Single();
             var input = Descendants(form).OfType<DaisyInput>().First();
@@ -64,10 +66,12 @@ public class Given_HighContrastGallery
             var labels = Descendants(form).OfType<TextBlock>()
                 .Where(label => DaisyHighContrast.GetContentOpacity(label) < 1).ToArray();
             Assert.IsTrue(labels.Length > 0);
+            foreach (var label in labels)
+                await RuntimeTestHelpers.EnsureLoadedAsync(label).WaitAsync(TimeSpan.FromSeconds(5));
             foreach (var contrast in new[] { true, false })
             {
+                // Theme and opacity handlers run synchronously once their elements are loaded.
                 SetContrast(contrast);
-                await Flush(page);
                 Assert.AreSame(form, container.Children.Single());
                 Assert.AreEqual("Retain this value", input.Text);
                 foreach (var label in labels)
@@ -76,10 +80,21 @@ public class Given_HighContrastGallery
         }
         finally
         {
-            RuntimeTestHelpers.GetHostPanel().Children.Clear();
-            await Flush(page);
-            SetContrast(originalContrast);
-            if (originalTheme is not null) DaisyThemeManager.ApplyTheme(originalTheme);
+            var unloaded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            void OnUnloaded(object sender, RoutedEventArgs args) => unloaded.TrySetResult();
+            var wasLoaded = page.IsLoaded;
+            if (wasLoaded) page.Unloaded += OnUnloaded;
+            try
+            {
+                RuntimeTestHelpers.GetHostPanel().Children.Clear();
+                if (wasLoaded) await unloaded.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            }
+            finally
+            {
+                page.Unloaded -= OnUnloaded;
+                SetContrast(originalContrast);
+                if (originalTheme is not null) DaisyThemeManager.ApplyTheme(originalTheme);
+            }
         }
     }
 
