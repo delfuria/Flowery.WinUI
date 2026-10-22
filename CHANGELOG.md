@@ -6,6 +6,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Gallery: new logo, a six-petal teal flower with one warm petal, shared by the Flowery family (Flowery.Uno uses blue, Flowery.NET violet). The executable and installer icon (`app_icon.ico`, now with 16-256 px sizes), the README banner, the Gallery and Kiosk SVG icon/splash assets, the Home banner and the sidebar keycap image are redrawn.
+
 ## [1.8.0] - 2026-10-22
 
 ### Added
