@@ -163,6 +163,8 @@
   "TourEditor_Title": "Tur tasarımcısı",
   "TourEditor_MoveCard": "Bilgi kartını taşı",
   "TourEditor_SaveCard": "Bu adım için kart konumunu kaydet",
+  "TourEditor_CollapseCard": "Bilgi kartını daralt",
+  "TourEditor_ExpandCard": "Bilgi kartını genişlet",
   "TourEditor_Field_cardX": "Kartın yatay konumu",
   "TourEditor_Field_cardY": "Kartın dikey konumu",
   "TourEditor_Step": "Adım",

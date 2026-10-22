@@ -163,6 +163,8 @@
   "TourEditor_Title": "Diseñador de recorridos",
   "TourEditor_MoveCard": "Mover la tarjeta informativa",
   "TourEditor_SaveCard": "Guardar la posición de la tarjeta para este paso",
+  "TourEditor_CollapseCard": "Contraer la tarjeta informativa",
+  "TourEditor_ExpandCard": "Expandir la tarjeta informativa",
   "TourEditor_Field_cardX": "Posición horizontal de la tarjeta",
   "TourEditor_Field_cardY": "Posición vertical de la tarjeta",
   "TourEditor_Step": "Paso",

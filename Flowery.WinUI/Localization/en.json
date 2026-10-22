@@ -165,6 +165,8 @@
   "TourEditor_Title": "Tour designer",
   "TourEditor_MoveCard": "Move information card",
   "TourEditor_SaveCard": "Save card position for this step",
+  "TourEditor_CollapseCard": "Collapse info card",
+  "TourEditor_ExpandCard": "Expand info card",
   "TourEditor_Field_cardX": "Card horizontal position",
   "TourEditor_Field_cardY": "Card vertical position",
   "TourEditor_Step": "Step",

@@ -128,7 +128,7 @@ public sealed partial class DaisyTour
         _previewProfile = draft;
         _card.TabFocusNavigation = KeyboardNavigationMode.Local;
         _surface.TabFocusNavigation = KeyboardNavigationMode.Cycle;
-        _surface.Children.Add(editor.HandleLayer);
+        _surface.Children.Insert(_surface.Children.IndexOf(_card), editor.HandleLayer);
         _surface.Children.Add(editor);
         try { await StartAsync(token); }
         catch

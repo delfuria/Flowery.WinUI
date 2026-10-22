@@ -163,6 +163,8 @@
   "TourEditor_Title": "Редактор туру",
   "TourEditor_MoveCard": "Перемістити інформаційну картку",
   "TourEditor_SaveCard": "Зберегти положення картки для цього кроку",
+  "TourEditor_CollapseCard": "Згорнути інформаційну картку",
+  "TourEditor_ExpandCard": "Розгорнути інформаційну картку",
   "TourEditor_Field_cardX": "Горизонтальне положення картки",
   "TourEditor_Field_cardY": "Вертикальне положення картки",
   "TourEditor_Step": "Крок",

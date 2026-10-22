@@ -165,6 +165,8 @@
   "TourEditor_Title": "مصمم الجولة",
   "TourEditor_MoveCard": "تحريك بطاقة المعلومات",
   "TourEditor_SaveCard": "حفظ موضع البطاقة لهذه الخطوة",
+  "TourEditor_CollapseCard": "طي بطاقة المعلومات",
+  "TourEditor_ExpandCard": "توسيع بطاقة المعلومات",
   "TourEditor_Field_cardX": "موضع البطاقة الأفقي",
   "TourEditor_Field_cardY": "موضع البطاقة العمودي",
   "TourEditor_Step": "الخطوة",

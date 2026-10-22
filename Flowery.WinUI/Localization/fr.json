@@ -163,6 +163,8 @@
   "TourEditor_Title": "Concepteur de visite",
   "TourEditor_MoveCard": "Déplacer la carte d’information",
   "TourEditor_SaveCard": "Enregistrer la position de la carte pour cette étape",
+  "TourEditor_CollapseCard": "Réduire la carte d’information",
+  "TourEditor_ExpandCard": "Développer la carte d’information",
   "TourEditor_Field_cardX": "Position horizontale de la carte",
   "TourEditor_Field_cardY": "Position verticale de la carte",
   "TourEditor_Step": "Étape",

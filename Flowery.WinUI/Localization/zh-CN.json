@@ -163,6 +163,8 @@
   "TourEditor_Title": "导览设计器",
   "TourEditor_MoveCard": "移动信息卡片",
   "TourEditor_SaveCard": "保存此步骤的卡片位置",
+  "TourEditor_CollapseCard": "收起信息卡片",
+  "TourEditor_ExpandCard": "展开信息卡片",
   "TourEditor_Field_cardX": "卡片水平位置",
   "TourEditor_Field_cardY": "卡片垂直位置",
   "TourEditor_Step": "步骤",

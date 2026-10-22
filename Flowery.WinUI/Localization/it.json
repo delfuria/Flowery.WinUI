@@ -163,6 +163,8 @@
   "TourEditor_Title": "Editor del percorso",
   "TourEditor_MoveCard": "Sposta la scheda informativa",
   "TourEditor_SaveCard": "Salva la posizione della scheda per questo passaggio",
+  "TourEditor_CollapseCard": "Comprimi la scheda informativa",
+  "TourEditor_ExpandCard": "Espandi la scheda informativa",
   "TourEditor_Field_cardX": "Posizione orizzontale della scheda",
   "TourEditor_Field_cardY": "Posizione verticale della scheda",
   "TourEditor_Step": "Passaggio",

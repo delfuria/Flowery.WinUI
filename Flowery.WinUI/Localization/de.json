@@ -163,6 +163,8 @@
   "TourEditor_Title": "Tour-Designer",
   "TourEditor_MoveCard": "Informationskarte verschieben",
   "TourEditor_SaveCard": "Kartenposition für diesen Schritt speichern",
+  "TourEditor_CollapseCard": "Infokarte einklappen",
+  "TourEditor_ExpandCard": "Infokarte aufklappen",
   "TourEditor_Field_cardX": "Horizontale Kartenposition",
   "TourEditor_Field_cardY": "Vertikale Kartenposition",
   "TourEditor_Step": "Schritt",

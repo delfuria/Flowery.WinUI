@@ -18,6 +18,13 @@ public sealed partial class DaisyTour
         Shape = DaisyButtonShape.Square, Size = DaisySize.Small, IsEnabled = false,
         Visibility = Visibility.Collapsed, VerticalAlignment = VerticalAlignment.Top
     };
+    private readonly DaisyButton _cardToggle = new()
+    {
+        Content = new FontIcon { Glyph = "\uE70E", FontFamily = new FontFamily("Segoe MDL2 Assets"), FontSize = 16 }, Variant = DaisyButtonVariant.Ghost,
+        Shape = DaisyButtonShape.Square, Size = DaisySize.Small,
+        Visibility = Visibility.Collapsed, VerticalAlignment = VerticalAlignment.Top
+    };
+    private bool _cardCollapsed;
     private (Pointer Pointer, Point PointerOrigin, Point CardOrigin, Point? PreviousPosition)? _cardDrag;
     private Point? _temporaryCardPosition;
     private Rect _configuredCardBounds;
@@ -30,8 +37,11 @@ public sealed partial class DaisyTour
     {
         FlowerySizeManager.SetIgnoreGlobalSize(_cardMove, true);
         FlowerySizeManager.SetIgnoreGlobalSize(_cardSave, true);
+        FlowerySizeManager.SetIgnoreGlobalSize(_cardToggle, true);
         AutomationProperties.SetAutomationId(_cardMove, "DaisyTourMoveCard");
         AutomationProperties.SetAutomationId(_cardSave, "DaisyTourSaveCard");
+        AutomationProperties.SetAutomationId(_cardToggle, "DaisyTourToggleCard");
+        _cardToggle.Click += OnCardToggle;
         _cardSave.Click += OnCardSave;
         _cardMove.AddHandler(PointerPressedEvent, new PointerEventHandler(OnCardMovePressed), true);
         _cardMove.AddHandler(PointerMovedEvent, new PointerEventHandler(OnCardMoveMoved), true);
@@ -43,12 +53,41 @@ public sealed partial class DaisyTour
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         header.Children.Add(_title);
         Grid.SetColumn(_cardMove, 1);
         header.Children.Add(_cardMove);
         Grid.SetColumn(_cardSave, 2);
         header.Children.Add(_cardSave);
+        Grid.SetColumn(_cardToggle, 3);
+        header.Children.Add(_cardToggle);
         return header;
+    }
+
+    private void OnCardToggle(object sender, RoutedEventArgs args)
+    {
+        if (_editor is not { } editor || _session is not { Busy: false } session) return;
+        editor.CancelGesture();
+        CancelCardDrag();
+        _cardCollapsed = !_cardCollapsed;
+        RefreshPresentation();
+        UpdateGeometry(session);
+        _cardToggle.Focus(FocusState.Programmatic);
+    }
+
+    private void SetCardCompact(bool compact)
+    {
+        var visibility = compact ? Visibility.Collapsed : Visibility.Visible;
+        _description.Visibility = _customContent.Visibility = _count.Visibility = _buttons.Visibility = visibility;
+        _progressScroll.Visibility = visibility;
+        _title.TextWrapping = compact ? TextWrapping.NoWrap : TextWrapping.Wrap;
+        _title.TextTrimming = compact ? TextTrimming.CharacterEllipsis : TextTrimming.None;
+        _cardLayout.RowSpacing = compact ? 0 : 12;
+        if (compact)
+        {
+            _card.Width = Math.Min(360, _card.Width);
+            _cardLayout.Padding = new Thickness(8);
+        }
     }
 
     private void OnCardMovePressed(object sender, PointerRoutedEventArgs args)
@@ -99,7 +138,8 @@ public sealed partial class DaisyTour
     private void MoveCardTo(Point point)
     {
         if (_editor is null || _session is not { Busy: false } session) return;
-        var travel = CardTravelArea(new Size(CardBounds.Width, CardBounds.Height));
+        if (Math.Abs(point.X - CardBounds.X) < 0.01 && Math.Abs(point.Y - CardBounds.Y) < 0.01) return;
+        var travel = CardTravelArea(new Size(_intendedCardBounds.Width, _intendedCardBounds.Height));
         var x = Math.Clamp(point.X, travel.Left, travel.Right);
         var y = Math.Clamp(point.Y, travel.Top, travel.Bottom);
         // Moving the card only clears the view. Saving is a separate authored change.
@@ -131,6 +171,12 @@ public sealed partial class DaisyTour
                 CardBounds.Width, CardBounds.Height);
         }
         _intendedCardBounds = CardBounds;
+        if (_editor is not null && _cardCollapsed)
+        {
+            SetCardCompact(true);
+            _card.Measure(new Size(_card.Width, _card.MaxHeight));
+            CardBounds = new Rect(CardBounds.X, CardBounds.Y, _card.DesiredSize.Width, _card.DesiredSize.Height);
+        }
         CardBounds = AvoidEditorInspector(CardBounds);
         _cardSave.IsEnabled = _session is { Editing: true, Busy: false } && CardPositionChanged;
     }

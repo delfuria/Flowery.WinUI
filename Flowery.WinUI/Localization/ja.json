@@ -163,6 +163,8 @@
   "TourEditor_Title": "ツアーデザイナー",
   "TourEditor_MoveCard": "情報カードを移動",
   "TourEditor_SaveCard": "このステップのカード位置を保存",
+  "TourEditor_CollapseCard": "情報カードを折りたたむ",
+  "TourEditor_ExpandCard": "情報カードを展開",
   "TourEditor_Field_cardX": "カードの水平位置",
   "TourEditor_Field_cardY": "カードの垂直位置",
   "TourEditor_Step": "ステップ",

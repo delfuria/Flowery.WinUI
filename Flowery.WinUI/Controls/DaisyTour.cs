@@ -275,7 +275,8 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             session.Busy = false;
             RefreshPresentation();
             ShowCurrentIndicator();
-            _next.Focus(FocusState.Programmatic);
+            if (_cardCollapsed) _cardToggle.Focus(FocusState.Programmatic);
+            else _next.Focus(FocusState.Programmatic);
             _surface.IsTabStop = false;
             NotifyState();
             var peer = FrameworkElementAutomationPeer.FromElement(this) ?? FrameworkElementAutomationPeer.CreatePeerForElement(this);
@@ -701,6 +702,12 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         _cardMove.Visibility = session.Editing ? Visibility.Visible : Visibility.Collapsed;
         _cardMove.IsEnabled = session.Editing && !session.Busy;
         _cardSave.Visibility = _cardMove.Visibility;
+        _cardToggle.Visibility = _cardMove.Visibility;
+        _cardToggle.IsEnabled = session.Editing && !session.Busy;
+        if (_cardToggle.Content is FontIcon toggleIcon) toggleIcon.Glyph = _cardCollapsed ? "\uE70D" : "\uE70E";
+        var toggleCardLabel = FloweryLocalization.GetStringInternal(_cardCollapsed ? "TourEditor_ExpandCard" : "TourEditor_CollapseCard");
+        AutomationProperties.SetName(_cardToggle, toggleCardLabel);
+        ToolTipService.SetToolTip(_cardToggle, toggleCardLabel);
         _cardSave.IsEnabled = session.Editing && !session.Busy && CardPositionChanged;
         var moveCardLabel = FloweryLocalization.GetStringInternal("TourEditor_MoveCard");
         AutomationProperties.SetName(_cardMove, moveCardLabel);
@@ -739,6 +746,8 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
 
     private void LayoutCard()
     {
+        // Measure the expanded card first so editor-only folding cannot change authored coordinates.
+        SetCardCompact(false);
         var width = Math.Max(1, Math.Min(480, _visibleArea.Width - 24));
         _card.Width = width;
         _card.MaxHeight = Math.Max(1, _visibleArea.Height - 24);
@@ -764,6 +773,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
 
     private void ShowCurrentIndicator()
     {
+        if (_cardCollapsed) return;
         if (CurrentIndex >= 0 && CurrentIndex < _progressItems.Count)
             _progressItems[CurrentIndex].StartBringIntoView(new BringIntoViewOptions { AnimationDesired = false, HorizontalAlignmentRatio = 0.5 });
     }
@@ -869,6 +879,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         if (!ReferenceEquals(_session, session)) return;
         var stepId = (session.PendingStep ?? CurrentStep)?.Id;
         _session = null;
+        _cardCollapsed = false;
         _updateQueued = false;
         try { session.Cancellation.Cancel(); }
         catch (AggregateException cancellationError) { error ??= cancellationError; }
