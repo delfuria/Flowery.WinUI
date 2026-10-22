@@ -536,6 +536,48 @@ public class Given_HighContrast
             Assert.IsTrue(allowed.Contains((brush.Color.R, brush.Color.G, brush.Color.B)), $"{scenario} contains a fixed decorative color {brush.Color}.");
     }
 
+    [TestMethod]
+    public void When_AContrastHandlerThrows_LaterHandlersStillHearTheChange()
+    {
+        var reached = false;
+        EventHandler throwing = (_, _) => throw new InvalidOperationException("Simulated failing subscriber");
+        EventHandler later = (_, _) => reached = true;
+        DaisySystemAppearance.ColorsChanged += throwing;
+        DaisySystemAppearance.ColorsChanged += later;
+        try
+        {
+            DaisySystemAppearance.RaiseColorsChanged();
+            Assert.IsTrue(reached, "A handler subscribed after a failing one still hears the contrast change.");
+        }
+        finally
+        {
+            DaisySystemAppearance.ColorsChanged -= throwing;
+            DaisySystemAppearance.ColorsChanged -= later;
+        }
+    }
+
+    [TestMethod]
+    public void When_AThemeChangedHandlerThrows_LaterHandlersStillHearTheChange()
+    {
+        var original = DaisyThemeManager.CurrentThemeName ?? DaisyThemeManager.BaseThemeName;
+        string? reached = null;
+        EventHandler<string> throwing = (_, _) => throw new InvalidOperationException("Simulated failing subscriber");
+        EventHandler<string> later = (_, name) => reached = name;
+        DaisyThemeManager.ThemeChanged += throwing;
+        DaisyThemeManager.ThemeChanged += later;
+        try
+        {
+            DaisyThemeManager.SetCurrentTheme(original + "-test");
+            Assert.AreEqual(original + "-test", reached, "A handler subscribed after a failing one still hears the theme change.");
+        }
+        finally
+        {
+            DaisyThemeManager.ThemeChanged -= throwing;
+            DaisyThemeManager.ThemeChanged -= later;
+            DaisyThemeManager.SetCurrentTheme(original);
+        }
+    }
+
     private static Windows.UI.Color ColorOf(string key) => ((SolidColorBrush)DaisyResourceLookup.GetBrush(key)).Color;
 
     private static void AssertColor(string role, Brush brush) => Assert.AreEqual(ColorOf(role), ((SolidColorBrush)brush).Color, role);
@@ -551,8 +593,8 @@ public class Given_HighContrast
     private static void SetContrast(bool enabled)
     {
         typeof(DaisySystemAppearance).GetField("_highContrast", BindingFlags.Static | BindingFlags.NonPublic)!.SetValue(null, enabled);
-        var handlers = (EventHandler?)typeof(DaisySystemAppearance).GetField("ColorsChanged", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null);
-        handlers?.Invoke(null, EventArgs.Empty);
+        // The same path as a real contrast change: a handler that throws does not keep the others from running.
+        DaisySystemAppearance.RaiseColorsChanged();
     }
 
     private static IEnumerable<DependencyObject> Descendants(DependencyObject root)

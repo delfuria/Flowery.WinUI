@@ -73,9 +73,12 @@ internal static class DaisySystemAppearance
         var animationsEnabled = _motionPreferenceOverride ?? Settings.AnimationsEnabled;
         var colorsChanged = highContrast != _highContrast || highContrast;
         _highContrast = highContrast;
-        if (colorsChanged) ColorsChanged?.Invoke(null, EventArgs.Empty);
+        if (colorsChanged) RaiseColorsChanged();
         ApplyMotionPreference(animationsEnabled);
     }
+
+    internal static void RaiseColorsChanged() =>
+        FloweryEventRaiser.Raise(ColorsChanged, null, EventArgs.Empty, nameof(ColorsChanged));
 
     internal static void SetMotionPreference(bool enabled)
     {
