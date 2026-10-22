@@ -29,6 +29,40 @@ jobs:
           test -s docs/home.html
           test -s docs/style.css
 
+  # Mirrors the release build-library job so packaging breaks surface in PRs.
+  build-library:
+    runs-on: windows-2025-vs2026
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.402
+      - name: Create NuGet package
+        run: ./scripts/build_nuget.ps1 -Configuration Release -OutputDir ./artifacts -SdkVersion '10.0.402'
+      - name: Run native Windows tests
+        run: ./scripts/test_windows.ps1 -Configuration Release -SdkVersion '10.0.402' -SkipBuild
+      - name: Run native Kiosk tests
+        run: ./scripts/test_kiosk.ps1 -Configuration Release -SdkVersion '10.0.402' -SkipBuild
+
+  # Mirrors the release build-gallery job so self-contained publishing is verified in PRs.
+  build-gallery:
+    runs-on: windows-2025-vs2026
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.402
+      - name: Publish Gallery App (Windows)
+        run: ./scripts/publish_windows.ps1 -Configuration Release -RuntimeIdentifier win-x64 -SelfContained:$true -OutputDir publish -SdkVersion '10.0.402'
+      - name: Publish Kiosk App (Windows)
+        run: ./scripts/publish_windows.ps1 -Application Kiosk -Configuration Release -OutputDir publish-kiosk -SdkVersion '10.0.402'
+
   windows:
     runs-on: windows-2025-vs2026
     strategy:
