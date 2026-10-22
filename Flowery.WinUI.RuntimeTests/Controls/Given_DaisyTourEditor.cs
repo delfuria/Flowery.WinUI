@@ -432,17 +432,18 @@ public class Given_DaisyTourEditor
             scenario.Editor.Discard();
             scenario.Tour.Cancel();
             RuntimeTestHelpers.GetHostPanel().Children.Remove(scenario.Root);
-            await SettleAsync(scenario.Root);
+            // Cancellation already detaches the session; cleanup only needs dispatcher turns for unloading.
+            await SettleAsync(scenario.Root, DispatcherQueuePriority.Normal);
         }
     }
 
-    private static async Task SettleAsync(FrameworkElement element)
+    private static async Task SettleAsync(FrameworkElement element, DispatcherQueuePriority priority = DispatcherQueuePriority.Low)
     {
         element.UpdateLayout();
         for (var turn = 0; turn < 2; turn++)
         {
             var ready = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            Assert.IsTrue(element.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () => ready.TrySetResult()));
+            Assert.IsTrue(element.DispatcherQueue.TryEnqueue(priority, () => ready.TrySetResult()));
             await ready.Task.WaitAsync(Timeout);
         }
     }

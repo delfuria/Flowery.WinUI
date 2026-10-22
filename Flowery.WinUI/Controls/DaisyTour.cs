@@ -352,7 +352,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
     {
         if (_updateQueued || _session is not { Busy: false } session) return;
         _updateQueued = true;
-        if (!DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, async () =>
+        if (!DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Normal, async () =>
         {
             if (!ReferenceEquals(_session, session) || session.Busy) { _updateQueued = false; return; }
             try
