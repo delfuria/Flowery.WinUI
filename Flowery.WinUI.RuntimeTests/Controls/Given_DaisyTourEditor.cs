@@ -322,10 +322,11 @@ public class Given_DaisyTourEditor
             var body = HandleCenter(scenario.Editor, "DaisyTourHandleBodyWidth");
             var headLength = HandleCenter(scenario.Editor, "DaisyTourHandleHeadLength");
             var headWidth = HandleCenter(scenario.Editor, "DaisyTourHandleHeadWidth");
-            Assert.AreEqual(geometry.BodyWidth, DaisyTourHandleLayer.ProjectWidth(body, geometry.BodyCenter, normal), 0.001);
+            // Visible width grips sit 18 DIP outside the editable boundary; projections remain logical.
+            Assert.AreEqual(geometry.BodyWidth + 36, DaisyTourHandleLayer.ProjectWidth(body, geometry.BodyCenter, normal), 0.001);
             Assert.AreEqual(geometry.HeadLength, DaisyTourHandleLayer.ProjectHeadLength(headLength, geometry), 0.001);
             var headNormal = new Point(-geometry.HeadDirection.Y, geometry.HeadDirection.X);
-            Assert.AreEqual(geometry.HeadWidth, DaisyTourHandleLayer.ProjectWidth(headWidth, geometry.HeadTip, headNormal), 0.001);
+            Assert.AreEqual(geometry.HeadWidth + 36, DaisyTourHandleLayer.ProjectWidth(headWidth, geometry.HeadTip, headNormal), 0.001);
         });
 
     [TestMethod]

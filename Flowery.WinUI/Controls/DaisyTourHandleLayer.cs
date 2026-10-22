@@ -18,6 +18,7 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
     private Pointer? _pointer;
     private Point _dragOrigin;
     private Point _dragPointerOrigin;
+    private Point _dragDisplayOffset;
 
     internal DaisyTourHandleLayer(DaisyTourEditor editor)
     {
@@ -27,9 +28,10 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
         {
             Microsoft.UI.Xaml.Shapes.Shape marker = kind is HandleKind.Source or HandleKind.Target
                 ? new Ellipse()
-                : new Polygon { Points = [new Point(5, 1), new Point(9, 5), new Point(5, 9), new Point(1, 5)] };
-            marker.Width = 10;
-            marker.Height = 10;
+                : new Polygon { Points = [new Point(7, 1), new Point(13, 7), new Point(7, 13), new Point(1, 7)] };
+            marker.Width = 14;
+            marker.Height = 14;
+            marker.Fill = new SolidColorBrush(Colors.DarkOrange);
             marker.StrokeThickness = 1.5;
             marker.IsHitTestVisible = false;
             var transparent = new SolidColorBrush(Colors.Transparent);
@@ -106,27 +108,33 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
         var tipDirection = geometry.HeadDirection;
         var tipNormal = new Point(-tipDirection.Y, tipDirection.X);
         var headBase = Add(geometry.HeadTip, tipDirection, -geometry.HeadLength);
-        SetHandle(HandleKind.Source, geometryForEdit.Source, true);
-        SetHandle(HandleKind.Target, geometryForEdit.Target, true);
+        var course = tour.AnnotationPresenters[selected].Course;
+        var sourceDirection = course.Count > 1 ? Unit(course[0], course[1]) : along;
+        var targetDirection = course.Count > 1 ? Unit(course[^2], course[^1]) : along;
+        var sourceClearance = 18 + Math.Max(geometry.BodyWidth, tour.AnnotationPresenters[selected].CourseThickness) / 2;
+        var targetClearance = 18 + Math.Max(geometry.HeadWidth, tour.AnnotationPresenters[selected].CourseThickness) / 2;
+        SetHandle(HandleKind.Source, geometryForEdit.Source, true, new Point(sourceDirection.Y * sourceClearance, -sourceDirection.X * sourceClearance));
+        SetHandle(HandleKind.Target, geometryForEdit.Target, true, new Point(targetDirection.Y * targetClearance, -targetDirection.X * targetClearance));
         SetHandle(HandleKind.Curvature, curve, geometry.Path == DaisyTourAnnotationPath.Curved && !geometry.HasRouteLimit && Distance(geometry.Source, geometry.Target) > 0.001);
-        SetHandle(HandleKind.FirstControl, geometry.FirstControl, geometry.Path == DaisyTourAnnotationPath.Bezier && !geometry.HasRouteLimit);
-        SetHandle(HandleKind.SecondControl, geometry.SecondControl, geometry.Path == DaisyTourAnnotationPath.Bezier && !geometry.HasRouteLimit);
-        SetHandle(HandleKind.BodyWidth, Add(geometry.BodyCenter, normal, geometry.BodyWidth / 2), geometry.IsBlock);
-        SetHandle(HandleKind.HeadLength, headBase, geometry.HasEndHead);
-        SetHandle(HandleKind.HeadWidth, Add(headBase, tipNormal, geometry.HeadWidth / 2), geometry.HasEndHead);
+        SetHandle(HandleKind.FirstControl, geometry.FirstControl, geometry.Path == DaisyTourAnnotationPath.Bezier && !geometry.HasRouteLimit, Add(default, below, -18));
+        SetHandle(HandleKind.SecondControl, geometry.SecondControl, geometry.Path == DaisyTourAnnotationPath.Bezier && !geometry.HasRouteLimit, Add(default, below, -18));
+        SetHandle(HandleKind.BodyWidth, Add(geometry.BodyCenter, normal, geometry.BodyWidth / 2), geometry.IsBlock, Add(default, normal, 18));
+        SetHandle(HandleKind.HeadLength, headBase, geometry.HasEndHead, Add(default, tipNormal, -(18 + geometry.HeadWidth / 2)));
+        SetHandle(HandleKind.HeadWidth, Add(headBase, tipNormal, geometry.HeadWidth / 2), geometry.HasEndHead, Add(default, tipNormal, 18));
     }
 
-    private void SetHandle(HandleKind kind, Point point, bool visible)
+    private void SetHandle(HandleKind kind, Point point, bool visible, Point displayOffset = default)
     {
         var button = _handles[kind];
         button.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+        // Drag deltas and keyboard edits use the real geometry, not the offset marker.
         _positions[kind] = point;
-        SetLeft(button, point.X - button.Width / 2);
-        SetTop(button, point.Y - button.Height / 2);
+        if (_drag == kind) displayOffset = _dragDisplayOffset;
+        SetLeft(button, point.X + displayOffset.X - button.Width / 2);
+        SetTop(button, point.Y + displayOffset.Y - button.Height / 2);
         if (button.Content is Microsoft.UI.Xaml.Shapes.Shape marker)
         {
-            marker.Fill = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
-            marker.Stroke = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
+            marker.Stroke = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
         }
         var name = FloweryLocalization.GetStringInternal("TourEditor_Handle_" + kind);
         AutomationProperties.SetName(button, name);
@@ -146,6 +154,7 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
         _dragGeometry = geometry;
         _pointer = args.Pointer;
         _dragOrigin = _positions[kind];
+        _dragDisplayOffset = new Point(GetLeft(button) + button.Width / 2 - _dragOrigin.X, GetTop(button) + button.Height / 2 - _dragOrigin.Y);
         _dragPointerOrigin = args.GetCurrentPoint(this).Position;
         _editor.BeginGesture();
         button.CapturePointer(args.Pointer);
