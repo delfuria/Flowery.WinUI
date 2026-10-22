@@ -18,34 +18,35 @@ public class Given_HighContrast
             SetContrast(false);
             var detached = new Border { Width = 80, Height = 40 };
             var loaded = RuntimeTestHelpers.EnsureLoadedAsync(detached);
-            await Load(new DaisyCard { Content = detached });
+            // Opacity updates are synchronous; only Loaded/Unloaded delivery needs a dispatcher turn.
+            await Load(new DaisyCard { Content = detached }, DispatcherQueuePriority.Normal);
             await loaded.WaitAsync(TimeSpan.FromSeconds(5));
             var unloaded = new TaskCompletionSource();
             detached.Unloaded += (_, _) => unloaded.TrySetResult();
             RuntimeTestHelpers.GetHostPanel().Children.Clear();
             await unloaded.Task.WaitAsync(TimeSpan.FromSeconds(5));
-            await Flush(detached);
+            await Flush(detached, DispatcherQueuePriority.Normal);
             Assert.IsNotNull(detached.XamlRoot, "Native elements can retain their root after removal.");
             DaisyHighContrast.SetContentOpacity(detached, 0.6);
             SetContrast(true);
-            await Flush(detached);
+            await Flush(detached, DispatcherQueuePriority.Normal);
             Assert.AreEqual(0.6, detached.Opacity, 0.000001, "Detached content must not subscribe to system changes.");
             SetContrast(false);
             foreach (var element in new FrameworkElement[] { new Border { Width = 80, Height = 40 }, new Grid { Width = 80, Height = 40 } })
             {
                 var childLoaded = RuntimeTestHelpers.EnsureLoadedAsync(element);
                 var card = new DaisyCard { Content = element };
-                await Load(card);
+                await Load(card, DispatcherQueuePriority.Normal);
                 await childLoaded.WaitAsync(TimeSpan.FromSeconds(5));
                 Assert.IsNotNull(VisualTreeHelper.GetParent(element));
                 Assert.AreSame(card.XamlRoot, element.XamlRoot);
                 DaisyHighContrast.SetContentOpacity(element, 0.6);
                 Assert.AreEqual(0.6, element.Opacity, 0.000001);
                 SetContrast(true);
-                await Flush(card);
+                await Flush(card, DispatcherQueuePriority.Normal);
                 Assert.AreEqual(1d, element.Opacity, $"{element.GetType().Name}, IsLoaded={element.IsLoaded}");
                 SetContrast(false);
-                await Flush(card);
+                await Flush(card, DispatcherQueuePriority.Normal);
                 Assert.AreEqual(0.6, element.Opacity, 0.000001);
             }
         }
@@ -607,17 +608,17 @@ public class Given_HighContrast
         }
     }
 
-    private static async Task Load(FrameworkElement element)
+    private static async Task Load(FrameworkElement element, DispatcherQueuePriority priority = DispatcherQueuePriority.Low)
     {
         RuntimeTestHelpers.AttachToHost(element);
         await RuntimeTestHelpers.EnsureLoadedAsync(element).WaitAsync(TimeSpan.FromSeconds(5));
-        await Flush(element);
+        await Flush(element, priority);
     }
 
-    private static async Task Flush(FrameworkElement element)
+    private static async Task Flush(FrameworkElement element, DispatcherQueuePriority priority = DispatcherQueuePriority.Low)
     {
         var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        Assert.IsTrue(element.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () => completion.TrySetResult()));
+        Assert.IsTrue(element.DispatcherQueue.TryEnqueue(priority, () => completion.TrySetResult()));
         await completion.Task.WaitAsync(TimeSpan.FromSeconds(5));
         element.UpdateLayout();
     }

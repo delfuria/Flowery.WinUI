@@ -1,4 +1,12 @@
 {
+  "Gallery_Tour_Design": "设计导览",
+  "Gallery_Tour_DesignReplay": "播放已应用的设计",
+  "Gallery_Tour_DesignDescription": "选择注释并更改其样式。应用可保留设计；导出可将草稿保存为 JSON。",
+  "Gallery_Tour_Import": "导入 JSON",
+  "Gallery_Tour_Export": "导出 JSON",
+  "Gallery_Tour_Imported": "已导入配置。请应用以保留此设计。",
+  "Gallery_Tour_Exported": "已导出草稿。请应用以保留此设计。",
+  "Gallery_Tour_FileError": "配置操作失败。",
   "Sidebar_Tour": "引导教程",
   "Gallery_Tour_Description": "教程在滚动和布局变化时跟随现有控件。选择教程，使用上一步和下一步，或按 Escape 跳过。",
   "Gallery_Tour_Start": "开始 / 重播",

@@ -1,4 +1,12 @@
 {
+  "Gallery_Tour_Design": "Tour gestalten",
+  "Gallery_Tour_DesignReplay": "Übernommene Gestaltung abspielen",
+  "Gallery_Tour_DesignDescription": "Wählen Sie eine Anmerkung und ändern Sie ihren Stil. Übernehmen behält die Gestaltung; Export speichert den Entwurf als JSON.",
+  "Gallery_Tour_Import": "JSON importieren",
+  "Gallery_Tour_Export": "JSON exportieren",
+  "Gallery_Tour_Imported": "Profil importiert. Übernehmen behält diese Gestaltung.",
+  "Gallery_Tour_Exported": "Entwurf exportiert. Übernehmen behält diese Gestaltung.",
+  "Gallery_Tour_FileError": "Der Profilvorgang ist fehlgeschlagen.",
   "Sidebar_Tour": "Geführte Tour",
   "Gallery_Tour_Description": "Die Tour folgt vorhandenen Steuerelementen beim Scrollen und bei Layoutänderungen. Wählen Sie eine Tour, verwenden Sie Zurück und Weiter oder drücken Sie Escape zum Überspringen.",
   "Gallery_Tour_Start": "Starten / wiederholen",

@@ -1,8 +1,33 @@
 # Noto Sans Fonts for Multilingual Support
 
-This folder contains Noto Sans font files for CJK (Chinese, Japanese, Korean) and Arabic character support in the Flowery.WinUI Gallery.
+This folder contains Noto Sans fonts for the multilingual Flowery.WinUI Gallery.
 
-## Included Fonts
+## Active Variable Fonts
+
+`GalleryResources.xaml` uses these variable fonts. Each file contains weights 100 through 900, including Regular (400), SemiBold (600), and Bold (700).
+
+| File | Font family | Script coverage |
+| --- | --- | --- |
+| `NotoSans-Variable.ttf` | Noto Sans | Latin, Cyrillic, Greek |
+| `NotoSansSC-Variable.ttf` | Noto Sans SC | Simplified Chinese |
+| `NotoSansJP-Variable.ttf` | Noto Sans JP | Japanese |
+| `NotoSansKR-Variable.ttf` | Noto Sans KR | Korean |
+| `NotoSansArabic-Variable.ttf` | Noto Sans Arabic | Arabic |
+| `NotoSansHebrew-Variable.ttf` | Noto Sans Hebrew | Hebrew |
+
+WinUI selects the weight within each file through `FontWeight`. Separate static files do not provide automatic weight selection for a file-based `FontFamily`.
+
+These files are unmodified downloads from [Google Fonts revision 45e3d5269e4a17d823f6d84470bc084dc5ae46f6](https://github.com/google/fonts/tree/45e3d5269e4a17d823f6d84470bc084dc5ae46f6/ofl).
+The source folders are `notosans`, `notosanssc`, `notosansjp`, `notosanskr`, `notosansarabic`, and `notosanshebrew`.
+Upstream filenames use `[wght]` or `[wdth,wght]` instead of `-Variable`.
+Each family has an accompanying `*-OFL.txt` file with its copyright notice and license.
+
+`Flowery.WinUI.GalleryAssets.props` copies these files and licenses to build and publish output.
+
+## Existing Static Fonts
+
+The Gallery app excludes these static fonts from build and publish output.
+They remain in this shared folder for other apps, including Photos.
 
 | File | Purpose | Size |
 | --- | --- | --- |
@@ -23,7 +48,7 @@ These fonts are from the [Google Noto Fonts](https://fonts.google.com/noto) proj
 ✅ **Free to use** - in personal and commercial projects  
 ✅ **Free to distribute** - can be bundled with applications  
 ✅ **Free to modify** - derivative works are allowed  
-✅ **No attribution required** - though appreciated  
+The copyright notice and license must accompany redistributed font files.
 
 The OFL is one of the most permissive font licenses available. The full license text is available at:
 https://scripts.sil.org/OFL
@@ -39,15 +64,16 @@ The Gallery embeds these fonts to render its language dropdown and localized UI 
 
 ## Configuration
 
-Fonts are configured in `App.xaml` as a FontFamily resource with fallback chain:
+`GalleryResources.xaml` defines the font family and fallback chain:
 
 ```xml
 <FontFamily x:Key="NotoSansFamily">
-    ms-appx:///Assets/Fonts/NotoSans-Regular.ttf#Noto Sans,
-    ms-appx:///Assets/Fonts/NotoSansSC-Regular.otf#Noto Sans CJK SC,
-    ms-appx:///Assets/Fonts/NotoSansJP-Regular.otf#Noto Sans CJK JP,
-    ms-appx:///Assets/Fonts/NotoSansKR-Regular.otf#Noto Sans CJK KR,
-    ms-appx:///Assets/Fonts/NotoSansArabic-Regular.ttf#Noto Sans Arabic
+    ms-appx:///Assets/Fonts/NotoSans-Variable.ttf#Noto Sans,
+    ms-appx:///Assets/Fonts/NotoSansSC-Variable.ttf#Noto Sans SC,
+    ms-appx:///Assets/Fonts/NotoSansJP-Variable.ttf#Noto Sans JP,
+    ms-appx:///Assets/Fonts/NotoSansKR-Variable.ttf#Noto Sans KR,
+    ms-appx:///Assets/Fonts/NotoSansArabic-Variable.ttf#Noto Sans Arabic,
+    ms-appx:///Assets/Fonts/NotoSansHebrew-Variable.ttf#Noto Sans Hebrew
 </FontFamily>
 ```
 

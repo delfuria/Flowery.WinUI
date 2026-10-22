@@ -155,11 +155,12 @@
     </Style>
 
     <FontFamily x:Key="NotoSansFamily">
-        ms-appx:///Assets/Fonts/NotoSans-Regular.ttf#Noto Sans,
-        ms-appx:///Assets/Fonts/NotoSansSC-Regular.otf#Noto Sans CJK SC,
-        ms-appx:///Assets/Fonts/NotoSansJP-Regular.otf#Noto Sans CJK JP,
-        ms-appx:///Assets/Fonts/NotoSansKR-Regular.otf#Noto Sans CJK KR,
-        ms-appx:///Assets/Fonts/NotoSansArabic-Regular.ttf#Noto Sans Arabic
+        ms-appx:///Assets/Fonts/NotoSans-Variable.ttf#Noto Sans,
+        ms-appx:///Assets/Fonts/NotoSansSC-Variable.ttf#Noto Sans SC,
+        ms-appx:///Assets/Fonts/NotoSansJP-Variable.ttf#Noto Sans JP,
+        ms-appx:///Assets/Fonts/NotoSansKR-Variable.ttf#Noto Sans KR,
+        ms-appx:///Assets/Fonts/NotoSansArabic-Variable.ttf#Noto Sans Arabic,
+        ms-appx:///Assets/Fonts/NotoSansHebrew-Variable.ttf#Noto Sans Hebrew
     </FontFamily>
 
     <Style TargetType="TextBlock">

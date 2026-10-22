@@ -1,4 +1,12 @@
 {
+  "Gallery_Tour_Design": "Turu tasarla",
+  "Gallery_Tour_DesignReplay": "Uygulanan tasarımı oynat",
+  "Gallery_Tour_DesignDescription": "Bir açıklama seçip stilini değiştirin. Uygula tasarımı korur; dışa aktar taslağı JSON olarak kaydeder.",
+  "Gallery_Tour_Import": "JSON içe aktar",
+  "Gallery_Tour_Export": "JSON dışa aktar",
+  "Gallery_Tour_Imported": "Profil içe aktarıldı. Tasarımı korumak için uygulayın.",
+  "Gallery_Tour_Exported": "Taslak dışa aktarıldı. Tasarımı korumak için uygulayın.",
+  "Gallery_Tour_FileError": "Profil işlemi başarısız oldu.",
   "Sidebar_Tour": "Rehberli tur",
   "Gallery_Tour_Description": "Tur, kaydırma ve düzen değişikliklerinde mevcut denetimleri izler. Bir tur seçin, Geri ve İleri düğmelerini kullanın veya atlamak için Escape tuşuna basın.",
   "Gallery_Tour_Start": "Başlat / yeniden oynat",

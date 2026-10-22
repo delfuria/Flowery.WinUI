@@ -1,4 +1,12 @@
 {
+  "Gallery_Tour_Design": "עיצוב הסיור",
+  "Gallery_Tour_DesignReplay": "הפעלת העיצוב שהוחל",
+  "Gallery_Tour_DesignDescription": "בחרו הערה ושנו את הסגנון שלה. החלה שומרת את העיצוב; ייצוא שומר את הטיוטה כ־JSON.",
+  "Gallery_Tour_Import": "ייבוא JSON",
+  "Gallery_Tour_Export": "ייצוא JSON",
+  "Gallery_Tour_Imported": "הפרופיל יובא. החילו את העיצוב כדי לשמור אותו.",
+  "Gallery_Tour_Exported": "הטיוטה יוצאה. החילו את העיצוב כדי לשמור אותו.",
+  "Gallery_Tour_FileError": "פעולת הפרופיל נכשלה.",
   "Sidebar_Tour": "סיור מודרך",
   "Gallery_Tour_Description": "הסיור עוקב אחר הפקדים בזמן גלילה ושינויי פריסה. בחרו סיור, השתמשו בהקודם ובהבא, או לחצו Escape לדילוג.",
   "Gallery_Tour_Start": "התחלה / הפעלה חוזרת",

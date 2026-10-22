@@ -343,7 +343,7 @@ namespace Flowery.Controls
             base.OnContentChanged(oldContent, newContent);
 
             // Capture the user's content before we replace it with our own visual tree
-            if (newContent != null && !ReferenceEquals(newContent, _rootGrid))
+            if (newContent != null && !ReferenceEquals(newContent, _rootGrid) && !ReferenceEquals(newContent, NavigationButton))
             {
                 _userContent = newContent;
             }
@@ -456,6 +456,7 @@ namespace Flowery.Controls
         #region Internal Properties
         internal bool IsFirst { get; set; }
         internal bool IsCompact { get; set; }
+        internal Button? NavigationButton { get; init; }
         internal bool IsLast { get; set; }
         internal int Index { get; set; }
         internal Orientation Orientation { get; set; } = Orientation.Horizontal;
@@ -478,7 +479,12 @@ namespace Flowery.Controls
             // For vertical: grid with indicator + connectors, label on side
             RebuildGridLayout();
 
-            Content = _rootGrid;
+            if (NavigationButton is { } button)
+            {
+                button.Content = _rootGrid;
+                Content = button;
+            }
+            else Content = _rootGrid;
         }
 
         private void RebuildGridLayout()

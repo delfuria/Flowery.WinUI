@@ -1,4 +1,12 @@
 {
+  "Gallery_Tour_Design": "Design tour",
+  "Gallery_Tour_DesignReplay": "Replay applied design",
+  "Gallery_Tour_DesignDescription": "Select an annotation and change its style. Apply keeps the design; export saves the draft to JSON.",
+  "Gallery_Tour_Import": "Import JSON",
+  "Gallery_Tour_Export": "Export JSON",
+  "Gallery_Tour_Imported": "Profile imported. Apply to keep this design.",
+  "Gallery_Tour_Exported": "Draft exported. Apply to keep this design.",
+  "Gallery_Tour_FileError": "The profile operation failed.",
   "Sidebar_Tour": "Guided Tour",
   "Gallery_Tour_Description": "A reusable tour follows live controls through scrolling and layout changes. Choose a tour, use Back and Next, or press Escape to skip.",
   "Gallery_Tour_Start": "Start / replay",

@@ -99,7 +99,8 @@ internal static partial class DaisyTourLayout
     internal static async Task SettleAsync(FrameworkElement host, CancellationToken token)
     {
         var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        if (!host.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+        // Layout is forced explicitly; low-priority queue work can starve during active rendering.
+        if (!host.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Normal, () =>
         {
             host.XamlRoot?.Content.UpdateLayout();
             host.UpdateLayout();

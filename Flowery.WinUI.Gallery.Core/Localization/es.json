@@ -1,4 +1,12 @@
 {
+  "Gallery_Tour_Design": "Diseñar recorrido",
+  "Gallery_Tour_DesignReplay": "Reproducir diseño aplicado",
+  "Gallery_Tour_DesignDescription": "Seleccione una anotación y cambie su estilo. Aplicar conserva el diseño; exportar guarda el borrador en JSON.",
+  "Gallery_Tour_Import": "Importar JSON",
+  "Gallery_Tour_Export": "Exportar JSON",
+  "Gallery_Tour_Imported": "Perfil importado. Aplique este diseño para conservarlo.",
+  "Gallery_Tour_Exported": "Borrador exportado. Aplique este diseño para conservarlo.",
+  "Gallery_Tour_FileError": "La operación del perfil falló.",
   "Sidebar_Tour": "Visita guiada",
   "Gallery_Tour_Description": "La visita sigue los controles al desplazarse y al cambiar el diseño. Elija una visita, use Atrás y Siguiente o pulse Escape para omitirla.",
   "Gallery_Tour_Start": "Iniciar / repetir",
