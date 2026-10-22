@@ -36,6 +36,7 @@ namespace Flowery.Controls
         private long _paddingChangedToken;
         private long _verticalContentAlignmentChangedToken;
         private long _automationNameChangedToken;
+        private long _minHeightChangedToken;
         private CancellationTokenSource? _floatingPlaceholderCts;
         private Brush? _baseInputBackground;
         private Brush? _baseInputBorderBrush;
@@ -63,6 +64,8 @@ namespace Flowery.Controls
                 _verticalContentAlignmentChangedToken = RegisterPropertyChangedCallback(Control.VerticalContentAlignmentProperty, OnVerticalContentAlignmentChanged);
             if (_automationNameChangedToken == 0)
                 _automationNameChangedToken = RegisterPropertyChangedCallback(Microsoft.UI.Xaml.Automation.AutomationProperties.NameProperty, OnAutomationNameChanged);
+            if (_minHeightChangedToken == 0)
+                _minHeightChangedToken = RegisterPropertyChangedCallback(FrameworkElement.MinHeightProperty, OnMinHeightChanged);
 
             if (_rootGrid != null)
             {
@@ -107,6 +110,11 @@ namespace Flowery.Controls
             {
                 UnregisterPropertyChangedCallback(Microsoft.UI.Xaml.Automation.AutomationProperties.NameProperty, _automationNameChangedToken);
                 _automationNameChangedToken = 0;
+            }
+            if (_minHeightChangedToken != 0)
+            {
+                UnregisterPropertyChangedCallback(FrameworkElement.MinHeightProperty, _minHeightChangedToken);
+                _minHeightChangedToken = 0;
             }
             DetachPendingFocusHandler();
         }
@@ -1761,6 +1769,13 @@ namespace Flowery.Controls
         }
 
         private void OnAutomationNameChanged(DependencyObject sender, DependencyProperty property) => UpdateInputAccessibility();
+
+        private void OnMinHeightChanged(DependencyObject sender, DependencyProperty property)
+        {
+            // The input border and the text box take their heights from MinHeight (DaisyTextArea derives it from its rows).
+            if (_isLoaded)
+                ApplySizing(Application.Current?.Resources);
+        }
 
         private void UpdateInputAccessibility()
         {

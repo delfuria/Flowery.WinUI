@@ -416,7 +416,7 @@ namespace Flowery.Controls
             if (_currentThemeName is { } name)
                 ApplyThemeCore(name, true);
             else
-                ThemeChanged?.Invoke(null, BaseThemeName);
+                FloweryEventRaiser.Raise(ThemeChanged, null, BaseThemeName, nameof(ThemeChanged));
         }
 
         private static bool ApplyThemeCore(string themeName, bool force)
@@ -502,11 +502,12 @@ namespace Flowery.Controls
 
                 TrySetRequestedTheme(app, def.Info.IsDark ? ApplicationTheme.Dark : ApplicationTheme.Light);
 
-                ThemeChanged?.Invoke(null, def.Info.Name);
+                FloweryEventRaiser.Raise(ThemeChanged, null, def.Info.Name, nameof(ThemeChanged));
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                FloweryLogging.Log(FloweryLogLevel.Error, "Theming", $"[DaisyThemeManager] Applying '{themeName}' failed: {ex.Message}", ex);
                 return false;
             }
         }
@@ -716,7 +717,7 @@ namespace Flowery.Controls
                 return;
 
             _currentThemeName = themeName;
-            ThemeChanged?.Invoke(null, themeName);
+            FloweryEventRaiser.Raise(ThemeChanged, null, themeName, nameof(ThemeChanged));
         }
 
         /// <summary>
