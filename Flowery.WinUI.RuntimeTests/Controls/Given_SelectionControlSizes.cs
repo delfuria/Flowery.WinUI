@@ -140,7 +140,7 @@ namespace Flowery.WinUI.RuntimeTests.Controls
         }
 
         [TestMethod]
-        public async Task When_CheckedKnobMatchesTheTrack_ItGetsContrastAnOutlineAndAVariantBorder()
+        public async Task When_CheckedKnobMatchesTheTrack_ItGetsContrastAnOutlineAndKeepsTheNeutralBorder()
         {
             // A track painted in the Secondary color hides a Secondary knob unless the toggle adjusts it.
             var secondary = (SolidColorBrush)DaisyResourceLookup.GetBrush("DaisySecondaryBrush");
@@ -157,6 +157,23 @@ namespace Flowery.WinUI.RuntimeTests.Controls
                 "The adjusted knob stands out from the track.");
             Assert.AreEqual(1, knob.StrokeThickness, "The knob has an outline.");
             Assert.IsInstanceOfType<SolidColorBrush>(knob.Stroke, "The outline has a color.");
+            Assert.AreNotEqual(secondary.Color, ((SolidColorBrush)track.BorderBrush).Color,
+                "A variant border the color of the track would not be seen, so the neutral border stays.");
+        }
+
+        [TestMethod]
+        public async Task When_VariantColorStandsOutFromTheTrack_TheCheckedTrackBorderTakesIt()
+        {
+            // The Gallery runs the tests in its saved theme, so the track takes a color far from Secondary.
+            var secondary = (SolidColorBrush)DaisyResourceLookup.GetBrush("DaisySecondaryBrush");
+            var trackColor = FloweryColorHelpers.IsDark(secondary.Color) ? Microsoft.UI.Colors.White : Microsoft.UI.Colors.Black;
+            var toggle = new DaisyToggle { Variant = DaisyToggleVariant.Secondary, IsOn = true };
+            toggle.Resources["DaisyToggleTrackBackground"] = new SolidColorBrush(trackColor);
+            RuntimeTestHelpers.AttachToHost(toggle);
+            await RuntimeTestHelpers.EnsureLoadedAsync(toggle);
+            await Task.Delay(100);
+
+            var (track, _) = GetToggleParts(toggle);
             Assert.AreEqual(secondary.Color, ((SolidColorBrush)track.BorderBrush).Color, "The checked track border takes the variant color.");
 
             toggle.IsOn = false;

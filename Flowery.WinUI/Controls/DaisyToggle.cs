@@ -17,8 +17,8 @@ namespace Flowery.Controls
     {
         // A clearly visible CIE76 color difference. A luminance ratio such as WCAG 3:1 would change most variant
         // knobs in the bundled themes, because their colors share the track's lightness and differ in hue.
-        private const double MinimumKnobDifference = 20;
-        private const double KnobOutlineOpacity = 0.25;
+        private const double MinimumTrackDifference = 20;
+        private const double KnobOutlineOpacity = 0.5;
 
         private Border? _switchArea;
         private Ellipse? _knob;
@@ -380,8 +380,9 @@ namespace Flowery.Controls
                 _knob.Fill = knobOverride
                     ?? EnsureKnobContrast(variantBrush ?? contentBrush, trackBrush);
 
-                // The checked track border takes the variant color, like DaisyUI.
-                _switchArea.BorderBrush = trackBorderOverride ?? variantBrush ?? halfContentBrush;
+                // The checked track border takes the variant color, like DaisyUI, where that color stands out
+                // from the track; otherwise the neutral border stays.
+                _switchArea.BorderBrush = trackBorderOverride ?? WhenDistinctFromTrack(variantBrush, trackBrush) ?? halfContentBrush;
             }
             else
             {
@@ -419,9 +420,19 @@ namespace Flowery.Controls
             if (_headerPresenter != null) _headerPresenter.Foreground = labelBrush;
         }
 
+        // Returns null where the brush color is too close to the track to be seen.
+        private static Brush? WhenDistinctFromTrack(Brush? brush, Brush track)
+        {
+            if (brush is SolidColorBrush solid && track is SolidColorBrush trackSolid
+                && FloweryColorHelpers.GetColorDifference(solid.Color, trackSolid.Color) < MinimumTrackDifference)
+                return null;
+
+            return brush;
+        }
+
         /// <summary>
         /// Returns <paramref name="knob"/>, darkened on a light track or lightened on a dark one in 10 % steps
-        /// (at most 60 %) until it differs from the track by <see cref="MinimumKnobDifference"/> (CIE76 Delta E).
+        /// (at most 60 %) until it differs from the track by <see cref="MinimumTrackDifference"/> (CIE76 Delta E).
         /// The steps keep the knob's hue, so a variant knob stays recognizable.
         /// </summary>
         private static Brush EnsureKnobContrast(Brush knob, Brush track)
@@ -431,7 +442,7 @@ namespace Flowery.Controls
 
             var darken = !FloweryColorHelpers.IsDark(trackSolid.Color);
             var color = knobSolid.Color;
-            for (var step = 1; step <= 6 && FloweryColorHelpers.GetColorDifference(color, trackSolid.Color) < MinimumKnobDifference; step++)
+            for (var step = 1; step <= 6 && FloweryColorHelpers.GetColorDifference(color, trackSolid.Color) < MinimumTrackDifference; step++)
             {
                 color = darken
                     ? FloweryColorHelpers.Darken(knobSolid.Color, step * 0.1)

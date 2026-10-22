@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Toggle: the knob stays visible in themes whose variant color is close to the track color (e.g. Secondary in the HappyHues themes). It always has a thin BaseContent outline (none in high contrast mode), the checked track border takes the variant color, and a checked knob whose color is too close to the track (CIE76 color difference below 20) is darkened on a light track or lightened on a dark one, keeping its hue. Knob brushes set by the app are used as given.
+- Toggle: the knob stays visible in themes whose variant color is close to the track color (e.g. Secondary in the HappyHues themes). It always has a thin BaseContent outline (50 % opacity, none in high contrast mode), the checked track border takes the variant color where that color stands out from the track, and a checked knob whose color is too close to the track (CIE76 color difference below 20) is darkened on a light track or lightened on a dark one, keeping its hue. Knob brushes set by the app are used as given.
 
 ### Fixed
 
