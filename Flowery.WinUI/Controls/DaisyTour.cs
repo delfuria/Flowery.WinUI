@@ -35,6 +35,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         internal CancellationTokenRegistration Registration;
         internal DaisyTourStep? PendingStep;
         internal bool Busy;
+        internal bool Editing;
     }
 
     private readonly Popup _popup = new() { IsLightDismissEnabled = false, ShouldConstrainToRootBounds = true };
@@ -175,10 +176,12 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         cancellationToken.ThrowIfCancellationRequested();
         if (CompositionVisualTree.GetConnectedRoot(this) is not { } root)
         {
+            if (_editor is not null) throw new InvalidOperationException("The tour must belong to a window before opening the editor.");
             Closed?.Invoke(this, new(DaisyTourCloseReason.TargetUnavailable, steps[0].Id));
             return;
         }
         var session = new Session(steps, CancellationTokenSource.CreateLinkedTokenSource(cancellationToken));
+        session.Editing = _editor is not null;
         _session = session;
         session.PreviousFocus = FocusManager.GetFocusedElement(root) is DependencyObject focus ? new(focus) : null;
         _popup.XamlRoot = root;
@@ -211,6 +214,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         if (_session is not { Busy: false } session) return Task.CompletedTask;
         if (CurrentIndex == session.Steps.Length - 1)
         {
+            if (session.Editing) return Task.CompletedTask;
             Close(session, DaisyTourCloseReason.Completed);
             return Task.CompletedTask;
         }
@@ -230,6 +234,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
     private async Task TransitionAsync(Session session, int index)
     {
         session.Busy = true;
+        _editor?.SetTransitioning(true);
         session.PendingStep = session.Steps[index];
         ClearStepObservers(session);
         _annotations.Children.Clear();
@@ -252,7 +257,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             var targets = GetTargets(step);
             // The highlight frame around each target is revealed together with the target.
             await DaisyTourLayout.PrepareTargetsAsync(targets, _surface, token,
-                Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness);
+                Math.Max(0, double.IsFinite(EffectiveHighlightPadding) ? EffectiveHighlightPadding : 0) + _outline.StrokeThickness);
             if (!ReferenceEquals(_session, session)) return;
             _previousStepCard = CardBounds;
             CurrentIndex = index;
@@ -284,6 +289,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         finally
         {
             session.Busy = false;
+            if (ReferenceEquals(_session, session)) _editor?.SetTransitioning(false);
         }
     }
 
@@ -389,17 +395,22 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             }
         }
         _visibleArea = _popup.XamlRoot is { } root ? DaisyTourLayout.VisibleArea(root) : new Rect(0, 0, _surface.Width, _surface.Height);
+        _editor?.ArrangeInspector(new Size(_visibleArea.Width, _visibleArea.Height), new Point(_visibleArea.X, _visibleArea.Y));
         LayoutCard();
         _card.Measure(new Size(_card.Width, _card.MaxHeight));
         var allTargets = visible;
         foreach (var hole in holes) allTargets.Union(hole);
         // The card is placed in the visible part of the window, in coordinates relative to that part.
         var viewport = new Size(_visibleArea.Width, _visibleArea.Height);
-        var position = step.CardPosition == DaisyTourCardPosition.Default ? CardPosition : step.CardPosition;
-        var frame = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness;
+        var stepPosition = StepSetting(step, DaisyTourStep.CardPositionProperty, step.CardPosition, DaisyTourCardPosition.Default);
+        var position = stepPosition == DaisyTourCardPosition.Default ? EffectiveCardPosition : stepPosition;
+        var placement = StepSetting(step, DaisyTourStep.PlacementProperty, step.Placement, DaisyTourPlacement.Auto);
+        var frame = Math.Max(0, double.IsFinite(EffectiveHighlightPadding) ? EffectiveHighlightPadding : 0) + _outline.StrokeThickness;
         var targets = Shift(allTargets, -_visibleArea.X, -_visibleArea.Y);
-        CardBounds = Shift(DaisyTourLayout.PlaceStationary(position, _card.DesiredSize, viewport, Inflate(targets, frame))
-            ?? DaisyTourLayout.Place(targets, _card.DesiredSize, viewport, step.Placement), _visibleArea.X, _visibleArea.Y);
+        CardBounds = _editor is { } editor
+            ? PlaceEditorCard(editor, _card.DesiredSize)
+            : Shift(DaisyTourLayout.PlaceStationary(position, _card.DesiredSize, viewport, Inflate(targets, frame))
+                ?? DaisyTourLayout.Place(targets, _card.DesiredSize, viewport, placement), _visibleArea.X, _visibleArea.Y);
         Canvas.SetLeft(_card, CardBounds.X);
         Canvas.SetTop(_card, CardBounds.Y);
         var cutout = new GeometryGroup { FillRule = FillRule.EvenOdd };
@@ -408,7 +419,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         var expandedHoles = new List<Rect>();
         foreach (var hole in holes)
         {
-            var padding = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0);
+            var padding = Math.Max(0, double.IsFinite(EffectiveHighlightPadding) ? EffectiveHighlightPadding : 0);
             var expanded = new Rect(hole.X - padding, hole.Y - padding, hole.Width + 2 * padding, hole.Height + 2 * padding);
             // Adjacent/overlapping targets share one highlight. Disjoint cutouts must
             // never toggle each other's opacity in the even-odd backdrop geometry.
@@ -425,9 +436,9 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         }
         foreach (var expanded in expandedHoles)
         {
-            var geometry = RoundedRectangle(expanded, HighlightCornerRadius);
+            var geometry = RoundedRectangle(expanded, EffectiveHighlightCornerRadius);
             cutout.Children.Add(geometry);
-            outlines.Children.Add(RoundedRectangle(expanded, HighlightCornerRadius));
+            outlines.Children.Add(RoundedRectangle(expanded, EffectiveHighlightCornerRadius));
         }
         _backdrop.Data = cutout;
         _outline.Data = outlines;
@@ -435,14 +446,14 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         // A card covering a course between controls, or the area its route limit keeps clear, moves away.
         // Courses from the card itself follow it.
         var courses = CourseBounds(step, bounds, -_visibleArea.X, -_visibleArea.Y);
-        if (courses.Count > 0 && DaisyTourLayout.Covers(Shift(CardBounds, -_visibleArea.X, -_visibleArea.Y), courses))
+        if (_editor is null && courses.Count > 0 && DaisyTourLayout.Covers(Shift(CardBounds, -_visibleArea.X, -_visibleArea.Y), courses))
         {
             var obstacles = new List<Rect>(courses);
             foreach (var hole in holes) obstacles.Add(Shift(Inflate(hole, frame), -_visibleArea.X, -_visibleArea.Y));
             Rect? kept = _previousStepCard.Width > 0
                 ? new Rect(_previousStepCard.X - _visibleArea.X, _previousStepCard.Y - _visibleArea.Y, _card.DesiredSize.Width, _card.DesiredSize.Height)
                 : null;
-            if (DaisyTourLayout.AvoidObstacles(position, step.Placement, targets, _card.DesiredSize, viewport, obstacles, kept) is { } clear)
+            if (DaisyTourLayout.AvoidObstacles(position, placement, targets, _card.DesiredSize, viewport, obstacles, kept) is { } clear)
             {
                 CardBounds = Shift(clear, _visibleArea.X, _visibleArea.Y);
                 Canvas.SetLeft(_card, CardBounds.X);
@@ -451,6 +462,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             }
         }
         GeometryUpdated?.Invoke(this, EventArgs.Empty);
+        _editor?.UpdateHandles();
         return true;
     }
 
@@ -524,17 +536,18 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             presenter.Width = _surface.Width;
             presenter.Height = _surface.Height;
             var foreground = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
-            var scale = Size switch
+            var scale = EffectiveSize switch
             {
                 DaisySize.ExtraSmall => 0.8, DaisySize.Small => 0.9, DaisySize.Large => 1.15, DaisySize.ExtraLarge => 1.3, _ => 1
             };
             var end = annotation.Target is { } target ? bounds[target] : TargetBounds;
-            var kind = DaisyTourAnnotationPresenter.ResolveKind(annotation, AnnotationDefaults, step.AnnotationDefaults);
+            var layers = ProfileLayers(step, annotation);
+            var kind = DaisyTourAnnotationPresenter.ResolveKind(annotation, AnnotationDefaults, step.AnnotationDefaults, layers);
             var source = annotation.Source is { } start ? bounds[start] : CardBounds;
             if (kind != DaisyTourAnnotationKind.Custom)
             {
                 // Connectors and tails start and end at the highlight frame instead of crossing it.
-                var frame = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness / 2;
+                var frame = Math.Max(0, double.IsFinite(EffectiveHighlightPadding) ? EffectiveHighlightPadding : 0) + _outline.StrokeThickness / 2;
                 end = Inflate(end, frame);
                 if (annotation.Source is not null) source = Inflate(source, frame);
             }
@@ -545,7 +558,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
                 source = PlaceSurface(presenter, annotation, step, end, bounds.Values, foreground, scale);
             presenter.Update(annotation, source, end,
                 DaisyResourceLookup.GetBrush("DaisyPrimaryBrush"), DaisyResourceLookup.GetBrush("DaisyBase100Brush"),
-                foreground, AnnotationDefaults, step.AnnotationDefaults, scale, _card.FlowDirection, RouteLimitFor(annotation));
+                foreground, AnnotationDefaults, step.AnnotationDefaults, scale, _card.FlowDirection, RouteLimitFor(annotation), layers);
         }
     }
 
@@ -554,18 +567,19 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
     private Rect PlaceSurface(DaisyTourAnnotationPresenter presenter, DaisyTourAnnotation annotation, DaisyTourStep step,
         Rect target, IEnumerable<Rect> highlighted, Brush foreground, double scale)
     {
-        var frame = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness;
-        var highlights = highlighted.Select(rect => Inflate(rect, frame)).ToArray();
+        var frame = Math.Max(0, double.IsFinite(EffectiveHighlightPadding) ? EffectiveHighlightPadding : 0) + _outline.StrokeThickness;
+        var highlights = highlighted.Select(rect => Inflate(rect, frame)).ToList();
+        if (_editor is { } editor) highlights.Add(editor.InspectorBounds);
         var viewport = new Size(_visibleArea.Width, _visibleArea.Height);
         var (dx, dy) = (_visibleArea.X, _visibleArea.Y);
         var visibleTarget = Shift(target, -dx, -dy);
         var card = Shift(CardBounds, -dx, -dy);
-        highlights = Array.ConvertAll(highlights, highlight => Shift(highlight, -dx, -dy));
+        highlights = highlights.Select(highlight => Shift(highlight, -dx, -dy)).ToList();
         var rightToLeft = _card.FlowDirection == FlowDirection.RightToLeft;
         for (var limit = double.PositiveInfinity; ; )
         {
             presenter.WidthLimit = limit;
-            var measured = presenter.MeasureSurface(annotation, foreground, AnnotationDefaults, step.AnnotationDefaults, scale, _card.FlowDirection);
+            var measured = presenter.MeasureSurface(annotation, foreground, AnnotationDefaults, step.AnnotationDefaults, scale, _card.FlowDirection, ProfileLayers(step, annotation));
             var placed = DaisyTourLayout.PlaceAnnotation(visibleTarget, card, viewport, measured, highlights,
                 presenter.PlacementDirection, rightToLeft, out var direction);
             if (direction >= 0)
@@ -581,7 +595,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
     // encloses the anchor's complete highlight, including its corners.
     private Rect MarkerBounds(Rect anchor)
     {
-        var margin = Math.Max(0, double.IsFinite(HighlightPadding) ? HighlightPadding : 0) + _outline.StrokeThickness;
+        var margin = Math.Max(0, double.IsFinite(EffectiveHighlightPadding) ? EffectiveHighlightPadding : 0) + _outline.StrokeThickness;
         var width = (anchor.Width + 2 * margin) * Math.Sqrt(2);
         var height = (anchor.Height + 2 * margin) * Math.Sqrt(2);
         return new Rect(anchor.X + anchor.Width / 2 - width / 2, anchor.Y + anchor.Height / 2 - height / 2, width, height);
@@ -590,14 +604,18 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
     // A limit control that cannot be measured leaves the connector unrestricted.
     private DaisyTourRouteLimit? RouteLimitFor(DaisyTourAnnotation annotation)
     {
-        var side = annotation.RouteLimitSide;
+        var side = AnnotationSetting(annotation, DaisyTourAnnotation.RouteLimitSideProperty, annotation.RouteLimitSide, DaisyTourRouteSide.None);
         if (side == DaisyTourRouteSide.None)
             return null;
         if (annotation.RouteLimit is not { } element)
-            return double.IsFinite(annotation.RouteLimitCoordinate) ? new DaisyTourRouteLimit(side, annotation.RouteLimitCoordinate) : null;
+        {
+            var coordinate = AnnotationSetting(annotation, DaisyTourAnnotation.RouteLimitCoordinateProperty, annotation.RouteLimitCoordinate, double.NaN);
+            return double.IsFinite(coordinate) ? new DaisyTourRouteLimit(side, coordinate) : null;
+        }
         if (!DaisyTourLayout.TryBounds(element, _surface, out var bounds))
             return null;
-        var margin = double.IsFinite(annotation.RouteLimitMargin) ? Math.Max(0, annotation.RouteLimitMargin) : 12;
+        var configuredMargin = AnnotationSetting(annotation, DaisyTourAnnotation.RouteLimitMarginProperty, annotation.RouteLimitMargin, 12d);
+        var margin = double.IsFinite(configuredMargin) ? Math.Max(0, configuredMargin) : 12;
         return new DaisyTourRouteLimit(side, side switch
         {
             DaisyTourRouteSide.Above => bounds.Top - margin,
@@ -645,10 +663,11 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             ? FinishText ?? FloweryLocalization.GetStringInternal("Tour_Finish")
             : NextText ?? FloweryLocalization.GetStringInternal("Tour_Next");
         _back.IsEnabled = !session.Busy && CurrentIndex > 0;
-        _next.IsEnabled = !session.Busy;
-        _back.Size = _skip.Size = _next.Size = _progress.Size = Size;
-        _title.FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.SectionHeader, Size);
-        _description.FontSize = _count.FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.Primary, Size);
+        _next.IsEnabled = !session.Busy && (!session.Editing || CurrentIndex < session.Steps.Length - 1);
+        _skip.Visibility = session.Editing ? Visibility.Collapsed : Visibility.Visible;
+        _back.Size = _skip.Size = _next.Size = _progress.Size = EffectiveSize;
+        _title.FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.SectionHeader, EffectiveSize);
+        _description.FontSize = _count.FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.Primary, EffectiveSize);
         if (CurrentStep is { } step)
         {
             _title.Text = step.Title;
@@ -668,7 +687,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
     {
         if (Flowery.Services.DaisySystemAppearance.HighContrast)
             return DaisyResourceLookup.GetBorderBrush();
-        if ((CardBorderBrush ?? DaisyResourceLookup.TryGetControlBrush(this, "DaisyTour", "CardBorderBrush")) is { } brush)
+        if ((TourSetting(CardBorderBrushProperty, CardBorderBrush, (Brush?)null) ?? DaisyResourceLookup.TryGetControlBrush(this, "DaisyTour", "CardBorderBrush")) is { } brush)
             return brush;
         return foreground is SolidColorBrush solid
             ? new SolidColorBrush(solid.Color) { Opacity = 0.45 }
@@ -677,7 +696,8 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
 
     private void LayoutCard()
     {
-        var width = Math.Max(1, Math.Min(480, _visibleArea.Width - 24));
+        var availableWidth = _visibleArea.Width - (_editor is { IsExpanded: true } editor ? editor.InspectorBounds.Width + 12 : 0);
+        var width = Math.Max(1, Math.Min(480, availableWidth - 24));
         _card.Width = width;
         _card.MaxHeight = Math.Max(1, _visibleArea.Height - 24);
         _cardLayout.Padding = new Thickness(width < 300 ? 12 : 20);
@@ -685,7 +705,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         _progressScroll.MaxWidth = Math.Max(1, width - 40);
         _progressScroll.Visibility = width >= 240 ? Visibility.Visible : Visibility.Collapsed;
         // Numbered DaisySteps remain at the selected size and can scroll horizontally.
-        var vertical = width < 340 || Size == DaisySize.ExtraLarge;
+        var vertical = width < 340 || EffectiveSize == DaisySize.ExtraLarge;
         if (_verticalButtons == vertical) return;
         _verticalButtons = vertical;
         _buttons.ColumnDefinitions.Clear();
@@ -730,6 +750,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         _surface.Height = root.Size.Height;
         _annotations.Width = root.Size.Width;
         _annotations.Height = root.Size.Height;
+        _editor?.ArrangeInspector(root.Size);
     }
 
     private void OnRootChanged(XamlRoot sender, XamlRootChangedEventArgs args)
@@ -764,12 +785,15 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
     {
         if (_session is not null && args.NewFocusedElement is DependencyObject element &&
             element is FrameworkElement { XamlRoot: var root } && root == XamlRoot &&
-            !DaisyTourLayout.IsDescendant(element, _surface))
+            !DaisyTourLayout.IsDescendant(element, _surface) &&
+            (_editor is null || !VisualTreeHelper.GetOpenPopupsForXamlRoot(root)
+                .Any(popup => popup != _popup && popup.Child is { } child && DaisyTourLayout.IsDescendant(element, child))))
             args.TrySetNewFocusedElement(_session.Busy ? _surface : _next);
     }
 
     private void OnSurfaceKeyDown(object sender, KeyRoutedEventArgs args)
     {
+        if (_editor is { } editor) { editor.HandleKey(args); return; }
         if (args.Key == VirtualKey.Escape) { Skip(); args.Handled = true; }
     }
 
@@ -820,7 +844,8 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             CompositionVisualTree.GetConnectedRoot(control) is not null && control.IsEnabled && control.Visibility == Visibility.Visible)
             control.Focus(FocusState.Programmatic);
         NotifyState();
-        Closed?.Invoke(this, new(reason, stepId, annotationId, target, error));
+        if (session.Editing) _editor?.OnPreviewClosed(error);
+        else Closed?.Invoke(this, new(reason, stepId, annotationId, target, error));
     }
 
     private void NotifyState()

@@ -26,6 +26,7 @@ public sealed partial class TourExamples : ScrollableExamplePage
         CardPositionSelector.ItemsSource = Enum.GetValues<DaisyTourCardPosition>()
             .Where(position => position != DaisyTourCardPosition.Default).ToArray();
         CardPositionSelector.SelectedItem = Tour.CardPosition;
+        InitializeTourDesigner();
     }
 
     public GalleryLocalization Localization => GalleryLocalization.Instance;
@@ -40,6 +41,7 @@ public sealed partial class TourExamples : ScrollableExamplePage
 
     private async void StartTour_Click(object sender, RoutedEventArgs e)
     {
+        CloseDesigner();
         Tour.Steps.Clear();
         foreach (var step in _standardSteps)
             Tour.Steps.Add(step);
@@ -48,6 +50,7 @@ public sealed partial class TourExamples : ScrollableExamplePage
 
     private async void Arrows_Click(object sender, RoutedEventArgs e)
     {
+        CloseDesigner();
         var presets = new[]
         {
             DaisyTourAnnotationPreset.ThinArrow,
@@ -77,6 +80,7 @@ public sealed partial class TourExamples : ScrollableExamplePage
 
     private async void Lines_Click(object sender, RoutedEventArgs e)
     {
+        CloseDesigner();
         Tour.Steps.Clear();
         var styles = new[]
         {
@@ -113,6 +117,7 @@ public sealed partial class TourExamples : ScrollableExamplePage
 
     private async void Bubbles_Click(object sender, RoutedEventArgs e)
     {
+        CloseDesigner();
         Tour.Steps.Clear();
         AddBubbleSteps(DaisyTourAnnotationKind.Cloud, DaisyTourAnnotationTail.Thought);
         AddBubbleSteps(DaisyTourAnnotationKind.SpeechBubble, DaisyTourAnnotationTail.Speech);
@@ -145,6 +150,7 @@ public sealed partial class TourExamples : ScrollableExamplePage
 
     private async void Custom_Click(object sender, RoutedEventArgs e)
     {
+        CloseDesigner();
         Tour.Steps.Clear();
         var annotation = new DaisyTourAnnotation
         {
@@ -161,6 +167,7 @@ public sealed partial class TourExamples : ScrollableExamplePage
 
     private async void Regions_Click(object sender, RoutedEventArgs e)
     {
+        CloseDesigner();
         if (FindThemeSelection() is not { } themeSelection)
             return;
         Tour.Steps.Clear();
@@ -181,6 +188,7 @@ public sealed partial class TourExamples : ScrollableExamplePage
 
     private async void Paths_Click(object sender, RoutedEventArgs e)
     {
+        CloseDesigner();
         if (FindThemeSelection() is not { } themeSelection)
             return;
         Tour.Steps.Clear();
@@ -216,6 +224,7 @@ public sealed partial class TourExamples : ScrollableExamplePage
 
     private async void RouteLimit_Click(object sender, RoutedEventArgs e)
     {
+        CloseDesigner();
         Tour.Steps.Clear();
         // The fixed coordinate is taken once; unlike the control limit, it does not follow scrolling.
         var keepClear = KeepClearArea.TransformToVisual(XamlRoot.Content)

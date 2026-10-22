@@ -1,4 +1,12 @@
 {
+  "Gallery_Tour_Design": "ツアーをデザイン",
+  "Gallery_Tour_DesignReplay": "適用したデザインを再生",
+  "Gallery_Tour_DesignDescription": "注釈を選択してスタイルを変更します。適用でデザインを保持し、エクスポートで下書きを JSON に保存します。",
+  "Gallery_Tour_Import": "JSON をインポート",
+  "Gallery_Tour_Export": "JSON をエクスポート",
+  "Gallery_Tour_Imported": "プロファイルをインポートしました。適用してデザインを保持してください。",
+  "Gallery_Tour_Exported": "下書きをエクスポートしました。適用してデザインを保持してください。",
+  "Gallery_Tour_FileError": "プロファイルの操作に失敗しました。",
   "Sidebar_Tour": "ガイドツアー",
   "Gallery_Tour_Description": "ツアーはスクロールやレイアウト変更に合わせて既存のコントロールを追跡します。ツアーを選択し、戻ると次へを使用するか、Escape でスキップします。",
   "Gallery_Tour_Start": "開始 / 再実行",

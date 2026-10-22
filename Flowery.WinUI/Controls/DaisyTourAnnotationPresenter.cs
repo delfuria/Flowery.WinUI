@@ -22,6 +22,7 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
     private readonly TextBlock _text = new() { TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis };
     private readonly Border _contentHost;
     private readonly Path[] _shapes;
+    private readonly Dictionary<DependencyProperty, DaisyTourResolvedValue> _resolvedValues = [];
 
     /// <summary>Narrows surfaces that cannot be placed at their preferred width.</summary>
     internal double WidthLimit { get; set; } = double.PositiveInfinity;
@@ -33,6 +34,9 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
     internal IReadOnlyList<Point> Course { get; private set; } = [];
 
     internal double CourseThickness { get; private set; }
+    internal DaisyTourEditGeometry? EditGeometry { get; private set; }
+    internal Rect? SelectionBounds { get; private set; }
+    internal IReadOnlyDictionary<DependencyProperty, DaisyTourResolvedValue> ResolvedValues => _resolvedValues;
 
     internal DaisyTourAnnotationPresenter()
     {
@@ -52,10 +56,12 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
     internal void Update(DaisyTourAnnotation annotation, Rect sourceBounds, Rect targetBounds,
         Brush defaultStroke, Brush defaultFill, Brush defaultForeground,
         DaisyTourAnnotationStyle? hostDefaults = null, DaisyTourAnnotationStyle? stepDefaults = null, double scale = 1,
-        FlowDirection textFlowDirection = FlowDirection.LeftToRight, DaisyTourRouteLimit? routeLimit = null)
+        FlowDirection textFlowDirection = FlowDirection.LeftToRight, DaisyTourRouteLimit? routeLimit = null,
+        DaisyTourProfileLayers profile = default)
     {
         _contentHost.FlowDirection = textFlowDirection;
-        var style = new EffectiveStyle(annotation, stepDefaults, hostDefaults, scale);
+        _resolvedValues.Clear();
+        var style = new EffectiveStyle(annotation, stepDefaults, hostDefaults, scale, profile, _resolvedValues);
         var kind = style.Kind;
         var stroke = style.Get(DaisyTourAnnotationStyle.StrokeProperty, defaultStroke);
         var fill = style.Get(DaisyTourAnnotationStyle.FillProperty, defaultFill);
@@ -71,10 +77,17 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
             thickness = Math.Max(1, thickness);
             Opacity = 1;
         }
+        style.Record(DaisyTourAnnotationStyle.StrokeProperty, stroke, highContrast: DaisySystemAppearance.HighContrast);
+        style.Record(DaisyTourAnnotationStyle.FillProperty, fill, highContrast: DaisySystemAppearance.HighContrast);
+        style.Record(DaisyTourAnnotationStyle.ForegroundProperty, foreground, highContrast: DaisySystemAppearance.HighContrast);
+        style.Record(DaisyTourAnnotationStyle.StrokeThicknessProperty, thickness);
+        style.Record(DaisyTourAnnotationStyle.OpacityProperty, Opacity, highContrast: DaisySystemAppearance.HighContrast);
 
         // Releases a previously fitted custom course before the shapes are rebuilt.
         _customRoute.Children.Clear();
         Course = [];
+        EditGeometry = null;
+        SelectionBounds = null;
         CourseThickness = thickness;
         foreach (var shape in _shapes)
         {
@@ -97,9 +110,11 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         }
         ApplyDashes(_body, style);
         _contentHost.Visibility = Visibility.Collapsed;
-        var source = Offset(Anchor(sourceBounds, Center(targetBounds), annotation.SourceAnchor),
+        var sourceAnchor = style.AnnotationValue(DaisyTourAnnotation.SourceAnchorProperty, annotation.SourceAnchor, DaisyTourAnchor.Auto);
+        var targetAnchor = style.AnnotationValue(DaisyTourAnnotation.TargetAnchorProperty, annotation.TargetAnchor, DaisyTourAnchor.Auto);
+        var source = Offset(Anchor(sourceBounds, Center(targetBounds), sourceAnchor),
             style.Number(DaisyTourAnnotationStyle.SourceOffsetXProperty, 0), style.Number(DaisyTourAnnotationStyle.SourceOffsetYProperty, 0));
-        var target = Offset(Anchor(targetBounds, Center(sourceBounds), annotation.TargetAnchor),
+        var target = Offset(Anchor(targetBounds, Center(sourceBounds), targetAnchor),
             style.Number(DaisyTourAnnotationStyle.TargetOffsetXProperty, 0), style.Number(DaisyTourAnnotationStyle.TargetOffsetYProperty, 0));
 
         if (kind is DaisyTourAnnotationKind.Arrow or DaisyTourAnnotationKind.Line)
@@ -107,6 +122,7 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
             (source, target) = AlignAutoAnchors(annotation, style, sourceBounds, targetBounds, source, target);
             // Heads and block bodies are solid in the stroke color unless a fill is specified.
             var solid = DaisySystemAppearance.HighContrast ? stroke : style.Get<Brush?>(DaisyTourAnnotationStyle.FillProperty, null) ?? stroke;
+            style.Record(DaisyTourAnnotationStyle.FillProperty, solid, highContrast: DaisySystemAppearance.HighContrast);
             var midpoint = DrawConnector(annotation, style, kind, source, target, sourceBounds, targetBounds, solid, routeLimit);
             ArrangeContent(annotation, style, midpoint, foreground);
             _contentHost.Background = fill;
@@ -117,15 +133,24 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
     }
 
     internal static DaisyTourAnnotationKind ResolveKind(DaisyTourAnnotation annotation,
-        DaisyTourAnnotationStyle? hostDefaults = null, DaisyTourAnnotationStyle? stepDefaults = null)
-        => new EffectiveStyle(annotation, stepDefaults, hostDefaults).Kind;
+        DaisyTourAnnotationStyle? hostDefaults = null, DaisyTourAnnotationStyle? stepDefaults = null,
+        DaisyTourProfileLayers profile = default)
+        => new EffectiveStyle(annotation, stepDefaults, hostDefaults, profile: profile).Kind;
+
+    internal static DaisyTourAnnotationPath ResolvePath(DaisyTourAnnotation annotation,
+        DaisyTourAnnotationStyle? host, DaisyTourAnnotationStyle? step, DaisyTourProfileLayers profile)
+    {
+        var style = new EffectiveStyle(annotation, step, host, profile: profile);
+        return style.Get(DaisyTourAnnotationStyle.PathProperty,
+            style.Preset == DaisyTourAnnotationPreset.CurvedArrow ? DaisyTourAnnotationPath.Curved : DaisyTourAnnotationPath.Straight);
+    }
 
     internal Size MeasureSurface(DaisyTourAnnotation annotation, Brush defaultForeground,
         DaisyTourAnnotationStyle? hostDefaults = null, DaisyTourAnnotationStyle? stepDefaults = null,
-        double scale = 1, FlowDirection textFlowDirection = FlowDirection.LeftToRight)
+        double scale = 1, FlowDirection textFlowDirection = FlowDirection.LeftToRight, DaisyTourProfileLayers profile = default)
     {
         _contentHost.FlowDirection = textFlowDirection;
-        var style = new EffectiveStyle(annotation, stepDefaults, hostDefaults, scale);
+        var style = new EffectiveStyle(annotation, stepDefaults, hostDefaults, scale, profile);
         var foreground = DaisySystemAppearance.HighContrast ? defaultForeground
             : style.Get(DaisyTourAnnotationStyle.ForegroundProperty, defaultForeground);
         var rect = ArrangeContent(annotation, style, new Point(), foreground);
@@ -191,9 +216,24 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         Course = points;
         var length = Math.Clamp(style.Dimension(DaisyTourAnnotationStyle.HeadLengthProperty, 22), 0, PolylineLength(points) / 3);
         var width = Math.Max(0, style.Dimension(DaisyTourAnnotationStyle.HeadWidthProperty, 18));
+        var bodyWidth = Math.Max(1, style.Dimension(DaisyTourAnnotationStyle.BodyWidthProperty, 6));
+        style.Record(DaisyTourAnnotationStyle.HeadLengthProperty, length);
+        style.Record(DaisyTourAnnotationStyle.HeadWidthProperty, width);
+        style.Record(DaisyTourAnnotationStyle.BodyWidthProperty, bodyWidth);
+        CourseThickness = block ? Math.Max(CourseThickness, bodyWidth) : CourseThickness;
+        var controls = CubicControls(style, path, source, target, sourceBounds, targetBounds, curvature);
+        if (path == DaisyTourAnnotationPath.Bezier)
+        {
+            RecordControlPoint(style, controls.First, source, target, DaisyTourAnnotationStyle.ControlPoint1XProperty, DaisyTourAnnotationStyle.ControlPoint1YProperty);
+            RecordControlPoint(style, controls.Second, source, target, DaisyTourAnnotationStyle.ControlPoint2XProperty, DaisyTourAnnotationStyle.ControlPoint2YProperty);
+        }
+        EditGeometry = new(source, target, controls.First, controls.Second, sourceBounds, targetBounds,
+            path, curvature, bodyWidth, length, width, limit is not null, PolylineMidpoint(points),
+            Unit(points[^2], points[^1]), points[^1], block && kind == DaisyTourAnnotationKind.Arrow,
+            end != DaisyTourArrowHead.None);
         _body.Data = block
             ? BlockGeometry(TrimEndpoints(points, start == DaisyTourArrowHead.None ? 0 : length, end == DaisyTourArrowHead.None ? 0 : length),
-                Math.Max(1, style.Dimension(DaisyTourAnnotationStyle.BodyWidthProperty, 6)))
+                bodyWidth)
             : route ?? ConnectorGeometry(source, target, path, curvature, points);
         _body.Fill = block ? fill : null;
         DrawHead(_startHead, start, points[0], points[1], length, width, fill);
@@ -207,8 +247,10 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         // Custom shapes without content fill their anchor box unless they are sized explicitly.
         var rect = ArrangeContent(annotation, style, Center(sourceBounds), foreground,
             kind == DaisyTourAnnotationKind.Custom ? new Size(sourceBounds.Width, sourceBounds.Height) : null);
+        SelectionBounds = rect;
         _contentHost.Background = null;
         var radius = Math.Clamp(style.Dimension(DaisyTourAnnotationStyle.CornerRadiusProperty, 16), 0, Math.Min(rect.Width, rect.Height) / 2);
+        style.Record(DaisyTourAnnotationStyle.CornerRadiusProperty, radius);
         _body.Fill = fill;
         _body.Data = kind switch
         {
@@ -266,6 +308,8 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         _contentHost.Clip = new RectangleGeometry { Rect = new Rect(0, 0, width, height) };
         var center = Offset(anchor, style.Number(DaisyTourAnnotationStyle.OffsetXProperty, 0), style.Number(DaisyTourAnnotationStyle.OffsetYProperty, 0));
         var rect = new Rect(center.X - width / 2, center.Y - height / 2, width, height);
+        style.Record(DaisyTourAnnotationStyle.WidthProperty, width, automatic: double.IsNaN(explicitWidth));
+        style.Record(DaisyTourAnnotationStyle.HeightProperty, height, automatic: double.IsNaN(explicitHeight));
         SetLeft(_contentHost, rect.X);
         SetTop(_contentHost, rect.Y);
         AutomationProperties.SetName(_contentHost, annotation.Text);
@@ -282,6 +326,8 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         var length = Math.Min(distance, Math.Max(0, style.Dimension(DaisyTourAnnotationStyle.TailLengthProperty, distance)));
         var end = Offset(start, direction.X * length, direction.Y * length);
         var width = Math.Max(0, style.Dimension(DaisyTourAnnotationStyle.TailWidthProperty, 18));
+        style.Record(DaisyTourAnnotationStyle.TailLengthProperty, length);
+        style.Record(DaisyTourAnnotationStyle.TailWidthProperty, width);
         _tail.Fill = fill;
         if (tail == DaisyTourAnnotationTail.Speech)
         {
@@ -536,8 +582,8 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
     {
         var path = style.Get(DaisyTourAnnotationStyle.PathProperty,
             style.Preset == DaisyTourAnnotationPreset.CurvedArrow ? DaisyTourAnnotationPath.Curved : DaisyTourAnnotationPath.Straight);
-        var autoSource = annotation.SourceAnchor == DaisyTourAnchor.Auto;
-        var autoTarget = annotation.TargetAnchor == DaisyTourAnchor.Auto;
+        var autoSource = style.AnnotationValue(DaisyTourAnnotation.SourceAnchorProperty, annotation.SourceAnchor, DaisyTourAnchor.Auto) == DaisyTourAnchor.Auto;
+        var autoTarget = style.AnnotationValue(DaisyTourAnnotation.TargetAnchorProperty, annotation.TargetAnchor, DaisyTourAnchor.Auto) == DaisyTourAnchor.Auto;
         var sourceOffset = new Point(style.Number(DaisyTourAnnotationStyle.SourceOffsetXProperty, 0), style.Number(DaisyTourAnnotationStyle.SourceOffsetYProperty, 0));
         var targetOffset = new Point(style.Number(DaisyTourAnnotationStyle.TargetOffsetXProperty, 0), style.Number(DaisyTourAnnotationStyle.TargetOffsetYProperty, 0));
         Point first, last;
@@ -641,6 +687,17 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
             return fallback;
         // Positive Y bends to the same side as a positive Curvature.
         return new Point(origin.X + (along.X * x - along.Y * y) * length, origin.Y + (along.Y * x + along.X * y) * length);
+    }
+
+    private static void RecordControlPoint(EffectiveStyle style, Point point, Point source, Point target,
+        DependencyProperty xProperty, DependencyProperty yProperty)
+    {
+        var length = Math.Max(0.001, Distance(source, target));
+        var along = Unit(source, target);
+        var dx = point.X - source.X;
+        var dy = point.Y - source.Y;
+        style.Record(xProperty, (dx * along.X + dy * along.Y) / length, automatic: style.IsUnset(xProperty));
+        style.Record(yProperty, (-dx * along.Y + dy * along.X) / length, automatic: style.IsUnset(yProperty));
     }
 
     private static Point EdgeNormal(Rect rect, Point point, Point fallback)
@@ -876,10 +933,15 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         return length > 0.001 ? new Point((end.X - start.X) / length, (end.Y - start.Y) / length) : new Point(1, 0);
     }
 
-    private sealed class EffectiveStyle(DaisyTourAnnotation annotation, DaisyTourAnnotationStyle? step, DaisyTourAnnotationStyle? host, double scale = 1)
+    private sealed class EffectiveStyle(DaisyTourAnnotation annotation, DaisyTourAnnotationStyle? step, DaisyTourAnnotationStyle? host,
+        double scale = 1, DaisyTourProfileLayers profile = default,
+        Dictionary<DependencyProperty, DaisyTourResolvedValue>? resolvedValues = null)
     {
         private readonly DaisyTourAnnotationStyle?[] _styles = [annotation, step, host];
+        private readonly DaisyTourStyleOverride?[] _overrides = [profile.Annotation, profile.Step, profile.Tour];
         internal double Scale { get; } = double.IsFinite(scale) && scale > 0 ? scale : 1;
+        internal int SourceScope { get; private set; } = 3;
+        internal bool SourceIsOverride { get; private set; }
         internal DaisyTourAnnotationPreset Preset => Get(DaisyTourAnnotationStyle.PresetProperty, DaisyTourAnnotationPreset.ThinArrow);
         internal DaisyTourAnnotationKind Kind => Get(DaisyTourAnnotationStyle.KindProperty, Preset switch
         {
@@ -891,18 +953,63 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
 
         internal T Get<T>(DependencyProperty property, T fallback)
         {
-            foreach (var style in _styles)
+            SourceScope = 3;
+            SourceIsOverride = false;
+            for (var index = 0; index < _styles.Length; index++)
             {
-                var value = style?.GetValue(property);
+                if (DaisyTourProfileResolver.TryGetValue(_overrides[index], property, out var authored, out var inherit))
+                {
+                    if (inherit) continue;
+                    SourceScope = index;
+                    SourceIsOverride = true;
+                    Record(property, authored);
+                    return (T)authored!;
+                }
+                var value = _styles[index]?.GetValue(property);
                 if (value is null || value is double number && !double.IsFinite(number) ||
                     value is Enum enumeration && Convert.ToInt32(enumeration) == 0)
                     continue;
+                SourceScope = index;
+                Record(property, value);
                 return (T)value;
             }
+            Record(property, fallback);
             return fallback;
         }
 
+        internal void Record(DependencyProperty property, object? value, bool automatic = false, bool highContrast = false)
+        {
+            if (resolvedValues is null) return;
+            var entry = resolvedValues.TryGetValue(property, out var previous)
+                ? previous : new DaisyTourResolvedValue(value, SourceScope, SourceIsOverride);
+            resolvedValues[property] = entry with { Value = value, Automatic = automatic, HighContrast = highContrast };
+        }
+
+        internal bool IsUnset(DependencyProperty property) => resolvedValues is not null &&
+            resolvedValues.TryGetValue(property, out var value) && value.Value is double number && double.IsNaN(number);
+
         internal double Number(DependencyProperty property, double fallback) => Get(property, fallback);
         internal double Dimension(DependencyProperty property, double fallback) => Get(property, fallback * Scale);
+        internal T AnnotationValue<T>(DependencyProperty property, T value, T fallback)
+        {
+            SourceScope = 0;
+            SourceIsOverride = false;
+            if (DaisyTourProfileResolver.TryGetValue(profile.Annotation, property, out var authored, out var inherit))
+            {
+                value = inherit ? fallback : (T)authored!;
+                SourceScope = inherit ? 3 : 0;
+                SourceIsOverride = !inherit;
+            }
+            Record(property, value);
+            return value;
+        }
     }
 }
+
+internal sealed record DaisyTourEditGeometry(Point Source, Point Target, Point FirstControl, Point SecondControl,
+    Rect SourceBounds, Rect TargetBounds, DaisyTourAnnotationPath Path, double Curvature, double BodyWidth,
+    double HeadLength, double HeadWidth, bool HasRouteLimit, Point BodyCenter, Point HeadDirection,
+    Point HeadTip, bool IsBlock, bool HasEndHead);
+
+internal sealed record DaisyTourResolvedValue(object? Value, int Scope, bool IsOverride,
+    bool Automatic = false, bool HighContrast = false);

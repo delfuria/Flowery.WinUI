@@ -1,4 +1,12 @@
 {
+  "Gallery_Tour_Design": "Personalizza il tour",
+  "Gallery_Tour_DesignReplay": "Riproduci lo stile applicato",
+  "Gallery_Tour_DesignDescription": "Seleziona un’annotazione e modifica lo stile. Applica conserva lo stile; esporta salva la bozza in JSON.",
+  "Gallery_Tour_Import": "Importa JSON",
+  "Gallery_Tour_Export": "Esporta JSON",
+  "Gallery_Tour_Imported": "Profilo importato. Applica lo stile per conservarlo.",
+  "Gallery_Tour_Exported": "Bozza esportata. Applica lo stile per conservarlo.",
+  "Gallery_Tour_FileError": "Operazione sul profilo non riuscita.",
   "Sidebar_Tour": "Tour guidato",
   "Gallery_Tour_Description": "Il tour segue i controlli durante lo scorrimento e le modifiche al layout. Scegli un tour, usa Indietro e Avanti oppure premi Escape per saltarlo.",
   "Gallery_Tour_Start": "Avvia / ripeti",

@@ -1,4 +1,12 @@
 {
+  "Gallery_Tour_Design": "Personnaliser la visite",
+  "Gallery_Tour_DesignReplay": "Lire le style appliqué",
+  "Gallery_Tour_DesignDescription": "Sélectionnez une annotation et modifiez son style. Appliquer conserve le style ; exporter enregistre le brouillon en JSON.",
+  "Gallery_Tour_Import": "Importer JSON",
+  "Gallery_Tour_Export": "Exporter JSON",
+  "Gallery_Tour_Imported": "Profil importé. Appliquez ce style pour le conserver.",
+  "Gallery_Tour_Exported": "Brouillon exporté. Appliquez ce style pour le conserver.",
+  "Gallery_Tour_FileError": "L’opération sur le profil a échoué.",
   "Sidebar_Tour": "Visite guidée",
   "Gallery_Tour_Description": "La visite suit les contrôles pendant le défilement et les changements de disposition. Choisissez une visite, utilisez Retour et Suivant ou Échap pour passer.",
   "Gallery_Tour_Start": "Démarrer / rejouer",

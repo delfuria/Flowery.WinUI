@@ -1,0 +1,158 @@
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace Flowery.Controls;
+
+public sealed partial class DaisyTour
+{
+    private DaisyTourEditor? _editor;
+    private DaisyTourStyleProfile? _previewProfile;
+    private DaisyTourStyleProfile? _activeProfile;
+    private int _editGeneration;
+
+    public static readonly DependencyProperty IdProperty = Register(nameof(Id), typeof(string), string.Empty);
+    public string Id { get => (string)GetValue(IdProperty); set => SetValue(IdProperty, value); }
+    public static readonly DependencyProperty StyleProfileProperty = DependencyProperty.Register(nameof(StyleProfile), typeof(DaisyTourStyleProfile), typeof(DaisyTour), new PropertyMetadata(null, OnStyleProfileChanged));
+    public DaisyTourStyleProfile? StyleProfile
+    {
+        get => _activeProfile is null ? null : DaisyTourStyleProfileSerializer.Clone(_activeProfile);
+        set => SetValue(StyleProfileProperty, value);
+    }
+
+    private static void OnStyleProfileChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+    {
+        var tour = (DaisyTour)sender;
+        var profile = (DaisyTourStyleProfile?)args.NewValue;
+        if (profile is not null) DaisyTourStyleProfileSerializer.Validate(profile, tour);
+        tour._activeProfile = profile is null ? null : DaisyTourStyleProfileSerializer.Clone(profile);
+        tour.RefreshPresentation();
+    }
+
+    private DaisyTourStyleProfile? EffectiveProfile => _previewProfile ?? _activeProfile;
+    internal Canvas EditingSurface => _surface;
+    internal IReadOnlyList<DaisyTourAnnotationPresenter> AnnotationPresenters => _presenters;
+    internal void RefreshEditorLayout() { ResizeSurface(); QueueGeometry(); }
+
+    private Rect PlaceEditorCard(DaisyTourEditor editor, Size card)
+    {
+        const double margin = 12;
+        var left = _visibleArea.Left + margin;
+        var right = _visibleArea.Right - margin;
+        if (editor.IsExpanded)
+        {
+            var inspector = editor.InspectorBounds;
+            if (inspector.Left + inspector.Width / 2 < _visibleArea.Left + _visibleArea.Width / 2)
+                left = inspector.Right + margin;
+            else
+                right = inspector.Left - margin;
+        }
+        return new Rect(left + Math.Max(0, (right - left - card.Width) / 2),
+            Math.Max(_visibleArea.Top + margin, _visibleArea.Bottom - margin - card.Height), card.Width, card.Height);
+    }
+
+    internal DaisyTourProfileLayers ProfileLayers(DaisyTourStep step, DaisyTourAnnotation annotation)
+    {
+        var profile = EffectiveProfile;
+        var stepProfile = DaisyTourProfileResolver.FindStep(profile, step.Id);
+        return new(DaisyTourProfileResolver.FindAnnotation(stepProfile, annotation.Id)?.Style,
+            stepProfile?.AnnotationDefaults, profile?.AnnotationDefaults);
+    }
+
+    private T TourSetting<T>(DependencyProperty property, T applicationValue, T inheritedValue)
+    {
+        if (DaisyTourProfileResolver.TryGetValue(EffectiveProfile?.Style, property, out var value, out var inherit))
+            return inherit ? inheritedValue : (T)value!;
+        return applicationValue;
+    }
+
+    private T StepSetting<T>(DaisyTourStep step, DependencyProperty property, T applicationValue, T inheritedValue)
+    {
+        var profile = DaisyTourProfileResolver.FindStep(EffectiveProfile, step.Id);
+        if (DaisyTourProfileResolver.TryGetValue(profile?.Style, property, out var value, out var inherit))
+            return inherit ? inheritedValue : (T)value!;
+        return applicationValue;
+    }
+
+    private T AnnotationSetting<T>(DaisyTourAnnotation annotation, DependencyProperty property, T applicationValue, T inheritedValue)
+    {
+        if (CurrentStep is not { } step) return applicationValue;
+        if (DaisyTourProfileResolver.TryGetValue(ProfileLayers(step, annotation).Annotation, property, out var value, out var inherit))
+            return inherit ? inheritedValue : (T)value!;
+        return applicationValue;
+    }
+
+    private double EffectiveHighlightPadding => TourSetting(HighlightPaddingProperty, HighlightPadding, 6d);
+    private double EffectiveHighlightCornerRadius => TourSetting(HighlightCornerRadiusProperty, HighlightCornerRadius, 8d);
+    private DaisySize EffectiveSize => TourSetting(SizeProperty, Size, DaisySize.Medium);
+    private DaisyTourCardPosition EffectiveCardPosition => TourSetting(CardPositionProperty, CardPosition, DaisyTourCardPosition.Target);
+
+    internal object? EditorSetting(DaisyTourStep step, DaisyTourAnnotation annotation, string name, bool stepScope) => name switch
+    {
+        "size" => EffectiveSize,
+        "highlightPadding" => EffectiveHighlightPadding,
+        "highlightCornerRadius" => EffectiveHighlightCornerRadius,
+        "cardBorderBrush" => CardBorder(DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")),
+        "cardPosition" => stepScope && StepSetting(step, DaisyTourStep.CardPositionProperty, step.CardPosition, DaisyTourCardPosition.Default) is var position && position != DaisyTourCardPosition.Default ? position : EffectiveCardPosition,
+        "placement" => StepSetting(step, DaisyTourStep.PlacementProperty, step.Placement, DaisyTourPlacement.Auto),
+        "sourceAnchor" => AnnotationSetting(annotation, DaisyTourAnnotation.SourceAnchorProperty, annotation.SourceAnchor, DaisyTourAnchor.Auto),
+        "targetAnchor" => AnnotationSetting(annotation, DaisyTourAnnotation.TargetAnchorProperty, annotation.TargetAnchor, DaisyTourAnchor.Auto),
+        "routeLimitSide" => AnnotationSetting(annotation, DaisyTourAnnotation.RouteLimitSideProperty, annotation.RouteLimitSide, DaisyTourRouteSide.None),
+        "routeLimitCoordinate" => AnnotationSetting(annotation, DaisyTourAnnotation.RouteLimitCoordinateProperty, annotation.RouteLimitCoordinate, double.NaN),
+        "routeLimitMargin" => AnnotationSetting(annotation, DaisyTourAnnotation.RouteLimitMarginProperty, annotation.RouteLimitMargin, 12d),
+        _ => null
+    };
+
+    internal async Task BeginEditingAsync(DaisyTourEditor editor, DaisyTourStyleProfile draft, CancellationToken token)
+    {
+        VerifyAccess();
+        if (_editor is not null) throw new InvalidOperationException("A tour editor is already open.");
+        if (Steps.Count == 0) throw new InvalidOperationException("The tour needs at least one step for editing.");
+        Cancel();
+        var editGeneration = ++_editGeneration;
+        _editor = editor;
+        _previewProfile = draft;
+        _card.TabFocusNavigation = KeyboardNavigationMode.Local;
+        _surface.TabFocusNavigation = KeyboardNavigationMode.Cycle;
+        _surface.Children.Add(editor.HandleLayer);
+        _surface.Children.Add(editor);
+        try { await StartAsync(token); }
+        catch
+        {
+            if (editGeneration == _editGeneration) EndEditing(editor);
+            throw;
+        }
+        if (editGeneration == _editGeneration && _session is not null) editor.Focus(FocusState.Programmatic);
+    }
+
+    internal void UpdatePreview(DaisyTourStyleProfile profile, bool geometryOnly = false)
+    {
+        _previewProfile = profile;
+        // Handle movement changes the annotation, not application layout or card content.
+        // Keep it on the pointer's UI turn instead of waiting for low-priority layout work.
+        if (geometryOnly && _session is { Busy: false } session) UpdateGeometry(session);
+        else RefreshPresentation();
+    }
+
+    internal async Task EditStepAsync(int index)
+    {
+        if (_session is { Busy: false } session && index >= 0 && index < session.Steps.Length)
+            await TransitionAsync(session, index);
+    }
+
+    internal void EndEditing(DaisyTourEditor editor)
+    {
+        if (!ReferenceEquals(_editor, editor)) return;
+        _editGeneration++;
+        // End the editing session before releasing its surface; normal completion events stay suppressed.
+        if (_session is { } session) Close(session, DaisyTourCloseReason.Cancelled);
+        _surface.Children.Remove(editor.HandleLayer);
+        _surface.Children.Remove(editor);
+        _editor = null;
+        _previewProfile = null;
+        _card.TabFocusNavigation = KeyboardNavigationMode.Cycle;
+        _surface.TabFocusNavigation = KeyboardNavigationMode.Local;
+    }
+}
+
+internal readonly record struct DaisyTourProfileLayers(
+    DaisyTourStyleOverride? Annotation, DaisyTourStyleOverride? Step, DaisyTourStyleOverride? Tour);
