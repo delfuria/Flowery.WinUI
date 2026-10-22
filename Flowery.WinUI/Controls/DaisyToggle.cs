@@ -1,4 +1,5 @@
 using System;
+using Flowery.Helpers;
 using Flowery.Theming;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -14,6 +15,11 @@ namespace Flowery.Controls
     /// </summary>
     public partial class DaisyToggle : ToggleButton
     {
+        // A clearly visible CIE76 color difference. A luminance ratio such as WCAG 3:1 would change most variant
+        // knobs in the bundled themes, because their colors share the track's lightness and differ in hue.
+        private const double MinimumKnobDifference = 20;
+        private const double KnobOutlineOpacity = 0.25;
+
         private Border? _switchArea;
         private Ellipse? _knob;
         private TranslateTransform? _knobTransform;
@@ -341,11 +347,25 @@ namespace Flowery.Controls
             var trackBorderOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyToggle", "TrackBorderBrush");
 
             // Track uses Base300 for background and half of BaseContent for the border, like DaisyUI's --input-color
-            _switchArea.Background = trackBgOverride ?? DaisyResourceLookup.GetBrush(resources, "DaisyBase300Brush", fallback: new SolidColorBrush(Microsoft.UI.Colors.Gray));
+            var trackBrush = trackBgOverride ?? DaisyResourceLookup.GetBrush(resources, "DaisyBase300Brush", fallback: new SolidColorBrush(Microsoft.UI.Colors.Gray));
             var contentBrush = DaisyResourceLookup.GetBrush(resources, "DaisyBaseContentBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.Gray));
-            _switchArea.BorderBrush = trackBorderOverride
-                ?? (contentBrush is SolidColorBrush solid ? new SolidColorBrush(solid.Color) { Opacity = 0.5 } : contentBrush);
+            var halfContentBrush = contentBrush is SolidColorBrush solidContent
+                ? new SolidColorBrush(solidContent.Color) { Opacity = 0.5 }
+                : contentBrush;
+            _switchArea.Background = trackBrush;
             _switchArea.BorderThickness = new Thickness(1);
+
+            var variantBrush = Variant switch
+            {
+                DaisyToggleVariant.Primary => DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
+                DaisyToggleVariant.Secondary => DaisyResourceLookup.GetBrush(resources, "DaisySecondaryBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
+                DaisyToggleVariant.Accent => DaisyResourceLookup.GetBrush(resources, "DaisyAccentBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
+                DaisyToggleVariant.Success => DaisyResourceLookup.GetBrush(resources, "DaisySuccessBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
+                DaisyToggleVariant.Warning => DaisyResourceLookup.GetBrush(resources, "DaisyWarningBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
+                DaisyToggleVariant.Info => DaisyResourceLookup.GetBrush(resources, "DaisyInfoBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
+                DaisyToggleVariant.Error => DaisyResourceLookup.GetBrush(resources, "DaisyErrorBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
+                _ => null
+            };
 
             if (IsChecked == true)
             {
@@ -355,31 +375,27 @@ namespace Flowery.Controls
                     : null;
                 knobOverride ??= DaisyResourceLookup.TryGetControlBrush(this, "DaisyToggle", "KnobBrush");
 
-                if (knobOverride != null)
-                {
-                    _knob.Fill = knobOverride;
-                }
-                else
-                {
-                    _knob.Fill = Variant switch
-                    {
-                        DaisyToggleVariant.Primary => DaisyResourceLookup.GetBrush(resources, "DaisyPrimaryBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
-                        DaisyToggleVariant.Secondary => DaisyResourceLookup.GetBrush(resources, "DaisySecondaryBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
-                        DaisyToggleVariant.Accent => DaisyResourceLookup.GetBrush(resources, "DaisyAccentBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
-                        DaisyToggleVariant.Success => DaisyResourceLookup.GetBrush(resources, "DaisySuccessBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
-                        DaisyToggleVariant.Warning => DaisyResourceLookup.GetBrush(resources, "DaisyWarningBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
-                        DaisyToggleVariant.Info => DaisyResourceLookup.GetBrush(resources, "DaisyInfoBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
-                        DaisyToggleVariant.Error => DaisyResourceLookup.GetBrush(resources, "DaisyErrorBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White)),
-                        _ => DaisyResourceLookup.GetBrush(resources, "DaisyBaseContentBrush", fallback: new SolidColorBrush(Microsoft.UI.Colors.Black))
-                    };
-                }
+                // A theme color that barely differs from the track is darkened (or lightened) in its own hue;
+                // a knob brush set by the app is used as given.
+                _knob.Fill = knobOverride
+                    ?? EnsureKnobContrast(variantBrush ?? contentBrush, trackBrush);
+
+                // The checked track border takes the variant color, like DaisyUI.
+                _switchArea.BorderBrush = trackBorderOverride ?? variantBrush ?? halfContentBrush;
             }
             else
             {
                 // Unchecked knob: check for override, else use Base100
                 var uncheckedKnobOverride = DaisyResourceLookup.TryGetControlBrush(this, "DaisyToggle", "KnobBrushUnchecked");
                 _knob.Fill = uncheckedKnobOverride ?? DaisyResourceLookup.GetBrush(resources, "DaisyBase100Brush", fallback: new SolidColorBrush(Microsoft.UI.Colors.White));
+                _switchArea.BorderBrush = trackBorderOverride ?? halfContentBrush;
             }
+
+            // A thin outline keeps the knob visible on any track, also where knob and track colors are close.
+            _knob.Stroke = contentBrush is SolidColorBrush outlineContent
+                ? new SolidColorBrush(outlineContent.Color) { Opacity = KnobOutlineOpacity }
+                : contentBrush;
+            _knob.StrokeThickness = 1;
 
             var labelBrush = _hasForegroundOverride && !DaisySystemAppearance.HighContrast
                 ? Foreground
@@ -392,6 +408,8 @@ namespace Flowery.Controls
                 _switchArea.BorderBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBorderBrush" : "DaisyDisabledForegroundBrush");
                 _knob.Fill = DaisyResourceLookup.GetBrush(!IsEnabled ? "DaisyDisabledForegroundBrush"
                     : checkedAndEnabled ? "DaisyPrimaryContentBrush" : "DaisyBaseContentBrush");
+                // High contrast colors already separate knob and track; a translucent outline has no place there.
+                _knob.Stroke = null;
                 labelBrush = DaisyResourceLookup.GetBrush(IsEnabled ? "DaisyBaseContentBrush" : "DaisyDisabledForegroundBrush");
             }
             if (!_hasForegroundOverride)
@@ -399,6 +417,28 @@ namespace Flowery.Controls
                 SetForeground(labelBrush);
             }
             if (_headerPresenter != null) _headerPresenter.Foreground = labelBrush;
+        }
+
+        /// <summary>
+        /// Returns <paramref name="knob"/>, darkened on a light track or lightened on a dark one in 10 % steps
+        /// (at most 60 %) until it differs from the track by <see cref="MinimumKnobDifference"/> (CIE76 Delta E).
+        /// The steps keep the knob's hue, so a variant knob stays recognizable.
+        /// </summary>
+        private static Brush EnsureKnobContrast(Brush knob, Brush track)
+        {
+            if (knob is not SolidColorBrush knobSolid || track is not SolidColorBrush trackSolid)
+                return knob;
+
+            var darken = !FloweryColorHelpers.IsDark(trackSolid.Color);
+            var color = knobSolid.Color;
+            for (var step = 1; step <= 6 && FloweryColorHelpers.GetColorDifference(color, trackSolid.Color) < MinimumKnobDifference; step++)
+            {
+                color = darken
+                    ? FloweryColorHelpers.Darken(knobSolid.Color, step * 0.1)
+                    : FloweryColorHelpers.Lighten(knobSolid.Color, step * 0.1);
+            }
+
+            return color == knobSolid.Color ? knob : new SolidColorBrush(color);
         }
 
         private void ApplyKnobPosition(bool animate)

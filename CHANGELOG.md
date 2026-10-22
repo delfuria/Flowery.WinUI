@@ -6,6 +6,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `FloweryColorHelpers.GetColorDifference`: the CIE76 color difference (Delta E) between two colors.
+
+### Changed
+
+- Toggle: the knob stays visible in themes whose variant color is close to the track color (e.g. Secondary in the HappyHues themes). It always has a thin BaseContent outline (none in high contrast mode), the checked track border takes the variant color, and a checked knob whose color is too close to the track (CIE76 color difference below 20) is darkened on a light track or lightened on a dark one, keeping its hue. Knob brushes set by the app are used as given.
+
+### Fixed
+
+- TextArea: every text area with the same `MinRows` has the same height. The visible border kept the 80 px default when the rows needed more, unless something else re-applied the sizing later; `DaisyInput` now re-applies its sizing when `MinHeight` changes.
+
 ## [1.7.0] - 2026-10-21
 
 ### Added

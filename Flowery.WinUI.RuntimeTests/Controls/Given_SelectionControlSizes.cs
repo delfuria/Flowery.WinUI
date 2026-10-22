@@ -2,6 +2,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Flowery.Controls;
 using Flowery.Enums;
+using Flowery.Helpers;
+using Flowery.Theming;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -135,6 +137,31 @@ namespace Flowery.WinUI.RuntimeTests.Controls
             await Task.Delay(300); // let the knob animation finish
             var innerWidth = track.Width - track.BorderThickness.Left - track.BorderThickness.Right;
             Assert.AreEqual(innerWidth - knob.Width - padding, KnobOffset(knob), 0.01, "Checked knob offset");
+        }
+
+        [TestMethod]
+        public async Task When_CheckedKnobMatchesTheTrack_ItGetsContrastAnOutlineAndAVariantBorder()
+        {
+            // A track painted in the Secondary color hides a Secondary knob unless the toggle adjusts it.
+            var secondary = (SolidColorBrush)DaisyResourceLookup.GetBrush("DaisySecondaryBrush");
+            var toggle = new DaisyToggle { Variant = DaisyToggleVariant.Secondary, IsOn = true };
+            toggle.Resources["DaisyToggleTrackBackground"] = new SolidColorBrush(secondary.Color);
+            RuntimeTestHelpers.AttachToHost(toggle);
+            await RuntimeTestHelpers.EnsureLoadedAsync(toggle);
+            await Task.Delay(100);
+
+            var (track, knob) = GetToggleParts(toggle);
+            var knobColor = ((SolidColorBrush)knob.Fill).Color;
+            Assert.AreNotEqual(secondary.Color, knobColor, "The knob is adjusted away from the track color.");
+            Assert.IsTrue(FloweryColorHelpers.GetColorDifference(knobColor, secondary.Color) >= 20,
+                "The adjusted knob stands out from the track.");
+            Assert.AreEqual(1, knob.StrokeThickness, "The knob has an outline.");
+            Assert.IsInstanceOfType<SolidColorBrush>(knob.Stroke, "The outline has a color.");
+            Assert.AreEqual(secondary.Color, ((SolidColorBrush)track.BorderBrush).Color, "The checked track border takes the variant color.");
+
+            toggle.IsOn = false;
+            await Task.Delay(100);
+            Assert.AreNotEqual(secondary.Color, ((SolidColorBrush)track.BorderBrush).Color, "The unchecked track border is neutral again.");
         }
 
         [TestMethod]
