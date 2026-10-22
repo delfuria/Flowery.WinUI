@@ -11,10 +11,6 @@ namespace Flowery.Controls;
 
 internal static partial class DaisyTourLayout
 {
-    // Temporary CI diagnosis; the runtime runner enables this only for tour tests.
-    internal static Action<string>? DiagnosticTrace { get; set; }
-    private static int _diagnosticSequence;
-
     /// <summary>
     /// The part of the window content that its display's work area shows, in content DIP. A window that
     /// extends below the taskbar or off the screen must not receive the card or annotations there.
@@ -102,20 +98,16 @@ internal static partial class DaisyTourLayout
 
     internal static async Task SettleAsync(FrameworkElement host, CancellationToken token)
     {
-        var traceId = Interlocked.Increment(ref _diagnosticSequence);
-        DiagnosticTrace?.Invoke($"settle {traceId}: queued");
         var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        if (!host.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+        // Layout is forced explicitly; low-priority queue work can starve during active rendering.
+        if (!host.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Normal, () =>
         {
-            DiagnosticTrace?.Invoke($"settle {traceId}: layout started");
             host.XamlRoot?.Content.UpdateLayout();
             host.UpdateLayout();
-            DiagnosticTrace?.Invoke($"settle {traceId}: layout completed");
             completion.TrySetResult();
         }))
             throw new OperationCanceledException(token);
         await completion.Task.WaitAsync(token);
-        DiagnosticTrace?.Invoke($"settle {traceId}: resumed");
     }
 
     // Loaded handlers can still resize controls created during preparation, and a scroll
@@ -123,20 +115,10 @@ internal static partial class DaisyTourLayout
     // only in the next frame. Bounds are measured after that frame.
     private static async Task NextFrameAsync(CancellationToken token)
     {
-        var traceId = Interlocked.Increment(ref _diagnosticSequence);
-        DiagnosticTrace?.Invoke($"frame {traceId}: waiting");
         var rendered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        EventHandler<object> handler = (_, _) =>
-        {
-            DiagnosticTrace?.Invoke($"frame {traceId}: rendering");
-            rendered.TrySetResult();
-        };
+        EventHandler<object> handler = (_, _) => rendered.TrySetResult();
         CompositionTarget.Rendering += handler;
-        try
-        {
-            await rendered.Task.WaitAsync(token);
-            DiagnosticTrace?.Invoke($"frame {traceId}: resumed");
-        }
+        try { await rendered.Task.WaitAsync(token); }
         finally { CompositionTarget.Rendering -= handler; }
     }
 
