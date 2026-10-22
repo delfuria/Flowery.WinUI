@@ -191,17 +191,19 @@ public class Given_DaisyTourEditorNavigation
             await editor.OpenAsync(tour).WaitAsync(Timeout);
             var originalProfile = editor.ExportJson();
             var viewport = DaisyTourLayout.VisibleArea(root.XamlRoot);
+            var cardWidth = tour.CardBounds.Width;
             Assert.AreEqual(viewport.Bottom - 12, tour.CardBounds.Bottom, 0.01);
-            Assert.IsTrue(tour.CardBounds.Right <= editor.InspectorBounds.Left - 12 + 0.01);
+            AssertCardAvoidance(tour, editor);
 
             await InvokeEditorButtonAsync(editor, tour, "DaisyTourEditorMovePanel");
             Assert.AreEqual(viewport.Bottom - 12, tour.CardBounds.Bottom, 0.01);
-            Assert.IsTrue(tour.CardBounds.Left >= editor.InspectorBounds.Right + 12 - 0.01);
+            AssertCardAvoidance(tour, editor);
 
             await InvokeEditorButtonAsync(editor, tour, "DaisyTourEditorTogglePanel");
             Assert.IsFalse(editor.IsExpanded);
             Assert.AreEqual(viewport.Bottom - 12, tour.CardBounds.Bottom, 0.01);
             Assert.AreEqual(viewport.Left + viewport.Width / 2, tour.CardBounds.Left + tour.CardBounds.Width / 2, 0.01);
+            Assert.AreEqual(cardWidth, tour.CardBounds.Width, 0.01, "The inspector must not resize the card.");
             Assert.AreEqual(originalProfile, editor.ExportJson());
             Assert.AreEqual(DaisyTourCardPosition.Top, tour.CardPosition);
             Assert.AreEqual(DaisyTourCardPosition.TopRight, step.CardPosition);
@@ -220,7 +222,7 @@ public class Given_DaisyTourEditorNavigation
     }
 
     [TestMethod]
-    public async Task When_InspectorResizes_ItKeepsCardSpaceAndHistoryActionsRemainAccessible()
+    public async Task When_InspectorResizes_ItPreservesCardSizeAndHistoryActionsRemainAccessible()
     {
         var root = new Grid { Width = 752, Height = 480 };
         var target = new Button
@@ -241,21 +243,22 @@ public class Given_DaisyTourEditorNavigation
             await editor.OpenAsync(tour).WaitAsync(Timeout);
             var original = editor.ExportJson();
             var initialWidth = editor.InspectorBounds.Width;
+            var cardWidth = tour.CardBounds.Width;
             await ChangeGeometryAsync(tour, () => editor.ResizeInspectorBy(-40));
             Assert.AreEqual(initialWidth + 40, editor.InspectorBounds.Width, 0.01);
-            Assert.IsTrue(tour.CardBounds.Right <= editor.InspectorBounds.Left - 12 + 0.01);
+            AssertCardAvoidance(tour, editor);
 
             await ChangeGeometryAsync(tour, () => editor.ResizeInspectorBy(-10000));
             Assert.IsTrue(editor.InspectorBounds.Width <= 600);
-            Assert.IsTrue(tour.CardBounds.Width >= 320);
-            Assert.IsTrue(tour.CardBounds.Right <= editor.InspectorBounds.Left - 12 + 0.01);
+            Assert.AreEqual(cardWidth, tour.CardBounds.Width, 0.01, "Widening the inspector must not shrink the card.");
+            AssertCardAvoidance(tour, editor);
             await ChangeGeometryAsync(tour, () => editor.ResizeInspectorBy(10000));
             Assert.AreEqual(180d, editor.InspectorBounds.Width, 0.01);
 
             await InvokeEditorButtonAsync(editor, tour, "DaisyTourEditorMovePanel");
             await ChangeGeometryAsync(tour, () => editor.ResizeInspectorBy(60));
             Assert.AreEqual(240d, editor.InspectorBounds.Width, 0.01);
-            Assert.IsTrue(tour.CardBounds.Left >= editor.InspectorBounds.Right + 12 - 0.01);
+            AssertCardAvoidance(tour, editor);
             await InvokeEditorButtonAsync(editor, tour, "DaisyTourEditorTogglePanel");
             await InvokeEditorButtonAsync(editor, tour, "DaisyTourEditorTogglePanel");
             Assert.AreEqual(240d, editor.InspectorBounds.Width, 0.01);
@@ -289,6 +292,23 @@ public class Given_DaisyTourEditorNavigation
             tour.Cancel();
             RuntimeTestHelpers.GetHostPanel().Children.Remove(root);
             await SettleAsync(root);
+        }
+    }
+
+    private static void AssertCardAvoidance(DaisyTour tour, DaisyTourEditor editor)
+    {
+        var viewport = DaisyTourLayout.VisibleArea(tour.XamlRoot);
+        var card = tour.CardBounds;
+        var inspector = editor.InspectorBounds;
+        Assert.IsTrue(card.Left >= viewport.Left + 12 - 0.01);
+        Assert.IsTrue(card.Right <= viewport.Right - 12 + 0.01);
+        var freeWidth = Math.Max(inspector.Left - viewport.Left - 24, viewport.Right - inspector.Right - 24);
+        if (freeWidth >= card.Width)
+        {
+            var overlap = card;
+            overlap.Intersect(inspector);
+            Assert.IsTrue(overlap.IsEmpty || overlap.Width <= 0 || overlap.Height <= 0,
+                "The card must avoid the inspector when there is enough room beside it.");
         }
     }
 
