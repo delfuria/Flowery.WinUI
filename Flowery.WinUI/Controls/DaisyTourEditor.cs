@@ -654,7 +654,8 @@ public sealed partial class DaisyTourEditor : ContentControl
 
     private void RefreshValue()
     {
-        if (_refreshing || !IsOpen) return;
+        // Fields need the active preview's resolved values; startup and selection prepare them first.
+        if (_refreshing || !IsOpen || SelectedStep is not { } step || _tour?.CurrentStep != step) return;
         _refreshing = true;
         try
         {
