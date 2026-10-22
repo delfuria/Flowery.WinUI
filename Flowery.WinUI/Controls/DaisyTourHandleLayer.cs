@@ -25,7 +25,29 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
         IsTabStop = false;
         foreach (var kind in Enum.GetValues<HandleKind>())
         {
-            var button = new Button { Width = 28, Height = 28, Padding = new Thickness(0), Content = kind is HandleKind.Source or HandleKind.Target ? "●" : "◆", Tag = kind };
+            Microsoft.UI.Xaml.Shapes.Shape marker = kind is HandleKind.Source or HandleKind.Target
+                ? new Ellipse()
+                : new Polygon { Points = [new Point(5, 1), new Point(9, 5), new Point(5, 9), new Point(1, 5)] };
+            marker.Width = 10;
+            marker.Height = 10;
+            marker.StrokeThickness = 1.5;
+            marker.IsHitTestVisible = false;
+            var transparent = new SolidColorBrush(Colors.Transparent);
+            var button = new Button
+            {
+                Width = 28, Height = 28, MinWidth = 0, MinHeight = 0,
+                Padding = new Thickness(0), BorderThickness = new Thickness(0),
+                Background = transparent, BorderBrush = transparent,
+                HorizontalContentAlignment = HorizontalAlignment.Center,
+                VerticalContentAlignment = VerticalAlignment.Center,
+                Content = marker, Tag = kind
+            };
+            // Keep a forgiving hit area without painting over the annotation.
+            foreach (var state in new[] { "PointerOver", "Pressed", "Disabled" })
+            {
+                button.Resources["ButtonBackground" + state] = transparent;
+                button.Resources["ButtonBorderBrush" + state] = transparent;
+            }
             AutomationProperties.SetAutomationId(button, "DaisyTourHandle" + kind);
             button.AddHandler(PointerPressedEvent, new PointerEventHandler(OnPressed), true);
             button.AddHandler(PointerMovedEvent, new PointerEventHandler(OnMoved), true);
@@ -78,7 +100,7 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
         var along = Unit(geometry.Source, geometry.Target);
         var normal = new Point(-along.Y, along.X);
         var below = normal.Y < 0 || (normal.Y == 0 && normal.X < 0) ? new Point(-normal.X, -normal.Y) : normal;
-        // Keep the 28-DIP handle just below the rendered midpoint, including on diagonal paths.
+        // Keep the 28-DIP hit area just below the rendered midpoint, including on diagonal paths.
         var clearance = 6 + 14 * (Math.Abs(below.X) + Math.Abs(below.Y)) + tour.AnnotationPresenters[selected].CourseThickness / 2;
         var curve = Add(geometry.BodyCenter, below, clearance);
         var tipDirection = geometry.HeadDirection;
@@ -101,9 +123,11 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
         _positions[kind] = point;
         SetLeft(button, point.X - button.Width / 2);
         SetTop(button, point.Y - button.Height / 2);
-        button.Background = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
-        button.Foreground = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
-        button.BorderBrush = DaisyResourceLookup.GetBrush("DaisyBaseContentBrush");
+        if (button.Content is Microsoft.UI.Xaml.Shapes.Shape marker)
+        {
+            marker.Fill = DaisyResourceLookup.GetBrush("DaisyBase100Brush");
+            marker.Stroke = DaisyResourceLookup.GetBrush("DaisyPrimaryBrush");
+        }
         var name = FloweryLocalization.GetStringInternal("TourEditor_Handle_" + kind);
         AutomationProperties.SetName(button, name);
         ToolTipService.SetToolTip(button, name);
