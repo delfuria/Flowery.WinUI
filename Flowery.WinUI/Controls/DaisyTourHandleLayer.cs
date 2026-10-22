@@ -116,11 +116,25 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
         SetHandle(HandleKind.Source, geometryForEdit.Source, true, new Point(sourceDirection.Y * sourceClearance, -sourceDirection.X * sourceClearance));
         SetHandle(HandleKind.Target, geometryForEdit.Target, true, new Point(targetDirection.Y * targetClearance, -targetDirection.X * targetClearance));
         SetHandle(HandleKind.Curvature, curve, geometry.Path == DaisyTourAnnotationPath.Curved && !geometry.HasRouteLimit && Distance(geometry.Source, geometry.Target) > 0.001);
-        SetHandle(HandleKind.FirstControl, geometry.FirstControl, geometry.Path == DaisyTourAnnotationPath.Bezier && !geometry.HasRouteLimit, Add(default, below, -18));
-        SetHandle(HandleKind.SecondControl, geometry.SecondControl, geometry.Path == DaisyTourAnnotationPath.Bezier && !geometry.HasRouteLimit, Add(default, below, -18));
-        SetHandle(HandleKind.BodyWidth, Add(geometry.BodyCenter, normal, geometry.BodyWidth / 2), geometry.IsBlock, Add(default, normal, 18));
+        SetBezierHandle(HandleKind.FirstControl, geometry, 1d / 3, sourceClearance);
+        SetBezierHandle(HandleKind.SecondControl, geometry, 2d / 3, sourceClearance);
+        SetHandle(HandleKind.BodyWidth, Add(geometry.BodyCenter, below, -geometry.BodyWidth / 2), geometry.IsBlock, Add(default, below, -18));
         SetHandle(HandleKind.HeadLength, headBase, geometry.HasEndHead, Add(default, tipNormal, -(18 + geometry.HeadWidth / 2)));
         SetHandle(HandleKind.HeadWidth, Add(headBase, tipNormal, geometry.HeadWidth / 2), geometry.HasEndHead, Add(default, tipNormal, 18));
+    }
+
+    private void SetBezierHandle(HandleKind kind, DaisyTourEditGeometry geometry, double t, double clearance)
+    {
+        var u = 1 - t;
+        var point = new Point(
+            u * u * u * geometry.Source.X + 3 * u * u * t * geometry.FirstControl.X + 3 * u * t * t * geometry.SecondControl.X + t * t * t * geometry.Target.X,
+            u * u * u * geometry.Source.Y + 3 * u * u * t * geometry.FirstControl.Y + 3 * u * t * t * geometry.SecondControl.Y + t * t * t * geometry.Target.Y);
+        var tangent = new Point(
+            u * u * (geometry.FirstControl.X - geometry.Source.X) + 2 * u * t * (geometry.SecondControl.X - geometry.FirstControl.X) + t * t * (geometry.Target.X - geometry.SecondControl.X),
+            u * u * (geometry.FirstControl.Y - geometry.Source.Y) + 2 * u * t * (geometry.SecondControl.Y - geometry.FirstControl.Y) + t * t * (geometry.Target.Y - geometry.SecondControl.Y));
+        var direction = Unit(default, tangent);
+        SetHandle(kind, point, geometry.Path == DaisyTourAnnotationPath.Bezier && !geometry.HasRouteLimit,
+            new Point(direction.Y * clearance, -direction.X * clearance));
     }
 
     private void SetHandle(HandleKind kind, Point point, bool visible, Point displayOffset = default)
@@ -241,6 +255,11 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
                 break;
             case HandleKind.FirstControl:
             case HandleKind.SecondControl:
+                // At t=1/3 or 2/3 the corresponding control contributes 4/9 of the curve point.
+                // Invert that weight so the visible grip follows the pointer one-for-one.
+                var control = kind == HandleKind.FirstControl ? geometry.FirstControl : geometry.SecondControl;
+                delta = new Point(control.X - geometry.Source.X + (point.X - origin.X) * 9 / 4,
+                    control.Y - geometry.Source.Y + (point.Y - origin.Y) * 9 / 4);
                 var prefix = kind == HandleKind.FirstControl ? "controlPoint1" : "controlPoint2";
                 _editor.SetAnnotationValue(prefix + "X", (delta.X * along.X + delta.Y * along.Y) / length, publish: false);
                 _editor.SetAnnotationValue(prefix + "Y", (delta.X * normal.X + delta.Y * normal.Y) / length);

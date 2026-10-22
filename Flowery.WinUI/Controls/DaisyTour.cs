@@ -650,7 +650,17 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         _progressItems.Clear();
         for (var index = 0; index < session.Steps.Length; index++)
         {
-            var item = new DaisyStepItem { DataContent = (index + 1).ToString(CultureInfo.CurrentCulture), IsCompact = true };
+            var button = new Button
+            {
+                Tag = index, Padding = new Thickness(0), BorderThickness = new Thickness(0),
+                Background = new SolidColorBrush(Colors.Transparent), MinWidth = 0, MinHeight = 0
+            };
+            button.Click += OnProgressClick;
+            AutomationProperties.SetAutomationId(button, "DaisyTourStep" + (index + 1).ToString(CultureInfo.InvariantCulture));
+            var item = new DaisyStepItem
+            {
+                DataContent = (index + 1).ToString(CultureInfo.CurrentCulture), IsCompact = true, NavigationButton = button
+            };
             _progressItems.Add(item);
             panel.Children.Add(item);
         }
@@ -677,6 +687,15 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             ? FinishText ?? FloweryLocalization.GetStringInternal("Tour_Finish")
             : NextText ?? FloweryLocalization.GetStringInternal("Tour_Next");
         _back.IsEnabled = !session.Busy && CurrentIndex > 0;
+        _progress.IsEnabled = !session.Busy;
+        for (var index = 0; index < _progressItems.Count; index++)
+        {
+            if (_progressItems[index].NavigationButton is not { } button) continue;
+            var label = string.Format(CultureInfo.CurrentCulture, FloweryLocalization.GetStringInternal("Tour_StepCount"), index + 1, session.Steps.Length);
+            label += ". " + session.Steps[index].Title;
+            AutomationProperties.SetName(button, label);
+            ToolTipService.SetToolTip(button, label);
+        }
         _next.IsEnabled = !session.Busy && (!session.Editing || CurrentIndex < session.Steps.Length - 1);
         _skip.Visibility = session.Editing ? Visibility.Collapsed : Visibility.Visible;
         _cardMove.Visibility = session.Editing ? Visibility.Visible : Visibility.Collapsed;
@@ -821,6 +840,12 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
     }
 
     private async void OnBack(object sender, RoutedEventArgs args) => await BackAsync();
+    private async void OnProgressClick(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button { Tag: int index } && _session is { Busy: false } session &&
+            index >= 0 && index < session.Steps.Length && index != CurrentIndex)
+            await TransitionAsync(session, index);
+    }
     private async void OnNext(object sender, RoutedEventArgs args) => await NextAsync();
     private void OnSkip(object sender, RoutedEventArgs args) => Skip();
     private void OnPopupClosed(object? sender, object args)
