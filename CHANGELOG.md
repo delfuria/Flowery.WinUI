@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Theming: `DaisyThemeManager.ThemeChanged` and the system contrast change notify their handlers one at a time. A handler that threw stopped the notification, so every control subscribed after it kept its old colors (seen as a `DaisyColorSlider` without its contrast border in CI); the failure is now logged under `Events`. A theme that fails to apply is logged under `Theming` instead of failing silently.
 - TextArea: every text area with the same `MinRows` has the same height. The visible border kept the 80 px default when the rows needed more, unless something else re-applied the sizing later; `DaisyInput` now re-applies its sizing when `MinHeight` changes.
 
 ## [1.7.0] - 2026-10-21
