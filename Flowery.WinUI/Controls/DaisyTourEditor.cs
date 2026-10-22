@@ -286,6 +286,11 @@ public sealed partial class DaisyTourEditor : ContentControl
         VerifyOpen();
         ValidateProperty(propertyName);
         if (value is not null) DaisyTourProfileResolver.ValidateValue(propertyName, value);
+        var scope = CurrentOverride(false);
+        var previous = DaisyTourProfileResolver.GetValue(scope, propertyName);
+        var unchanged = value is double[] numbers && previous is double[] oldNumbers
+            ? numbers.SequenceEqual(oldNumbers) : Equals(value, previous);
+        if (unchanged && scope?.Inherit.Contains(propertyName) != true) return;
         if (propertyName is "cardX" or "cardY" or "cardPosition" or "placement") _tour!.ClearCardPositionPreview();
         RecordUndo();
         DaisyTourProfileResolver.SetValue(CurrentOverride(create: true)!, propertyName, value);
@@ -296,6 +301,7 @@ public sealed partial class DaisyTourEditor : ContentControl
     {
         VerifyOpen();
         ValidateProperty(propertyName);
+        if (CurrentOverride(false)?.Inherit.Contains(propertyName) == true) return;
         if (propertyName is "cardX" or "cardY" or "cardPosition" or "placement") _tour!.ClearCardPositionPreview();
         RecordUndo();
         DaisyTourProfileResolver.InheritValue(CurrentOverride(create: true)!, propertyName);

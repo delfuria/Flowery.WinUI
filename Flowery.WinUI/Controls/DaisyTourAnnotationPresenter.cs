@@ -601,26 +601,60 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
             double[] distances = [Math.Abs(point.X - bounds.Left), Math.Abs(point.X - bounds.Right),
                 Math.Abs(point.Y - bounds.Top), Math.Abs(point.Y - bounds.Bottom)];
             var side = Array.IndexOf(distances, distances.Min());
-            if (side == 3)
+            var departure = side switch
             {
-                point = new Point(point.X, Math.Max(point.Y, bounds.Bottom + clearance));
-                AddRoutePoint(points, point);
-                side = Center(other).X >= Center(bounds).X ? 1 : 0;
-            }
-            if (side is 0 or 1)
+                0 => new Point(Math.Min(point.X, bounds.Left - clearance), point.Y),
+                1 => new Point(Math.Max(point.X, bounds.Right + clearance), point.Y),
+                2 => new Point(point.X, Math.Min(point.Y, bounds.Top - clearance)),
+                _ => new Point(point.X, Math.Max(point.Y, bounds.Bottom + clearance))
+            };
+            // Keep the outward leg in the gap when the other end is closer than the clearance.
+            if (RouteSegmentIntersects(other, point, departure))
             {
-                point = new Point(side == 0 ? Math.Min(point.X, bounds.Left - clearance)
-                    : Math.Max(point.X, bounds.Right + clearance), point.Y);
-                AddRoutePoint(points, point);
+                departure = side switch
+                {
+                    0 => new Point((point.X + other.Right) / 2, point.Y),
+                    1 => new Point((point.X + other.Left) / 2, point.Y),
+                    2 => new Point(point.X, (point.Y + other.Bottom) / 2),
+                    _ => new Point(point.X, (point.Y + other.Top) / 2)
+                };
             }
+            point = departure;
+            AddRoutePoint(points, point);
+        }
+        var rise = new Point(point.X, level);
+        if (RouteSegmentIntersects(bounds, point, rise) || RouteSegmentIntersects(other, point, rise))
+        {
+            var left = new Point(Math.Min(bounds.Left, other.Left) - clearance, point.Y);
+            var right = new Point(Math.Max(bounds.Right, other.Right) + clearance, point.Y);
+            var leftClear = !RouteSegmentIntersects(bounds, point, left) && !RouteSegmentIntersects(other, point, left);
+            var rightClear = !RouteSegmentIntersects(bounds, point, right) && !RouteSegmentIntersects(other, point, right);
+            if (leftClear && (!rightClear || Distance(point, left) <= Distance(point, right))) point = left;
+            else if (rightClear) point = right;
+            AddRoutePoint(points, point);
         }
         AddRoutePoint(points, new Point(point.X, level));
         return points;
     }
 
+    // Route legs are axis-aligned; touching an endpoint boundary does not cross its interior.
+    private static bool RouteSegmentIntersects(Rect bounds, Point start, Point end) => start.X == end.X
+        ? start.X > bounds.Left && start.X < bounds.Right && Math.Max(start.Y, end.Y) > bounds.Top && Math.Min(start.Y, end.Y) < bounds.Bottom
+        : start.Y > bounds.Top && start.Y < bounds.Bottom && Math.Max(start.X, end.X) > bounds.Left && Math.Min(start.X, end.X) < bounds.Right;
+
     private static void AddRoutePoint(List<Point> points, Point point)
     {
-        if (Distance(points[^1], point) > 0.01) points.Add(point);
+        var last = points[^1];
+        if (Distance(last, point) <= 0.01) return;
+        // Do not create a rounded corner in the middle of a straight leg.
+        if (points.Count > 1)
+        {
+            var previous = points[^2];
+            if (previous.X == last.X && last.X == point.X && (last.Y - previous.Y) * (point.Y - last.Y) >= 0 ||
+                previous.Y == last.Y && last.Y == point.Y && (last.X - previous.X) * (point.X - last.X) >= 0)
+                points.RemoveAt(points.Count - 1);
+        }
+        points.Add(point);
     }
 
     // An end meets the course from its facing side when the course level crosses it, otherwise from its top.

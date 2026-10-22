@@ -19,6 +19,7 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
     private Point _dragOrigin;
     private Point _dragPointerOrigin;
     private Point _dragDisplayOffset;
+    private bool _dragMoved;
 
     internal DaisyTourHandleLayer(DaisyTourEditor editor)
     {
@@ -170,6 +171,7 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
         _dragOrigin = _positions[kind];
         _dragDisplayOffset = new Point(GetLeft(button) + button.Width / 2 - _dragOrigin.X, GetTop(button) + button.Height / 2 - _dragOrigin.Y);
         _dragPointerOrigin = args.GetCurrentPoint(this).Position;
+        _dragMoved = false;
         _editor.BeginGesture();
         button.CapturePointer(args.Pointer);
         button.Focus(FocusState.Pointer);
@@ -179,16 +181,17 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
     private void OnMoved(object sender, PointerRoutedEventArgs args)
     {
         if (_drag is not { } kind || _dragGeometry is not { } geometry) return;
-        ApplyPoint(kind, DragPoint(args), geometry, _dragOrigin);
         args.Handled = true;
+        var point = DragPoint(args);
+        if (!_dragMoved && point == _dragOrigin) return;
+        _dragMoved = true;
+        ApplyPoint(kind, point, geometry, _dragOrigin);
     }
 
     private void OnReleased(object sender, PointerRoutedEventArgs args)
     {
-        if (_drag is not { } kind || _dragGeometry is not { } geometry) return;
-        ApplyPoint(kind, DragPoint(args), geometry, _dragOrigin);
-        _editor.EndGesture();
-        ReleaseGesture();
+        if (_drag is null) return;
+        FinishGesture(args);
         args.Handled = true;
     }
 
@@ -202,14 +205,23 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
 
     private void OnCaptureLost(object sender, PointerRoutedEventArgs args)
     {
-        if (_drag is not { } kind || _dragGeometry is not { } geometry) return;
         // Button can release capture before PointerReleased reaches handled-events-too listeners.
         // The final point can be newer than the last delivered PointerMoved event.
-        ApplyPoint(kind, DragPoint(args), geometry, _dragOrigin);
-        _drag = null;
-        _dragGeometry = null;
-        _pointer = null;
-        _editor.EndGesture();
+        FinishGesture(args);
+    }
+
+    private void FinishGesture(PointerRoutedEventArgs args)
+    {
+        if (_drag is not { } kind || _dragGeometry is not { } geometry) return;
+        var point = DragPoint(args);
+        if (_dragMoved && point == _dragOrigin)
+            _editor.CancelGesture();
+        else
+        {
+            if (point != _dragOrigin) ApplyPoint(kind, point, geometry, _dragOrigin);
+            _editor.EndGesture();
+        }
+        ReleaseGesture();
     }
 
     private void OnKeyDown(object sender, KeyRoutedEventArgs args)
@@ -229,7 +241,7 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
     private Point DragPoint(PointerRoutedEventArgs args)
     {
         var point = args.GetCurrentPoint(this).Position;
-        return new Point(_dragOrigin.X + point.X - _dragPointerOrigin.X, _dragOrigin.Y + point.Y - _dragPointerOrigin.Y);
+        return new Point(_dragOrigin.X + (point.X - _dragPointerOrigin.X), _dragOrigin.Y + (point.Y - _dragPointerOrigin.Y));
     }
 
     private void ApplyPoint(HandleKind kind, Point point, DaisyTourEditGeometry geometry, Point origin)
@@ -291,6 +303,7 @@ internal sealed partial class DaisyTourHandleLayer : Canvas
         _drag = null;
         _dragGeometry = null;
         _pointer = null;
+        _dragMoved = false;
         if (kind is { } selected && pointer is not null) _handles[selected].ReleasePointerCapture(pointer);
     }
 
