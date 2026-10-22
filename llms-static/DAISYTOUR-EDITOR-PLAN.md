@@ -1,7 +1,7 @@
 # DaisyTour editor implementation plan
 
 Approved scope: a reusable tour styling editor, first integrated in the Gallery.
-Use the existing checkout on `codex/daisytour-editor`, based on `main`. Do not commit or push.
+Use the existing checkout on `codex/daisytour-editor`, based on `main`. Further commits and pushes require user approval.
 
 ## Scope and architecture
 
@@ -53,6 +53,8 @@ Use the existing checkout on `codex/daisytour-editor`, based on `main`. Do not c
 
 ## E: Verification and documentation
 
+The completed checks below record the earlier implementation. They do not establish full verification of the later inspector redesign or the current cleanup.
+
 - [x] Test real JSON round trips, validation failures and inheritance at every scope.
 - [x] Test live changes, undo/redo, apply/cancel, binding preservation, handles and lifecycle cleanup.
 - [x] Test normal playback regressions and authoring-specific focus/outcomes.
@@ -67,10 +69,51 @@ Full tour construction, target discovery/registry, serializing callbacks or arbi
 
 ## Progress
 
-Plan saved before implementation. A-E are complete, with the unrelated full-suite
-Inconclusive result and the high-contrast verification scope recorded below.
-The current branch is `codex/daisytour-editor`, based directly on `main` (`6ae98e9`).
-Changes from the unrelated toggle branch are excluded. No commit or push has been made.
+Plan saved before implementation. A-D are implemented. The review of the accumulated diff found unused inspector strings, outdated inspector test assumptions, and unintended font delivery to Photos.
+The user authorized snapshot commit `c9246bf` before cleanup. The branch remains `codex/daisytour-editor`, originally based on `main` (`6ae98e9`).
+Changes from the unrelated toggle branch are excluded. The cleanup has not been committed or pushed.
+
+### Current verification scope
+
+The inspector layout, drag updates, themed flyouts, translations, and font configuration changed after the runtime checks below.
+The user confirmed that contact-point dragging works well and that section headings now display SemiBold.
+Later Gallery builds succeeded, but the earlier runtime totals are not results for the current source.
+Inspector tests written for the former selector layout do not verify the current field-based inspector.
+Full runtime and visual verification of the later changes remains open; this cleanup does not add or run tests.
+
+The cleanup build passed with zero errors and 12 existing Skia deprecation warnings:
+`logs/all-build-debug-sdk11.0.100-preview.5.26302.115-20261022-190610-520.log`.
+The rebuilt Photos output contains five Regular fonts and no Variable fonts.
+Manual connector endpoints now participate in limit routing, and editor handles use the rendered endpoints.
+This routing correction has been reviewed and compiled; its native visual check remains open.
+
+Historical card movement and compact inspector follow-up: the regular Debug build passed with
+six warnings in `logs/all-build-debug-sdk11.0.100-preview.5.26302.115-20261022-192100-748.log`.
+Native cua-driver interaction moved the card exactly 120 screen pixels and restored
+its original position with one Undo action. The collapsed inspector remained compact
+after Next, and expanding and collapsing it again worked. No new tests were added.
+The card-drag Undo result describes the superseded behavior before explicit saving was requested.
+
+Current card-position behavior: dragging or keyboard movement is temporary and does not change the profile, undo history, or exported JSON.
+The adjacent save button stores the changed position in the current step as one undo action.
+Temporary movement is cleared on a step change or editor closure.
+The regular Debug build passed with six warnings in `logs/all-build-debug-sdk11.0.100-preview.5.26302.115-20261022-193549-939.log`.
+Native cua-driver verification confirmed that dragging enables Save without creating an Undo entry;
+saving keeps the position and creates one Undo entry, and Undo restores the configured position.
+A further 120-pixel drag and return to the original position disabled Save again without changing history.
+
+Inspector overlap follow-up: card coordinates and width now use the full preview area.
+Only an actual overlap temporarily shifts the displayed card; the intended position and profile stay unchanged.
+Debug build passed with six warnings in `logs/all-build-debug-sdk11.0.100-preview.5.26302.115-20261022-195821-782.log`.
+Native cua-driver verification confirmed unchanged card bounds on expand/collapse without overlap,
+and temporary avoidance plus exact return for a saved overlapping position. Save stayed disabled,
+and one Undo still reverted the single authored position change after repeated expand/collapse.
+Automated grip input did not change the inspector width. The user subsequently verified repeated
+widening and narrowing: the card follows only when necessary and remains clear of the inspector.
+
+### Historical verification before the inspector redesign
+
+The following logs, screenshots, test totals, and window states describe their recorded implementation stages, not the current checkout or running Gallery.
 
 Native UI checks have covered JSON file export/readback/import, Apply and normal replay,
 step navigation, keyboard handle input, and Light/Dark screenshots at all five control sizes.

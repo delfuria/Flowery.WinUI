@@ -86,6 +86,8 @@ public sealed class DaisyTourStyleValues
     public DaisySize? Size { get; set; }
     public DaisyTourPlacement? Placement { get; set; }
     public DaisyTourCardPosition? CardPosition { get; set; }
+    public double? CardX { get; set; }
+    public double? CardY { get; set; }
     public string? CardBorderBrush { get; set; }
     public double? HighlightPadding { get; set; }
     public double? HighlightCornerRadius { get; set; }

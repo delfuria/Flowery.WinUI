@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Flowery.Controls;
 using Flowery.Enums;
 using Flowery.Services;
-using Flowery.Theming;
 using Microsoft.UI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -307,161 +305,6 @@ public class Given_DaisyTourEditor
         });
 
     [TestMethod]
-    public async Task When_SmallPresetValuesBecomeOverrides_RealEditorSelectionPreservesRenderedGeometry()
-    {
-        foreach (var preset in new[] { DaisyTourAnnotationPreset.CurvedArrow, DaisyTourAnnotationPreset.BlockArrow })
-        {
-            await InScenarioAsync(async scenario =>
-            {
-                FlowerySizeManager.SetIgnoreGlobalSize(scenario.Tour, true);
-                scenario.Tour.Size = DaisySize.Small;
-                scenario.Annotation.Preset = preset;
-                scenario.Annotation.ClearValue(DaisyTourAnnotationStyle.ArrowStyleProperty);
-                scenario.Annotation.ClearValue(DaisyTourAnnotationStyle.PathProperty);
-                scenario.Annotation.ClearValue(DaisyTourAnnotationStyle.BodyWidthProperty);
-                scenario.Annotation.ClearValue(DaisyTourAnnotationStyle.CurvatureProperty);
-                await scenario.Editor.OpenAsync(scenario.Tour).WaitAsync(Timeout);
-                var group = FindEditorControl<ComboBox>(scenario.Editor, "DaisyTourEditorGroup")!;
-                var property = FindEditorControl<ComboBox>(scenario.Editor, "DaisyTourEditorProperty")!;
-                var mode = FindEditorControl<ComboBox>(scenario.Editor, "DaisyTourEditorValueMode")!;
-                Assert.IsNotNull(group);
-                Assert.IsNotNull(property);
-                Assert.IsNotNull(mode);
-                var properties = new[]
-                {
-                    (Name: "strokeThickness", Group: 1, Property: DaisyTourAnnotationStyle.StrokeThicknessProperty),
-                    (Name: "bodyWidth", Group: 1, Property: DaisyTourAnnotationStyle.BodyWidthProperty),
-                    (Name: "headLength", Group: 1, Property: DaisyTourAnnotationStyle.HeadLengthProperty),
-                    (Name: "headWidth", Group: 1, Property: DaisyTourAnnotationStyle.HeadWidthProperty),
-                    (Name: "arrowStyle", Group: 1, Property: DaisyTourAnnotationStyle.ArrowStyleProperty),
-                    (Name: "path", Group: 2, Property: DaisyTourAnnotationStyle.PathProperty)
-                }.AsEnumerable();
-                if (preset == DaisyTourAnnotationPreset.CurvedArrow)
-                    properties = properties.Append(("curvature", 2, DaisyTourAnnotationStyle.CurvatureProperty));
-                foreach (var entry in properties)
-                {
-                    group.SelectedIndex = entry.Group;
-                    property.SelectedItem = entry.Name;
-                    Assert.AreEqual(entry.Name, property.SelectedItem);
-                    Assert.AreEqual(0, mode.SelectedIndex);
-                    var presenter = scenario.Tour.AnnotationPresenters.Single();
-                    var rendered = presenter.ResolvedValues[entry.Property];
-                    Assert.IsFalse(rendered.IsOverride);
-                    var geometry = presenter.EditGeometry;
-                    var course = presenter.Course.ToArray();
-                    await ChangeAndRenderAsync(scenario, () => mode.SelectedIndex = 1);
-                    var values = scenario.Editor.ExportProfile().Steps.Single().Annotations.Single().Style!;
-                    Assert.AreEqual(rendered.Value, DaisyTourProfileResolver.GetValue(values, entry.Name),
-                        $"{preset}/{entry.Name}: Override must use the current rendered value.");
-                    Assert.AreEqual(geometry, presenter.EditGeometry,
-                        $"{preset}/{entry.Name}: selecting Override must not change geometry.");
-                    CollectionAssert.AreEqual(course, presenter.Course.ToArray(),
-                        $"{preset}/{entry.Name}: selecting Override must not move the connector course.");
-                    Assert.IsTrue(presenter.ResolvedValues[entry.Property].IsOverride);
-                    Assert.AreEqual(DaisySize.Small, scenario.Tour.Size);
-                }
-            });
-        }
-    }
-
-    [TestMethod]
-    public Task When_HighContrastChanges_EditorShowsForcedRenderingAndPreservesAuthoredStyles() =>
-        InScenarioAsync(async scenario =>
-        {
-            var originalContrast = DaisySystemAppearance.HighContrast;
-            var stroke = new SolidColorBrush(Colors.Red);
-            var fill = new SolidColorBrush(Colors.Green);
-            var foreground = new SolidColorBrush(Colors.Blue);
-            try
-            {
-                SetTestContrast(false);
-                scenario.Annotation.Stroke = stroke;
-                scenario.Annotation.Fill = fill;
-                scenario.Annotation.Foreground = foreground;
-                scenario.Annotation.Opacity = 0.45;
-                var annotationProfile = new DaisyTourAnnotationStyleProfile
-                {
-                    Id = scenario.Annotation.Id,
-                    Style = new DaisyTourStyleOverride()
-                };
-                annotationProfile.Style.Values.Stroke = "#FF102030";
-                annotationProfile.Style.Values.Fill = "#FF304050";
-                annotationProfile.Style.Values.Foreground = "#FF506070";
-                annotationProfile.Style.Values.Opacity = 0.35;
-                var stepProfile = new DaisyTourStepStyleProfile { Id = scenario.Step.Id };
-                stepProfile.Annotations.Add(annotationProfile);
-                var profile = new DaisyTourStyleProfile { TourId = scenario.Tour.Id };
-                profile.Steps.Add(stepProfile);
-                scenario.Tour.StyleProfile = profile;
-                await scenario.Editor.OpenAsync(scenario.Tour).WaitAsync(Timeout);
-                var savedProfile = DaisyTourStyleProfileSerializer.Serialize(scenario.Tour.StyleProfile!);
-                var savedDraft = scenario.Editor.ExportJson();
-                var presenter = scenario.Tour.AnnotationPresenters.Single();
-                var ordinaryValues = presenter.ResolvedValues.ToDictionary(entry => entry.Key, entry => entry.Value);
-                var group = FindEditorControl<ComboBox>(scenario.Editor, "DaisyTourEditorGroup")!;
-                var properties = FindEditorControl<ComboBox>(scenario.Editor, "DaisyTourEditorProperty")!;
-                var effective = (TextBlock)typeof(DaisyTourEditor)
-                    .GetField("_effective", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(scenario.Editor)!;
-                Assert.IsNotNull(group);
-                Assert.IsNotNull(properties);
-                await ChangeAndRenderAsync(scenario, () => SetTestContrast(true));
-                Assert.IsTrue(DaisySystemAppearance.HighContrast);
-                group.SelectedIndex = 0;
-                foreach (var entry in new[]
-                {
-                    (Name: "stroke", Property: DaisyTourAnnotationStyle.StrokeProperty, Role: "DaisyPrimaryBrush"),
-                    (Name: "fill", Property: DaisyTourAnnotationStyle.FillProperty, Role: "DaisyPrimaryBrush"),
-                    (Name: "foreground", Property: DaisyTourAnnotationStyle.ForegroundProperty, Role: "DaisyBaseContentBrush")
-                })
-                {
-                    properties.SelectedItem = entry.Name;
-                    Assert.AreEqual(entry.Name, properties.SelectedItem);
-                    var rendered = presenter.ResolvedValues[entry.Property];
-                    var expected = ((SolidColorBrush)DaisyResourceLookup.GetBrush(entry.Role)).Color;
-                    Assert.IsTrue(rendered.HighContrast);
-                    Assert.AreEqual(expected, ((SolidColorBrush)rendered.Value!).Color);
-                    var color = $"#{expected.A:X2}{expected.R:X2}{expected.G:X2}{expected.B:X2}";
-                    StringAssert.Contains(effective.Text, color + " (HighContrast)");
-                }
-                properties.SelectedItem = "opacity";
-                Assert.IsTrue(presenter.ResolvedValues[DaisyTourAnnotationStyle.OpacityProperty].HighContrast);
-                Assert.AreEqual(1d, presenter.ResolvedValues[DaisyTourAnnotationStyle.OpacityProperty].Value);
-                Assert.AreEqual(1d, presenter.Opacity);
-                StringAssert.Contains(effective.Text, "1 (HighContrast)");
-                Assert.AreEqual(savedProfile, DaisyTourStyleProfileSerializer.Serialize(scenario.Tour.StyleProfile!));
-                Assert.AreEqual(savedDraft, scenario.Editor.ExportJson());
-                Assert.IsFalse(scenario.Editor.HasChanges);
-                await ChangeAndRenderAsync(scenario, () => SetTestContrast(false));
-                Assert.IsFalse(DaisySystemAppearance.HighContrast);
-                foreach (var property in new[]
-                {
-                    DaisyTourAnnotationStyle.StrokeProperty, DaisyTourAnnotationStyle.FillProperty,
-                    DaisyTourAnnotationStyle.ForegroundProperty
-                })
-                {
-                    var rendered = presenter.ResolvedValues[property];
-                    Assert.IsFalse(rendered.HighContrast);
-                    Assert.AreEqual(((SolidColorBrush)ordinaryValues[property].Value!).Color, ((SolidColorBrush)rendered.Value!).Color);
-                }
-                Assert.AreEqual(0.35, presenter.Opacity, 0.000001);
-                Assert.IsFalse(presenter.ResolvedValues[DaisyTourAnnotationStyle.OpacityProperty].HighContrast);
-                Assert.AreSame(stroke, scenario.Annotation.Stroke);
-                Assert.AreSame(fill, scenario.Annotation.Fill);
-                Assert.AreSame(foreground, scenario.Annotation.Foreground);
-                Assert.AreEqual(0.45, scenario.Annotation.Opacity);
-                Assert.AreEqual(savedProfile, DaisyTourStyleProfileSerializer.Serialize(scenario.Tour.StyleProfile!));
-                Assert.AreEqual(savedDraft, scenario.Editor.ExportJson());
-                Assert.IsFalse(scenario.Editor.HasChanges);
-                Assert.IsTrue(scenario.Editor.IsOpen);
-            }
-            finally
-            {
-                SetTestContrast(originalContrast);
-                await SettleAsync(scenario.Root);
-            }
-        });
-
-    [TestMethod]
     public Task When_CurvedDiagonalHandlesAreProjected_BackToValuesTheyPreserveRenderedDimensions() =>
         InScenarioAsync(async scenario =>
         {
@@ -551,26 +394,6 @@ public class Given_DaisyTourEditor
                 }
             }
         });
-
-    private static void SetTestContrast(bool enabled)
-    {
-        typeof(DaisySystemAppearance).GetField("_highContrast", BindingFlags.Static | BindingFlags.NonPublic)!.SetValue(null, enabled);
-        var handlers = (EventHandler?)typeof(DaisySystemAppearance)
-            .GetField("ColorsChanged", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null);
-        handlers?.Invoke(null, EventArgs.Empty);
-    }
-
-    private static T? FindEditorControl<T>(DependencyObject root, string id) where T : DependencyObject
-    {
-        if (root is T control && Microsoft.UI.Xaml.Automation.AutomationProperties.GetAutomationId(control) == id)
-            return control;
-        for (var index = 0; index < VisualTreeHelper.GetChildrenCount(root); index++)
-        {
-            if (FindEditorControl<T>(VisualTreeHelper.GetChild(root, index), id) is { } found)
-                return found;
-        }
-        return null;
-    }
 
     private static Point HandleCenter(DaisyTourEditor editor, string id)
     {

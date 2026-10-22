@@ -12,7 +12,7 @@ public static class DaisyTourStyleProfileSerializer
     {
         "size", "cardPosition", "cardBorderBrush", "highlightPadding", "highlightCornerRadius"
     };
-    private static readonly HashSet<string> StepProperties = new(StringComparer.Ordinal) { "placement", "cardPosition" };
+    private static readonly HashSet<string> StepProperties = new(StringComparer.Ordinal) { "placement", "cardPosition", "cardX", "cardY" };
     private static readonly HashSet<string> AnnotationProperties = new(StringComparer.Ordinal)
     {
         "sourceAnchor", "targetAnchor", "routeLimitSide", "routeLimitCoordinate", "routeLimitMargin"

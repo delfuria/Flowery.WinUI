@@ -82,7 +82,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         for (var index = 0; index < 4; index++)
             _cardLayout.RowDefinitions.Add(new RowDefinition { Height = index == 0 ? new GridLength(1, GridUnitType.Star) : GridLength.Auto });
         var text = new StackPanel { Spacing = 8 };
-        text.Children.Add(_title);
+        text.Children.Add(CreateCardHeader());
         text.Children.Add(_description);
         text.Children.Add(_customContent);
         _textScroll.Content = text;
@@ -233,6 +233,8 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
 
     private async Task TransitionAsync(Session session, int index)
     {
+        _editor?.CancelGesture();
+        ClearCardPositionPreview();
         session.Busy = true;
         _editor?.SetTransitioning(true);
         session.PendingStep = session.Steps[index];
@@ -407,10 +409,22 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         var placement = StepSetting(step, DaisyTourStep.PlacementProperty, step.Placement, DaisyTourPlacement.Auto);
         var frame = Math.Max(0, double.IsFinite(EffectiveHighlightPadding) ? EffectiveHighlightPadding : 0) + _outline.StrokeThickness;
         var targets = Shift(allTargets, -_visibleArea.X, -_visibleArea.Y);
-        CardBounds = _editor is { } editor
-            ? PlaceEditorCard(editor, _card.DesiredSize)
+        CardBounds = _editor is not null
+            ? PlaceEditorCard(_card.DesiredSize)
             : Shift(DaisyTourLayout.PlaceStationary(position, _card.DesiredSize, viewport, Inflate(targets, frame))
                 ?? DaisyTourLayout.Place(targets, _card.DesiredSize, viewport, placement), _visibleArea.X, _visibleArea.Y);
+        var cardX = StepSetting(step, DaisyTourStep.CardXProperty, step.CardX, double.NaN);
+        var cardY = StepSetting(step, DaisyTourStep.CardYProperty, step.CardY, double.NaN);
+        var manualCard = double.IsFinite(cardX) || double.IsFinite(cardY);
+        if (manualCard)
+        {
+            var travel = CardTravelArea(_card.DesiredSize);
+            CardBounds = new Rect(
+                double.IsFinite(cardX) ? travel.X + Math.Clamp(cardX, 0, 1) * travel.Width : Math.Clamp(CardBounds.X, travel.Left, travel.Right),
+                double.IsFinite(cardY) ? travel.Y + Math.Clamp(cardY, 0, 1) * travel.Height : Math.Clamp(CardBounds.Y, travel.Top, travel.Bottom),
+                CardBounds.Width, CardBounds.Height);
+        }
+        ApplyCardPositionPreview();
         Canvas.SetLeft(_card, CardBounds.X);
         Canvas.SetTop(_card, CardBounds.Y);
         var cutout = new GeometryGroup { FillRule = FillRule.EvenOdd };
@@ -446,7 +460,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         // A card covering a course between controls, or the area its route limit keeps clear, moves away.
         // Courses from the card itself follow it.
         var courses = CourseBounds(step, bounds, -_visibleArea.X, -_visibleArea.Y);
-        if (_editor is null && courses.Count > 0 && DaisyTourLayout.Covers(Shift(CardBounds, -_visibleArea.X, -_visibleArea.Y), courses))
+        if (_editor is null && !manualCard && courses.Count > 0 && DaisyTourLayout.Covers(Shift(CardBounds, -_visibleArea.X, -_visibleArea.Y), courses))
         {
             var obstacles = new List<Rect>(courses);
             foreach (var hole in holes) obstacles.Add(Shift(Inflate(hole, frame), -_visibleArea.X, -_visibleArea.Y));
@@ -665,6 +679,16 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         _back.IsEnabled = !session.Busy && CurrentIndex > 0;
         _next.IsEnabled = !session.Busy && (!session.Editing || CurrentIndex < session.Steps.Length - 1);
         _skip.Visibility = session.Editing ? Visibility.Collapsed : Visibility.Visible;
+        _cardMove.Visibility = session.Editing ? Visibility.Visible : Visibility.Collapsed;
+        _cardMove.IsEnabled = session.Editing && !session.Busy;
+        _cardSave.Visibility = _cardMove.Visibility;
+        _cardSave.IsEnabled = session.Editing && !session.Busy && CardPositionChanged;
+        var moveCardLabel = FloweryLocalization.GetStringInternal("TourEditor_MoveCard");
+        AutomationProperties.SetName(_cardMove, moveCardLabel);
+        ToolTipService.SetToolTip(_cardMove, moveCardLabel);
+        var saveCardLabel = FloweryLocalization.GetStringInternal("TourEditor_SaveCard");
+        AutomationProperties.SetName(_cardSave, saveCardLabel);
+        ToolTipService.SetToolTip(_cardSave, saveCardLabel);
         _back.Size = _skip.Size = _next.Size = _progress.Size = EffectiveSize;
         _title.FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.SectionHeader, EffectiveSize);
         _description.FontSize = _count.FontSize = FlowerySizeManager.GetFontSizeForTier(ResponsiveFontTier.Primary, EffectiveSize);
@@ -696,8 +720,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
 
     private void LayoutCard()
     {
-        var availableWidth = _visibleArea.Width - (_editor is { IsExpanded: true } editor ? editor.InspectorBounds.Width + 12 : 0);
-        var width = Math.Max(1, Math.Min(480, availableWidth - 24));
+        var width = Math.Max(1, Math.Min(480, _visibleArea.Width - 24));
         _card.Width = width;
         _card.MaxHeight = Math.Max(1, _visibleArea.Height - 24);
         _cardLayout.Padding = new Thickness(width < 300 ? 12 : 20);

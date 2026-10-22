@@ -33,21 +33,34 @@ public sealed partial class DaisyTour
     internal IReadOnlyList<DaisyTourAnnotationPresenter> AnnotationPresenters => _presenters;
     internal void RefreshEditorLayout() { ResizeSurface(); QueueGeometry(); }
 
-    private Rect PlaceEditorCard(DaisyTourEditor editor, Size card)
+    private Rect PlaceEditorCard(Size card)
+    {
+        var travel = CardTravelArea(card);
+        return new Rect(travel.X + travel.Width / 2, travel.Bottom, card.Width, card.Height);
+    }
+
+    private Rect CardTravelArea(Size card)
     {
         const double margin = 12;
         var left = _visibleArea.Left + margin;
         var right = _visibleArea.Right - margin;
-        if (editor.IsExpanded)
-        {
-            var inspector = editor.InspectorBounds;
-            if (inspector.Left + inspector.Width / 2 < _visibleArea.Left + _visibleArea.Width / 2)
-                left = inspector.Right + margin;
-            else
-                right = inspector.Left - margin;
-        }
-        return new Rect(left + Math.Max(0, (right - left - card.Width) / 2),
-            Math.Max(_visibleArea.Top + margin, _visibleArea.Bottom - margin - card.Height), card.Width, card.Height);
+        return new Rect(left, _visibleArea.Top + margin, Math.Max(0, right - left - card.Width),
+            Math.Max(0, _visibleArea.Height - 2 * margin - card.Height));
+    }
+
+    private Rect AvoidEditorInspector(Rect card)
+    {
+        if (_editor is not { } editor) return card;
+        var inspector = editor.InspectorBounds;
+        var overlap = card;
+        overlap.Intersect(inspector);
+        if (overlap.IsEmpty || overlap.Width <= 0 || overlap.Height <= 0) return card;
+        var travel = CardTravelArea(new Size(card.Width, card.Height));
+        var x = inspector.Left + inspector.Width / 2 < _visibleArea.Left + _visibleArea.Width / 2
+            ? inspector.Right + 12
+            : inspector.Left - 12 - card.Width;
+        // Avoidance changes only the displayed bounds, never the saved or temporary position.
+        return new Rect(Math.Clamp(x, travel.Left, travel.Right), card.Y, card.Width, card.Height);
     }
 
     internal DaisyTourProfileLayers ProfileLayers(DaisyTourStep step, DaisyTourAnnotation annotation)
@@ -94,6 +107,8 @@ public sealed partial class DaisyTour
         "cardBorderBrush" => CardBorder(DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")),
         "cardPosition" => stepScope && StepSetting(step, DaisyTourStep.CardPositionProperty, step.CardPosition, DaisyTourCardPosition.Default) is var position && position != DaisyTourCardPosition.Default ? position : EffectiveCardPosition,
         "placement" => StepSetting(step, DaisyTourStep.PlacementProperty, step.Placement, DaisyTourPlacement.Auto),
+        "cardX" => StepSetting(step, DaisyTourStep.CardXProperty, step.CardX, double.NaN),
+        "cardY" => StepSetting(step, DaisyTourStep.CardYProperty, step.CardY, double.NaN),
         "sourceAnchor" => AnnotationSetting(annotation, DaisyTourAnnotation.SourceAnchorProperty, annotation.SourceAnchor, DaisyTourAnchor.Auto),
         "targetAnchor" => AnnotationSetting(annotation, DaisyTourAnnotation.TargetAnchorProperty, annotation.TargetAnchor, DaisyTourAnchor.Auto),
         "routeLimitSide" => AnnotationSetting(annotation, DaisyTourAnnotation.RouteLimitSideProperty, annotation.RouteLimitSide, DaisyTourRouteSide.None),
@@ -127,10 +142,16 @@ public sealed partial class DaisyTour
     internal void UpdatePreview(DaisyTourStyleProfile profile, bool geometryOnly = false)
     {
         _previewProfile = profile;
-        // Handle movement changes the annotation, not application layout or card content.
+        // Handle movement changes geometry, not application layout or card content.
         // Keep it on the pointer's UI turn instead of waiting for low-priority layout work.
         if (geometryOnly && _session is { Busy: false } session) UpdateGeometry(session);
-        else RefreshPresentation();
+        else
+        {
+            RefreshPresentation();
+            // Inspector fields read the presenters' resolved values immediately after publication.
+            // Refresh those values before Undo/import rebuilds the fields; layout still settles later.
+            if (_session is { Busy: false } activeSession) UpdateGeometry(activeSession);
+        }
     }
 
     internal async Task EditStepAsync(int index)

@@ -166,12 +166,17 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         var curvature = style.Number(DaisyTourAnnotationStyle.CurvatureProperty, cubic ? 0.5 : 0.25);
         Geometry? route = null;
         var custom = false;
+        var fixedSource = limit is not null && HasAuthoredEndpoint(style, annotation, true) ? source : (Point?)null;
+        var fixedTarget = limit is not null && HasAuthoredEndpoint(style, annotation, false) ? target : (Point?)null;
         List<Point> points;
-        if (limit is { } routeLimit && RouteAround(routeLimit, sourceBounds, targetBounds) is { } corners)
+        if (limit is { } routeLimit && RouteAround(routeLimit, sourceBounds, targetBounds, fixedSource, fixedTarget) is { } corners)
         {
             // A route around the limit replaces the path's shape. Curve paths get smooth corners.
             var radius = path is DaisyTourAnnotationPath.Straight or DaisyTourAnnotationPath.Elbow
                 ? Math.Max(0, style.Dimension(DaisyTourAnnotationStyle.CornerRadiusProperty, 0)) : double.PositiveInfinity;
+            // Authored endpoints may leave a side facing away from the limit. Keep rounded
+            // corners inside the clearance used to take those legs around the element.
+            if (fixedSource is not null || fixedTarget is not null) radius = Math.Min(radius, 12);
             (route, points) = RoundedPolyline(corners, radius);
         }
         else if (cubic)
@@ -227,7 +232,7 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
             RecordControlPoint(style, controls.First, source, target, DaisyTourAnnotationStyle.ControlPoint1XProperty, DaisyTourAnnotationStyle.ControlPoint1YProperty);
             RecordControlPoint(style, controls.Second, source, target, DaisyTourAnnotationStyle.ControlPoint2XProperty, DaisyTourAnnotationStyle.ControlPoint2YProperty);
         }
-        EditGeometry = new(source, target, controls.First, controls.Second, sourceBounds, targetBounds,
+        EditGeometry = new(points[0], points[^1], controls.First, controls.Second, sourceBounds, targetBounds,
             path, curvature, bodyWidth, length, width, limit is not null, PolylineMidpoint(points),
             Unit(points[^2], points[^1]), points[^1], block && kind == DaisyTourAnnotationKind.Arrow,
             end != DaisyTourArrowHead.None);
@@ -540,9 +545,16 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         return FromRouteSpace(new Point(routed.X, Math.Min(routed.Y, RouteSpaceLimit(limit))), limit.Side);
     }
 
+    private static bool HasAuthoredEndpoint(EffectiveStyle style, DaisyTourAnnotation annotation, bool source) =>
+        style.AnnotationValue(source ? DaisyTourAnnotation.SourceAnchorProperty : DaisyTourAnnotation.TargetAnchorProperty,
+            source ? annotation.SourceAnchor : annotation.TargetAnchor, DaisyTourAnchor.Auto) != DaisyTourAnchor.Auto ||
+        style.Number(source ? DaisyTourAnnotationStyle.SourceOffsetXProperty : DaisyTourAnnotationStyle.TargetOffsetXProperty, 0) != 0 ||
+        style.Number(source ? DaisyTourAnnotationStyle.SourceOffsetYProperty : DaisyTourAnnotationStyle.TargetOffsetYProperty, 0) != 0;
+
     // Returns right-angle corners around the limit when an end lies beyond it, or null when both
     // ends are on the allowed side. The ends never belong to the area kept clear.
-    private static List<Point>? RouteAround(DaisyTourRouteLimit limit, Rect sourceBounds, Rect targetBounds)
+    private static List<Point>? RouteAround(DaisyTourRouteLimit limit, Rect sourceBounds, Rect targetBounds,
+        Point? fixedSource, Point? fixedTarget)
     {
         const double clearance = 12;
         var value = RouteSpaceLimit(limit);
@@ -550,14 +562,27 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
             ToRouteSpace(new Point(sourceBounds.Right, sourceBounds.Bottom), limit.Side));
         var target = new Rect(ToRouteSpace(new Point(targetBounds.Left, targetBounds.Top), limit.Side),
             ToRouteSpace(new Point(targetBounds.Right, targetBounds.Bottom), limit.Side));
-        var sourceBeyond = source.Bottom > value;
-        var targetBeyond = target.Bottom > value;
+        var authoredStart = fixedSource is { } startPoint ? ToRouteSpace(startPoint, limit.Side) : (Point?)null;
+        var authoredEnd = fixedTarget is { } endPoint ? ToRouteSpace(endPoint, limit.Side) : (Point?)null;
+        var sourceBeyond = source.Bottom > value || authoredStart is { } a && a.Y > value;
+        var targetBeyond = target.Bottom > value || authoredEnd is { } b && b.Y > value;
         if (!sourceBeyond && !targetBeyond)
             return null;
         // Both beyond: legs rise above both ends. One beyond: the course runs at the other end's middle.
         var level = sourceBeyond && targetBeyond
             ? Math.Min(value, Math.Min(source.Top, target.Top) - clearance)
             : Center(sourceBeyond ? target : source).Y;
+        if (authoredStart is not null || authoredEnd is not null)
+        {
+            // A manual side must be reachable without taking its leg through either element.
+            level = Math.Min(value, Math.Min(source.Top, target.Top) - clearance);
+            var startLeg = RouteEndpoint(source, target, authoredStart, level, clearance);
+            var endLeg = RouteEndpoint(target, source, authoredEnd, level, clearance);
+            endLeg.Reverse();
+            foreach (var point in endLeg) AddRoutePoint(startLeg, point);
+            if (startLeg.Count == 1) startLeg.Add(startLeg[0]);
+            return startLeg.ConvertAll(point => FromRouteSpace(point, limit.Side));
+        }
         var start = RouteEnd(source, target, level);
         var end = RouteEnd(target, source, level);
         var points = new List<Point> { start };
@@ -565,6 +590,37 @@ internal sealed partial class DaisyTourAnnotationPresenter : Canvas
         if (Math.Abs(end.Y - level) > 0.01) points.Add(new Point(end.X, level));
         points.Add(end);
         return points.ConvertAll(point => FromRouteSpace(point, limit.Side));
+    }
+
+    private static List<Point> RouteEndpoint(Rect bounds, Rect other, Point? authored, double level, double clearance)
+    {
+        var point = authored ?? RouteEnd(bounds, other, level);
+        var points = new List<Point> { point };
+        if (authored is not null && point.Y > level)
+        {
+            double[] distances = [Math.Abs(point.X - bounds.Left), Math.Abs(point.X - bounds.Right),
+                Math.Abs(point.Y - bounds.Top), Math.Abs(point.Y - bounds.Bottom)];
+            var side = Array.IndexOf(distances, distances.Min());
+            if (side == 3)
+            {
+                point = new Point(point.X, Math.Max(point.Y, bounds.Bottom + clearance));
+                AddRoutePoint(points, point);
+                side = Center(other).X >= Center(bounds).X ? 1 : 0;
+            }
+            if (side is 0 or 1)
+            {
+                point = new Point(side == 0 ? Math.Min(point.X, bounds.Left - clearance)
+                    : Math.Max(point.X, bounds.Right + clearance), point.Y);
+                AddRoutePoint(points, point);
+            }
+        }
+        AddRoutePoint(points, new Point(point.X, level));
+        return points;
+    }
+
+    private static void AddRoutePoint(List<Point> points, Point point)
+    {
+        if (Distance(points[^1], point) > 0.01) points.Add(point);
     }
 
     // An end meets the course from its facing side when the course level crosses it, otherwise from its top.

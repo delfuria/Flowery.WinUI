@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `DaisyTourEditor`: live tour styling with editable connector handles, undo/redo, and draft profiles that preserve application bindings. The Gallery includes a designer with JSON import/export and replay.
+- `DaisyTourEditor`: live tour styling with editable connector handles, movable information cards, undo/redo, and draft profiles that preserve application bindings. The Gallery includes a designer with JSON import/export and replay.
 - `DaisyTourStyleProfile`: versioned styling profiles with explicit overrides and inheritance for tour, step, and annotation settings.
 
 ## [1.7.0] - 2026-10-21

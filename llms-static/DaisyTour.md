@@ -375,7 +375,10 @@ Unknown versions, members, IDs, duplicate IDs, invalid values, and invalid enum 
 Step IDs must be unique within the tour, and annotation IDs must be unique within their step.
 
 The root `style` supports size, card position, card border color, highlight padding, and highlight corner radius.
-A step `style` supports card position and preferred placement.
+A step `style` supports card position, preferred placement, and optional `cardX`/`cardY` values from 0 to 1.
+These coordinates place the card within the available layout area: 0 is the left/top edge, and 1 is the right/bottom edge.
+Each omitted coordinate keeps the default placement on that axis.
+They are saved with the step and used during playback.
 Tour and step `annotationDefaults` support common annotation appearance.
 An annotation `style` also supports its anchors, offsets, and route limit values.
 
@@ -403,12 +406,21 @@ Move the inspector to the other side or collapse it when it covers a target.
 The inspector starts at up to 300 DIP wide. Drag its inner edge to resize it, or focus the edge and use the arrow keys.
 The width stays between 180 and 600 DIP, limited by the space needed for the preview card.
 Moving or collapsing the inspector preserves the chosen width. This layout preference is not part of the exported tour profile.
-The preview card stays at the bottom, beside the expanded inspector.
-Card-position settings apply during normal playback; the editor keeps its preview card at the bottom while you work.
+The preview card starts at the bottom center of the full preview area.
+Opening, closing, or resizing the inspector preserves the card's position unless the two overlap.
+When they overlap, the card temporarily moves out of the inspector's way and returns when its intended position is clear again.
+This automatic movement does not change saved coordinates, create an undo entry, or enable the card's save button.
+Drag the move grip in its header to reposition it, or focus the grip and use the arrow keys.
+Dragging and keyboard movement only change the temporary preview position. They do not change the profile, undo history, or exported JSON.
+The adjacent save button is available when the position differs from the step's current position.
+Select **Save card position for this step** to store `cardX`/`cardY` in the current step as one undo action.
+Only this saved position is exported and used during playback. Temporary movement is cleared when you change the step or close the editor.
+Remove both overrides through **Use application setting** to restore automatic positioning.
+Without saved coordinates or temporary movement, the editor uses bottom placement; normal playback uses the configured card-position settings.
 Use the arrow keys on a focused handle for precise changes.
 The curvature handle stays just below the visible arc midpoint as the window changes size.
 Dragging moves the arc with the handle; grabbing its edge does not change the curvature.
-One drag is one undo action; Escape cancels a drag or closes the editor without applying the draft.
+Each annotation-handle drag is one undo action; Escape cancels a drag or closes the editor without applying the draft.
 The Undo and Redo arrow buttons have localized tooltips and accessible names.
 Use **Import JSON** and **Export JSON** in the inspector to exchange profiles.
 Select **Replay applied design** to view the active profile with normal tour navigation.

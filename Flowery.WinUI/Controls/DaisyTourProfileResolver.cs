@@ -59,6 +59,8 @@ internal static class DaisyTourProfileResolver
         new("size", typeof(DaisySize), [DaisyTour.SizeProperty], values => values.Size, (values, value) => values.Size = (DaisySize?)value),
         new("placement", typeof(DaisyTourPlacement), [DaisyTourStep.PlacementProperty], values => values.Placement, (values, value) => values.Placement = (DaisyTourPlacement?)value),
         new("cardPosition", typeof(DaisyTourCardPosition), [DaisyTour.CardPositionProperty, DaisyTourStep.CardPositionProperty], values => values.CardPosition, (values, value) => values.CardPosition = (DaisyTourCardPosition?)value),
+        new("cardX", typeof(double), [DaisyTourStep.CardXProperty], values => values.CardX, (values, value) => values.CardX = (double?)value),
+        new("cardY", typeof(double), [DaisyTourStep.CardYProperty], values => values.CardY, (values, value) => values.CardY = (double?)value),
         new("cardBorderBrush", typeof(string), [DaisyTour.CardBorderBrushProperty], values => values.CardBorderBrush, (values, value) => values.CardBorderBrush = (string?)value),
         new("highlightPadding", typeof(double), [DaisyTour.HighlightPaddingProperty], values => values.HighlightPadding, (values, value) => values.HighlightPadding = (double?)value),
         new("highlightCornerRadius", typeof(double), [DaisyTour.HighlightCornerRadiusProperty], values => values.HighlightCornerRadius, (values, value) => values.HighlightCornerRadius = (double?)value),
@@ -122,6 +124,7 @@ internal static class DaisyTourProfileResolver
         {
             if (!double.IsFinite(number)) throw new ArgumentException($"'{name}' must be finite.");
             if (name == "opacity" && (number < 0 || number > 1)) throw new ArgumentException("'opacity' must be between 0 and 1.");
+            if (name is "cardX" or "cardY" && (number < 0 || number > 1)) throw new ArgumentException($"'{name}' must be between 0 and 1.");
             if (Nonnegative.Contains(name) && number < 0) throw new ArgumentException($"'{name}' cannot be negative.");
             if (Positive.Contains(name) && number <= 0) throw new ArgumentException($"'{name}' must be greater than zero.");
         }

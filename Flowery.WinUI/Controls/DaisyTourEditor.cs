@@ -30,8 +30,8 @@ public sealed partial class DaisyTourEditor : ContentControl
     private readonly DaisyButton _redo = new() { Content = new SymbolIcon(Symbol.Redo), Shape = DaisyButtonShape.Square };
     private readonly DaisyButton _apply = new() { Variant = DaisyButtonVariant.Primary };
     private readonly DaisyButton _discard = new();
-    private readonly DaisyButton _dock = new() { Content = "⇄" };
-    private readonly DaisyButton _collapse = new() { Content = "−" };
+    private readonly DaisyButton _dock = new();
+    private readonly DaisyButton _collapse = new();
     private readonly ScrollViewer _scroll = new() { HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
     private readonly Border _panel = new() { CornerRadius = new CornerRadius(12), Padding = new Thickness(16), BorderThickness = new Thickness(1) };
     private readonly ResizeGrip _resizeGrip = new() { Width = 12, HorizontalAlignment = HorizontalAlignment.Left };
@@ -130,7 +130,7 @@ public sealed partial class DaisyTourEditor : ContentControl
         VerticalContentAlignment = VerticalAlignment.Stretch;
         _steps.SelectionChanged += OnStepSelectionChanged;
         _annotations.SelectionChanged += OnAnnotationSelectionChanged;
-        _scope.SelectionChanged += (_, _) => RefreshProperties();
+        _scope.SelectionChanged += (_, _) => RefreshValue();
         _undo.Click += (_, _) => Undo();
         _redo.Click += (_, _) => Redo();
         _apply.Click += (_, _) => Apply();
@@ -152,6 +152,16 @@ public sealed partial class DaisyTourEditor : ContentControl
             _collapse.Content = new SymbolIcon(_collapsed ? Symbol.Add : Symbol.Remove);
             _title.Visibility = tools.Visibility = _footer.Visibility = _collapsed ? Visibility.Collapsed : Visibility.Visible;
             _dock.Visibility = _collapsed ? Visibility.Collapsed : Visibility.Visible;
+            if (_collapsed)
+            {
+                chrome.Children.Remove(_collapse);
+                _panel.Child = _collapse;
+            }
+            else
+            {
+                _panel.Child = layout;
+                chrome.Children.Add(_collapse);
+            }
             _tour?.RefreshEditorLayout();
         };
         AutomationProperties.SetAutomationId(this, "DaisyTourEditor");
@@ -241,6 +251,8 @@ public sealed partial class DaisyTourEditor : ContentControl
         VerifyOpen();
         DaisyTourStyleProfileSerializer.Validate(profile, _tour);
         var replacement = DaisyTourStyleProfileSerializer.Clone(profile);
+        CancelGesture();
+        _tour!.ClearCardPositionPreview();
         RecordUndo();
         _draft = replacement;
         PublishDraft();
@@ -274,6 +286,7 @@ public sealed partial class DaisyTourEditor : ContentControl
         VerifyOpen();
         ValidateProperty(propertyName);
         if (value is not null) DaisyTourProfileResolver.ValidateValue(propertyName, value);
+        if (propertyName is "cardX" or "cardY" or "cardPosition" or "placement") _tour!.ClearCardPositionPreview();
         RecordUndo();
         DaisyTourProfileResolver.SetValue(CurrentOverride(create: true)!, propertyName, value);
         PublishDraft();
@@ -283,6 +296,7 @@ public sealed partial class DaisyTourEditor : ContentControl
     {
         VerifyOpen();
         ValidateProperty(propertyName);
+        if (propertyName is "cardX" or "cardY" or "cardPosition" or "placement") _tour!.ClearCardPositionPreview();
         RecordUndo();
         DaisyTourProfileResolver.InheritValue(CurrentOverride(create: true)!, propertyName);
         PublishDraft();
@@ -294,6 +308,18 @@ public sealed partial class DaisyTourEditor : ContentControl
         var scope = AnnotationOverride(create: true)!;
         DaisyTourProfileResolver.SetValue(scope, name, value);
         if (publish) PublishDraft();
+    }
+
+    internal void SetCardPosition(double x, double y)
+    {
+        if (_tour?.CurrentStep != SelectedStep || SelectedStep is null) return;
+        RecordUndo();
+        var step = StepProfile(create: true)!;
+        var style = step.Style ??= new();
+        DaisyTourProfileResolver.SetValue(style, "cardX", x);
+        DaisyTourProfileResolver.SetValue(style, "cardY", y);
+        PublishDraft();
+        RefreshValue();
     }
 
     internal void BeginGesture()
@@ -317,6 +343,7 @@ public sealed partial class DaisyTourEditor : ContentControl
 
     internal void CancelGesture()
     {
+        _tour?.CancelCardDrag();
         if (_gestureSnapshot is not { } before) return;
         HandleLayer.ReleaseGesture();
         _gestureSnapshot = null;
@@ -328,7 +355,7 @@ public sealed partial class DaisyTourEditor : ContentControl
     internal void UpdateHandles()
     {
         HandleLayer.Update();
-        if (_gestureSnapshot is null) RefreshValueDescription();
+        if (_gestureSnapshot is null && _tour?.IsCardDragging != true) RefreshValueDescription();
     }
     internal void OnPreviewClosed(Exception? error)
     {
@@ -341,10 +368,12 @@ public sealed partial class DaisyTourEditor : ContentControl
     internal void ArrangeInspector(Size size, Point origin = default)
     {
         _viewportWidth = size.Width;
-        var width = _collapsed ? 72 : Math.Clamp(_desiredWidth ?? Math.Min(300, Math.Max(180, size.Width / 3)), 180, MaximumInspectorWidth);
+        _panel.Padding = new Thickness(_collapsed ? 4 : 12);
+        if (_collapsed) _collapse.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        var collapsedSize = Math.Ceiling(Math.Max(_collapse.DesiredSize.Width, _collapse.DesiredSize.Height)) + 10;
+        var width = _collapsed ? collapsedSize : Math.Clamp(_desiredWidth ?? Math.Min(300, Math.Max(180, size.Width / 3)), 180, MaximumInspectorWidth);
         Width = width;
-        _panel.Padding = new Thickness(_collapsed ? 8 : 12);
-        Height = _collapsed ? 64 : Math.Max(1, size.Height - 24);
+        Height = _collapsed ? collapsedSize : Math.Max(1, size.Height - 24);
         Canvas.SetLeft(this, origin.X + (_dockLeft ? 12 : Math.Max(0, size.Width - width - 12)));
         Canvas.SetTop(this, origin.Y + 12);
         InspectorBounds = new Rect(Canvas.GetLeft(this), Canvas.GetTop(this), width, Height);
@@ -430,7 +459,7 @@ public sealed partial class DaisyTourEditor : ContentControl
         if (args.Key == VirtualKey.Escape)
         {
             if (_resizing) CancelResize();
-            else if (_gestureSnapshot is not null) { HandleLayer.ReleaseGesture(); CancelGesture(); }
+            else if (_tour?.IsCardDragging == true || _gestureSnapshot is not null) CancelGesture();
             else Discard();
             args.Handled = true;
         }
@@ -450,6 +479,7 @@ public sealed partial class DaisyTourEditor : ContentControl
         try
         {
             CancelResize();
+            tour.ClearCardPositionPreview();
             HandleLayer.ReleaseGesture();
             _gestureSnapshot = null;
             try { _cancellation?.Cancel(); }
@@ -492,7 +522,8 @@ public sealed partial class DaisyTourEditor : ContentControl
     {
         VerifyOpen();
         CancelGesture();
-        if (from.Count == 0) return;
+        _tour!.ClearCardPositionPreview();
+        if (from.Count == 0) { _tour.RefreshEditorLayout(); return; }
         PushHistory(to, DaisyTourStyleProfileSerializer.Serialize(_draft!));
         _draft = DaisyTourStyleProfileSerializer.Deserialize(from[^1]);
         from.RemoveAt(from.Count - 1);
@@ -557,7 +588,7 @@ public sealed partial class DaisyTourEditor : ContentControl
     {
         if (_refreshing) return;
         CancelGesture();
-        RefreshProperties();
+        RefreshValue();
         UpdateHandles();
     }
 
@@ -574,15 +605,13 @@ public sealed partial class DaisyTourEditor : ContentControl
         }
         _annotations.SelectedItem = _annotations.Items.FirstOrDefault();
         _refreshing = false;
-        RefreshProperties();
+        RefreshValue();
     }
-
-    private void RefreshProperties() => RefreshValue();
 
     private bool IsPropertyAvailable(string name)
     {
         string[] tour = ["size", "cardPosition", "cardBorderBrush", "highlightPadding", "highlightCornerRadius"];
-        string[] step = ["placement", "cardPosition"];
+        string[] step = ["placement", "cardPosition", "cardX", "cardY"];
         string[] endpoints = ["sourceAnchor", "targetAnchor", "routeLimitSide", "routeLimitCoordinate", "routeLimitMargin"];
         return ScopeIndex switch
         {
@@ -798,11 +827,11 @@ public sealed partial class DaisyTourEditor : ContentControl
             var number = new DaisyNumericUpDown
             {
                 Minimum = decimal.MinValue, Maximum = decimal.MaxValue, MaxDecimalPlaces = 4,
-                Increment = name is "opacity" or "curvature" || name.StartsWith("controlPoint", StringComparison.Ordinal) ? 0.05m : 1m,
+                Increment = name is "opacity" or "curvature" or "cardX" or "cardY" || name.StartsWith("controlPoint", StringComparison.Ordinal) ? 0.05m : 1m,
                 Value = value is double d && double.IsFinite(d) && d > (double)decimal.MinValue && d < (double)decimal.MaxValue ? (decimal)d : null
             };
             Compact(number);
-            if (name == "opacity") { number.Minimum = 0; number.Maximum = 1; }
+            if (name is "opacity" or "cardX" or "cardY") { number.Minimum = 0; number.Maximum = 1; }
             number.RegisterPropertyChangedCallback(DaisyNumericUpDown.ValueProperty, (_, _) =>
             {
                 if (number.Value is { } edited) EditInput(name, (double)edited, number);
@@ -813,21 +842,63 @@ public sealed partial class DaisyTourEditor : ContentControl
         {
             var button = new DaisyButton { HorizontalContentAlignment = HorizontalAlignment.Left };
             Compact(button);
-            var color = new DaisyColorEditor { ShowAlphaChannel = true, ShowHslSliders = false, Width = 260 };
+            var color = new DaisyColorEditor { ShowAlphaChannel = true, ShowRgbSliders = false, ShowHslSliders = false, Width = 240 };
             if (value is SolidColorBrush brush) color.Color = brush.Color;
             else if (value is string text && text.Length == 9 && uint.TryParse(text.AsSpan(1), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var rgba))
                 color.Color = Windows.UI.Color.FromArgb((byte)(rgba >> 24), (byte)(rgba >> 16), (byte)(rgba >> 8), (byte)rgba);
+            var wheel = new DaisyColorWheel
+            {
+                Width = 208, Height = 208, HorizontalAlignment = HorizontalAlignment.Center,
+                Lightness = new HslColor(color.Color).L, Color = color.Color,
+                AccessibleText = Local("ColorPicker_Title")
+            };
+            var lightness = new DaisyColorSlider
+            {
+                Channel = ColorSliderChannel.Lightness, Height = 22, Color = color.Color,
+                AccessibleText = Local("ColorPicker_Lightness")
+            };
+            var alpha = new DaisyColorSlider
+            {
+                Channel = ColorSliderChannel.Alpha, Height = 22, Color = color.Color,
+                AccessibleText = Local("TourEditor_Field_opacity")
+            };
+            AutomationProperties.SetAutomationId(wheel, "DaisyTourEditorColorWheel_" + name);
+            AutomationProperties.SetAutomationId(lightness, "DaisyTourEditorLightness_" + name);
+            AutomationProperties.SetAutomationId(alpha, "DaisyTourEditorAlpha_" + name);
+            ToolTipService.SetToolTip(wheel, Local("ColorPicker_ClickAndDrag"));
+            ToolTipService.SetToolTip(lightness, lightness.AccessibleText);
+            ToolTipService.SetToolTip(alpha, alpha.AccessibleText);
+            var picker = new StackPanel { Width = 240, Spacing = 8 };
+            picker.Children.Add(wheel);
+            picker.Children.Add(new TextBlock { Text = lightness.AccessibleText, FontSize = 12 });
+            picker.Children.Add(lightness);
+            picker.Children.Add(new TextBlock { Text = alpha.AccessibleText, FontSize = 12 });
+            picker.Children.Add(alpha);
+            picker.Children.Add(color);
             var swatch = new Border { Width = 16, Height = 16, CornerRadius = new CornerRadius(3), Background = new SolidColorBrush(color.Color) };
             var caption = new TextBlock { Text = Describe(value), FontSize = 12, VerticalAlignment = VerticalAlignment.Center };
             var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
             content.Children.Add(swatch);
             content.Children.Add(caption);
             button.Content = content;
-            var flyout = new Flyout { Content = color };
+            var flyout = new Flyout { Content = picker };
             flyout.Opening += (_, _) => flyout.FlyoutPresenterStyle = FlyoutPresenterStyle(typeof(FlyoutPresenter), new Thickness(12));
             button.Flyout = flyout;
+            var synchronizing = false;
+            wheel.ColorChanged += (_, args) => { if (!synchronizing) color.Color = args.Color; };
+            lightness.ColorChanged += (_, args) => { if (!synchronizing) color.Color = args.Color; };
+            alpha.ColorChanged += (_, args) => { if (!synchronizing) color.Color = args.Color; };
             color.ColorChanged += (_, args) =>
             {
+                synchronizing = true;
+                try
+                {
+                    wheel.Lightness = new HslColor(args.Color).L;
+                    wheel.Color = args.Color;
+                    lightness.Color = args.Color;
+                    alpha.Color = args.Color;
+                }
+                finally { synchronizing = false; }
                 var hex = $"#{args.Color.A:X2}{args.Color.R:X2}{args.Color.G:X2}{args.Color.B:X2}";
                 EditInput(name, hex, button);
                 caption.Text = hex;
@@ -855,7 +926,7 @@ public sealed partial class DaisyTourEditor : ContentControl
         try
         {
             SetValue(name, value);
-            if (name is "path" or "kind" or "preset") RefreshProperties();
+            if (name is "path" or "kind" or "preset") RefreshValue();
         }
         catch (ArgumentException error) { ShowError(error); }
     }
@@ -967,7 +1038,8 @@ public sealed partial class DaisyTourEditor : ContentControl
         var style = new Style(targetType);
         style.Setters.Add(new Setter(BackgroundProperty, DaisyResourceLookup.GetBrush("DaisyBase100Brush")));
         style.Setters.Add(new Setter(ForegroundProperty, DaisyResourceLookup.GetBrush("DaisyBaseContentBrush")));
-        style.Setters.Add(new Setter(BorderBrushProperty, DaisyResourceLookup.GetBrush("DaisyBase300Brush")));
+        style.Setters.Add(new Setter(BorderBrushProperty, DaisyResourceLookup.IsHighContrast
+            ? DaisyResourceLookup.GetBorderBrush() : DaisyResourceLookup.GetBrush("DaisyAccentBrush")));
         style.Setters.Add(new Setter(BorderThicknessProperty, new Thickness(1)));
         style.Setters.Add(new Setter(CornerRadiusProperty, new CornerRadius(8)));
         style.Setters.Add(new Setter(PaddingProperty, padding));
