@@ -27,9 +27,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\*.ttf;..\Flowery.WinUI.Gallery.Core\Assets\Fonts\*.otf"
+    <Content Include="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\*.ttf;..\Flowery.WinUI.Gallery.Core\Assets\Fonts\*.otf;..\Flowery.WinUI.Gallery.Core\Assets\Fonts\StaticFonts-OFL.txt"
              Exclude="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\*-Variable.ttf">
       <Link>Assets\Fonts\%(Filename)%(Extension)</Link>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
@@ -43,4 +44,10 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
+
+  <!-- PhotosResources.xaml uses these fonts. One license file covers all five. -->
+  <ItemGroup>
+    <RequiredFontAsset Include="NotoSans-Regular.ttf;NotoSansSC-Regular.otf;NotoSansJP-Regular.otf;NotoSansKR-Regular.otf;NotoSansArabic-Regular.ttf;StaticFonts-OFL.txt" />
+  </ItemGroup>
+  <Import Project="..\Flowery.WinUI.FontAssets.targets" />
 </Project>

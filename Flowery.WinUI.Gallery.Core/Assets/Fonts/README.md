@@ -22,12 +22,12 @@ The source folders are `notosans`, `notosanssc`, `notosansjp`, `notosanskr`, `no
 Upstream filenames use `[wght]` or `[wdth,wght]` instead of `-Variable`.
 Each family has an accompanying `*-OFL.txt` file with its copyright notice and license.
 
-`Flowery.WinUI.GalleryAssets.props` copies these files and licenses to build and publish output.
+`Flowery.WinUI.GalleryAssets.props` copies these files and licenses to the Gallery and Kiosk build and publish output.
 
 ## Existing Static Fonts
 
-The Gallery app excludes these static fonts from build and publish output.
-They remain in this shared folder for other apps, including Photos.
+`PhotosResources.xaml` uses these static fonts.
+The Gallery app excludes them and `StaticFonts-OFL.txt` from build and publish output.
 
 | File | Purpose | Size |
 | --- | --- | --- |
@@ -39,9 +39,19 @@ They remain in this shared folder for other apps, including Photos.
 
 **Total Size:** ~48MB (Note: Builds may be large, but this ensures full CJK support)
 
+These files are unmodified upstream files:
+
+- `NotoSans-Regular.ttf` and `NotoSansArabic-Regular.ttf` come from `hinted/ttf` in [notofonts/noto-fonts](https://github.com/notofonts/noto-fonts).
+- The CJK files are `NotoSansCJKsc-Regular.otf`, `NotoSansCJKjp-Regular.otf`, and `NotoSansCJKkr-Regular.otf` from `Sans/OTF` in [notofonts/noto-cjk](https://github.com/notofonts/noto-cjk), renamed.
+
+`StaticFonts-OFL.txt` contains their copyright notices and the license.
+The notices match the font metadata and the upstream license files.
+The Photos project copies these files and `StaticFonts-OFL.txt` to build and publish output.
+
 ## License
 
 These fonts are from the [Google Noto Fonts](https://fonts.google.com/noto) project and are licensed under the **SIL Open Font License, Version 1.1 (OFL-1.1)**.
+The repository's MIT license does not apply to these fonts.
 
 ### What This Means
 
@@ -49,6 +59,8 @@ These fonts are from the [Google Noto Fonts](https://fonts.google.com/noto) proj
 ✅ **Free to distribute** - can be bundled with applications  
 ✅ **Free to modify** - derivative works are allowed  
 The copyright notice and license must accompany redistributed font files.
+Keep each `*-OFL.txt` file in the same `Assets/Fonts` folder as the fonts it covers, including in build, publish, and installer output.
+The build and publish fail if a required font or license file is missing from `Assets/Fonts`.
 
 The OFL is one of the most permissive font licenses available. The full license text is available at:
 https://scripts.sil.org/OFL
@@ -60,7 +72,8 @@ https://openfontlicense.org/how-to-use-ofl-fonts/
 
 ## Why These Are Committed
 
-The Gallery embeds these fonts to render its language dropdown and localized UI text for all supported languages on Windows.
+The apps ship these fonts as separate files in `Assets/Fonts`, not as embedded assembly resources.
+The Gallery uses them to render its language dropdown and localized UI text for all supported languages on Windows.
 
 ## Configuration
 

@@ -39,8 +39,11 @@ internal static class KioskSmokeTests
             Require(resources["DaisyBase100Brush"] is SolidColorBrush, "The native base theme brush is missing.");
             Require(resources["DaisyPrimaryBrush"] is SolidColorBrush, "The primary theme brush is missing.");
             Require(resources["KioskSlideTitleFontSize"] is double size && size == 43, "The overlay title resource is missing.");
-            foreach (var font in new[] { "NotoSans-Regular.ttf", "NotoSansArabic-Regular.ttf", "NotoSansJP-Regular.otf", "NotoSansKR-Regular.otf", "NotoSansSC-Regular.otf" })
-                RequireFile(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "Fonts", font));
+            foreach (var asset in new[] { "NotoSans-Regular.ttf", "NotoSansArabic-Regular.ttf", "NotoSansJP-Regular.otf", "NotoSansKR-Regular.otf", "NotoSansSC-Regular.otf", "StaticFonts-OFL.txt" })
+                RequireFile(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "Fonts", asset));
+            var problems = global::Flowery.WinUI.Gallery.GalleryFontAssets.FindProblems((FontFamily)resources["NotoSansFamily"],
+                page.Content as Panel ?? throw new InvalidOperationException("The kiosk page root panel is missing."));
+            Require(problems.Count == 0, string.Join(" ", problems));
             return Task.CompletedTask;
         });
         await CheckAsync(report, "SharedPatternsAndOriginalIcons", () =>
