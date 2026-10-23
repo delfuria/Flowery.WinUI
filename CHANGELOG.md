@@ -6,15 +6,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.8.1] - 2026-10-23
 
-### Changed
-
-- Gallery: new logo, a six-petal teal flower with one warm petal, shared by the Flowery family (Flowery.Uno uses blue, Flowery.NET violet). The executable and installer icon (`app_icon.ico`, now with 16-256 px sizes), the README banner, the Gallery and Kiosk SVG icon/splash assets, the Home banner and the sidebar keycap image are redrawn.
 ### Added
 
 - `DaisyTourEditor`: live tour styling with editable connector handles, movable information cards, undo/redo, and draft profiles that preserve application bindings. The Gallery includes a designer with JSON import/export and replay.
 - `DaisyTourStyleProfile`: versioned styling profiles with explicit overrides and inheritance for tour, step, and annotation settings.
+
+### Changed
+
+- Gallery: new logo, a six-petal teal flower with one warm petal, shared by the Flowery family (Flowery.Uno uses blue, Flowery.NET violet). The executable and installer icon (`app_icon.ico`, now with 16-256 px sizes), the README banner, the Gallery and Kiosk SVG icon/splash assets, the Home banner and the sidebar keycap image are redrawn.
+- Build: every project declares `x64` as its only platform, matching its fixed `win-x64` runtime identifier. Visual Studio no longer adds `Any CPU` configurations to `Flowery.WinUI.sln`, which built the same x64 binaries; on Windows on ARM the apps keep running under x64 emulation.
 
 ## [1.8.0] - 2026-10-22
 
