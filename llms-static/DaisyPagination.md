@@ -19,7 +19,7 @@ DaisyPagination renders joined page navigation buttons using `DaisyJoin` interna
 | `CurrentPage` | `int` | `1` | The currently selected page (1-based, auto-clamped to valid range). |
 | `TotalPages` | `int` | `1` | Total number of pages to display. |
 | `MaxVisiblePages` | `int` | `7` | Maximum page buttons to display (minimum 5). When `TotalPages` exceeds this, ellipsis is shown. |
-| `Size` | `DaisySize` | `Medium` | Button size preset (ExtraSmall, Small, Medium, Large, ExtraLarge). |
+| `Size` | `DaisySize` | `Auto` | Authored tier; `ResolvedSize` reports the effective button size. Explicit local values, styles, and bindings retain their tier. |
 | `Orientation` | `Orientation` | `Horizontal` | Layout direction (Horizontal or Vertical). |
 | `ShowPrevNext` | `bool` | `True` | Whether to show single-chevron prev/next buttons (‹ ›). |
 | `ShowFirstLast` | `bool` | `False` | Whether to show first/last page buttons (⏮ ⏭). |

@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Flowery.Controls;
@@ -23,7 +21,7 @@ namespace Flowery.WinUI.Gallery
     public sealed partial class MainView : UserControl
     {
         private const string HomeTabHeader = "Sidebar_Home";
-        private const double SidebarWidth = 250;
+        private static double SidebarWidth => FlowerySizeManager.GetSidebarWidth(FlowerySizeManager.CurrentSize);
         private const double MinContentWidth = 400;
         private const double MaxSidebarWidthPercent = 0.35;
         private const double HeaderCollapseScrollThreshold = 20;
@@ -81,7 +79,6 @@ namespace Flowery.WinUI.Gallery
             }
 
             UpdateFlowDirection();
-            FloweryLocalization.CultureChanged += OnCultureChanged;
 
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
@@ -124,8 +121,6 @@ namespace Flowery.WinUI.Gallery
                 ComponentSidebar.AvailableLanguages = GallerySidebarData.CreateLanguages();
             }
 
-            FlowerySizeManager.SizeChanged += OnGlobalSizeChanged;
-
             // Always render Home first for fast first content, then restore last selection after first UI pass.
             NavigateToCategory(HomeTabHeader);
         }
@@ -133,20 +128,23 @@ namespace Flowery.WinUI.Gallery
         private void OnCultureChanged(object? sender, string cultureName)
         {
             SuppressScrollEvents();
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                UpdateFlowDirection();
-                if (_activeCategoryContent != null && CategoryTitle != null && CategoryTitle.Tag is string key)
-                {
-                    CategoryTitle.Text = FloweryLocalization.GetString(key);
-                }
-            });
+            DispatcherQueue.TryEnqueue(UpdateLocalizedState);
+        }
+
+        private void UpdateLocalizedState()
+        {
+            UpdateFlowDirection();
+            if (_activeCategoryContent != null && CategoryTitle != null && CategoryTitle.Tag is string key)
+                CategoryTitle.Text = FloweryLocalization.GetString(key);
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             DaisyThemeManager.ThemeChanged += OnThemeChanged;
+            FlowerySizeManager.SizeChanged += OnGlobalSizeChanged;
+            FloweryLocalization.CultureChanged += OnCultureChanged;
             ApplyTheme();
+            UpdateLocalizedState();
 
             UpdateResponsiveLayout(ActualWidth);
 
@@ -161,13 +159,15 @@ namespace Flowery.WinUI.Gallery
                     AttachScrollHandler(_activeCategoryContent);
             }
 
-            ApplyGlobalSizeToControls(this, FlowerySizeManager.CurrentSize);
+            ApplySizeToGalleryElements(FlowerySizeManager.CurrentSize);
             QueueDeferredInitialNavigation();
         }
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
             DaisyThemeManager.ThemeChanged -= OnThemeChanged;
+            FlowerySizeManager.SizeChanged -= OnGlobalSizeChanged;
+            FloweryLocalization.CultureChanged -= OnCultureChanged;
             if (EnableCentralDiagnosticsLog)
             {
                 GalleryDiagnostics.MessageLogged -= OnDiagnosticsMessageLogged;
@@ -260,14 +260,21 @@ namespace Flowery.WinUI.Gallery
             if (MainSplitView == null || HamburgerButton == null)
                 return;
 
+            MainSplitView.OpenPaneLength = SidebarWidth;
+            if (ComponentSidebar != null)
+                ComponentSidebar.SidebarWidth = SidebarWidth;
             var contentWidthIfInline = width - SidebarWidth;
             var sidebarPercent = width > 0 ? SidebarWidth / width : 0;
 
             var shouldCollapse = contentWidthIfInline < MinContentWidth || sidebarPercent > MaxSidebarWidthPercent;
 
-            MainSplitView.DisplayMode = shouldCollapse ? SplitViewDisplayMode.Overlay : SplitViewDisplayMode.Inline;
+            var displayMode = shouldCollapse ? SplitViewDisplayMode.Overlay : SplitViewDisplayMode.Inline;
+            if (MainSplitView.DisplayMode != displayMode)
+            {
+                MainSplitView.DisplayMode = displayMode;
+                MainSplitView.IsPaneOpen = !shouldCollapse;
+            }
             HamburgerButton.Visibility = shouldCollapse ? Visibility.Visible : Visibility.Collapsed;
-            MainSplitView.IsPaneOpen = !shouldCollapse;
 
             SetHeaderNarrow(width > 0 && width < NarrowHeaderWidth);
         }
@@ -423,26 +430,6 @@ namespace Flowery.WinUI.Gallery
                 DispatcherQueue.TryEnqueue(() => AttachScrollHandler(newContent));
             }
 
-            if (contentChanged)
-            {
-                // Hook into Loaded event to ensure visual tree is fully realized
-                // before applying global size (DispatcherQueue timing is unreliable)
-                void OnContentLoaded(object s, RoutedEventArgs args)
-                {
-                    newContent.Loaded -= OnContentLoaded;
-                    ApplyGlobalSizeToControls(newContent, FlowerySizeManager.CurrentSize);
-                }
-
-                if (newContent.IsLoaded)
-                {
-                    // Already loaded (cached view), apply immediately
-                    ApplyGlobalSizeToControls(newContent, FlowerySizeManager.CurrentSize);
-                }
-                else
-                {
-                    newContent.Loaded += OnContentLoaded;
-                }
-            }
         }
 
         private FrameworkElement GetOrCreateCategoryContent(string tabHeader)
@@ -696,8 +683,8 @@ namespace Flowery.WinUI.Gallery
         private void OnGlobalSizeChanged(object? sender, DaisySize newSize)
         {
             SuppressScrollEvents();
-            ApplyGlobalSizeToControls(this, newSize);
             ApplySizeToGalleryElements(newSize);
+            UpdateResponsiveLayout(ActualWidth);
         }
 
         private void ApplySizeToGalleryElements(DaisySize size)
@@ -745,51 +732,6 @@ namespace Flowery.WinUI.Gallery
             }
         }
 
-        [UnconditionalSuppressMessage("Trimming", "IL2075:DynamicallyAccessedMembers",
-            Justification = "DaisyUI controls that support Size property are always preserved. Method handles missing properties gracefully.")]
-        private static void ApplyGlobalSizeToControls(DependencyObject root, DaisySize size)
-        {
-            foreach (var element in EnumerateVisualTree(root))
-            {
-                if (element is Control control)
-                {
-                    if (ShouldIgnoreGlobalSize(control))
-                        continue;
-
-                    var sizeProperty = control.GetType().GetProperty("Size", BindingFlags.Public | BindingFlags.Instance);
-                    if (sizeProperty != null && sizeProperty.PropertyType == typeof(DaisySize) && sizeProperty.CanWrite)
-                    {
-                        try
-                        {
-                            sizeProperty.SetValue(control, size);
-                        }
-                        catch
-                        {
-                        }
-                    }
-                }
-            }
-        }
-
-        private static bool ShouldIgnoreGlobalSize(DependencyObject control)
-        {
-            DependencyObject? current = control;
-            while (current != null)
-            {
-                if (FlowerySizeManager.GetIgnoreGlobalSize(current))
-                    return true;
-
-                // Fallback: Check if it's a FrameworkElement's Parent property if VisualTreeHelper fails
-                var next = VisualTreeHelper.GetParent(current);
-                if (next == null && current is FrameworkElement fe)
-                {
-                    next = fe.Parent;
-                }
-                current = next;
-            }
-
-            return false;
-        }
 
         /// <summary>
         /// Iteratively enumerates the visual tree to avoid StackOverflow.

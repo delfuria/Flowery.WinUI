@@ -35,6 +35,8 @@ namespace Flowery.Enums
     /// </summary>
     public enum DaisySize
     {
+        /// <summary>Use the current sizing policy without replacing authored values.</summary>
+        Auto = -1,
         /// <summary>Extra small size</summary>
         ExtraSmall,
         /// <summary>Small size</summary>

@@ -10,7 +10,7 @@ DaisySteps renders a sequence of step items with lines and circles. It supports 
 | Property | Description |
 | --- | --- |
 | `Orientation` | Horizontal (default) or Vertical. |
-| `Size` | ExtraSmall, Small, Medium (default), Large, ExtraLarge (affects circle/line sizes and fonts). |
+| `Size` | Defaults to `Auto`. A concrete size supplies a default for automatic items. `ResolvedSize` supplies the effective tier without assigning child `Size` values. |
 | `SelectedIndex` | 0-based index; steps with index ≤ SelectedIndex become active. |
 | `JsonSteps` | A JSON string describing step objects: `[{"content": "Label", "color": "Primary", "isActive": true}, ...]`. |
 
@@ -23,6 +23,7 @@ DaisySteps renders a sequence of step items with lines and circles. It supports 
 | `Icon` | Slot available if you template-in; not used in default theme. |
 | `Color` | Step color: Default, Neutral, Primary, Secondary, Accent, Info, Success, Warning, Error. |
 | `IsActive` | Set by DaisySteps when `SelectedIndex` includes the step. |
+| `Size` | Defaults to `Auto`. Explicit values, styles, and bindings take precedence over the container and global defaults. |
 
 ## Quick Examples
 

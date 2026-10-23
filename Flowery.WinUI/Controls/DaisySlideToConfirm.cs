@@ -92,14 +92,13 @@ namespace Flowery.Controls
             RefreshNeumorphicEffect();
         }
 
-        protected override void OnGlobalSizeChanged(DaisySize size)
+        protected override void OnResolvedSizeChanged()
         {
-            base.OnGlobalSizeChanged(size);
+            base.OnResolvedSizeChanged();
             ApplyAll();
         }
 
         protected override DaisySize? GetControlSize() => Size;
-        protected override void SetControlSize(DaisySize size) => Size = size;
 
         #endregion
 
@@ -142,7 +141,7 @@ namespace Flowery.Controls
                 nameof(Size),
                 typeof(DaisySize),
                 typeof(DaisySlideToConfirm),
-                new PropertyMetadata(DaisySize.Medium, OnAppearanceChanged));
+                new PropertyMetadata(DaisySize.Auto, OnAppearanceChanged));
 
         /// <summary>
         /// The size of the slide control.
@@ -387,7 +386,7 @@ namespace Flowery.Controls
             }
 
             // Get size key for token lookup
-            var sizeKey = Theming.DaisyResourceLookup.GetSizeKeyFull(Size);
+            var sizeKey = Theming.DaisyResourceLookup.GetSizeKeyFull(ResolvedSize);
 
             // Get dimensions from design tokens
             var minTrackWidth = Theming.DaisyResourceLookup.GetDouble($"DaisySlideToConfirm{sizeKey}TrackWidth", 100);
@@ -964,7 +963,7 @@ namespace Flowery.Controls
                 isEnabled,
                 DaisyNeumorphicMode.Inset,
                 intensity,
-                DaisyResourceLookup.GetDefaultElevation(Size)
+                DaisyResourceLookup.GetDefaultElevation(ResolvedSize)
             );
 
             // 2. Update Handle (Raised)
@@ -975,7 +974,7 @@ namespace Flowery.Controls
                     isEnabled,
                     DaisyNeumorphicMode.Raised,
                     intensity,
-                    DaisyResourceLookup.GetDefaultElevation(Size)
+                    DaisyResourceLookup.GetDefaultElevation(ResolvedSize)
                 );
             }
         }

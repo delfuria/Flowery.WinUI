@@ -76,7 +76,7 @@ namespace Flowery.Controls
         private bool _isSyncing;
         private bool _eventsSubscribed;
 
-        public DaisySizeDropdown() : base(subscribeSizeChanges: false)
+        public DaisySizeDropdown()
         {
             SelectionChanged += OnSelectionChanged;
             UpdateDisplayMemberPath();
@@ -157,12 +157,6 @@ namespace Flowery.Controls
 
         private void OnSizeChanged(object? sender, DaisySize size)
         {
-            // Use ShouldIgnoreGlobalSize to check this control AND ancestors
-            if (FlowerySizeManager.ShouldIgnoreGlobalSize(this))
-                return;
-
-            Size = size;
-            ApplyAll();
             SyncWithCurrentSize();
         }
 
@@ -302,7 +296,7 @@ namespace Flowery.Controls
             var visibleCount = 0;
             foreach (var option in options)
             {
-                if (option.IsVisible)
+                if (option.IsVisible && option.Size is >= DaisySize.ExtraSmall and <= DaisySize.ExtraLarge)
                     visibleCount++;
             }
 
@@ -313,7 +307,7 @@ namespace Flowery.Controls
             var index = 0;
             foreach (var option in options)
             {
-                if (option.IsVisible)
+                if (option.IsVisible && option.Size is >= DaisySize.ExtraSmall and <= DaisySize.ExtraLarge)
                     visible[index++] = option;
             }
 

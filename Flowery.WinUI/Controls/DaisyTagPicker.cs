@@ -65,18 +65,15 @@ namespace Flowery.Controls
             ApplyAll();
         }
 
-        protected override void OnGlobalSizeChanged(DaisySize size)
+        protected override void OnResolvedSizeChanged()
         {
-            base.OnGlobalSizeChanged(size);
-            SetControlSize(size);
+            base.OnResolvedSizeChanged();
+            ApplyAll();
         }
 
         protected override DaisySize? GetControlSize() => Size;
 
-        protected override void SetControlSize(DaisySize size)
-        {
-            Size = size;
-        }
+        protected override DaisySize DefaultSize => DaisySize.Small;
 
         protected override FrameworkElement? GetNeumorphicHostElement()
         {
@@ -125,7 +122,7 @@ namespace Flowery.Controls
                 nameof(Size),
                 typeof(DaisySize),
                 typeof(DaisyTagPicker),
-                new PropertyMetadata(DaisySize.Small, OnAppearanceChanged));
+                new PropertyMetadata(DaisySize.Auto, OnAppearanceChanged));
 
         /// <summary>
         /// Gets or sets the size of the tag chips.
@@ -618,7 +615,7 @@ namespace Flowery.Controls
 
         private Border CreateChip(string tag, bool isSelected)
         {
-            var effectiveSize = FlowerySizeManager.ShouldIgnoreGlobalSize(this) ? Size : FlowerySizeManager.CurrentSize;
+            var effectiveSize = ResolvedSize;
             string sizeKey = DaisyResourceLookup.GetSizeKeyFull(effectiveSize);
 
             var resources = Application.Current?.Resources;
@@ -982,7 +979,7 @@ namespace Flowery.Controls
             if (HasLocalOverride(FontSizeProperty))
                 return FontSize;
 
-            var effectiveSize = FlowerySizeManager.ShouldIgnoreGlobalSize(this) ? Size : FlowerySizeManager.CurrentSize;
+            var effectiveSize = ResolvedSize;
             string sizeKey = DaisyResourceLookup.GetSizeKeyFull(effectiveSize);
             var resources = Application.Current?.Resources;
             return DaisyResourceLookup.GetDouble(

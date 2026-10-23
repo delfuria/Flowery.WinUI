@@ -174,11 +174,11 @@ All variants scale proportionally across sizes. Canvas-based animations use View
 
 | Size | Dimensions | Use Case |
 | --- | --- | --- |
-| ExtraSmall | 16×16px | Inline with text, compact buttons |
+| ExtraSmall | 14×14px | Inline with text, compact buttons |
 | Small | 20×20px | Small UI elements, table cells |
-| Medium | 24×24px | Default, general purpose (recommended) |
-| Large | 36×36px | Prominent loading states, cards |
-| ExtraLarge | 48×48px | Full-page loading overlays, hero sections |
+| Medium | 26×26px | General purpose |
+| Large | 38×38px | Prominent loading states, cards |
+| ExtraLarge | 52×52px | Full-page loading overlays, hero sections |
 
 ## Color Variants
 
@@ -280,7 +280,7 @@ Use the `Color` property to apply theme colors. All variants support coloring.
 | Property | Type | Default | Description |
 | --- | --- | --- | --- |
 | `Variant` | `DaisyLoadingVariant` | `Spinner` | Animation style (27 options) |
-| `Size` | `DaisySize` | `Medium` | Control dimensions (5 options). Uses shared enum. |
+| `Size` | `DaisySize` | `Auto` | `ResolvedSize` supplies the effective tier. Explicit values, styles, and bindings take precedence over global defaults. `PixelSize` overrides the rendered dimensions. |
 | `Color` | `DaisyColor` | `Default` | Theme color (9 options). Uses shared enum. |
 | `AccessibleText` | `string` | `"Loading"` | Screen reader announcement |
 

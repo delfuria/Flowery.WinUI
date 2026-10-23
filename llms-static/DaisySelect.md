@@ -3,7 +3,7 @@
 
 # Overview
 
-DaisySelect is a styled ComboBox with **9 variants** and **4 size presets**. It provides a chevron toggle, placeholder text, and themed dropdown. Use it for single-select dropdowns that need DaisyUI styling.
+DaisySelect is a styled ComboBox with **9 variants** and **5 size presets**. It provides a chevron toggle, placeholder text, and themed dropdown. Use it for single-select dropdowns that need DaisyUI styling.
 
 ## Variant Options
 
@@ -16,12 +16,15 @@ DaisySelect is a styled ComboBox with **9 variants** and **4 size presets**. It 
 
 ## Size Options
 
+`Size` defaults to `Auto`. `ResolvedSize` supplies the effective tier without replacing explicit values, styles, or bindings.
+
 | Size | Height | Font Size |
 | --- | --- | --- |
 | ExtraSmall | 24 | 10 |
-| Small | 32 | 12 |
-| Medium (default) | 48 | 14 |
-| Large | 64 | 18 |
+| Small | 28 | 12 |
+| Medium | 32 | 14 |
+| Large | 36 | 18 |
+| ExtraLarge | 40 | 20 |
 
 > [!NOTE]
 > DaisySelect uses **fixed heights** for each size to match DaisyUI's design.

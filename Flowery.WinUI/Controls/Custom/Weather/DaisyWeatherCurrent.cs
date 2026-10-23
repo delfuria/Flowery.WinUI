@@ -36,18 +36,13 @@ namespace Flowery.Controls.Weather
             ApplyAll();
         }
 
-        protected override void OnGlobalSizeChanged(DaisySize size)
+        protected override void OnResolvedSizeChanged()
         {
-            base.OnGlobalSizeChanged(size);
-            SetControlSize(size);
+            base.OnResolvedSizeChanged();
+            ApplyAll();
         }
 
         protected override DaisySize? GetControlSize() => Size;
-
-        protected override void SetControlSize(DaisySize size)
-        {
-            Size = size;
-        }
 
         private void ApplyAll()
         {
@@ -93,12 +88,12 @@ namespace Flowery.Controls.Weather
                 nameof(Size),
                 typeof(DaisySize),
                 typeof(DaisyWeatherCurrent),
-                new PropertyMetadata(DaisySize.Medium, OnSizeChanged));
+                new PropertyMetadata(DaisySize.Auto, OnSizeChanged));
 
         /// <summary>
         /// The size of the weather display.
-        /// When <see cref="FlowerySizeManager.UseGlobalSizeByDefault"/> is enabled,
-        /// this will follow <see cref="FlowerySizeManager.CurrentSize"/> unless IgnoreGlobalSize is set.
+        /// Auto uses the applicable size scope, global size, or control fallback.
+        /// An authored concrete Size takes precedence; ResolvedSize is the rendering tier.
         /// </summary>
         public DaisySize Size
         {
@@ -125,7 +120,7 @@ namespace Flowery.Controls.Weather
 
         private void UpdateSizeVisualState()
         {
-            var stateName = Size switch
+            var stateName = ResolvedSize switch
             {
                 DaisySize.ExtraSmall => "ExtraSmall",
                 DaisySize.Small => "Small",

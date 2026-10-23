@@ -39,13 +39,17 @@ DaisyButton delivers DaisyUI-styled actions with **11 color variants**, **4 visu
 
 ## Size Options
 
+`Size` defaults to `Auto`; `ResolvedSize` supplies the concrete tier without replacing authored values, styles or bindings.
+`ContentPadding` is nullable: null selects automatic inner padding, while explicit zero, styles and bindings remain authoritative.
+`ResolvedContentPadding` is the template value. Inherited `Padding` remains separate outer padding.
+
 | Size | Height | Padding | Typical Use |
 | --- | --- | --- | --- |
 | ExtraSmall | 24px | 8px horizontal | Dense toolbars, icon circles. |
-| Small | 32px | 12px horizontal | Compact forms, secondary actions. |
-| Medium (default) | 48px | 16px horizontal | General purpose. |
-| Large | 64px | 24px horizontal | Hero sections, primary CTAs. |
-| ExtraLarge | 80px | 32px horizontal | Splash/marketing layouts. |
+| Small | 28px | 12px horizontal | Compact forms, secondary actions. |
+| Medium | 32px | 12px horizontal | General purpose; default fallback. |
+| Large | 36px | 16px horizontal | Larger controls. |
+| ExtraLarge | 40px | 16px horizontal | Largest discrete tier. |
 
 > [!NOTE]
 > DaisyButton uses **fixed heights** (not MinHeight) for each size to match DaisyUI's design. Buttons will not grow vertically to accommodate multi-line content. If you need a flexible-height button, override `Height="NaN"` on the individual button.

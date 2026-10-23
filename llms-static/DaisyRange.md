@@ -3,7 +3,7 @@
 
 # Overview
 
-DaisyRange is a styled slider with **8 color variants**, **4 size presets**, and customizable thumb/track colors. It exposes thumb size and optional progress fill properties while inheriting standard `Control` behavior including `IsEnabled`. It supports step-based value snapping and full keyboard navigation.
+DaisyRange is a styled slider with **8 color variants**, **5 size presets**, and customizable thumb/track colors. It exposes thumb size and optional progress fill properties while inheriting standard `Control` behavior including `IsEnabled`. It supports step-based value snapping and full keyboard navigation.
 
 ## Variant Options
 
@@ -15,12 +15,15 @@ DaisyRange is a styled slider with **8 color variants**, **4 size presets**, and
 
 ## Size Options
 
+`Size` defaults to `Auto`. `ResolvedSize` supplies the effective tier without replacing explicit values, styles, or bindings.
+
 | Size | Track Height | Thumb Size |
 | --- | --- | --- |
-| ExtraSmall | 4 | 16 |
-| Small | 6 | 20 |
-| Medium (default) | 8 | 24 |
-| Large | 12 | 32 |
+| ExtraSmall | 4 | 12 |
+| Small | 6 | 16 |
+| Medium | 8 | 20 |
+| Large | 12 | 28 |
+| ExtraLarge | 16 | 36 |
 
 ## Value Control Properties
 

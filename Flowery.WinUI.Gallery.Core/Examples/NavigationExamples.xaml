@@ -441,17 +441,17 @@
                             <Grid Margin="6">
                                 <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                                     <daisy:DaisyButton x:Name="PhotoTabAction0"
-                                                       Width="32" Height="32" Padding="0" Shape="Circle" Variant="Default"
+                                                       Width="32" Height="32" ContentPadding="0" Shape="Circle" Variant="Default"
                                                        Click="OnPhotoTabActionClick" Tag="0">
                                         <daisy:DaisyIconText IconData="{StaticResource DaisyIconUser}" Size="Medium" />
                                     </daisy:DaisyButton>
                                     <daisy:DaisyButton x:Name="PhotoTabAction1"
-                                                       Width="32" Height="32" Padding="0" Shape="Circle" Variant="Default"
+                                                       Width="32" Height="32" ContentPadding="0" Shape="Circle" Variant="Default"
                                                        Click="OnPhotoTabActionClick" Tag="1">
                                         <daisy:DaisyIconText IconData="{StaticResource DaisyIconDog}" Size="Medium" />
                                     </daisy:DaisyButton>
                                     <daisy:DaisyButton x:Name="PhotoTabAction2"
-                                                       Width="32" Height="32" Padding="0" Shape="Circle" Variant="Default"
+                                                       Width="32" Height="32" ContentPadding="0" Shape="Circle" Variant="Default"
                                                        Click="OnPhotoTabActionClick" Tag="2">
                                         <daisy:DaisyIconText IconData="{StaticResource DaisyIconNavigation}" Size="Medium" />
                                     </daisy:DaisyButton>

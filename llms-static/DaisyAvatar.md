@@ -7,13 +7,15 @@ DaisyAvatar renders user/profile images or initials with **5 sizes**, **3 shapes
 
 ## Size Options
 
+`Size` defaults to `Auto`. `ResolvedSize` supplies the effective tier without replacing explicit values, styles, or bindings.
+
 | Size | Approx. Dimensions | Use Case |
 | --- | --- | --- |
-| ExtraSmall | 24×24 | Very tight UIs, inline with text |
-| Small | 32×32 | Toolbars, compact cards |
-| Medium (default) | 48×48 | General-purpose avatar lists |
-| Large | 96×96 | Profile headers, spotlight cards |
-| ExtraLarge | 128×128 | Hero/profile pages |
+| ExtraSmall | 20×20 | Very tight UIs, inline with text |
+| Small | 28×28 | Toolbars, compact cards |
+| Medium | 40×40 | General-purpose avatar lists |
+| Large | 56×56 | Profile headers, spotlight cards |
+| ExtraLarge | 80×80 | Hero/profile pages |
 
 ## Shape Options
 
@@ -35,7 +37,7 @@ DaisyAvatar renders user/profile images or initials with **5 sizes**, **3 shapes
 ## Quick Examples
 
 ```xml
-<!-- Image avatar (default circle, medium) -->
+<!-- Image avatar (default circle, automatic size) -->
 <controls:DaisyAvatar>
     <Image Source="ms-appx:///Flowery.WinUI.Gallery/Assets/logo.png" />
 </controls:DaisyAvatar>

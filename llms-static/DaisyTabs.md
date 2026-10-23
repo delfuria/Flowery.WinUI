@@ -16,12 +16,16 @@ DaisyTabs is a styled `TabControl` with four header variants (None, Bordered, Li
 
 ## Size Options
 
+`Size` defaults to `Auto`. `ResolvedSize` reports the effective header tier from the global sizing policy.
+Explicit local values, styles, and bindings retain their tier, including explicit Medium.
+
 | Size | Padding | Font Size |
 | --- | --- | --- |
-| ExtraSmall | 8,4 | 10 |
-| Small | 12,6 | 12 |
-| Medium (default) | 16,8 | 14 |
-| Large | 20,12 | 18 |
+| ExtraSmall | 8,0 | 10 |
+| Small | 8,0 | 12 |
+| Medium | 12,0 | 14 |
+| Large | 12,0 | 18 |
+| ExtraLarge | 16,0 | 20 |
 
 ## Tab Width Options
 

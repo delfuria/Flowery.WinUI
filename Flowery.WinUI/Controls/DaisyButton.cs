@@ -61,12 +61,50 @@ namespace Flowery.Controls
                 nameof(Size),
                 typeof(DaisySize),
                 typeof(DaisyButton),
-                new PropertyMetadata(DaisySize.Medium, OnStylePropertyChanged));
+                new PropertyMetadata(DaisySize.Auto, OnStylePropertyChanged));
 
         public DaisySize Size
         {
             get => (DaisySize)GetValue(SizeProperty);
             set => SetValue(SizeProperty, value);
+        }
+
+        public DaisySize ResolvedSize => FlowerySizeManager.ResolveSize(this, Size);
+
+        public static readonly DependencyProperty ContentPaddingProperty =
+            DependencyProperty.Register(
+                nameof(ContentPadding),
+                // Native bindings cannot convert boxed Thickness to IReference<Thickness>.
+                typeof(object),
+                typeof(DaisyButton),
+                new PropertyMetadata(null, OnStylePropertyChanged));
+
+        /// <summary>
+        /// Inner content padding. Null follows the resolved size, shape and variant.
+        /// Inherited Padding remains separate outer padding.
+        /// </summary>
+        public Thickness? ContentPadding
+        {
+            get => GetValue(ContentPaddingProperty) is { } value
+                ? (Thickness)Microsoft.UI.Xaml.Markup.XamlBindingHelper.ConvertValue(typeof(Thickness), value)
+                : null;
+            set => SetValue(ContentPaddingProperty, value);
+        }
+
+        public static readonly DependencyProperty ResolvedContentPaddingProperty =
+            DependencyProperty.Register(
+                nameof(ResolvedContentPadding),
+                typeof(Thickness),
+                typeof(DaisyButton),
+                new PropertyMetadata(new Thickness(0)));
+
+        /// <summary>
+        /// The inner padding currently used by the control template.
+        /// </summary>
+        public Thickness ResolvedContentPadding
+        {
+            get => (Thickness)GetValue(ResolvedContentPaddingProperty);
+            private set => SetValue(ResolvedContentPaddingProperty, value);
         }
 
         public static readonly DependencyProperty ButtonStyleProperty =
@@ -216,9 +254,8 @@ namespace Flowery.Controls
             _lifecycle = new DaisyControlLifecycle(
                 this,
                 ApplyAll,
-                () => Size,
-                s => Size = s,
                 handleLifecycleEvents: false);
+            FlowerySizeManager.Register(this, RefreshResolvedSize, () => ResolvedSize);
 
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
@@ -348,7 +385,7 @@ namespace Flowery.Controls
             var isEnabled = IsNeumorphicEffectivelyEnabled();
             var mode = GetEffectiveNeumorphicMode();
             var intensity = GetEffectiveNeumorphicIntensity();
-            var elevation = DaisyResourceLookup.GetDefaultElevation(Size);
+            var elevation = DaisyResourceLookup.GetDefaultElevation(ResolvedSize);
 
             // Only an opaque face can be raised. Outline, dash, ghost, link and soft buttons would show the
             // shadows through their face (#12).
@@ -838,12 +875,12 @@ namespace Flowery.Controls
         /// <summary>
         /// Gets the appropriate icon size based on button Size.
         /// </summary>
-        private double GetIconSizeForButtonSize() => DaisyResourceLookup.GetDefaultIconSize(Size);
+        private double GetIconSizeForButtonSize() => DaisyResourceLookup.GetDefaultIconSize(ResolvedSize);
 
         /// <summary>
         /// Gets the appropriate icon-to-text spacing based on button Size.
         /// </summary>
-        private double GetIconSpacingForSize() => DaisyResourceLookup.GetDefaultIconSpacing(Size);
+        private double GetIconSpacingForSize() => DaisyResourceLookup.GetDefaultIconSpacing(ResolvedSize);
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
@@ -886,6 +923,8 @@ namespace Flowery.Controls
 
         private void OnNativePressedChanged(DependencyObject sender, DependencyProperty property) => ApplyCurrentPointerState();
 
+        internal virtual void RefreshResolvedSize() => ApplyAll();
+
         private void ApplyAll()
         {
             var resources = Application.Current?.Resources;
@@ -902,7 +941,7 @@ namespace Flowery.Controls
 
         private void ApplySizing(ResourceDictionary? resources)
         {
-            var size = Size;
+            var size = ResolvedSize;
 
             // Tokens are guaranteed by EnsureDefaults(); fallbacks only for null resources edge case
             Height = DaisyResourceLookup.GetSizeDouble(resources, "DaisySize", size, "Height",
@@ -911,12 +950,11 @@ namespace Flowery.Controls
             FontSize = DaisyResourceLookup.GetSizeDouble(resources, "DaisySize", size, "FontSize",
                 DaisyResourceLookup.GetDefaultFontSize(size));
 
-            if (ReadLocalValue(PaddingProperty) == DependencyProperty.UnsetValue)
-            {
-                var padding = DaisyResourceLookup.GetSizeThickness(resources, "DaisyButton", size, "Padding",
-                    DaisyResourceLookup.GetDefaultPadding(size));
-                ApplyEffectivePadding(padding);
-            }
+            ResolvedContentPadding = ContentPadding ??
+                (Variant == DaisyButtonVariant.Link || Shape is DaisyButtonShape.Square or DaisyButtonShape.Circle
+                    ? new Thickness(0)
+                    : DaisyResourceLookup.GetSizeThickness(resources, "DaisyButton", size, "Padding",
+                        DaisyResourceLookup.GetDefaultPadding(size)));
 
             // Respect local CornerRadius overrides (e.g. DaisyButtonGroup joined corners).
             if (!_hasCornerRadiusOverride)
@@ -959,8 +997,8 @@ namespace Flowery.Controls
             if (label.ReadLocalValue(TextBlock.LineHeightProperty) != DependencyProperty.UnsetValue)
                 return;
 
-            var lineHeight = DaisyResourceLookup.GetSizeDouble(resources, "DaisySize", Size, "LineHeight",
-                DaisyResourceLookup.GetDefaultLineHeight(Size));
+            var lineHeight = DaisyResourceLookup.GetSizeDouble(resources, "DaisySize", ResolvedSize, "LineHeight",
+                DaisyResourceLookup.GetDefaultLineHeight(ResolvedSize));
             label.LineHeight = lineHeight;
         }
 
@@ -1026,7 +1064,6 @@ namespace Flowery.Controls
                     }
                 }
 
-                ApplyEffectivePadding(new Thickness(0));
                 if (!hasLocalHorizontalAlignment)
                     HorizontalAlignment = HorizontalAlignment.Center;
             }
@@ -1224,8 +1261,6 @@ namespace Flowery.Controls
                 _pointerOverBorderThickness = noBorder;
                 _pressedBorderThickness = noBorder;
 
-                Padding = new Thickness(0);
-
                 // Apply lightweight styling overrides for Link variant
                 ApplyBrushOverrides(variantName);
                 return;
@@ -1271,21 +1306,27 @@ namespace Flowery.Controls
             }
             else if (effectiveStyle == DaisyButtonStyle.Soft)
             {
-                _normalBackground = DaisyResourceLookup.WithOpacity(variantBg, 0.18) ?? variantBg;
-                _pointerOverBackground = DaisyResourceLookup.WithOpacity(variantBg, 0.28) ?? variantHoverBg;
-                _pressedBackground = DaisyResourceLookup.WithOpacity(variantBg, 0.35) ?? variantHoverBg;
+                var hasSoftPalette = Variant is DaisyButtonVariant.Primary or DaisyButtonVariant.Secondary
+                    or DaisyButtonVariant.Accent or DaisyButtonVariant.Info or DaisyButtonVariant.Success
+                    or DaisyButtonVariant.Warning or DaisyButtonVariant.Error;
+                _normalBackground = hasSoftPalette
+                    ? DaisyResourceLookup.GetBrush(resources, $"DaisyButton{variantName}SoftBrush", base200) : base200;
+                _pointerOverBackground = hasSoftPalette
+                    ? DaisyResourceLookup.GetBrush(resources, $"DaisyButton{variantName}SoftHoverBrush", base300) : base300;
+                _pressedBackground = _pointerOverBackground;
 
-                _normalForeground = variantText;
-                _pointerOverForeground = variantText;
-                _pressedForeground = variantText;
+                _normalForeground = hasSoftPalette ? variantText : baseContent;
+                _pointerOverForeground = _normalForeground;
+                _pressedForeground = _normalForeground;
 
-                _normalBorderBrush = transparent;
-                _pointerOverBorderBrush = transparent;
-                _pressedBorderBrush = transparent;
+                _normalBorderBrush = hasSoftPalette
+                    ? DaisyResourceLookup.GetBrush(resources, $"DaisyButton{variantName}SoftBorderBrush", base300) : base300;
+                _pointerOverBorderBrush = _normalBorderBrush;
+                _pressedBorderBrush = _normalBorderBrush;
 
-                _normalBorderThickness = noBorder;
-                _pointerOverBorderThickness = noBorder;
-                _pressedBorderThickness = noBorder;
+                _normalBorderThickness = thinBorder;
+                _pointerOverBorderThickness = thinBorder;
+                _pressedBorderThickness = thinBorder;
             }
             else
             {
@@ -1510,12 +1551,6 @@ namespace Flowery.Controls
                 _dashedBorder.RadiusX = CornerRadius.TopLeft;
                 _dashedBorder.RadiusY = CornerRadius.TopLeft;
             }
-        }
-
-        private void ApplyEffectivePadding(Thickness padding)
-        {
-            Padding = padding;
-            // Dashed border doesn't need margin adjustment - it stretches to fill the template Grid
         }
 
     }

@@ -14,7 +14,7 @@ It also supports non-clickable segments (for counters/labels) by using a `Border
 | Member | Description |
 | --- | --- |
 | `Variant` (`DaisyButtonVariant`) | Applies a unified color variant to all segments (Default, Primary, Secondary, Accent, etc.). |
-| `Size` (`DaisySize`) | Applies size tokens to all segments (height, padding, font size). |
+| `Size` (`DaisySize`, default `Auto`) | `ResolvedSize` supplies segment defaults. Explicit DaisyButton sizes, styles, and bindings retain their tier. DaisyButton `Size` and outer `Padding` remain unchanged. |
 | `ButtonStyle` (`DaisyButtonStyle`) | Segment style: `Default`, `Outline`, `Soft`, `Dash` (outer dashed border). |
 | `Shape` (`DaisyButtonGroupShape`) | Corner rounding: `Default`, `Square`, `Rounded`, `Pill`. |
 | `Orientation` (`Orientation`) | Layout direction (`Horizontal` or `Vertical`). |

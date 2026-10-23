@@ -4,7 +4,7 @@ A dropdown control for selecting a global size (`DaisySize`) that affects (almos
 
 ## Overview
 
-`DaisySizeDropdown` provides a user-friendly way to let users choose their preferred UI size. When the user selects a size, it's applied globally via `FlowerySizeManager`. All Daisy controls with a `Size` property automatically update.
+`DaisySizeDropdown` selects the global concrete tier through `FlowerySizeManager`. Automatic controls update. Explicit sizes, styles, and bindings retain their values.
 
 ## Basic Usage
 
@@ -21,7 +21,7 @@ This displays a dropdown with all five sizes (ExtraSmall, Small, Medium, Large, 
 | Property | Type | Default | Description |
 | --- | --- | --- | --- |
 | `SelectedSize` | `DaisySize` | `Medium` | The currently selected size |
-| `Size` | `DaisySize` | `Medium` | The size of the dropdown control itself |
+| `Size` | `DaisySize` | `Auto` | Authored dropdown size. `ResolvedSize` supplies its effective tier independently of `SelectedSize`. |
 | `ShowAbbreviations` | `bool` | `false` | Show abbreviations (XS, S, M, L, XL) instead of full names |
 | `SizeOptions` | `IList<SizePreviewInfo>` | `null` | Custom size options to display |
 
@@ -110,7 +110,7 @@ If you need to override the built-in translations, add these keys to your locali
 
 ## Styling
 
-The dropdown respects global size changes. When a new size is selected, the dropdown itself also updates its appearance.
+The automatic dropdown updates its appearance when the global size changes. A concrete dropdown `Size` retains its tier while selection still synchronizes.
 
 ### Size Variants
 
@@ -151,12 +151,10 @@ If you need to change the size without the UI:
 
 ```csharp
 using Flowery.Controls;
+using Flowery.Services;
 
 // Apply a size globally
 FlowerySizeManager.ApplySize(DaisySize.Large);
-
-// Or by name
-FlowerySizeManager.ApplySize("Large");
 
 // Check current size
 DaisySize current = FlowerySizeManager.CurrentSize;

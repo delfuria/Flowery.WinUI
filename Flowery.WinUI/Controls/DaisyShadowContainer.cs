@@ -248,13 +248,13 @@ public sealed partial class DaisyShadowContainer : ContentControl
         {
             var blur = (float)Math.Max(0, shadow.BlurRadius);
             var extent = blur * 3 + (float)Math.Max(Math.Abs(shadow.OffsetX), Math.Abs(shadow.OffsetY)) + (float)Math.Abs(shadow.Spread) + 1;
-            using var inverse = new SKPath { FillType = SKPathFillType.EvenOdd };
-            inverse.AddRect(new SKRect(-extent, -extent, width + extent, height + extent));
+            using var inverse = new SKPathBuilder { FillType = SKPathFillType.EvenOdd };
+            inverse.AddRect(new SKRect(-extent, -extent, width + extent, height + extent), SKPathDirection.Clockwise);
             var spread = (float)Math.Min(shadow.Spread, Math.Min(width, height) / 2 - 0.01);
             using var hole = CreateRoundedRect(new SKRect(
                 spread + (float)shadow.OffsetX, spread + (float)shadow.OffsetY,
                 width - spread + (float)shadow.OffsetX, height - spread + (float)shadow.OffsetY), -spread);
-            inverse.AddRoundRect(hole);
+            inverse.AddRoundRect(hole, SKPathDirection.Clockwise);
             using var filter = SKImageFilter.CreateBlur(blur / 2, blur / 2, SKShaderTileMode.Decal);
             using var paint = new SKPaint
             {
@@ -263,7 +263,8 @@ public sealed partial class DaisyShadowContainer : ContentControl
                     (byte)Math.Clamp(shadow.Color.A * shadow.Opacity, 0, 255)),
                 ImageFilter = filter
             };
-            canvas.DrawPath(inverse, paint);
+            using var path = inverse.Detach();
+            canvas.DrawPath(path, paint);
         }
         canvas.Flush();
         var image = new WriteableBitmap(pixelWidth, pixelHeight);

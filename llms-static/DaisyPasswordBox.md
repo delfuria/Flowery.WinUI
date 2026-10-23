@@ -3,7 +3,7 @@
 
 # Overview
 
-DaisyPasswordBox is a specialized password input field that manages its own reveal button and masked input. It inherits from `ContentControl` but behaves like a `PasswordBox`, providing **10 variants** and **4 size presets**. It supports bordered, ghost, filled, and semantic colored borders, plus labels, helper text, and icons.
+DaisyPasswordBox is a specialized password input field that manages its own reveal button and masked input. It inherits from `ContentControl` but behaves like a `PasswordBox`, providing **10 variants** and **5 size presets**. It supports bordered, ghost, filled, and semantic colored borders, plus labels, helper text, and icons.
 
 ## Features
 
@@ -28,10 +28,14 @@ DaisyPasswordBox uses **fixed heights** for each size to match DaisyUI's design.
 
 | Size | Height | Font Size | Floating Height | Use Case |
 | --- | --- | --- | --- | --- |
-| ExtraSmall | 24 | 10 | 40 | Dense tables/toolbars. |
-| Small | 32 | 12 | 48 | Compact forms. |
-| Medium (default) | 48 | 14 | 56 | General usage. |
-| Large | 64 | 18 | 64 | Prominent inputs/hero sections. |
+| ExtraSmall | 24 | 10 | 36 | Dense tables/toolbars. |
+| Small | 28 | 12 | 40 | Compact forms. |
+| Medium | 32 | 14 | 44 | General usage. |
+| Large | 36 | 18 | 48 | Prominent inputs. |
+| ExtraLarge | 40 | 20 | 50 | Large forms. |
+
+`Size` defaults to `Auto`; `ResolvedSize` reports the effective tier.
+Explicit local values, styles, and bindings retain their tier, including explicit Medium.
 
 ## Properties
 
@@ -44,7 +48,7 @@ DaisyPasswordBox uses **fixed heights** for each size to match DaisyUI's design.
 | `PasswordChar` | `string` | `●` | The character used to mask the password. |
 | `IsPasswordRevealButtonEnabled` | `bool` | `true` | Whether the reveal button eye icon is shown. |
 | `Variant` | `DaisyInputVariant` | `Bordered` | Visual style variant (see table above). |
-| `Size` | `DaisySize` | `Medium` | Size preset (see table above). |
+| `Size` | `DaisySize` | `Auto` | Authored size; `ResolvedSize` reports the effective tier. |
 | `Label` | `string` | `""` | Label text shown above the input. |
 | `LabelPosition` | `DaisyLabelPosition` | `Top` | Position of the label (`Top`, `Floating`, `None`). |
 | `IsRequired` | `bool` | `false` | Shows a red asterisk (*) next to the label. |
@@ -54,6 +58,11 @@ DaisyPasswordBox uses **fixed heights** for each size to match DaisyUI's design.
 | `EndIconData` | `string` | `null` | Path data for an icon on the right (before reveal button). |
 
 ## Quick Examples
+
+Optional labels, hints, and helper text use `DaisyBaseContentMutedBrush` with element opacity 1.
+Placeholders use `DaisyBaseContentSubtleBrush`; `DaisyInputPlaceholderForeground` remains an explicit resource override.
+Native disabled text uses `DaisyBaseContentDisabledBrush`. Password reveal, editing, focus, and selection remain unchanged.
+Windows contrast themes retain opaque system colors and suppress decorative overrides.
 
 ```xml
 <!-- Basic -->

@@ -19,7 +19,7 @@ Each entry is a `DaisyContributionDay`:
 
 | Property | Description |
 | --- | --- |
-| `Size` (`DaisySize`) | Control size (ExtraSmall through ExtraLarge). Automatically adjusts cell size, margins, corner radius, and font sizes. Respects `FlowerySizeManager` global sizing. Default: Medium. |
+| `Size` (`DaisySize`, default `Auto`) | `ResolvedSize` controls cell size, margins, corner radius, and fonts. Explicit sizes, styles, and bindings take precedence over global defaults. |
 | `Contributions` (`IEnumerable<DaisyContributionDay>?`) | Data points used to populate the graph. Days not present render as level 0 / count 0. |
 | `Year` (int) | Which year to display (default: current year). |
 | `StartDayOfWeek` (`DayOfWeek`) | Which day is shown as the first row. **Default: Current culture's first day of week** (Monday in Europe, Sunday in US, etc.). Can be overridden explicitly. |

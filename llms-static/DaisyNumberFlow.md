@@ -146,6 +146,11 @@ The control shows an accent border when focused via keyboard (`:focus-visible`).
 | Property | Type | Default | Description |
 | --- | --- | --- | --- |
 | `ShowDigitBoxes` | bool | False | Displays styled boxes behind each digit |
+| `DigitForeground` | Brush? | null | Overrides digits and format symbols; null restores theme or digit-box contrast text. Prefix and suffix retain the theme foreground. |
+
+`DigitForeground` supports local values, styles, bindings, and transparent brushes.
+Theme changes refresh the digit-box background and the fallback foreground.
+Windows contrast themes retain system text colors, including disabled text, instead of decorative brush overrides.
 
 When `ShowDigitBoxes="True"`, each digit gets a rounded box with an inset shadow, creating a dashboard/counter aesthetic similar to SmoothUI's NumberFlow component.
 

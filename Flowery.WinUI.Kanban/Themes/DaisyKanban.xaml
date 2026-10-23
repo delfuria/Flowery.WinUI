@@ -164,7 +164,7 @@
                                                           Opacity="0"
                                                           IsHitTestVisible="False"
                                                           controls:DaisyNeumorphic.IsEnabled="False"
-                                                          Padding="0"
+                                                          ContentPadding="0"
                                                           MinWidth="0"
                                                           MinHeight="0"
                                                           Width="16"

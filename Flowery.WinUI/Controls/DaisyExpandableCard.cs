@@ -427,7 +427,7 @@ namespace Flowery.Controls
             {
                 Content = ActionButtonText,
                 Variant = DaisyButtonVariant.Primary,
-                Padding = new Thickness(8, 4, 8, 4),
+                ContentPadding = new Thickness(8, 4, 8, 4),
                 MinHeight = 32,
                 Command = ToggleCommand
             };

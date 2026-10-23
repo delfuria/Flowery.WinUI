@@ -157,6 +157,22 @@ namespace Flowery.Controls
             set => SetValue(SuffixProperty, value);
         }
 
+        public static readonly DependencyProperty DigitForegroundProperty =
+            DependencyProperty.Register(
+                nameof(DigitForeground),
+                typeof(Brush),
+                typeof(DaisyNumberFlow),
+                new PropertyMetadata(null, OnLayoutOrValueConfigChanged));
+
+        /// <summary>
+        /// Gets or sets the digit and format-symbol brush. Null uses the theme foreground.
+        /// </summary>
+        public Brush? DigitForeground
+        {
+            get => (Brush?)GetValue(DigitForegroundProperty);
+            set => SetValue(DigitForegroundProperty, value);
+        }
+
         public static readonly DependencyProperty CultureProperty =
             DependencyProperty.Register(
                 nameof(Culture),
@@ -1324,6 +1340,9 @@ namespace Flowery.Controls
                         fg = DaisyResourceLookup.GetBrush("DaisyNeutralContentBrush");
                     }
                 }
+                if (!DaisySystemAppearance.HighContrast)
+                    fg = _owner.DigitForeground ?? fg;
+
                 foreach (var tb in new[] { _prevText, _currentText })
                 {
                     tb.FontSize = _owner.FontSize;

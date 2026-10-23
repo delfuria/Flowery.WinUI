@@ -10,11 +10,16 @@ DaisyBreadcrumbs shows a horizontal trail of navigation steps. Provide a `Panel`
 | Property | Description |
 | --- | --- |
 | `Separator` (string, default "/") | Text used between items. Accepts any string (e.g., `›`, `»`, `>`). |
-| `SeparatorOpacity` (double, default 0.5) | Controls the visual weight of the separator glyph. |
+| `SeparatorOpacity` (double, default 1) | Additional separator opacity multiplier; the default brush supplies its own alpha. |
+| `SeparatorBrush` (Brush?, default null) | Default separator brush for items without their own brush. |
 | `Size` (DaisySize) | Controls text/icon sizing for the breadcrumb items. |
 | `Content` (Panel) | Provide a `Panel` (e.g., `StackPanel` with `Orientation="Horizontal"`) containing `DaisyBreadcrumbItem` children; items are re-parented into the control layout. |
 
 ## Item Properties
+
+An item's SeparatorBrush takes precedence over the parent brush, then its separator resource, then DaisyBaseContentSubtleBrush.
+`Size` defaults to Auto on the container; the resolved tier supplies item metrics.
+The final item uses the muted text brush without applying opacity to its whole content element.
 
 | Property | Description |
 | --- | --- |

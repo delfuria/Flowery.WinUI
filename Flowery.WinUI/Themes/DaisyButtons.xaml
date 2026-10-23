@@ -32,7 +32,7 @@
 
     <!-- ===================== DaisyButton ===================== -->
     <ControlTemplate x:Key="DaisyButtonTemplate" TargetType="controls:DaisyButton">
-        <Grid x:Name="RootGrid">
+        <Grid x:Name="RootGrid" Padding="{TemplateBinding Padding}">
             <!-- Composition host for neumorphic visuals (kept behind content). -->
             <Canvas x:Name="PART_NeumorphicHost"
                     Tag="DaisyNeumorphicHost"
@@ -50,7 +50,7 @@
                     <Grid x:Name="PART_IconContentPanel"
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                 VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                Margin="{TemplateBinding Padding}">
+                                Margin="{TemplateBinding ResolvedContentPadding}">
                         <ContentPresenter x:Name="PART_IconPresenter"
                                           Foreground="{TemplateBinding Foreground}"
                                           HorizontalAlignment="Center"

@@ -98,7 +98,7 @@ namespace Flowery.Controls
                 nameof(Size),
                 typeof(DaisySize),
                 typeof(DaisyAnimatedNumber),
-                new PropertyMetadata(DaisySize.Medium, OnAppearanceChanged));
+                new PropertyMetadata(DaisySize.Auto, OnAppearanceChanged));
 
         public DaisySize Size
         {
@@ -180,18 +180,13 @@ namespace Flowery.Controls
                 _currentTransform.Y = 0;
         }
 
-        protected override void OnGlobalSizeChanged(DaisySize size)
+        protected override void OnResolvedSizeChanged()
         {
-            base.OnGlobalSizeChanged(size);
-            SetControlSize(size);
+            base.OnResolvedSizeChanged();
+            ApplyAll();
         }
 
         protected override DaisySize? GetControlSize() => Size;
-
-        protected override void SetControlSize(DaisySize size)
-        {
-            Size = size;
-        }
 
         #endregion
 
@@ -366,13 +361,13 @@ namespace Flowery.Controls
             if (resources != null)
                 DaisyTokenDefaults.EnsureDefaults(resources);
 
-            string sizeKey = DaisyResourceLookup.GetSizeKeyFull(Size);
+            string sizeKey = DaisyResourceLookup.GetSizeKeyFull(ResolvedSize);
 
             // Animated numbers use header-style font sizes
             double fontSize = resources == null
-                ? DaisyResourceLookup.GetDefaultHeaderFontSize(Size)
+                ? DaisyResourceLookup.GetDefaultHeaderFontSize(ResolvedSize)
                 : DaisyResourceLookup.GetDouble(resources, $"DaisySize{sizeKey}HeaderFontSize",
-                    DaisyResourceLookup.GetDefaultHeaderFontSize(Size));
+                    DaisyResourceLookup.GetDefaultHeaderFontSize(ResolvedSize));
 
             _currentText.FontSize = fontSize;
             _prevText.FontSize = fontSize;

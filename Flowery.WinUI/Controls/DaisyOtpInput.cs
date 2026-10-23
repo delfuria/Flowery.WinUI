@@ -25,12 +25,6 @@ namespace Flowery.Controls
             IsTabStop = false;
             IsEnabledChanged += (sender, args) => ApplyColors();
 
-            // Apply global size early if allowed and not explicitly ignored.
-            if (FlowerySizeManager.UseGlobalSizeByDefault && !FlowerySizeManager.GetIgnoreGlobalSize(this))
-            {
-                Size = FlowerySizeManager.CurrentSize;
-            }
-
         }
 
         #region Dependency Properties
@@ -152,7 +146,7 @@ namespace Flowery.Controls
                 nameof(Size),
                 typeof(DaisySize),
                 typeof(DaisyOtpInput),
-                new PropertyMetadata(DaisySize.Medium, OnAppearanceChanged));
+                new PropertyMetadata(DaisySize.Auto, OnAppearanceChanged));
 
         public DaisySize Size
         {
@@ -261,18 +255,13 @@ namespace Flowery.Controls
             ApplyAll();
         }
 
-        protected override void OnGlobalSizeChanged(DaisySize size)
+        protected override void OnResolvedSizeChanged()
         {
-            base.OnGlobalSizeChanged(size);
-            SetControlSize(size);
+            base.OnResolvedSizeChanged();
+            ApplySizing();
         }
 
         protected override DaisySize? GetControlSize() => Size;
-
-        protected override void SetControlSize(DaisySize size)
-        {
-            Size = size;
-        }
 
         #endregion
 
@@ -723,28 +712,28 @@ namespace Flowery.Controls
                 DaisyTokenDefaults.EnsureDefaults(resources);
             var lookupResources = resources ?? [];
 
-            string sizeKey = DaisyResourceLookup.GetSizeKeyFull(Size);
+            string sizeKey = DaisyResourceLookup.GetSizeKeyFull(ResolvedSize);
 
             // Get slot size from tokens
             double slotSize = DaisyResourceLookup.GetDouble(
                 lookupResources, $"DaisyOtp{sizeKey}SlotSize",
-                DaisyResourceLookup.GetDefaultOtpSlotSize(Size));
+                DaisyResourceLookup.GetDefaultOtpSlotSize(ResolvedSize));
 
             // Get font size from tokens (OTP uses header-style larger fonts)
             double fontSize = DaisyResourceLookup.GetDouble(
                 lookupResources, $"DaisyOtp{sizeKey}FontSize",
-                DaisyResourceLookup.GetDefaultHeaderFontSize(Size));
+                DaisyResourceLookup.GetDefaultHeaderFontSize(ResolvedSize));
 
             // Get corner radius from standard tokens
             CornerRadius cornerRadiusValue = DaisyResourceLookup.GetCornerRadius(
                 lookupResources, $"DaisySize{sizeKey}CornerRadius",
-                DaisyResourceLookup.GetDefaultCornerRadius(Size));
+                DaisyResourceLookup.GetDefaultCornerRadius(ResolvedSize));
             double cornerRadius = cornerRadiusValue.TopLeft;
 
             // Get spacing from tokens (0 when joined)
             double spacing = DaisyResourceLookup.GetDouble(
                 lookupResources, $"DaisyOtp{sizeKey}Spacing",
-                DaisyResourceLookup.GetDefaultOtpSpacing(Size));
+                DaisyResourceLookup.GetDefaultOtpSpacing(ResolvedSize));
             _slotsPanel.Spacing = IsJoined ? 0 : spacing;
 
             // Calculate group size for join borders

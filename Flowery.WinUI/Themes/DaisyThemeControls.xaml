@@ -108,9 +108,11 @@
     </ControlTemplate>
 
     <ControlTemplate x:Key="DaisyThemeControllerCheckboxTemplate" TargetType="controls:DaisyThemeController">
-        <Grid Background="Transparent">
+        <Grid x:Name="CheckboxRoot" Background="Transparent">
             <Border x:Name="CheckboxMode" Width="48"
                     Height="48"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
                     CornerRadius="8"
                     Background="{ThemeResource DaisyBase300Brush}">
                 <Path x:Name="CheckMark"

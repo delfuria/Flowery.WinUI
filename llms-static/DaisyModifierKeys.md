@@ -13,6 +13,9 @@ The control automatically hooks into keyboard events and updates in real-time. O
 
 ## Properties
 
+`Size` defaults to `Auto`. `ResolvedSize` supplies the effective keycap tier without replacing explicit values, styles, or bindings.
+Without a size scope or global size, automatic sizing falls back to Small.
+
 ### State Properties (Read from keyboard)
 
 | Property | Type | Default | Description |

@@ -1,4 +1,6 @@
+using System;
 using System.Threading.Tasks;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -42,6 +44,21 @@ namespace Flowery.WinUI.RuntimeTests
             };
             element.Loaded += handler;
             return tcs.Task;
+        }
+
+        public static async Task CompleteLayoutAsync(FrameworkElement element, params FrameworkElement[] requiredElements)
+        {
+            await EnsureLoadedAsync(element).WaitAsync(TimeSpan.FromSeconds(5));
+            foreach (var required in requiredElements)
+                await EnsureLoadedAsync(required).WaitAsync(TimeSpan.FromSeconds(5));
+            var completion = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            if (!element.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+                {
+                    element.UpdateLayout();
+                    completion.TrySetResult(null);
+                }))
+                throw new InvalidOperationException("The runtime dispatcher rejected layout verification.");
+            await completion.Task.WaitAsync(TimeSpan.FromSeconds(5));
         }
     }
 }

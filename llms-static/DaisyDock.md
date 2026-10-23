@@ -7,6 +7,10 @@ DaisyDock arranges items in a pill-shaped bar, similar to a macOS dock. It suppo
 
 ## Properties & Events
 
+`Size` defaults to `Auto`; `ResolvedSize` supplies the effective tier.
+The dock supplies child defaults without assigning child Size, IconSize or IgnoreGlobalSize.
+An authored child size or icon size wins. Dock subscriptions are released on unload and restored on reload.
+
 | Member | Description |
 | --- | --- |
 | `Size` (`DaisySize`: `ExtraSmall`, `Small`, `Medium`, `Large`, `ExtraLarge`) | Adjusts dock item size and spacing. Responds to global size changes via `FlowerySizeManager`. |

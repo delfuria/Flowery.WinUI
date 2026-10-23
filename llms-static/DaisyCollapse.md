@@ -18,6 +18,7 @@ DaisyCollapse is an `Expander`-based container for revealing content under a cli
 | --- | --- |
 | `IsExpanded` | Toggles visibility of the content presenter; bound to the header toggle. |
 | `Header` | Shown in the toggle button; can be any content. |
+| `Size` | Defaults to `Auto`. `ResolvedSize` supplies header, icon, and padding metrics. Explicit values, styles, and bindings take precedence over global defaults. |
 | `Content` | Shown below the header when expanded; supports any child UI. |
 | `Padding` / `CornerRadius` | Control spacing and rounding of both header and body regions. |
 

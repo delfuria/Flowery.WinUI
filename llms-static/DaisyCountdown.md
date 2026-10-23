@@ -30,6 +30,7 @@ It supports TimeSpan-based timing with millisecond precision, lap recording with
 | `Digits` | `int` (1-3) | Number of digits to display |
 | `ClockUnit` | `Hours`/`Minutes`/`Seconds`/`None` | When set, shows that component of current time |
 | `Mode` | `CountdownMode` | Operating mode: Display, Countdown, or Stopwatch |
+| `Size` | `DaisySize` | Defaults to `Auto`. `ResolvedSize` supplies the effective font tier. Explicit values, styles, and bindings win. |
 
 ### TimeSpan-Based Timing
 

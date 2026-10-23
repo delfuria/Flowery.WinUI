@@ -92,7 +92,9 @@ This behavior also applies to derived patterned and expandable cards.
 
 | Property | Description |
 | --- | --- |
-| `BodyPadding` | Content padding. Follows `Size` and `Variant` until the application sets a local value. |
+| `BodyPadding` | Nullable content padding. Null follows `ResolvedSize` and `Variant`; explicit zero, styles and bindings win. |
+| `ResolvedBodyPadding` | Concrete padding used by the built-in templates; custom templates should bind this property. |
+| `Size` / `ResolvedSize` | Auto is the authored default; ResolvedSize supplies the effective concrete tier. |
 | `BodyFontSize` | Default body text size for custom layouts (default 14). |
 | `TitleFontSize` | Default title text size for custom layouts (default 20). |
 
@@ -109,7 +111,7 @@ These values apply to all four sides, in device-independent pixels:
 | ExtraLarge | 48 | 24 |
 
 Changing `Size` or `Variant` updates automatic padding.
-A local `BodyPadding` value remains unchanged during these updates.
+Authored `BodyPadding` values, including style and binding values, remain unchanged during these updates.
 Call `card.ClearValue(DaisyCard.BodyPaddingProperty)` to restore automatic padding for the current size and variant.
 
 ## Batteries-Included Header

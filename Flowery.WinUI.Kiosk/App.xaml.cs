@@ -17,6 +17,11 @@ public partial class App : Application
         {
             _options = KioskOptions.Parse(Environment.GetCommandLineArgs()[1..]);
             _report = _options.SmokeReport is { } path ? new KioskSmokeReport(path) : null;
+            if (_report is not null)
+            {
+                Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "en-US";
+                Flowery.Localization.FloweryLocalization.SetCulture("en-US");
+            }
             ConfigureStateStorage();
             InitializeComponent();
         }

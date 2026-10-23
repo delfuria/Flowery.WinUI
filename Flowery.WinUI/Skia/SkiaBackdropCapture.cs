@@ -120,7 +120,7 @@ namespace Flowery.Skia
                     (float)(Math.Max(0, cornerRadius) * captured.ScaleX),
                     (float)(Math.Max(0, cornerRadius) * captured.ScaleY));
                 canvas.ClipRoundRect(clip, SKClipOperation.Intersect, true);
-                canvas.DrawBitmap(processed, captureRect.Left - targetX, captureRect.Top - targetY);
+                canvas.DrawBitmap(processed, captureRect.Left - targetX, captureRect.Top - targetY, SKSamplingOptions.Default);
                 using var image = surface.Snapshot();
                 using var encoded = image.Encode(SKEncodedImageFormat.Png, 100);
                 return encoded == null ? null : await BytesToImageSourceAsync(encoded.ToArray());

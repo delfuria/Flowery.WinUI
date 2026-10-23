@@ -31,7 +31,7 @@ namespace Flowery.Controls
                 nameof(Size),
                 typeof(DaisySize),
                 typeof(DaisyTable),
-                new PropertyMetadata(DaisySize.Medium, OnAppearanceChanged));
+                new PropertyMetadata(DaisySize.Auto, OnAppearanceChanged));
 
         public DaisySize Size
         {
@@ -96,6 +96,8 @@ namespace Flowery.Controls
             if (d is DaisyTable table)
             {
                 table.ApplyAll();
+                if (e.Property == SizeProperty)
+                    FlowerySizeManager.RefreshSizeScope(table);
             }
         }
 
@@ -121,18 +123,15 @@ namespace Flowery.Controls
             ApplyAll();
         }
 
-        protected override void OnGlobalSizeChanged(DaisySize size)
+        protected override void OnResolvedSizeChanged()
         {
-            base.OnGlobalSizeChanged(size);
-            SetControlSize(size);
+            base.OnResolvedSizeChanged();
+            ApplyAll();
         }
 
         protected override DaisySize? GetControlSize() => Size;
 
-        protected override void SetControlSize(DaisySize size)
-        {
-            Size = size;
-        }
+        internal override DaisySize? ChildSizeOverride => Size == DaisySize.Auto ? null : Size;
 
         protected override FrameworkElement? GetNeumorphicHostElement()
         {
@@ -204,7 +203,9 @@ namespace Flowery.Controls
             for (int i = 0; i < _rows.Count; i++)
             {
                 var row = _rows[i];
-                row.Size = Size;
+                if (row.Parent != _rowsPanel)
+                    continue;
+                row.RefreshResolvedSize();
 
                 if (Zebra && i % 2 == 1 && !row.IsActive)
                 {
@@ -253,7 +254,7 @@ namespace Flowery.Controls
                 nameof(Size),
                 typeof(DaisySize),
                 typeof(DaisyTableRow),
-                new PropertyMetadata(DaisySize.Medium, OnAppearanceChanged));
+                new PropertyMetadata(DaisySize.Auto, OnAppearanceChanged));
 
         public DaisySize Size
         {
@@ -341,18 +342,13 @@ namespace Flowery.Controls
             ApplyAll();
         }
 
-        protected override void OnGlobalSizeChanged(DaisySize size)
+        protected override void OnResolvedSizeChanged()
         {
-            base.OnGlobalSizeChanged(size);
-            SetControlSize(size);
+            base.OnResolvedSizeChanged();
+            ApplyAll();
         }
 
         protected override DaisySize? GetControlSize() => Size;
-
-        protected override void SetControlSize(DaisySize size)
-        {
-            Size = size;
-        }
 
         /// <summary>
         /// Rows never draw their own neumorphic surface; the table is the one raised surface (#12).
@@ -460,17 +456,17 @@ namespace Flowery.Controls
             if (resources != null)
                 DaisyTokenDefaults.EnsureDefaults(resources);
 
-            string sizeKey = DaisyResourceLookup.GetSizeKeyFull(Size);
+            string sizeKey = DaisyResourceLookup.GetSizeKeyFull(ResolvedSize);
 
             // Table rows use padding similar to menu items
             Thickness padding = resources == null
-                ? DaisyResourceLookup.GetDefaultMenuPadding(Size)
+                ? DaisyResourceLookup.GetDefaultMenuPadding(ResolvedSize)
                 : DaisyResourceLookup.GetThickness(resources, $"DaisyMenu{sizeKey}Padding",
-                    DaisyResourceLookup.GetDefaultMenuPadding(Size));
+                    DaisyResourceLookup.GetDefaultMenuPadding(ResolvedSize));
             double fontSize = resources == null
-                ? DaisyResourceLookup.GetDefaultFontSize(Size)
+                ? DaisyResourceLookup.GetDefaultFontSize(ResolvedSize)
                 : DaisyResourceLookup.GetDouble(resources, $"DaisySize{sizeKey}FontSize",
-                    DaisyResourceLookup.GetDefaultFontSize(Size));
+                    DaisyResourceLookup.GetDefaultFontSize(ResolvedSize));
 
             _rootBorder.Padding = padding;
             FontSize = fontSize;

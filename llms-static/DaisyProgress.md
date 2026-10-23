@@ -17,11 +17,13 @@ DaisyProgress is a styled progress bar with **8 color variants**, **4 size prese
 
 ## Size Options
 
+`Size` defaults to `Auto`. `ResolvedSize` supplies the effective tier without replacing explicit values, styles, or bindings.
+
 | Size | Height | CornerRadius |
 | --- | --- | --- |
 | ExtraSmall | 2 | 1 |
 | Small | 4 | 2 |
-| Medium (default) | 8 | 4 |
+| Medium | 8 | 4 |
 | Large | 16 | 8 |
 
 ## Shimmer Animation

@@ -21,9 +21,10 @@ Subscribes to `DaisyThemeManager.ThemeChanged` automatically. Derived controls c
 
 Integrates with `FlowerySizeManager` to support global sizing tiers (XS to XL).
 
-- Automatically applies the global size if no local `Size` is set.
+- Registers loaded controls and refreshes their rendering without writing authored `Size` values.
+- `Size` defaults to `Auto`; `ResolvedSize` reports the concrete tier. Explicit values, styles and bindings win.
 - Respects the `IgnoreGlobalSize` attached property.
-- Provides `OnGlobalSizeChanged()` for derived controls to react to layout changes.
+- Provides `OnResolvedSizeChanged()` for derived controls to update layout.
 
 ### 4. Visual Effects (Neumorphism)
 
@@ -128,11 +129,14 @@ To participate in the theme and sizing systems, implement these hooks:
 ```csharp
 protected override void OnThemeChanged(string themeName) => ApplyAll();
 
-protected override void OnGlobalSizeChanged(DaisySize size) => Size = size;
+protected override void OnResolvedSizeChanged()
+{
+    base.OnResolvedSizeChanged();
+    ApplyAll(); // Calculate dimensions from ResolvedSize.
+}
 
 protected override DaisySize? GetControlSize() => Size;
 
-protected override void SetControlSize(DaisySize size) => Size = size;
 ```
 
 ### Visual Tree Construction

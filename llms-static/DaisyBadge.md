@@ -26,13 +26,15 @@ Use it alone or inside buttons and lists.
 
 The default tokens below use device-independent pixels. Applications can override them.
 
+`Size` defaults to `Auto`. `ResolvedSize` supplies the effective tier without replacing explicit values, styles, or bindings.
+
 | Size | Minimum Height / Horizontal Padding / Font Size | Use Case |
 | --- | --- | --- |
-| ExtraSmall | 16 / 4 / 7 | Small counts inline with text |
-| Small | 16 / 6 / 9 | Compact labels for dense lists |
-| Medium (default) | 20 / 8 / 10 | General-purpose badges |
-| Large | 24 / 12 / 12 | Emphasized tags |
-| ExtraLarge | 28 / 16 / 14 | Large labels and counts |
+| ExtraSmall | 16 / 4 / 10 | Small counts inline with text |
+| Small | 20 / 6 / 12 | Compact labels for dense lists |
+| Medium | 24 / 8 / 14 | General-purpose badges |
+| Large | 28 / 12 / 18 | Emphasized tags |
+| ExtraLarge | 32 / 16 / 20 | Large labels and counts |
 
 ## Outline Mode
 
@@ -91,4 +93,4 @@ When you set **explicit sizing properties** (`Width`, `Height`, `MinWidth`, `Min
 - **Circular status dots**: Set `Width="12" Height="12" MinWidth="12" MinHeight="12" CornerRadius="6" Padding="0"` for a perfect 12px circle.
 - **Custom dimensions**: Override the size preset's default height when you need non-standard sizing.
 
-Without explicit `MinHeight`, the badge uses the Size preset's token value (e.g., 20px for Medium), which may be larger than your explicit `Height`.
+Without explicit `MinHeight`, the badge uses the resolved tier's token value (24px for Medium). This minimum can exceed an explicit `Height`.

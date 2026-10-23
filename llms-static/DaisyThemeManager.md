@@ -152,6 +152,18 @@ Both setters copy the names and replace the previous set; the getters return rea
 - Applying the same theme twice short-circuits.
 - On apply, keep the palette `ResourceDictionary` stable and update its brushes in-place. Removing/replacing the dictionary breaks `ThemeResource` bindings because controls keep references to the old brush instances.
 
+## Semantic Brushes
+
+The default palette path derives `DaisyBaseContentMutedBrush` at 70% alpha and
+`DaisyBaseContentSubtleBrush` / `DaisyBaseContentDisabledBrush` at 50% alpha from BaseContent.
+Seven semantic variants provide `DaisyButton{Variant}SoftBrush`, `SoftHoverBrush`, and `SoftBorderBrush`
+at 15%, 30%, and 45% alpha. The named Business theme uses 12% for Primary Soft.
+
+Each brush has a matching `...Color` token. An explicit color wins over an explicit brush.
+Solid brush overrides include their color alpha and brush opacity without mutating the supplied brush.
+Partial custom palettes use current base colors for missing sources, but do not inherit previous semantic overrides.
+Theme changes retain the published brush instances. Windows contrast themes replace these tokens with opaque system colors.
+
 ## Windows Contrast Themes
 
 Windows contrast themes are system accessibility settings. They are separate from the Flowery theme catalog.
