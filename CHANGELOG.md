@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Build: builds and publishes of Gallery, Kiosk and Photos fail when a required font or its license notice is missing from `Assets/Fonts`. The Kiosk smoke test and a Gallery runtime test also check that each font of the Gallery font family is present, has its license notice and renders its script.
+
+### Fixed
+
+- Photos ships the SIL Open Font License notice for its bundled Noto fonts. `Assets/Fonts/StaticFonts-OFL.txt` contains the copyright notices of the five static fonts and the full license, in the build, publish and installer output (#31).
+
 ## [1.8.1] - 2026-10-23
 
 ### Added
