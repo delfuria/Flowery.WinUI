@@ -612,6 +612,10 @@ public class Given_HighContrast
     {
         RuntimeTestHelpers.AttachToHost(element);
         await RuntimeTestHelpers.EnsureLoadedAsync(element).WaitAsync(TimeSpan.FromSeconds(5));
+        // A panel can report Loaded before its children; a child that is not loaded yet misses contrast changes.
+        if (element is Panel panel)
+            foreach (var child in panel.Children.OfType<FrameworkElement>())
+                await RuntimeTestHelpers.EnsureLoadedAsync(child).WaitAsync(TimeSpan.FromSeconds(5));
         await Flush(element, priority);
     }
 
