@@ -12,11 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `DaisyTourEditor`: live tour styling with editable connector handles, movable information cards, undo/redo, and draft profiles that preserve application bindings. The Gallery includes a designer with JSON import/export and replay.
 - `DaisyTourStyleProfile`: versioned styling profiles with explicit overrides and inheritance for tour, step, and annotation settings.
+- Build: builds and publishes of Gallery, Kiosk and Photos fail when a required font or its license notice is missing from `Assets/Fonts`. The Kiosk smoke test and a Gallery runtime test also check that each font of the Gallery font family is present, has its license notice and renders its script.
 
 ### Changed
 
 - Gallery: new logo, a six-petal teal flower with one warm petal, shared by the Flowery family (Flowery.Uno uses blue, Flowery.NET violet). The executable and installer icon (`app_icon.ico`, now with 16-256 px sizes), the README banner, the Gallery and Kiosk SVG icon/splash assets, the Home banner and the sidebar keycap image are redrawn.
 - Build: every project declares `x64` as its only platform, matching its fixed `win-x64` runtime identifier. Visual Studio no longer adds `Any CPU` configurations to `Flowery.WinUI.sln`, which built the same x64 binaries; on Windows on ARM the apps keep running under x64 emulation.
+
+### Fixed
+
+- Photos ships the SIL Open Font License notice for its bundled Noto fonts. `Assets/Fonts/StaticFonts-OFL.txt` contains the copyright notices of the five static fonts and the full license, in the build, publish and installer output (#31).
 
 ## [1.8.0] - 2026-10-22
 

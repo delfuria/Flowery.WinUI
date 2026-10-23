@@ -288,6 +288,7 @@ Historical changelog entries describe their original releases.
 ## License and credits
 
 [MIT](LICENSE).
+The bundled Noto fonts are licensed separately under the SIL Open Font License 1.1. See the [font notes](Flowery.WinUI.Gallery.Core/Assets/Fonts/README.md).
 The project retains its original implementation and Git history.
 [DaisyUI](https://daisyui.com/) supplies the design language.
 [WinUI 3](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/) and the Windows App SDK supply the native Windows framework.

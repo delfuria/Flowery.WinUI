@@ -36,6 +36,7 @@
     <Content Remove="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\NotoSansSC-Regular.otf" />
     <Content Remove="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\NotoSansJP-Regular.otf" />
     <Content Remove="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\NotoSansKR-Regular.otf" />
+    <Content Remove="..\Flowery.WinUI.Gallery.Core\Assets\Fonts\StaticFonts-OFL.txt" />
   </ItemGroup>
 
   <!-- Without MSIX tooling, publish omits the app's own PRI file, and the app cannot load its XAML. -->

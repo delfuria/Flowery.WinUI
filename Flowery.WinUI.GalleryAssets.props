@@ -7,4 +7,11 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
+
+  <!-- GalleryResources.xaml uses these fonts. Each font family has its own license notice. -->
+  <ItemGroup>
+    <RequiredFontAsset Include="NotoSans-Variable.ttf;NotoSansSC-Variable.ttf;NotoSansJP-Variable.ttf;NotoSansKR-Variable.ttf;NotoSansArabic-Variable.ttf;NotoSansHebrew-Variable.ttf" />
+    <RequiredFontAsset Include="NotoSans-OFL.txt;NotoSansSC-OFL.txt;NotoSansJP-OFL.txt;NotoSansKR-OFL.txt;NotoSansArabic-OFL.txt;NotoSansHebrew-OFL.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)Flowery.WinUI.FontAssets.targets" />
 </Project>

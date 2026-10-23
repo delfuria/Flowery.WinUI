@@ -1,0 +1,12 @@
+<Project>
+  <!-- The OFL requires each delivered font to keep its copyright and license notice. -->
+  <Target Name="VerifyFontAssetsInOutput" AfterTargets="Build" Condition="'@(RequiredFontAsset)' != ''">
+    <Error Condition="!Exists('$(OutDir)Assets\Fonts\%(RequiredFontAsset.Identity)')"
+           Text="Build output is missing the font asset Assets\Fonts\%(RequiredFontAsset.Identity)." />
+  </Target>
+
+  <Target Name="VerifyFontAssetsInPublish" AfterTargets="Publish" Condition="'@(RequiredFontAsset)' != ''">
+    <Error Condition="!Exists('$(PublishDir)Assets\Fonts\%(RequiredFontAsset.Identity)')"
+           Text="Publish output is missing the font asset Assets\Fonts\%(RequiredFontAsset.Identity)." />
+  </Target>
+</Project>
