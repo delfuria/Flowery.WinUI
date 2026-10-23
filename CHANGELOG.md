@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Gallery: new logo, a six-petal teal flower with one warm petal, shared by the Flowery family (Flowery.Uno uses blue, Flowery.NET violet). The executable and installer icon (`app_icon.ico`, now with 16-256 px sizes), the README banner, the Gallery and Kiosk SVG icon/splash assets, the Home banner and the sidebar keycap image are redrawn.
 ### Added
 
 - `DaisyTourEditor`: live tour styling with editable connector handles, movable information cards, undo/redo, and draft profiles that preserve application bindings. The Gallery includes a designer with JSON import/export and replay.
