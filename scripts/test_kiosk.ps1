@@ -3,7 +3,7 @@ param(
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
     [switch]$SkipBuild,
     [ValidateRange(0, 16)][int]$Monitor = 0,
-    [ValidateSet('Full', 'LowerHalf')][string]$WindowRegion = 'LowerHalf',
+    [ValidateSet('Full', 'UpperHalf', 'LowerHalf')][string]$WindowRegion = 'LowerHalf',
     [string]$SdkVersion,
     [string]$DotNetPath
 )
@@ -38,7 +38,7 @@ $startInfo.ArgumentList.Add($reportPath)
 $startInfo.Environment['FLOWERY_STATE_ROOT'] = Join-Path $resultsRoot 'state'
 if ($Monitor -gt 0) {
     $startInfo.Environment['FLOWERY_MONITOR_DEVICE'] = '\\.\DISPLAY{0}' -f $Monitor
-    $startInfo.Environment['FLOWERY_MONITOR_REGION'] = if ($WindowRegion -eq 'LowerHalf') { 'lower-half' } else { 'full' }
+    $startInfo.Environment['FLOWERY_MONITOR_REGION'] = switch ($WindowRegion) { 'UpperHalf' { 'upper-half' } 'LowerHalf' { 'lower-half' } default { 'full' } }
 }
 $process = [Diagnostics.Process]::Start($startInfo)
 Write-Host ('Kiosk process: {0}; report: {1}' -f $process.Id, $reportPath)

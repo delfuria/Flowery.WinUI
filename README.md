@@ -133,7 +133,7 @@ pwsh -NoProfile -File ./scripts/test_windows.ps1 -Configuration Debug
 ```
 
 After a successful build, use `-SkipBuild` to run the same prebuilt binaries.
-For a specific display, use `-Monitor 2 -WindowRegion LowerHalf` to place the test window in its lower half.
+Window placement is optional: for example, `-Monitor 2 -WindowRegion LowerHalf` places the test window in the lower half of display 2, and `-WindowRegion UpperHalf` in its upper half.
 The Windows runner passes an isolated results path to the Gallery.
 The Gallery stores test state beside that path, separate from personal Gallery settings.
 Results and logs are in `TestResults/` and `logs/`.

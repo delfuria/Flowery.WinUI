@@ -16,9 +16,10 @@ internal static class NativeWindowPlacement
 
         var region = Environment.GetEnvironmentVariable("FLOWERY_MONITOR_REGION") ?? "full";
         if (!string.Equals(region, "full", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(region, "upper-half", StringComparison.OrdinalIgnoreCase)
             && !string.Equals(region, "lower-half", StringComparison.OrdinalIgnoreCase))
         {
-            throw new ArgumentException("FLOWERY_MONITOR_REGION must be 'full' or 'lower-half'.");
+            throw new ArgumentException("FLOWERY_MONITOR_REGION must be 'full', 'upper-half' or 'lower-half'.");
         }
 
         DisplayArea? selected = null;
@@ -47,7 +48,11 @@ internal static class NativeWindowPlacement
 
         var workArea = selected.WorkArea;
         var desired = workArea;
-        if (string.Equals(region, "lower-half", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(region, "upper-half", StringComparison.OrdinalIgnoreCase))
+        {
+            desired.Height = workArea.Height / 2;
+        }
+        else if (string.Equals(region, "lower-half", StringComparison.OrdinalIgnoreCase))
         {
             desired.Y += workArea.Height / 2;
             desired.Height = workArea.Height - workArea.Height / 2;

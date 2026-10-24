@@ -29,8 +29,8 @@ An explicit SDK selection fails if that version is unavailable.
 
 $dotnetPath = Join-Path $env:LOCALAPPDATA 'Microsoft\dotnet\dotnet.exe'
 ./scripts/build_all.ps1 -Configuration Release -NoRun -SdkVersion 11.0.100-rc.2.26504.105 -DotNetPath $dotnetPath
-./scripts/test_windows.ps1 -Configuration Release -SkipBuild -Monitor 2 -WindowRegion LowerHalf
-./scripts/test_kiosk.ps1 -Configuration Release -SkipBuild -Monitor 2 -WindowRegion LowerHalf
+./scripts/test_windows.ps1 -Configuration Release -SkipBuild
+./scripts/test_kiosk.ps1 -Configuration Release -SkipBuild
 ```
 
 With `-SkipBuild`, the test scripts run the existing binaries from the matching configuration.
@@ -68,8 +68,8 @@ The run script waits for the Gallery to close unless you specify `-NoWait`.
 
 ```powershell
 ./scripts/build_kiosk.ps1 -Configuration Debug -NoRun
-./scripts/run-kiosk.ps1 -Configuration Debug -SkipBuild -Monitor 2 -WindowRegion LowerHalf
-./scripts/run-kiosk.ps1 -Configuration Debug -SkipBuild -Manual -Monitor 2 -WindowRegion LowerHalf
+./scripts/run-kiosk.ps1 -Configuration Debug -SkipBuild
+./scripts/run-kiosk.ps1 -Configuration Debug -SkipBuild -Manual
 ```
 
 The Kiosk has six slides: Authentication, Data Visualization, Communication, Enhanced Controls, Runtime Scaling, and Background Patterns.
@@ -80,13 +80,13 @@ Autoplay advances through the slides unless you specify `-Manual`, which passes 
 Right, Space, or N advances to the next slide.
 Left or P returns to the previous slide.
 The run script waits for the application unless you specify `-NoWait`.
-Its default placement is the lower half of monitor 2.
+Like the test scripts, it places the window on a display only when you pass `-Monitor` (see [Run native tests](#run-native-tests)).
 
 After the matching solution build, run the native Kiosk smoke checks:
 
 ```powershell
-./scripts/test_kiosk.ps1 -Configuration Debug -SkipBuild -Monitor 2 -WindowRegion LowerHalf
-./scripts/test_kiosk.ps1 -Configuration Release -SkipBuild -Monitor 2 -WindowRegion LowerHalf
+./scripts/test_kiosk.ps1 -Configuration Debug -SkipBuild
+./scripts/test_kiosk.ps1 -Configuration Release -SkipBuild
 ```
 
 The script launches the native Kiosk with an isolated state directory and an absolute XML report path.
@@ -109,13 +109,15 @@ If the matching solution build is complete, use `-SkipBuild`:
 ./scripts/test_windows.ps1 -Configuration Debug -SkipBuild
 ```
 
-For the lower half of display 2, use:
+Window placement is optional; without `-Monitor`, Windows places the window as usual.
+To use one display, pass its number with `-Monitor` and a region with `-WindowRegion`: `Full`, `UpperHalf` or `LowerHalf` (the default).
+`test_kiosk.ps1` and `run-kiosk.ps1` accept the same options. For example, for the lower half of display 2:
 
 ```powershell
 ./scripts/test_windows.ps1 -Configuration Debug -SkipBuild -Monitor 2 -WindowRegion LowerHalf
 ```
 
-The Gallery resolves the Windows display device before it shows the window.
+With `-Monitor`, the Gallery resolves the Windows display device before it shows the window.
 If the requested device is absent, the run fails without a fallback to another display.
 
 The Windows runner starts the Gallery and executes tests on its WinUI dispatcher.
@@ -129,7 +131,7 @@ The script writes test reports under `TestResults/` and process logs under `logs
 To run one group of native tests, pass a name substring with `-TestFilter`:
 
 ```powershell
-./scripts/test_windows.ps1 -Configuration Release -SkipBuild -TestFilter Given_HighContrast -Monitor 2 -WindowRegion LowerHalf
+./scripts/test_windows.ps1 -Configuration Release -SkipBuild -TestFilter Given_HighContrast
 ```
 
 The filter matches the full class and method name, without case sensitivity.

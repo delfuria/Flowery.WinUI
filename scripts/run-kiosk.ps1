@@ -4,8 +4,8 @@ param(
     [switch]$SkipBuild,
     [switch]$Manual,
     [switch]$NoWait,
-    [ValidateRange(0, 16)][int]$Monitor = 2,
-    [ValidateSet('Full', 'LowerHalf')][string]$WindowRegion = 'LowerHalf',
+    [ValidateRange(0, 16)][int]$Monitor = 0,
+    [ValidateSet('Full', 'UpperHalf', 'LowerHalf')][string]$WindowRegion = 'LowerHalf',
     [string]$SdkVersion,
     [string]$DotNetPath
 )
@@ -29,7 +29,7 @@ $startInfo.CreateNoWindow = $true
 if ($Manual) { $startInfo.ArgumentList.Add('--manual') }
 if ($Monitor -gt 0) {
     $startInfo.Environment['FLOWERY_MONITOR_DEVICE'] = '\\.\DISPLAY{0}' -f $Monitor
-    $startInfo.Environment['FLOWERY_MONITOR_REGION'] = if ($WindowRegion -eq 'LowerHalf') { 'lower-half' } else { 'full' }
+    $startInfo.Environment['FLOWERY_MONITOR_REGION'] = switch ($WindowRegion) { 'UpperHalf' { 'upper-half' } 'LowerHalf' { 'lower-half' } default { 'full' } }
 }
 $process = [Diagnostics.Process]::Start($startInfo)
 Write-Host ('Started Kiosk process {0}: {1}' -f $process.Id, $executable)

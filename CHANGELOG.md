@@ -33,15 +33,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stat: title and description use the Muted brush at full opacity. Input, PasswordBox and TextArea: hint, helper and optional text use Muted, placeholders Subtle. CalendarDatePicker: the date hint uses the placeholder brush, a selected date the full foreground.
 - ThemeController: the checkbox mode follows the checkbox size tokens.
 - Gallery: the sidebar takes the library widths 190/205/220/235/250 per tier, the four selectors stretch to the sidebar width, and a size change keeps the pane open or closed. Gallery and Photos ignore a saved global size that is not one of the five tiers.
+- Gallery: in the glass demos of the Cards page (Glass Card, DaisyGlass Simulated, Bitmap Capture and Full Width), every card or glass panel has a row of six stars. Two stay left of it and four run half behind its lower edge, so sharp and covered stars sit side by side; the cards are 100 apart to make room. In the Glass Card demo, the comparison caption sits above the cards.
 - Runtime tests run in English, whatever the saved Gallery language.
 - Build: the Skia backdrop capture and image processor call the `DrawBitmap` overloads with `SKSamplingOptions`; the obsolete overloads raised `CS0618`.
 - Build: the Kiosk smoke report has an inconclusive outcome. A scaling checkpoint whose only problem is a zoom panel overflowing the slide is inconclusive instead of failed; its text measures taller in local console sessions than over Remote Desktop. `test_kiosk.ps1` lists inconclusive checks as warnings and fails only on failed checks.
+- Build: `test_windows.ps1`, `test_kiosk.ps1` and `run-kiosk.ps1` accept `-WindowRegion UpperHalf`, and the Gallery, Kiosk and Photos accept `FLOWERY_MONITOR_REGION=upper-half`, to place the window in the upper half of the chosen monitor. The physical rendering probe checks that region too. Window placement stays optional: `run-kiosk.ps1` no longer defaults to monitor 2 and, like the test scripts, leaves the window to Windows unless `-Monitor` is given.
 - Release: every release asset has a signed build provenance attestation, verifiable with `gh attestation verify <file> --repo tobitege/Flowery.WinUI`, and `SHA256SUMS.txt` lists the SHA-256 checksum of each asset. The release notes explain both checks.
 
 ### Fixed
 
 - Button: an authored `MinWidth`, including one from a style or binding, is kept. Every size or shape update reset it to 0 (200 for `Wide`); the `Wide` shape still supplies 200 when nothing else sets a minimum width, and leaving `Wide` removes only that value.
 - IconText: a control that loads again shows its current `Text` and icon. Changes made while it was unloaded, for example in a hidden tab, kept the old content.
+- Glass: `DaisyGlass` applies its `Padding` to the content. It builds its visual tree in code and ignored `Padding`, so the content touched the edges and the glass was only as tall as its content.
 - Tooltip: a tooltip opened with `IsOpen` closes when the control unloads, for example on navigation, and opens again when it loads while `IsOpen` is still true. It stayed on screen without its owner, partly outside the window. `IsOpen` set before the first load now opens the tooltip too.
 - Tour: a step no longer closes when another scroll, such as a page control bringing itself into view, moves its target out of view. The tour scrolls the targets into view again and closes with `TargetUnavailable` only when the target stays hidden. This made the Gallery connector demo test fail intermittently.
 

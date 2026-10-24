@@ -55,6 +55,7 @@ namespace Flowery.Controls
             CornerRadius = new CornerRadius(16);
             IsTabStop = false;
             RegisterPropertyChangedCallback(CornerRadiusProperty, OnCornerRadiusChanged);
+            RegisterPropertyChangedCallback(PaddingProperty, OnPaddingChanged);
         }
 
         #region Dependency Properties
@@ -238,6 +239,14 @@ namespace Flowery.Controls
             glass.InvalidateBackdrop();
         }
 
+        // The visual tree is built in code without a template, so Padding has to reach the content here.
+        private static void OnPaddingChanged(DependencyObject sender, DependencyProperty property)
+        {
+            var glass = (DaisyGlass)sender;
+            if (glass._contentPresenter != null)
+                glass._contentPresenter.Margin = glass.Padding;
+        }
+
         protected override void OnLoaded()
         {
             base.OnLoaded();
@@ -335,6 +344,7 @@ namespace Flowery.Controls
             _contentPresenter = new ContentPresenter
             {
                 Content = _userContent,
+                Margin = Padding,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Stretch
             };

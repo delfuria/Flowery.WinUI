@@ -11,7 +11,7 @@ param(
     [string]$TestFilter,
     [ValidateRange(0, 16)]
     [int]$Monitor = 0,
-    [ValidateSet('Full', 'LowerHalf')]
+    [ValidateSet('Full', 'UpperHalf', 'LowerHalf')]
     [string]$WindowRegion = 'LowerHalf',
     [string]$SdkVersion,
     [string]$DotNetPath
@@ -61,7 +61,7 @@ try {
     [Environment]::SetEnvironmentVariable('FLOWERY_RUNTIME_TEST_FILTER', $TestFilter, 'Process')
     if ($Monitor -gt 0) {
         $monitorDevice = '\\.\DISPLAY{0}' -f $Monitor
-        $monitorRegion = if ($WindowRegion -eq 'LowerHalf') { 'lower-half' } else { 'full' }
+        $monitorRegion = switch ($WindowRegion) { 'UpperHalf' { 'upper-half' } 'LowerHalf' { 'lower-half' } default { 'full' } }
         [Environment]::SetEnvironmentVariable('FLOWERY_MONITOR_DEVICE', $monitorDevice, 'Process')
         [Environment]::SetEnvironmentVariable('FLOWERY_MONITOR_REGION', $monitorRegion, 'Process')
         Write-Host ('Window placement: {0}, {1}' -f $monitorDevice, $WindowRegion)
