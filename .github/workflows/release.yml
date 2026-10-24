@@ -197,6 +197,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
+      attestations: write
 
     steps:
       - uses: actions/checkout@v7
@@ -220,6 +221,19 @@ jobs:
           find ./release-artifacts -name "Flowery.WinUI.Photos-Setup-*-x64.exe" -exec cp {} ./final/ \;
           echo "=== Release artifacts ==="
           ls -la ./final/
+
+      - name: Create checksums
+        working-directory: ./final
+        run: |
+          sha256sum -- * > ../SHA256SUMS.txt
+          mv ../SHA256SUMS.txt ./SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      # Signed build provenance for every release asset, verifiable with `gh attestation verify`.
+      - name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: './final/*'
 
       - name: Extract changelog
         id: changelog
@@ -332,6 +346,19 @@ jobs:
 
           echo "| \`Flowery.WinUI.Photos-Setup-${{ needs.validate.outputs.version }}-x64.exe\` | Per-user installer (Windows x64) |" >> release_notes.md
           echo "| \`Flowery.WinUI.Photos-Windows-x64.zip\` | Portable app (Windows x64); run \`Flowery.WinUI.Photos.exe\` |" >> release_notes.md
+
+          cat >> release_notes.md << 'VERIFY'
+
+          ## 🔐 Verify downloads
+
+          This workflow built every asset above and attested its build provenance. To check that a file comes from this repository and release build:
+
+          ```
+          gh attestation verify <file> --repo ${{ github.repository }}
+          ```
+
+          `SHA256SUMS.txt` lists the SHA-256 checksum of every asset; check all of them with `sha256sum -c SHA256SUMS.txt`, or one file in PowerShell with `Get-FileHash <file>`. The packages on nuget.org carry nuget.org's repository signature, so their checksums differ from the release assets.
+          VERIFY
 
           echo "=== Release Notes ==="
           cat release_notes.md
