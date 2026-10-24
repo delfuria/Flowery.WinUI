@@ -373,14 +373,14 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
                 await DaisyTourLayout.SettleAsync(_surface, token);
                 if (ReferenceEquals(_session, session) && !session.Busy && CurrentStep is { } step)
                     await RevealHiddenTargetAsync(step, token);
-                if (ReferenceEquals(_session, session) && !session.Busy) UpdateGeometry(session);
+                if (ReferenceEquals(_session, session) && !session.Busy) UpdateGeometry(session, revealHidden: false);
             }
             catch (OperationCanceledException) { }
             finally { _updateQueued = false; }
         })) _updateQueued = false;
     }
 
-    private bool UpdateGeometry(Session session)
+    private bool UpdateGeometry(Session session, bool revealHidden = true)
     {
         if (CurrentStep is not { } step || step.Target is not { } target ||
             !DaisyTourLayout.TryBounds(target, _surface, out var primary))
@@ -392,6 +392,13 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         var visible = DaisyTourLayout.VisibleBounds(target, _surface, primary);
         if (visible.IsEmpty || visible.Width <= 0 || visible.Height <= 0)
         {
+            // Direct updates, such as a card size change, can run while another scroll hides the target.
+            // The queued update reveals the targets once and closes the tour only if the target stays hidden.
+            if (revealHidden && !session.Busy)
+            {
+                QueueGeometry();
+                return false;
+            }
             Close(session, DaisyTourCloseReason.TargetUnavailable, target,
                 error: new InvalidOperationException($"The tour target is outside the visible area. Bounds={primary}; viewport={_surface.ActualWidth}x{_surface.ActualHeight}."));
             return false;
