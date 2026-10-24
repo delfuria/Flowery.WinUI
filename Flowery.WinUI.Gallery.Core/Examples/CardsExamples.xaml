@@ -363,44 +363,46 @@
                         <TextBlock Text="SHARP" FontSize="72" FontWeight="ExtraBold" Foreground="{ThemeResource GalleryMediaMutedTextBrush}"
                                    HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="20"/>
                         <TextBlock Text="●●●" FontSize="48" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity50}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20"/>
+                                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,8"/>
 
-                        <!-- The first two cards share the same centered comparison backdrop. -->
-                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,40,0,60">
-                            <StackPanel Width="520" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,16,0,0">
-                                <TextBlock Text="Compare: Simulated vs Real Blur" FontSize="16" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity80}" TextAlignment="Center"/>
-                                <TextBlock Text="★ ★ ★ ★ ★" FontSize="28" Foreground="{ThemeResource GalleryMediaAccentTextBrush}" Margin="0,12,0,0" TextAlignment="Center"/>
-                            </StackPanel>
-                            <!-- Glass cards overlaid on background -->
-                            <daisy:WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                             HorizontalSpacing="20" VerticalSpacing="20">
-                            <daisy:DaisyCard IsGlass="True" Width="250" Foreground="{ThemeResource GalleryGlassTextBrush}">
-                                <StackPanel Spacing="8">
-                                    <TextBlock Text="Simulated Glass" FontWeight="Bold" FontSize="18"/>
-                                    <TextBlock Text="No real blur - text behind stays sharp." TextWrapping="Wrap"/>
-                                    <daisy:DaisyButton Content="Action" Size="Small" HorizontalAlignment="Right"/>
-                                </StackPanel>
-                            </daisy:DaisyCard>
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,24,0,88" Spacing="12">
+                            <TextBlock Text="Compare: Simulated vs Real Blur" FontSize="16" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity80}" HorizontalAlignment="Center"/>
+                            <Grid>
+                                <!-- The stars straddle the lower edge of the first two cards and start before the first one,
+                                     so the same stars show sharp, behind simulated glass and behind real blur. -->
+                                <TextBlock Text="★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★" FontSize="28" Foreground="{ThemeResource GalleryMediaAccentTextBrush}"
+                                           HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-40,0,0,-18"/>
+                                <!-- Glass cards overlaid on background -->
+                                <daisy:WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                 HorizontalSpacing="20" VerticalSpacing="20">
+                                <daisy:DaisyCard IsGlass="True" Width="250" Foreground="{ThemeResource GalleryGlassTextBrush}">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Text="Simulated Glass" FontWeight="Bold" FontSize="18"/>
+                                        <TextBlock Text="No real blur - text behind stays sharp." TextWrapping="Wrap"/>
+                                        <daisy:DaisyButton Content="Action" Size="Small" HorizontalAlignment="Right"/>
+                                    </StackPanel>
+                                </daisy:DaisyCard>
 
-                            <daisy:DaisyCard IsGlass="True" EnableBackdropBlur="True" BlurMode="SkiaSharp"
-                                             GlassBlur="30" GlassSaturation="0.8" Width="250" Foreground="{ThemeResource GalleryGlassTextBrush}">
-                                <StackPanel Spacing="8">
-                                    <TextBlock Text="Skia Blur Card" FontWeight="Bold" FontSize="18"/>
-                                    <TextBlock Text="Real blur - text behind is blurred!" TextWrapping="Wrap"/>
-                                    <daisy:DaisyButton Content="Action" Size="Small" HorizontalAlignment="Right"/>
-                                </StackPanel>
-                            </daisy:DaisyCard>
+                                <daisy:DaisyCard IsGlass="True" EnableBackdropBlur="True" BlurMode="SkiaSharp"
+                                                 GlassBlur="30" GlassSaturation="0.8" Width="250" Foreground="{ThemeResource GalleryGlassTextBrush}">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Text="Skia Blur Card" FontWeight="Bold" FontSize="18"/>
+                                        <TextBlock Text="Real blur - text behind is blurred!" TextWrapping="Wrap"/>
+                                        <daisy:DaisyButton Content="Action" Size="Small" HorizontalAlignment="Right"/>
+                                    </StackPanel>
+                                </daisy:DaisyCard>
 
-                            <daisy:DaisyCard IsGlass="True" GlassTint="#000000" GlassOpacity="0.4"
-                                             EnableBackdropBlur="True" BlurMode="BitmapCapture"
-                                             GlassBlur="40" Width="250">
-                                <StackPanel Spacing="8">
-                                    <TextBlock Text="Dark Blur Glass" FontWeight="Bold" FontSize="18" Foreground="{ThemeResource GalleryMediaTextBrush}"/>
-                                    <TextBlock Text="Dark tint + blur = frosted dark glass." TextWrapping="Wrap" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity90}"/>
-                                </StackPanel>
-                            </daisy:DaisyCard>
-                            </daisy:WrapPanel>
-                        </Grid>
+                                <daisy:DaisyCard IsGlass="True" GlassTint="#000000" GlassOpacity="0.4"
+                                                 EnableBackdropBlur="True" BlurMode="BitmapCapture"
+                                                 GlassBlur="40" Width="250">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Text="Dark Blur Glass" FontWeight="Bold" FontSize="18" Foreground="{ThemeResource GalleryMediaTextBrush}"/>
+                                        <TextBlock Text="Dark tint + blur = frosted dark glass." TextWrapping="Wrap" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity90}"/>
+                                    </StackPanel>
+                                </daisy:DaisyCard>
+                                </daisy:WrapPanel>
+                            </Grid>
+                        </StackPanel>
                     </Grid>
                 </Border>
             </StackPanel>
