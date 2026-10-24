@@ -427,35 +427,41 @@
                         <StackPanel Margin="20">
                             <TextBlock Text="BACKGROUND TEXT" FontSize="32" FontWeight="ExtraBold" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity90}"/>
                             <TextBlock Text="This text is NOT blurred - simulated mode only uses overlays" FontSize="16" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"/>
-                            <TextBlock Text="★ ★ ★ ★ ★" FontSize="28" Foreground="{ThemeResource GalleryMediaAccentTextBrush}" Margin="0,12,0,0"/>
                             <TextBlock Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                                       FontSize="14" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity70}" Margin="0,8,0,0" TextWrapping="Wrap" MaxWidth="400"/>
+                                       FontSize="14" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity70}" Margin="0,58,0,0" TextWrapping="Wrap" MaxWidth="400"/>
                         </StackPanel>
                         <TextBlock Text="SHARP" FontSize="72" FontWeight="ExtraBold" Foreground="{ThemeResource GalleryMediaMutedTextBrush}"
                                    HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="20"/>
                         <TextBlock Text="●●●" FontSize="48" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity50}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,60"/>
+                                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,16"/>
 
-                        <!-- Glass panels on top -->
-                        <daisy:WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalSpacing="20" VerticalSpacing="20">
-                            <daisy:DaisyGlass Padding="24" CornerRadius="16" Width="220">
-                                <StackPanel Spacing="8">
-                                    <TextBlock Text="Simulated" FontWeight="Bold" FontSize="18"
-                                               Foreground="{ThemeResource DaisyBaseContentBrush}"/>
-                                    <TextBlock Text="No real blur effect."
-                                               TextWrapping="Wrap"
-                                               Foreground="{ThemeResource DaisyBaseContentBrush}"/>
-                                </StackPanel>
-                            </daisy:DaisyGlass>
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <!-- The stars straddle the lower edge of the glass panels and extend past both sides,
+                                 so sharp and covered halves of the same stars show what the overlay does. -->
+                            <TextBlock Text="★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★" FontSize="28" Foreground="{ThemeResource GalleryMediaAccentTextBrush}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="-80,0,-80,-18"/>
 
-                            <daisy:DaisyGlass Padding="24" CornerRadius="16" Width="220"
-                                              GlassTint="#1a1a2e" GlassTintOpacity="0.7">
-                                <StackPanel Spacing="8">
-                                    <TextBlock Text="Dark Tint" FontWeight="Bold" FontSize="18" Foreground="{ThemeResource GalleryMediaTextBrush}"/>
-                                    <TextBlock Text="Just tinted overlay." TextWrapping="Wrap" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity85}"/>
-                                </StackPanel>
-                            </daisy:DaisyGlass>
-                        </daisy:WrapPanel>
+                            <!-- Glass panels on top -->
+                            <daisy:WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalSpacing="20" VerticalSpacing="20">
+                                <daisy:DaisyGlass Padding="24" CornerRadius="16" Width="220">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Text="Simulated" FontWeight="Bold" FontSize="18"
+                                                   Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                                        <TextBlock Text="No real blur effect."
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{ThemeResource DaisyBaseContentBrush}"/>
+                                    </StackPanel>
+                                </daisy:DaisyGlass>
+
+                                <daisy:DaisyGlass Padding="24" CornerRadius="16" Width="220"
+                                                  GlassTint="#1a1a2e" GlassTintOpacity="0.7">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Text="Dark Tint" FontWeight="Bold" FontSize="18" Foreground="{ThemeResource GalleryMediaTextBrush}"/>
+                                        <TextBlock Text="Just tinted overlay." TextWrapping="Wrap" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity85}"/>
+                                    </StackPanel>
+                                </daisy:DaisyGlass>
+                            </daisy:WrapPanel>
+                        </Grid>
                     </Grid>
                 </Border>
             </StackPanel>

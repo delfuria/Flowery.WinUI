@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stat: title and description use the Muted brush at full opacity. Input, PasswordBox and TextArea: hint, helper and optional text use Muted, placeholders Subtle. CalendarDatePicker: the date hint uses the placeholder brush, a selected date the full foreground.
 - ThemeController: the checkbox mode follows the checkbox size tokens.
 - Gallery: the sidebar takes the library widths 190/205/220/235/250 per tier, the four selectors stretch to the sidebar width, and a size change keeps the pane open or closed. Gallery and Photos ignore a saved global size that is not one of the five tiers.
+- Gallery: in the DaisyGlass (Simulated Glass) demo, a row of stars runs half behind both glass panels and past their sides, so the overlay's effect on the same stars is visible.
 - Runtime tests run in English, whatever the saved Gallery language.
 - Build: the Skia backdrop capture and image processor call the `DrawBitmap` overloads with `SKSamplingOptions`; the obsolete overloads raised `CS0618`.
 - Build: the Kiosk smoke report has an inconclusive outcome. A scaling checkpoint whose only problem is a zoom panel overflowing the slide is inconclusive instead of failed; its text measures taller in local console sessions than over Remote Desktop. `test_kiosk.ps1` lists inconclusive checks as warnings and fails only on failed checks.
