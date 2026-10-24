@@ -4,8 +4,6 @@
     <RootNamespace>Flowery.WinUI.Gallery.Core</RootNamespace>
     <UseWinUI>true</UseWinUI>
     <OutputType>Library</OutputType>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <PlatformTarget>x64</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateLibraryLayout>true</GenerateLibraryLayout>
     <IsPackable>false</IsPackable>
