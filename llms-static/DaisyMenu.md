@@ -10,7 +10,7 @@ DaisyMenu is a styled menu control for navigation menus. It supports vertical or
 | Option | Description |
 | --- | --- |
 | `Orientation` | `Vertical` (default) or `Horizontal`. Horizontal enables horizontal scrolling if needed. |
-| `Size` | ExtraSmall, Small, Medium (default), Large, ExtraLarge adjust padding/font on items. |
+| `Size` | Auto (default) resolves the global tier; ExtraSmall, Small, Medium, Large, ExtraLarge set an explicit tier. `ResolvedSize` reports the effective tier. |
 
 ## Active Styling
 
@@ -24,9 +24,14 @@ DaisyMenu is a styled menu control for navigation menus. It supports vertical or
 | Property | Description |
 | --- | --- |
 | `Click` | DaisyMenuItem raises a click event and supports keyboard activation. |
+| `IsTitle` | Non-interactive heading with bold primary text and a bottom divider. It does not receive keyboard focus or selection highlighting. |
 | `Command` / `CommandParameter` | DaisyMenuItem inherits the base command pattern; use these for MVVM. |
 
 ### Hover Styling
+
+Disabled item text uses `DaisyBaseContentDisabledBrush` at element opacity 1.
+The `DaisyMenuItemForeground` resource remains an explicit foreground override.
+Windows contrast themes retain opaque system colors.
 
 To override hover background on menu items, define:
 
@@ -74,6 +79,6 @@ DaisyMenuItemHoverBackground
 - Use size presets to match surrounding controls; Small/ExtraSmall pair well with toolbars.
 - Set `ActiveForeground/ActiveBackground` to align with your brand colors if Neutral isn't desired.
 - For horizontal menus, ensure there's enough padding/margin in the parent to avoid crowding.
-- Use `Classes="menu-title"` for non-interactive section headers inside the menu.
+- Use `IsTitle="True"` for non-interactive section headers inside the menu.
 - Nest DaisyMenu or use `Expander` for collapsible submenus; adjust margins for indentation as needed.
 - Use `IsChecked` for toggle-like items so all menu rows keep the same layout.

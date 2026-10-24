@@ -3,7 +3,7 @@
 
 # Overview
 
-DaisyInput is a styled TextBox with **10 variants** and **4 size presets**. It supports bordered, ghost, filled, and semantic colored borders, plus labels, helper text, icons, and inner content slots. Defaults to a padded, rounded text field that matches DaisyUI forms.
+DaisyInput is a styled TextBox with **10 variants** and **5 size presets**. It supports bordered, ghost, filled, and semantic colored borders, plus labels, helper text, icons, and inner content slots. Defaults to a padded, rounded text field that matches DaisyUI forms.
 
 ## Variant Options
 
@@ -21,10 +21,14 @@ DaisyInput uses **fixed heights** for each size to match DaisyUI's design.
 
 | Size | Height | Font Size | Floating Height | Use Case |
 | --- | --- | --- | --- | --- |
-| ExtraSmall | 24 | 10 | 40 | Dense tables/toolbars. |
-| Small | 32 | 12 | 48 | Compact forms. |
-| Medium (default) | 48 | 14 | 56 | General usage. |
-| Large | 64 | 18 | 64 | Prominent inputs/hero sections. |
+| ExtraSmall | 24 | 10 | 36 | Dense tables/toolbars. |
+| Small | 28 | 12 | 40 | Compact forms. |
+| Medium | 32 | 14 | 44 | General usage. |
+| Large | 36 | 18 | 48 | Prominent inputs. |
+| ExtraLarge | 40 | 20 | 50 | Large forms. |
+
+`Size` defaults to `Auto`. `ResolvedSize` reports the effective tier from the global sizing policy.
+Explicit local values, styles, and bindings retain their tier, including explicit Medium.
 
 > [!TIP]
 > The heights for `LabelPosition="Floating"` are slightly larger to provide vertical headroom for the label. See `DaisyInputFloating*Height` tokens in Design Tokens documentation.
@@ -41,7 +45,7 @@ DaisyInput wraps an inner `TextBox` and forwards common TextBox properties (`Tex
 | Property | Type | Default | Description |
 | --- | --- | --- | --- |
 | `Variant` | `DaisyInputVariant` | `Bordered` | Visual style variant (see table above). |
-| `Size` | `DaisySize` | `Medium` | Size preset (see table above). |
+| `Size` | `DaisySize` | `Auto` | Authored size; `ResolvedSize` reports the effective tier. |
 | `Label` | `string?` | `null` | Label text displayed above the input. |
 | `LabelPosition` | `DaisyLabelPosition` | `Top` | Label positioning mode (None, Top, Floating, Inset). **Floating** mode features a high-fidelity "identity clone" animation. |
 | `IsRequired` | `bool` | `false` | Shows asterisk (*) indicator next to label. |
@@ -75,10 +79,18 @@ Setting `LabelPosition="Floating"` enables a high-fidelity interaction inspired 
 
 Floating labels require additional vertical headroom above the input border to prevent clipping. This is handled automatically by the control's template using dedicated design tokens:
 
-- `DaisyInputFloatingMediumHeight` (Default: 56px)
-- `DaisyInputFloatingSmallHeight` (Default: 48px)
-- `DaisyInputFloatingExtraSmallHeight` (Default: 40px)
-- `DaisyInputFloatingLargeHeight` (Default: 64px)
+- `DaisyInputFloatingMediumHeight` (Default: 44px)
+- `DaisyInputFloatingSmallHeight` (Default: 40px)
+- `DaisyInputFloatingExtraSmallHeight` (Default: 36px)
+- `DaisyInputFloatingLargeHeight` (Default: 48px)
+- `DaisyInputFloatingExtraLargeHeight` (Default: 50px)
+
+## Semantic Brushes
+
+Optional labels, hints, and helper text use `DaisyBaseContentMutedBrush` with element opacity 1.
+Placeholders use `DaisyBaseContentSubtleBrush`; `DaisyInputPlaceholderForeground` remains an explicit resource override.
+Native disabled text uses `DaisyBaseContentDisabledBrush`. Editing, focus, and selection colors keep their existing contracts.
+Windows contrast themes retain opaque system colors and suppress decorative overrides.
 
 ## Quick Examples
 

@@ -75,7 +75,8 @@ namespace Flowery.WinUI.Photos.Services
         public static DaisySize? LoadGlobalSize()
         {
             var line = LoadSingle(SizeKey);
-            return line != null && Enum.TryParse(line, ignoreCase: true, out DaisySize size) ? size : null;
+            return line != null && Enum.TryParse(line, ignoreCase: true, out DaisySize size)
+                && size is >= DaisySize.ExtraSmall and <= DaisySize.ExtraLarge ? size : null;
         }
 
         public static void SaveGlobalSize(DaisySize size) => SaveSingle(SizeKey, size.ToString());

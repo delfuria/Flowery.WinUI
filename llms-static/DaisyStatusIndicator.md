@@ -13,7 +13,7 @@ DaisyStatusIndicator shows a status dot with **27 animation variants**. It suppo
 | --- | --- |
 | `Variant` | Animation style: Default (static), Ping, Bounce, Pulse, Blink, Ripple, Heartbeat, Spin, Wave, Glow, Morph, Orbit, Radar, Sonar, Beacon, Shake, Wobble, Pop, Flicker, Breathe, Ring, Flash, Swing, Jiggle, Throb, Twinkle, Splash. |
 | `Color` | Default, Neutral, Primary, Secondary, Accent, Info, Success, Warning, Error (sets dot fill). Uses shared `DaisyColor` enum. |
-| `Size` | ExtraSmall, Small, Medium (default), Large, ExtraLarge (adjusts diameter). Uses shared `DaisySize` enum. |
+| `Size` | Defaults to `Auto`. `ResolvedSize` supplies the effective diameter tier. Explicit values, styles, and bindings take precedence over global defaults. |
 | `AccessibleText` | Custom text for screen readers. When null, auto-derived from Color (see below). |
 
 ## Color Selection Guide

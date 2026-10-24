@@ -19,7 +19,7 @@ Key features:
 | Property | Type | Default | Description |
 | --- | --- | --- | --- |
 | **Variant** | `DaisySlideToConfirmVariant` | `Default` | Color variant (Primary, Success, Error, etc.). |
-| **Size** | `DaisySize` | `Medium` | Control size (ExtraSmall to ExtraLarge). |
+| **Size** | `DaisySize` | `Auto` | `ResolvedSize` selects the preset. Explicit values, styles, and bindings take precedence over global defaults. |
 | **Text** | `string` | `"SLIDE TO CONFIRM"` | Label text displayed on the track. |
 | **ConfirmingText** | `string` | `"CONFIRMING..."` | Text displayed after the slide is completed. |
 | **SlideColor** | `Color` | (from Variant) | Color the track transitions to as the user slides. |
@@ -150,7 +150,7 @@ Override tokens in your App.xaml or ResourceDictionary:
 - **Use Variants for Colors**: Prefer `Variant="Error"` over hardcoded `SlideColor="#DC2626"` for theme-aware colors.
 - **Semantic Variants**: Use `Error` for destructive actions, `Success` for confirmations, `Info` for unlocks.
 - **Size Consistency**: The control responds to `FlowerySizeManager` global size by default.
-- **Ignore Global Size in Demos**: Use `FlowerySizeManager.IgnoreGlobalSize="True"` on parent to show explicit sizes.
+- **Explicit Sizes**: A concrete `Size` already takes precedence over global sizing. `IgnoreGlobalSize` selects the fallback for automatic controls.
 - **Reset Delay**: Adjust `ResetDelay` based on how long the confirmed action takes to complete.
 - **Custom Icons**: Use `IconData` with StaticResource for custom icons (lock, trash, check, etc.).
 

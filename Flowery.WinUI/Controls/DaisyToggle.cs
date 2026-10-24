@@ -44,10 +44,8 @@ namespace Flowery.Controls
             _lifecycle = new DaisyControlLifecycle(
                 this,
                 () => ApplyAll(animateKnob: false),
-                () => Size,
-                s => Size = s,
-                handleLifecycleEvents: false,
-                subscribeSizeChanges: false);
+                handleLifecycleEvents: false);
+            FlowerySizeManager.Register(this, () => ApplyAll(animateKnob: false), () => ResolvedSize);
 
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
@@ -172,7 +170,7 @@ namespace Flowery.Controls
                 nameof(Size),
                 typeof(DaisySize),
                 typeof(DaisyToggle),
-                new PropertyMetadata(DaisySize.Medium, OnAppearanceChanged));
+                new PropertyMetadata(DaisySize.Auto, OnAppearanceChanged));
 
         /// <summary>
         /// The size of the toggle.
@@ -182,6 +180,8 @@ namespace Flowery.Controls
             get => (DaisySize)GetValue(SizeProperty);
             set => SetValue(SizeProperty, value);
         }
+
+        public DaisySize ResolvedSize => FlowerySizeManager.ResolveSize(this, Size);
         #endregion
 
         #region TogglePadding
@@ -308,19 +308,20 @@ namespace Flowery.Controls
             if (_switchArea == null || _knob == null)
                 return;
 
-            _switchArea.Width = DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggle", Size, "Width", fallback: 40d);
-            _switchArea.Height = DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggle", Size, "Height", fallback: 20d);
+            var size = ResolvedSize;
+            _switchArea.Width = DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggle", size, "Width", fallback: 40d);
+            _switchArea.Height = DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggle", size, "Height", fallback: 20d);
             _switchArea.CornerRadius = new CornerRadius(_switchArea.Height / 2);
 
-            _knob.Width = DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggleKnob", Size, "Size", fallback: 12d);
+            _knob.Width = DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggleKnob", size, "Size", fallback: 12d);
             _knob.Height = _knob.Width;
             // No margin needed - vertical centering via VerticalAlignment="Center" in XAML,
             // horizontal positioning via TranslateTransform.X
 
             if (!_hasFontSizeOverride)
             {
-                SetFontSize(DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggle", Size, "FontSize",
-                    DaisyResourceLookup.GetDefaultFontSize(Size)));
+                SetFontSize(DaisyResourceLookup.GetSizeDouble(resources, "DaisyToggle", size, "FontSize",
+                    DaisyResourceLookup.GetDefaultFontSize(size)));
             }
         }
 

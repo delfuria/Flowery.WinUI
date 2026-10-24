@@ -120,7 +120,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
     internal bool IsTransitioning => _session?.Busy == true;
     internal event EventHandler? GeometryUpdated;
 
-    public static readonly DependencyProperty SizeProperty = Register(nameof(Size), typeof(DaisySize), DaisySize.Medium);
+    public static readonly DependencyProperty SizeProperty = Register(nameof(Size), typeof(DaisySize), DaisySize.Auto);
     public DaisySize Size { get => (DaisySize)GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
     public static readonly DependencyProperty HighlightPaddingProperty = Register(nameof(HighlightPadding), typeof(double), 6d);
     public double HighlightPadding { get => (double)GetValue(HighlightPaddingProperty); set => SetValue(HighlightPaddingProperty, value); }
@@ -154,9 +154,8 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         tour.RefreshPresentation();
     }
 
-    protected override DaisySize? GetControlSize() => Size;
-    protected override void SetControlSize(DaisySize size) => Size = size;
-    protected override void OnGlobalSizeChanged(DaisySize size) => Size = size;
+    protected override DaisySize? GetControlSize() => TourSetting(SizeProperty, Size, DaisySize.Auto);
+    protected override void OnResolvedSizeChanged() { base.OnResolvedSizeChanged(); RefreshPresentation(); }
     protected override void OnThemeChanged(string themeName) => RefreshPresentation();
     protected override void OnUnloaded() { Cancel(); base.OnUnloaded(); }
 
@@ -256,10 +255,7 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             if (step.PrepareAsync is { } prepare)
                 await prepare(step, token).WaitAsync(token);
             token.ThrowIfCancellationRequested();
-            var targets = GetTargets(step);
-            // The highlight frame around each target is revealed together with the target.
-            await DaisyTourLayout.PrepareTargetsAsync(targets, _surface, token,
-                Math.Max(0, double.IsFinite(EffectiveHighlightPadding) ? EffectiveHighlightPadding : 0) + _outline.StrokeThickness);
+            await RevealTargetsAsync(step, token);
             if (!ReferenceEquals(_session, session)) return;
             _previousStepCard = CardBounds;
             CurrentIndex = index;
@@ -269,6 +265,8 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             ObserveCurrentStep(session);
             _card.Visibility = Visibility.Visible;
             RefreshPresentation();
+            await RevealHiddenTargetAsync(step, token);
+            if (!ReferenceEquals(_session, session)) return;
             if (!UpdateGeometry(session)) return;
             await DaisyTourLayout.SettleAsync(_surface, token);
             if (!ReferenceEquals(_session, session)) return;
@@ -294,6 +292,20 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
             session.Busy = false;
             if (ReferenceEquals(_session, session)) _editor?.SetTransitioning(false);
         }
+    }
+
+    // The highlight frame around each target is revealed together with the target.
+    private Task RevealTargetsAsync(DaisyTourStep step, CancellationToken token) =>
+        DaisyTourLayout.PrepareTargetsAsync(GetTargets(step), _surface, token,
+            Math.Max(0, double.IsFinite(EffectiveHighlightPadding) ? EffectiveHighlightPadding : 0) + _outline.StrokeThickness);
+
+    // Another scroll can move the step target out of view after its targets were revealed, such as a page
+    // control bringing itself into view. The targets are revealed once more; a target that stays hidden closes the tour.
+    private async Task RevealHiddenTargetAsync(DaisyTourStep step, CancellationToken token)
+    {
+        if (step.Target is { } target && DaisyTourLayout.TryBounds(target, _surface, out var bounds) &&
+            DaisyTourLayout.VisibleBounds(target, _surface, bounds) is not { Width: > 0, Height: > 0 })
+            await RevealTargetsAsync(step, token);
     }
 
     private static List<FrameworkElement> GetTargets(DaisyTourStep step)
@@ -355,9 +367,12 @@ public sealed partial class DaisyTour : DaisyBaseContentControl, INotifyProperty
         if (!DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Normal, async () =>
         {
             if (!ReferenceEquals(_session, session) || session.Busy) { _updateQueued = false; return; }
+            var token = session.Cancellation.Token;
             try
             {
-                await DaisyTourLayout.SettleAsync(_surface, session.Cancellation.Token);
+                await DaisyTourLayout.SettleAsync(_surface, token);
+                if (ReferenceEquals(_session, session) && !session.Busy && CurrentStep is { } step)
+                    await RevealHiddenTargetAsync(step, token);
                 if (ReferenceEquals(_session, session) && !session.Busy) UpdateGeometry(session);
             }
             catch (OperationCanceledException) { }

@@ -120,11 +120,17 @@ internal static class DaisySystemAppearance
         foreach (var prefix in new[] { "DaisyBaseContent", "DaisyNeutralContent", "DaisyPrimaryForeground",
             "DaisySecondaryForeground", "DaisyAccentForeground", "DaisyNeutralForeground", "DaisyButtonPrimaryForeground" })
             SetColor(palette, prefix, foreground);
+        SetColor(palette, "DaisyBaseContentMuted", foreground);
+        SetColor(palette, "DaisyBaseContentSubtle", foreground);
+        SetColor(palette, "DaisyBaseContentDisabled", disabledForeground);
         foreach (var name in new[] { "Primary", "Secondary", "Accent", "Info", "Success", "Warning", "Error" })
         {
             SetColor(palette, "Daisy" + name, selectedBackground);
             SetColor(palette, "Daisy" + name + "Focus", selectedBackground);
             SetColor(palette, "Daisy" + name + "Content", selectedForeground);
+            SetColor(palette, "DaisyButton" + name + "Soft", background);
+            SetColor(palette, "DaisyButton" + name + "SoftHover", selectedBackground);
+            SetColor(palette, "DaisyButton" + name + "SoftBorder", foreground);
         }
         SetColor(palette, "DaisyBorder", foreground);
         SetColor(palette, "DaisyFocus", selectedBackground);

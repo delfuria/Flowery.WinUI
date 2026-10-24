@@ -19,6 +19,7 @@ This control uses `DaisyThemeManager` internally, which manages the application'
 | Property | Description |
 | --- | --- |
 | `Mode` | Visual mode: Toggle, Checkbox, Swap, ToggleWithText, ToggleWithIcons. |
+| `Size` / `ResolvedSize` | Auto by default; the resolved tier controls checkbox hit area, indicator and checkmark. Other modes retain native geometry. |
 | `UncheckedLabel` / `CheckedLabel` | Labels for light/dark (or custom) modes. |
 | `UncheckedTheme` / `CheckedTheme` | Theme names to apply on off/on states (defaults: Light/Dark). |
 

@@ -133,6 +133,7 @@ Tour.Steps.Add(step);
 `SourceAnchor` and `TargetAnchor` accept `Auto`, `Top`, `Bottom`, `Left`, `Right`, and `Center`.
 Automatic anchors use the current bounds of both controls.
 Resize, reflow, and scrolling update the geometry during the active step.
+When another scroll moves the step target out of view, the tour scrolls its targets into view again; a target that stays outside the visible area closes the tour with `TargetUnavailable`.
 
 ## Style inheritance
 
@@ -227,7 +228,9 @@ Without `Width` and `Height`, its box is sized so that an inscribed ellipse encl
 
 ## Appearance
 
-The host uses the existing Daisy theme, motion policy, and five `DaisySize` values.
+The host uses the existing Daisy theme, motion policy, and five concrete `DaisySize` tiers.
+`Size` defaults to `Auto`. `ResolvedSize` supplies the effective tier without replacing authored values, styles, or bindings.
+An active profile can override the requested tier. Profile `inherit` uses automatic sizing through the containing scope or global policy.
 `HighlightPadding` defaults to 6 DIP, and `HighlightCornerRadius` defaults to 8 DIP.
 The highlight frame uses the theme's Primary color.
 The step card's border uses the theme's text color at 45% opacity, so it stands apart from the highlight and from Base300 borders.

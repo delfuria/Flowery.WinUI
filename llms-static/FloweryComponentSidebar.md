@@ -9,7 +9,7 @@ FloweryComponentSidebar is a high-performance, navigational sidebar designed for
 
 - **Collapsible Categories:** Sections can be expanded/collapsed and current state is persisted.
 - **Dynamic Sizing:** Automatically scales all visual metrics (icons, fonts, margins) via `FlowerySizeManager`.
-- **Uniform Selector Widths:** Theme/Language/Size dropdowns use a consistent fixed width inside the sidebar to keep alignment stable across themes.
+- **Selector Widths:** Gallery dropdowns stretch within the current sidebar width.
 - **Theme/Language Integration:** Special items for quick switching of UI settings.
 - **Search Filtering:** Integrated search bar that filters categories and items in real-time.
 - **Category Expansion:** Uses `DaisyExpander` for expandable categories in the native Windows Gallery.
@@ -23,7 +23,7 @@ FloweryComponentSidebar is a high-performance, navigational sidebar designed for
 | `SidebarWidth` (double) | The width of the sidebar. Default ~254. |
 | `AutoSizeSidebarWidth` (bool) | If true, sidebar width scales automatically with the global `DaisySize`. |
 | `SearchText` (string) | Live filtering query. Syncs automatically with the internal search input. |
-| `Size` (`DaisySize`) | The manual sizing override. Typically synced with the global scale. |
+| `Size` / `ResolvedSize` | Auto by default. The resolved tier controls metrics while explicit values, styles and bindings remain authoritative. |
 | `ItemSelected` (event) | Fired when an item is clicked. Includes the item and its parent category. |
 | `FavoriteToggled` (event) | Fired when an item's favorite/star icon is toggled. |
 
@@ -79,8 +79,8 @@ The sidebar uses a sophisticated internal metrics system (`SidebarMetrics`) to e
 
 Selected items are visually distinct, using the project's **Primary** color palette:
 
-- **Background:** `{DynamicResource DaisyPrimaryBrush}`
-- **Foreground:** `{DynamicResource DaisyPrimaryContentBrush}` (white/contrast text)
+- **Background:** `{ThemeResource DaisyPrimaryBrush}`
+- **Foreground:** `{ThemeResource DaisyPrimaryContentBrush}` (white/contrast text)
 - **Icons:** Favorite star outline syncs to the content brush color.
 
 ## State Management

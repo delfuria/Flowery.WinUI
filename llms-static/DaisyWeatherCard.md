@@ -43,7 +43,7 @@ DaisyWeatherCard is a flexible container that combines multiple weather display 
 | `ShowMetrics` | `bool` | `true` | Show metrics section |
 | `ShowSunTimes` | `bool` | `true` | Show sunrise/sunset times |
 | `DateFormat` | `string` | `"dddd, d MMMM"` | Date display format (e.g., "ddd, d MMM" for short) |
-| `Size` | `DaisySize` | `Medium` | Control size (ExtraSmall, Small, Medium, Large, ExtraLarge) |
+| `Size` | `DaisySize` | `Auto` | `ResolvedSize` supplies the effective tier. Explicit values, styles, and bindings take precedence over global defaults. |
 
 ### Service Integration
 

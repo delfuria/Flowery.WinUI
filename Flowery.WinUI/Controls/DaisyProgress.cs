@@ -48,7 +48,7 @@ namespace Flowery.Controls
                 nameof(Size),
                 typeof(DaisySize),
                 typeof(DaisyProgress),
-                new PropertyMetadata(DaisySize.Medium, OnAppearanceChanged));
+                new PropertyMetadata(DaisySize.Auto, OnAppearanceChanged));
 
         public DaisySize Size
         {
@@ -167,18 +167,13 @@ namespace Flowery.Controls
             ApplyAll();
         }
 
-        protected override void OnGlobalSizeChanged(DaisySize size)
+        protected override void OnResolvedSizeChanged()
         {
-            base.OnGlobalSizeChanged(size);
-            SetControlSize(size);
+            base.OnResolvedSizeChanged();
+            ApplyAll();
         }
 
         protected override DaisySize? GetControlSize() => Size;
-
-        protected override void SetControlSize(DaisySize size)
-        {
-            Size = size;
-        }
 
         protected override FrameworkElement? GetNeumorphicHostElement()
         {
@@ -228,7 +223,7 @@ namespace Flowery.Controls
             if (_trackBorder == null || _fillBorder == null)
                 return;
 
-            double height = Size switch
+            double height = ResolvedSize switch
             {
                 DaisySize.ExtraSmall => DaisyResourceLookup.GetDouble("DaisyProgressExtraSmallHeight", 2),
                 DaisySize.Small => DaisyResourceLookup.GetDouble("DaisyProgressSmallHeight", 4),
@@ -238,7 +233,7 @@ namespace Flowery.Controls
                 _ => 8
             };
 
-            var cornerRadius = Size switch
+            var cornerRadius = ResolvedSize switch
             {
                 DaisySize.ExtraSmall => DaisyResourceLookup.GetCornerRadius("DaisyProgressExtraSmallCornerRadius", new CornerRadius(1)),
                 DaisySize.Small => DaisyResourceLookup.GetCornerRadius("DaisyProgressSmallCornerRadius", new CornerRadius(2)),

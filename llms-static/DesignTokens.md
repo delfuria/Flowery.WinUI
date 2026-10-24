@@ -49,32 +49,33 @@ For custom controls or code-behind, use `DaisyResourceLookup` helper methods:
 
 ```csharp
 using Flowery.Theming;
-using Flowery.Controls;
+using Flowery.Enums;
+using Microsoft.UI.Xaml;
 
 // Get default values based on DaisySize
-double height = DaisyResourceLookup.GetDefaultHeight(DaisySize.Medium);        // 28
+double height = DaisyResourceLookup.GetDefaultHeight(DaisySize.Medium);        // 32
 double fontSize = DaisyResourceLookup.GetDefaultFontSize(DaisySize.Medium);    // 14
-Thickness padding = DaisyResourceLookup.GetDefaultPadding(DaisySize.Medium);   // 10,0,10,0
+Thickness padding = DaisyResourceLookup.GetDefaultPadding(DaisySize.Medium);   // 12,0,12,0
 CornerRadius radius = DaisyResourceLookup.GetDefaultCornerRadius(DaisySize.Medium); // 8
 
 // Read from ResourceDictionary with fallback
 var resources = Application.Current?.Resources;
-double actualHeight = DaisyResourceLookup.GetDouble(resources, "DaisySizeMediumHeight", 28);
+double actualHeight = DaisyResourceLookup.GetDouble(resources, "DaisySizeMediumHeight", height);
 ```
 
 ### Available Helper Methods
 
 | Method | Returns | Description |
 | --- | --- | --- |
-| `GetDefaultHeight(size)` | double | Standard control height (22-36) |
+| `GetDefaultHeight(size)` | double | Native code fallback for control height (24-40) |
 | `GetDefaultFloatingInputHeight(size)` | double | Taller input height (36-50) |
 | `GetDefaultFontSize(size)` | double | Primary font size (10-20) |
 | `GetDefaultLineHeight(size)` | double | Primary line height (14-28) |
-| `GetDefaultHeaderFontSize(size)` | double | Large display font size (12-24) |
+| `GetDefaultHeaderFontSize(size)` | double | Header font fallback (14-28) |
 | `GetDefaultPadding(size)` | Thickness | Horizontal button padding |
 | `GetDefaultCornerRadius(size)` | CornerRadius | Rounded corners (4-12) |
-| `GetDefaultIconSize(size)` | double | Icon dimensions (10-18) |
-| `GetDefaultIconSpacing(size)` | double | Gap between icon and text (3-8) |
+| `GetDefaultIconSize(size)` | double | Icon dimensions (8-24) |
+| `GetDefaultIconSpacing(size)` | double | Gap between icon and text (4-8) |
 | `GetDefaultMenuPadding(size)` | Thickness | Menu/list item padding |
 | `GetDefaultTagPadding(size)` | Thickness | Tag/chip padding |
 | `GetDefaultRangeTrackHeight(size)` | double | Range slider track (4-16) |
@@ -98,11 +99,11 @@ Used for buttons, inputs, selects, and other fixed-height controls.
 
 | Token | XS | S | M | L | XL | Used By |
 | ----- | -- | -- | -- | -- | --- | ------- |
-| `DaisySize{Size}Height` | 22 | 24 | 28 | 32 | 36 | DaisyButton, DaisyInput, DaisySelect |
+| `DaisySize{Size}Height` | 24 | 28 | 32 | 36 | 40 | DaisyButton, DaisyInput, DaisySelect |
 
 ### Floating Input Heights
 
-Specific heights for taller input controls like `DaisyNumericUpDown` and `DaisyFileInput`.
+Heights used by floating-label inputs. NumericUpDown uses the standard control-height ladder.
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
@@ -159,7 +160,7 @@ Rounded corners for controls.
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisySize{Size}CornerRadius` | 4 | 6 | 8 | 10 | 12 |
+| `DaisySize{Size}CornerRadius` | 4 | 4 | 8 | 8 | 12 |
 
 ### Button Padding
 
@@ -167,7 +168,9 @@ Horizontal-only padding (vertical is controlled by Height).
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyButton{Size}Padding` | 8,0 | 12,0 | 14,0 | 16,0 | 16,0 |
+| `DaisyButton{Size}Padding` | 8,0 | 12,0 | 12,0 | 16,0 | 16,0 |
+
+These token values differ from the fixed `GetDefaultPadding()` fallback for Small and Large.
 
 ### Input Padding
 
@@ -175,19 +178,21 @@ Full padding for text inputs.
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyInput{Size}Padding` | 8,4 | 12,5 | 12,6 | 14,6 | 14,7 |
+| `DaisyInput{Size}Padding` | 8,4 | 12,4 | 12,8 | 16,8 | 16,8 |
 
 ### Tab Padding
 
-Both horizontal and vertical padding (tabs don't use fixed height).
+Declared tab padding tokens:
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
-| `DaisyTab{Size}Padding` | 10,2 | 12,4 | 12,5 | 12,5 | 12,5 |
+| `DaisyTab{Size}Padding` | 8,4 | 12,4 | 12,4 | 12,4 | 12,4 |
+
+DaisyTabs currently uses `GetDefaultPadding(ResolvedSize)` and assigns a height from the resolved tier.
 
 ### Badge Tokens
 
-Badge text uses the primary font ladder.
+Badge text uses the primary font ladder. Height tokens set the owned border's minimum height, unless MinHeight is set locally.
 
 | Token | XS | S | M | L | XL |
 | ----- | -- | -- | -- | -- | --- |
@@ -200,9 +205,12 @@ Badge text uses the primary font ladder.
 | Token | Value |
 | --- | --- |
 | `DaisyCardLargePadding` | 24 |
-| `DaisyCardMediumPadding` | 18 |
+| `DaisyCardMediumPadding` | 20 |
 | `DaisyCardSmallPadding` | 12 |
 | `DaisyCardCompactPadding` | 8 |
+
+These are declared legacy tokens. DaisyCard's automatic body padding uses 16/24/32/40/48 for XS/S/M/L/XL.
+Compact halves that value. Nullable `BodyPadding` overrides it, including zero; `ResolvedBodyPadding` reports the result.
 
 ### Spacing
 
@@ -211,10 +219,10 @@ General spacing values for layouts.
 | Token | Value |
 | --- | --- |
 | `DaisySpacingXL` | 20 |
-| `DaisySpacingLarge` | 14 |
-| `DaisySpacingMedium` | 10 |
-| `DaisySpacingSmall` | 6 |
-| `DaisySpacingXS` | 3 |
+| `DaisySpacingLarge` | 16 |
+| `DaisySpacingMedium` | 12 |
+| `DaisySpacingSmall` | 8 |
+| `DaisySpacingXS` | 4 |
 
 ### Border Thickness
 
@@ -442,49 +450,26 @@ Used by `DaisyNumberFlow` and similar large-format controls.
 
 ## Making Custom Controls Token-Aware
 
-### Pattern 1: Use DaisyResourceLookup (Recommended)
+Use the existing [custom control contract](FlowerySizeManager.md#custom-controls) for the Size dependency property and loaded registration.
+Keep Size at Auto unless the application authors a concrete tier. Render from ResolvedSize without assigning Size.
 
-For custom controls, use `DaisyResourceLookup` methods instead of hardcoded values:
-
-```csharp
-public class MyCustomControl : ContentControl
-{
-    public DaisySize Size { get; set; } = DaisySize.Medium;
-
-    private void ApplySizing()
-    {
-        var resources = Application.Current?.Resources;
-        if (resources != null)
-            DaisyTokenDefaults.EnsureDefaults(resources);
-
-        // Use centralized defaults - single source of truth
-        Height = DaisyResourceLookup.GetDefaultHeight(Size);
-        FontSize = DaisyResourceLookup.GetDefaultFontSize(Size);
-        Padding = DaisyResourceLookup.GetDefaultPadding(Size);
-    }
-}
-```
-
-### Pattern 2: Read from ResourceDictionary with Fallback
-
-For maximum flexibility (allows token overrides):
+Inside that DaisyBaseContentControl-derived control, read tokens with native fallbacks:
 
 ```csharp
 private void ApplySizing()
 {
-    var resources = Application.Current?.Resources;
-    if (resources != null)
-        DaisyTokenDefaults.EnsureDefaults(resources);
-
-    string sizeKey = DaisyResourceLookup.GetSizeKeyFull(Size); // "Medium", "Large", etc.
-
-    // Try resource dictionary first, fallback to centralized default
+    DaisyResourceLookup.EnsureTokens();
+    var resources = Application.Current.Resources;
+    var sizeKey = DaisyResourceLookup.GetSizeKeyFull(ResolvedSize);
     Height = DaisyResourceLookup.GetDouble(resources, $"DaisySize{sizeKey}Height",
-        DaisyResourceLookup.GetDefaultHeight(Size));
+        DaisyResourceLookup.GetDefaultHeight(ResolvedSize));
     FontSize = DaisyResourceLookup.GetDouble(resources, $"DaisySize{sizeKey}FontSize",
-        DaisyResourceLookup.GetDefaultFontSize(Size));
+        DaisyResourceLookup.GetDefaultFontSize(ResolvedSize));
 }
 ```
+
+Call this from OnLoaded and OnResolvedSizeChanged, as shown in the linked example.
+The base class owns load, unload, and reload registration.
 
 ---
 
@@ -495,7 +480,7 @@ Most Daisy controls use the token system for consistent sizing:
 - **DaisyButton** - Heights, font sizes, padding, corner radius
 - **DaisyInput** - Heights, font sizes, padding, corner radius
 - **DaisySelect** - Heights, font sizes, corner radius
-- **DaisyNumericUpDown** - Floating heights, font sizes, corner radius
+- **DaisyNumericUpDown** - Standard control heights, font sizes, corner radius
 - **DaisyTabs** - Font sizes, padding, corner radius
 - **DaisyBadge** - Badge-specific heights, font sizes, padding
 - **DaisyFileInput** - Floating heights, font sizes, corner radius

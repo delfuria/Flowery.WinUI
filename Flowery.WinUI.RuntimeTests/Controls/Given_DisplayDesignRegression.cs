@@ -421,16 +421,17 @@ namespace Flowery.WinUI.RuntimeTests.Controls
         {
             var card = new DaisyCard { Size = DaisySize.Small };
             await LoadAsync(card);
-            Assert.AreEqual(new Thickness(24), card.BodyPadding);
+            Assert.IsNull(card.BodyPadding);
+            Assert.AreEqual(new Thickness(24), card.ResolvedBodyPadding);
             card.Size = DaisySize.Large;
-            Assert.AreEqual(new Thickness(40), card.BodyPadding);
+            Assert.AreEqual(new Thickness(40), card.ResolvedBodyPadding);
             card.Variant = DaisyCardVariant.Compact;
-            Assert.AreEqual(new Thickness(20), card.BodyPadding);
+            Assert.AreEqual(new Thickness(20), card.ResolvedBodyPadding);
             card.BodyPadding = new Thickness(9);
             card.Size = DaisySize.ExtraLarge;
-            Assert.AreEqual(new Thickness(9), card.BodyPadding);
+            Assert.AreEqual(new Thickness(9), card.ResolvedBodyPadding);
             card.ClearValue(DaisyCard.BodyPaddingProperty);
-            Assert.AreEqual(new Thickness(24), card.BodyPadding);
+            Assert.AreEqual(new Thickness(24), card.ResolvedBodyPadding);
         }
 
         [TestMethod]

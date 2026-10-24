@@ -15,7 +15,7 @@ DaisyWeatherCurrent is a standalone widget for showing the current weather state
 | `TemperatureUnit` | `string` | `"C"` | Temperature unit (C or F) |
 | `ShowSunTimes` | `bool` | `true` | Whether to show sunrise/sunset |
 | `DateFormat` | `string` | `"dddd, d MMMM"` | Date display format (e.g., "ddd, d MMM" for short) |
-| `Size` | `DaisySize` | `Medium` | Control size (ExtraSmall, Small, Medium, Large, ExtraLarge) |
+| `Size` | `DaisySize` | `Auto` | `ResolvedSize` supplies the effective tier. Explicit values, styles, and bindings take precedence over global defaults. |
 
 ## Quick Examples
 

@@ -23,7 +23,7 @@ Use it directly in any UI, or as the `Content` of buttons, menu items, tabs, lis
 | `IconData` | `string` | `null` | Path data string for a custom icon (24×24 coordinate system). Takes precedence over `IconSymbol`. |
 | `IconSymbol` | `Symbol?` | `null` | A Windows Symbol enum value (e.g., `Symbol.Home`, `Symbol.Save`). Used when `IconData` is not set. |
 | `Text` | `string` | `null` | Text to display alongside or instead of the icon. |
-| `Size` | `DaisySize` | `Medium` | Controls both icon dimensions and font size. Follows global size if `FlowerySizeManager` is active. |
+| `Size` | `DaisySize` | `Auto` | `ResolvedSize` controls icon dimensions and font size. Explicit values, styles, and bindings take precedence over global defaults. |
 | `IconPlacement` | `IconPlacement` | `Left` | Position of the icon relative to text: `Left`, `Right`, `Top`, or `Bottom`. |
 | `Spacing` | `double` | `NaN` (auto) | Gap between icon and text. If `NaN`, auto-computed based on `Size`. |
 | `IconSize` | `double` | `NaN` (auto) | Explicit icon size override. If `NaN`, auto-computed based on `Size`. |
@@ -34,14 +34,14 @@ Use it directly in any UI, or as the `Content` of buttons, menu items, tabs, lis
 
 | Size | Icon Size | Font Size | Spacing |
 | --- | --- | --- | --- |
-| ExtraSmall | 12px | 10px | 4px |
-| Small | 14px | 12px | 6px |
+| ExtraSmall | 8px | 10px | 4px |
+| Small | 12px | 12px | 4px |
 | Medium | 16px | 14px | 8px |
-| Large | 20px | 16px | 10px |
-| ExtraLarge | 24px | 18px | 12px |
+| Large | 20px | 18px | 8px |
+| ExtraLarge | 24px | 20px | 8px |
 
 > [!NOTE]
-> These values come from `DaisyResourceLookup` and may vary slightly by theme. The control automatically responds to `FlowerySizeManager.SizeChanged` for global size changes, unless `IgnoreGlobalSize="True"` is set on the control or an ancestor.
+> These defaults come from `DaisyResourceLookup`. Automatic sizes use the containing size scope or global policy. See [size precedence](FlowerySizeManager.md#size-ownership).
 
 ## Quick Examples
 

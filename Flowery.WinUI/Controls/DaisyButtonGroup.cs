@@ -141,7 +141,7 @@ namespace Flowery.Controls
                 nameof(Size),
                 typeof(DaisySize),
                 typeof(DaisyButtonGroup),
-                new PropertyMetadata(DaisySize.Medium, OnAppearanceChanged));
+                new PropertyMetadata(DaisySize.Auto, OnAppearanceChanged));
 
         /// <summary>
         /// Gets or sets the size applied to all segments.
@@ -308,21 +308,22 @@ namespace Flowery.Controls
         private static void OnAppearanceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is DaisyButtonGroup group)
+            {
                 group.ApplyTheme();
+                if (e.Property == SizeProperty)
+                    FlowerySizeManager.RefreshSizeScope(group);
+            }
         }
 
-        protected override void OnGlobalSizeChanged(DaisySize size)
+        protected override void OnResolvedSizeChanged()
         {
-            base.OnGlobalSizeChanged(size);
-            SetControlSize(size);
+            base.OnResolvedSizeChanged();
+            ApplyTheme();
         }
 
         protected override DaisySize? GetControlSize() => Size;
 
-        protected override void SetControlSize(DaisySize size)
-        {
-            Size = size;
-        }
+        internal override DaisySize? ChildSizeOverride => Size == DaisySize.Auto ? null : Size;
 
         private void CollectAndDisplay()
         {
@@ -704,9 +705,7 @@ namespace Flowery.Controls
             if (resources != null)
                 DaisyTokenDefaults.EnsureDefaults(resources);
 
-            var effectiveSize = FlowerySizeManager.ShouldIgnoreGlobalSize(this)
-                ? Size
-                : FlowerySizeManager.CurrentSize;
+            var effectiveSize = ResolvedSize;
 
             // ---- Sizing (token-first) ----
             var sizeKey = DaisyResourceLookup.GetSizeKeyFull(effectiveSize);
@@ -722,7 +721,19 @@ namespace Flowery.Controls
 
             foreach (var seg in _segmentItems)
             {
-                if (seg is Button button)
+                if (seg.Parent != _itemsPanel)
+                    continue;
+                if (seg is DaisyButton daisyButton)
+                {
+                    daisyButton.RefreshResolvedSize();
+                    var childSize = daisyButton.ResolvedSize;
+                    var childKey = DaisyResourceLookup.GetSizeKeyFull(childSize);
+                    daisyButton.Height = DaisyResourceLookup.GetDouble(resources, $"DaisySize{childKey}Height", DaisyResourceLookup.GetDefaultHeight(childSize));
+                    daisyButton.FontSize = DaisyResourceLookup.GetDouble(resources, $"DaisySize{childKey}FontSize", DaisyResourceLookup.GetDefaultFontSize(childSize));
+                    daisyButton.HorizontalContentAlignment = HorizontalAlignment.Center;
+                    daisyButton.VerticalContentAlignment = VerticalAlignment.Center;
+                }
+                else if (seg is Button button)
                 {
                     button.Height = height;
                     button.Padding = padding;
@@ -825,10 +836,21 @@ namespace Flowery.Controls
             }
             else if (ButtonStyle == DaisyButtonStyle.Soft)
             {
-                normalBg = base200;
-                hoverBg = base300;
-                fg = baseContent;
-                dividerBorder = base300;
+                var softPrefix = Variant switch
+                {
+                    DaisyButtonVariant.Primary => "Primary",
+                    DaisyButtonVariant.Secondary => "Secondary",
+                    DaisyButtonVariant.Accent => "Accent",
+                    DaisyButtonVariant.Info => "Info",
+                    DaisyButtonVariant.Success => "Success",
+                    DaisyButtonVariant.Warning => "Warning",
+                    DaisyButtonVariant.Error => "Error",
+                    _ => null
+                };
+                normalBg = softPrefix == null ? base200 : DaisyResourceLookup.GetBrush(resources, $"DaisyButton{softPrefix}SoftBrush", base200);
+                hoverBg = softPrefix == null ? base300 : DaisyResourceLookup.GetBrush(resources, $"DaisyButton{softPrefix}SoftHoverBrush", base300);
+                fg = softPrefix == null ? baseContent : DaisyResourceLookup.GetBrush(resources, $"Daisy{softPrefix}Brush", baseContent);
+                dividerBorder = softPrefix == null ? base300 : DaisyResourceLookup.GetBrush(resources, $"DaisyButton{softPrefix}SoftBorderBrush", base300);
             }
 
             // Check for lightweight styling overrides (instance-level takes precedence)

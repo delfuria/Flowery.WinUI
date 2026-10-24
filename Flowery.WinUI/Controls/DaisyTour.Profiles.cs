@@ -96,7 +96,7 @@ public sealed partial class DaisyTour
 
     private double EffectiveHighlightPadding => TourSetting(HighlightPaddingProperty, HighlightPadding, 6d);
     private double EffectiveHighlightCornerRadius => TourSetting(HighlightCornerRadiusProperty, HighlightCornerRadius, 8d);
-    private DaisySize EffectiveSize => TourSetting(SizeProperty, Size, DaisySize.Medium);
+    private DaisySize EffectiveSize => ResolvedSize;
     private DaisyTourCardPosition EffectiveCardPosition => TourSetting(CardPositionProperty, CardPosition, DaisyTourCardPosition.Target);
 
     internal object? EditorSetting(DaisyTourStep step, DaisyTourAnnotation annotation, string name, bool stepScope) => name switch

@@ -24,6 +24,12 @@ namespace Flowery.WinUI.RuntimeTests
 
             await RunOnDispatcherAsync(dispatcher, async () =>
             {
+                var culture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+                System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+                System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+                System.Globalization.CultureInfo.CurrentCulture = culture;
+                System.Globalization.CultureInfo.CurrentUICulture = culture;
+                Flowery.Localization.FloweryLocalization.SetCulture("en-US");
                 // Pin the global size so default-value assertions don't depend on
                 // whatever size the hosting app (or a previous user session) applied.
                 FlowerySizeManager.Reset();

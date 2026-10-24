@@ -78,9 +78,9 @@ public sealed partial class ScalingSlide : UserControl
         DemoButton3.Size = size;
         var buttonPadding = DaisyResourceLookup.GetSizeThickness(Application.Current.Resources, "DaisyButton", size, "Padding",
             DaisyResourceLookup.GetDefaultPadding(size));
-        DemoButton1.Padding = buttonPadding;
-        DemoButton2.Padding = buttonPadding;
-        DemoButton3.Padding = buttonPadding;
+        DemoButton1.ContentPadding = buttonPadding;
+        DemoButton2.ContentPadding = buttonPadding;
+        DemoButton3.ContentPadding = buttonPadding;
         DemoBadge1.Size = size;
         DemoBadge2.Size = size;
         DemoBadge3.Size = size;

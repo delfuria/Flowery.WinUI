@@ -153,6 +153,8 @@ public class Given_DaisyTour
                     if (index > 0) await tour.NextAsync().WaitAsync(Timeout);
                     AssertActive(tour, tour.Steps[index], index);
                     await RenderFrameAsync(page);
+                    // Geometry updates run during the frame and close the tour when an endpoint becomes unavailable.
+                    AssertActive(tour, tour.Steps[index], index);
                     var connector = tour.CurrentStep!.Annotations.Single();
                     var start = BoundsInRoot(connector.Source!);
                     var end = BoundsInRoot(connector.Target!);
@@ -941,6 +943,47 @@ public class Given_DaisyTour
     }
 
     [TestMethod]
+    public async Task When_AnotherScrollMovesTheTargetAway_TheTourRevealsItAgain()
+    {
+        var target = CreateTarget();
+        target.Margin = new Thickness(24, 900, 0, 0);
+        var viewer = new ScrollViewer { Content = new Grid { Height = 1200, Children = { target } } };
+        var step = new DaisyTourStep { Id = "scrolled-away", Target = target };
+        var tour = new DaisyTour();
+        tour.Steps.Add(step);
+        var root = CreateRoot(tour, viewer);
+        var revealed = NewCompletion();
+        var scrolledAway = false;
+        EventHandler<ScrollViewerViewChangedEventArgs> viewChanged = (_, args) =>
+        {
+            if (args.IsIntermediate) return;
+            if (!scrolledAway) scrolledAway = viewer.VerticalOffset == 0;
+            else if (viewer.VerticalOffset > 0) revealed.TrySetResult();
+        };
+        tour.Closed += (_, args) => revealed.TrySetException(
+            new AssertFailedException($"The tour closed: {args.Reason}, {args.Error?.Message}"));
+        try
+        {
+            await LoadAsync(root);
+            await tour.StartAsync().WaitAsync(Timeout);
+            AssertActive(tour, step, 0);
+            viewer.ViewChanged += viewChanged;
+            // A page control bringing itself into view scrolls the target out of the viewport.
+            Assert.IsTrue(viewer.ChangeView(null, 0, null, true));
+            await revealed.Task.WaitAsync(Timeout);
+            await ArrangeAsync(root);
+            AssertActive(tour, step, 0);
+            AssertFits(target, viewer);
+            AssertTargetBounds(tour, target);
+        }
+        finally
+        {
+            viewer.ViewChanged -= viewChanged;
+            await CleanupAsync(root, tour);
+        }
+    }
+
+    [TestMethod]
     public async Task When_ScrollViewerHasNotRenderedYet_PreparedBoundsIncludeTheNewOffset()
     {
         // Each pass starts before a new viewer's first frame, as after a tab switch. The first
@@ -1613,11 +1656,12 @@ public class Given_DaisyTour
             var next = Descendants<DaisyButton>(surface).Single(button => AutomationProperties.GetAutomationId(button) == "DaisyTourNext");
             var card = Descendants<Border>(surface).Single(border => AutomationProperties.GetAutomationId(border) == "DaisyTourCard");
             var lightColor = ((SolidColorBrush)card.Background).Color;
-            foreach (var size in Enum.GetValues<DaisySize>())
+            foreach (var size in Enum.GetValues<DaisySize>().Where(size => size != DaisySize.Auto))
             {
                 FlowerySizeManager.ApplySize(size);
                 await ArrangeAsync(root);
-                Assert.AreEqual(size, tour.Size);
+                Assert.AreEqual(DaisySize.Auto, tour.Size);
+                Assert.AreEqual(size, tour.ResolvedSize);
                 Assert.AreEqual(size, next.Size);
                 Assert.AreEqual(size, tour.Progress.Size);
                 AssertActive(tour, step, 0);
@@ -1731,7 +1775,7 @@ public class Given_DaisyTour
         {
             await LoadAsync(root);
             await tour.StartAsync().WaitAsync(Timeout);
-            foreach (var size in Enum.GetValues<DaisySize>())
+            foreach (var size in Enum.GetValues<DaisySize>().Where(size => size != DaisySize.Auto))
             {
                 foreach (var preset in new[] { DaisyTourAnnotationPreset.Cloud, DaisyTourAnnotationPreset.SpeechBubble })
                 {
@@ -1779,6 +1823,7 @@ public class Given_DaisyTour
             await LoadAsync(root);
             var cases = from viewport in new[] { new Size(600, 400), new Size(260, 220) }
                         from size in Enum.GetValues<DaisySize>()
+                        where size != DaisySize.Auto
                         from preset in new[] { DaisyTourAnnotationPreset.Cloud, DaisyTourAnnotationPreset.SpeechBubble }
                         select (viewport, size, preset);
             foreach (var (viewport, size, preset) in cases)

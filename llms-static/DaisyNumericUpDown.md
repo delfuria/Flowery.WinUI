@@ -37,12 +37,16 @@
 
 ## Size Options
 
+`Size` defaults to `Auto`. `ResolvedSize` reports the effective tier from the global sizing policy.
+Explicit local values, styles, and bindings retain their tier, including explicit Medium.
+
 | Size | Height | Use Case |
 | --- | --- | --- |
 | ExtraSmall | 24px | Compact tables, dense UIs |
-| Small | 32px | Secondary inputs |
-| Medium | 48px | General purpose (default) |
-| Large | 64px | Primary inputs, touch targets |
+| Small | 28px | Secondary inputs |
+| Medium | 32px | General purpose |
+| Large | 36px | Primary inputs |
+| ExtraLarge | 40px | Large inputs |
 
 > [!NOTE]
 > DaisyNumericUpDown uses **fixed heights** for each size to match DaisyUI's design.
@@ -185,7 +189,7 @@
 | `Suffix` | string | null | Fixed text displayed on the right (e.g., `"%"`, `"kg"`) |
 | `Watermark` | string | null | Placeholder text when empty |
 | `Variant` | DaisyInputVariant | Bordered | Visual style variant |
-| `Size` | DaisySize | Medium | Control size |
+| `Size` | DaisySize | Auto | Authored tier; `ResolvedSize` reports the effective size |
 | `ShowButtons` | bool | true | Show/hide spin buttons |
 | `ShowClearButton` | bool | false | Show clear button on left when focused (resets to 0) |
 | `IsReadOnly` | bool | false | Prevent editing |

@@ -7,6 +7,11 @@ DaisyStat displays a metric with title, value, optional description, figure (ico
 
 ## DaisyStat Properties
 
+`Size` defaults to `Auto`; `ResolvedSize` follows the nearest composite or global policy.
+Default value fonts are 18/20/24/28/32 for XS/S/M/L/XL.
+Title and description use the secondary font tier, 9/10/12/14/16.
+ValueFontSize and LabelFontSize default to NaN, meaning automatic; explicit values, styles and bindings survive size and theme changes.
+
 | Property | Description |
 | --- | --- |
 | `Title` | Small label above the value. |

@@ -13,7 +13,7 @@ DaisyWeatherMetrics shows supplementary weather data in a structured grid. Each 
 | `WindUnit` | `string` | `"km/h"` | Wind speed unit |
 | `Humidity` | `int` | `0` | Current humidity (0-100%) |
 | `HumidityMax` | `int` | `0` | Maximum humidity |
-| `Size` | `DaisySize` | `Medium` | Control size (ExtraSmall, Small, Medium, Large, ExtraLarge) |
+| `Size` | `DaisySize` | `Auto` | `ResolvedSize` supplies the effective tier. Explicit values, styles, and bindings take precedence over global defaults. |
 
 ## Quick Examples
 

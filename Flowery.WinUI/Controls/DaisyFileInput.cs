@@ -61,7 +61,7 @@ namespace Flowery.Controls
                 nameof(Size),
                 typeof(DaisySize),
                 typeof(DaisyFileInput),
-                new PropertyMetadata(DaisySize.Medium, OnAppearanceChanged));
+                new PropertyMetadata(DaisySize.Auto, OnAppearanceChanged));
 
         public DaisySize Size
         {
@@ -142,18 +142,13 @@ namespace Flowery.Controls
             ApplyAll();
         }
 
-        protected override void OnGlobalSizeChanged(DaisySize size)
+        protected override void OnResolvedSizeChanged()
         {
-            base.OnGlobalSizeChanged(size);
-            SetControlSize(size);
+            base.OnResolvedSizeChanged();
+            ApplyAll();
         }
 
         protected override DaisySize? GetControlSize() => Size;
-
-        protected override void SetControlSize(DaisySize size)
-        {
-            Size = size;
-        }
 
         protected override FrameworkElement? GetNeumorphicHostElement()
         {
@@ -232,20 +227,21 @@ namespace Flowery.Controls
             if (resources != null)
                 DaisyTokenDefaults.EnsureDefaults(resources);
 
-            string sizeKey = DaisyResourceLookup.GetSizeKeyFull(Size);
+            var size = ResolvedSize;
+            string sizeKey = DaisyResourceLookup.GetSizeKeyFull(size);
 
-            _browseButton.Size = Size;
+            _browseButton.Size = size;
 
             double fontSize = resources == null
-                ? DaisyResourceLookup.GetDefaultFontSize(Size)
+                ? DaisyResourceLookup.GetDefaultFontSize(size)
                 : DaisyResourceLookup.GetDouble(resources, $"DaisySize{sizeKey}FontSize",
-                    DaisyResourceLookup.GetDefaultFontSize(Size));
+                    DaisyResourceLookup.GetDefaultFontSize(size));
             _fileNameTextBlock.FontSize = fontSize;
 
             double containerHeight = resources == null
-                ? DaisyResourceLookup.GetDefaultFloatingInputHeight(Size)
+                ? DaisyResourceLookup.GetDefaultFloatingInputHeight(size)
                 : DaisyResourceLookup.GetDouble(resources, $"DaisySize{sizeKey}Height",
-                    DaisyResourceLookup.GetDefaultFloatingInputHeight(Size));
+                    DaisyResourceLookup.GetDefaultFloatingInputHeight(size));
             _containerBorder.Height = containerHeight;
 
             var cornerRadius = resources == null

@@ -3,7 +3,7 @@
 
 # Overview
 
-DaisyRating is a star rating control built on `RangeBase`. It supports **precision modes** (full/half/0.1), **3 size presets**, and respects `Minimum/Maximum/Value` (default 0–5).
+DaisyRating is a star rating control. It supports **precision modes** (full/half/0.1), **5 size presets**, and a `Value` from zero to `Maximum` (default 5).
 Filled stars are clipped based on `Value` to show partial ratings; clicking updates the value unless `IsReadOnly` is set.
 
 ## Precision Modes
@@ -16,13 +16,15 @@ Filled stars are clipped based on `Value` to show partial ratings; clicking upda
 
 ## Size Options
 
+`Size` defaults to `Auto`. `ResolvedSize` supplies the effective tier without replacing explicit values, styles, or bindings.
+
 | Size | Star Size | Use Case |
 | --- | --- | --- |
-| ExtraSmall | 12px | Dense tables/toolbars. |
-| Small | 16px | Compact cards/forms. |
-| Medium (default) | 24px | General usage. |
+| ExtraSmall | 16px | Dense tables/toolbars. |
+| Small | 20px | Compact cards/forms. |
+| Medium | 24px | General usage. |
 | Large | 32px | Hero ratings or touch-friendly UIs. |
-| ExtraLarge | Falls back to Medium styling (no explicit theme overrides). |
+| ExtraLarge | 40px | Large ratings or touch targets. |
 
 ## Quick Examples
 

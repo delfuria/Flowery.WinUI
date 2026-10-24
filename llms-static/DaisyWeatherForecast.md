@@ -9,7 +9,7 @@ DaisyWeatherForecast is an `ItemsControl` that renders a row of forecast cards. 
 | `ItemsSource` | `IEnumerable` | - | Collection of `ForecastDay` items |
 | `TemperatureUnit` | `string` | `"C"` | Temperature unit (C or F) |
 | `ShowPrecipitation` | `bool` | `false` | Show precipitation chance |
-| `Size` | `DaisySize` | `Medium` | Control size (ExtraSmall, Small, Medium, Large, ExtraLarge) |
+| `Size` | `DaisySize` | `Auto` | `ResolvedSize` supplies the effective tier. Explicit values, styles, and bindings take precedence over global defaults. |
 | `AutoFitItems` | `bool` | `true` | Auto-calculate item widths to fit container (recommended) |
 
 ## ForecastDay Model
@@ -62,6 +62,9 @@ Each forecast item displays:
 3. **Temperature range** - High°/Low° format
 
 Items are arranged horizontally with equal spacing.
+
+`AutoFitItems` can reduce the tier for automatic forecast items. An item's explicit `Size`, style setter, or binding retains its tier.
+The forecast never assigns `Size` to supplied `DaisyWeatherForecastItem` controls.
 
 ## Styling
 

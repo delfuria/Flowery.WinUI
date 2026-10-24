@@ -24,7 +24,7 @@ DaisyTextArea inherits all properties from DaisyInput. Key ones for textarea usa
 | `HelperText` | `string?` | `null` | Helper text displayed below textarea (left-aligned). |
 | `HintText` | `string?` | `null` | Hint text displayed below label, above textarea. |
 | `Variant` | `DaisyInputVariant` | `Bordered` | Visual style (Bordered, Ghost, Filled, Error, Success, etc.). |
-| `Size` | `DaisySize` | `Medium` | Size preset affecting padding and font size. |
+| `Size` | `DaisySize` | `Auto` | `ResolvedSize` supplies the effective preset. Explicit values, styles, and bindings take precedence over global defaults. |
 
 ## TextArea-Specific Properties
 

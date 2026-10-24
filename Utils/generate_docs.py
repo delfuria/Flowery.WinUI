@@ -330,7 +330,8 @@ class CSharpParser:
 
     @staticmethod
     def _argument_value(argument: str) -> str:
-        """Remove an optional C# named-argument prefix."""
+        """Remove leading comments and an optional C# named-argument prefix."""
+        argument = re.sub(r'^(?:\s*(?://[^\r\n]*|/\*.*?\*/))+', '', argument, flags=re.DOTALL)
         return re.sub(r'^\s*\w+\s*:\s*', '', argument).strip()
 
     def _summary_before(self, content: str, declaration_start: int) -> str:

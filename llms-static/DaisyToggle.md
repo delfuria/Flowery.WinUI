@@ -21,11 +21,13 @@ lightweight styling (`DaisyToggleKnobBrush`, `DaisyToggle{Variant}KnobBrush`) ar
 
 ## Size Options
 
+`Size` defaults to `Auto`. `ResolvedSize` supplies the effective tier without replacing explicit values, styles, or bindings.
+
 | Size | Track (W×H) | Knob | Use Case |
 | --- | --- | --- | --- |
 | ExtraSmall | 28×14 | 8px | Dense layouts, tables. |
 | Small | 32×16 | 10px | Compact forms. |
-| Medium (default) | 40×20 | 12px | General purpose. |
+| Medium | 40×20 | 12px | General purpose. |
 | Large | 48×24 | 14px | Touch-friendly UIs. |
 | ExtraLarge | 56×28 | 16px | Hero sections or large touch targets. |
 

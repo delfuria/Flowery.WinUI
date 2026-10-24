@@ -4,7 +4,7 @@ Flowery.WinUI provides **two distinct sizing systems**. Understanding when to us
 
 | System | Purpose | Scope |
 | --- | --- | --- |
-| **Global Size** (`FlowerySizeManager`) | User preference / accessibility | Entire app – all controls respond |
+| **Global Size** (`FlowerySizeManager`) | User preference / accessibility | Loaded controls whose Size resolves through the global default |
 | **Auto Scaling** (`FloweryScaleManager`) | Responsive window-based sizing | Per-container opt-in only |
 
 > [!NOTE]
@@ -20,7 +20,7 @@ Flowery.WinUI uses a code-based token system instead of XAML resource dictionari
 | `DaisyResourceLookup.cs` | Centralized helper methods for sizing calculations |
 | `FlowerySizeManager` | Global size management and event broadcasting |
 
-All controls read sizing from `DaisyResourceLookup.GetDefault*()` methods, ensuring consistency across the entire UI.
+Controls read size tokens or use `DaisyResourceLookup.GetDefault*()` fallbacks.
 
 ---
 
@@ -28,9 +28,9 @@ All controls read sizing from `DaisyResourceLookup.GetDefault*()` methods, ensur
 
 The `FlowerySizeManager` is a static service that:
 
-- Broadcasts size changes to all subscribing controls
+- Refreshes loaded controls without changing authored Size values
 - Maintains the current global size setting
-- Provides localized size names in 11 languages
+- Provides five concrete tiers; DaisySizeDropdown supplies localized names
 
 ## Quick Start
 
@@ -38,12 +38,14 @@ Apply a global size to all controls:
 
 ```csharp
 using Flowery.Controls;
+using Flowery.Enums;
 
 // Apply a size by enum
 FlowerySizeManager.ApplySize(DaisySize.Small);
 
-// Or by name (case-insensitive)
-FlowerySizeManager.ApplySize("Large");
+// Auto is the default control policy; ApplySize accepts concrete tiers only.
+var button = new DaisyButton();
+DaisySize effectiveSize = button.ResolvedSize;
 ```
 
 ## Size Options
@@ -51,8 +53,8 @@ FlowerySizeManager.ApplySize("Large");
 | Size | Typical Use Case |
 | --- | --- |
 | `ExtraSmall` | High-density UIs, data tables, compact toolbars |
-| `Small` | **Default** - Good balance for desktop apps |
-| `Medium` | Touch-friendly, accessibility |
+| `Small` | Compact desktop apps; selected by Reset() |
+| `Medium` | Initial global tier; general desktop use |
 | `Large` | Larger screens, presentations |
 | `ExtraLarge` | Maximum readability, kiosk mode |
 
@@ -64,8 +66,12 @@ FlowerySizeManager.ApplySize("Large");
 // Get the current global size
 DaisySize currentSize = FlowerySizeManager.CurrentSize;
 
-// Check/set if new controls should auto-use global size
+// Select whether Auto uses the global default; changing this refreshes loaded controls.
 FlowerySizeManager.UseGlobalSizeByDefault = true;
+
+// Pause automatic visual refresh; CurrentSize and ResolvedSize still change.
+FlowerySizeManager.EnableGlobalAutoSize = false;
+FlowerySizeManager.RefreshAllSizes();
 ```
 
 ### Methods
@@ -74,10 +80,7 @@ FlowerySizeManager.UseGlobalSizeByDefault = true;
 // Apply a size by enum
 FlowerySizeManager.ApplySize(DaisySize.Medium);
 
-// Apply a size by name (returns true if successful)
-bool success = FlowerySizeManager.ApplySize("ExtraLarge");
-
-// Reset to default (Small)
+// Reset selects Small. Initial CurrentSize is Medium.
 FlowerySizeManager.Reset();
 ```
 
@@ -106,7 +109,7 @@ A ComboBox-style dropdown that shows all available sizes with localized names:
 
 The dropdown:
 
-- Shows the current size with an abbreviation (XS, S, M, L, XL)
+- Shows the localized size name by default; ShowAbbreviations enables XS, S, M, L, XL
 - Displays localized size names (e.g., "Klein" in German, "小" in Japanese)
 - Automatically updates all controls when selection changes
 
@@ -114,7 +117,11 @@ The dropdown:
 
 ### Which Controls Respond?
 
-All DaisyUI controls with a `Size` property respond to global size changes:
+Size defaults to Auto. Explicit local values, styles, and bindings retain their concrete tier, including Medium.
+ResolvedSize reports the effective tier. ClearValue restores the underlying style or Auto default.
+See [FlowerySizeManager](FlowerySizeManager.md) for composite precedence, opt-out behavior, and registration lifetime.
+
+Controls with this sizing contract include:
 
 - `DaisyButton`
 - `DaisyInput` / `DaisyTextArea`
@@ -149,7 +156,8 @@ For regular `TextBlock` elements that should scale with the global size, use the
 | `Primary` | Body text, descriptions | 10/12/14/18/20 |
 | `Secondary` | Hints, captions, labels | 9/10/12/14/16 |
 | `Tertiary` | Very small text, counters | 8/9/11/12/14 |
-| `Header` | Section titles, headings | 14/16/20/24/28 |
+| `SectionHeader` | Section titles | 12/14/16/20/22 |
+| `Header` | Page headings | 14/16/20/24/28 |
 
 ### Examples
 
@@ -164,162 +172,30 @@ For regular `TextBlock` elements that should scale with the global size, use the
 
 <!-- Section header -->
 <TextBlock Text="Settings" FontWeight="Bold"
-           controls:FlowerySizeManager.ResponsiveFont="Header" />
+           controls:FlowerySizeManager.ResponsiveFont="SectionHeader" />
 ```
 
 ### How It Works
 
 The attached property:
 
-1. Subscribes the TextBlock to `FlowerySizeManager.SizeChanged`
+1. Registers the TextBlock while it is loaded
 2. Immediately applies the font size for the current global size
 3. Updates automatically when the global size changes
-4. Cleans up the subscription when the control is unloaded
+4. Releases the registration on unload and restores it on reload
 
 > **Note:** The `ResponsiveFont` attached property is the recommended approach for text that should scale with global size, as it handles subscription and cleanup automatically.
 
 ## Making Custom Controls Size-Aware
 
-To make your own controls respond to global size changes:
+Derive from `DaisyBaseContentControl` and render from `ResolvedSize`.
+Keep the authored Size dependency property at Auto, and return its raw value from `GetControlSize()`.
+Refresh dimensions in `OnLoaded()` and `OnResolvedSizeChanged()` without assigning Size.
+The base class owns registration, unload cleanup, and reload catch-up.
 
-### Option 1: Use DaisyResourceLookup (Recommended)
-
-Use centralized helper methods instead of inline switch expressions:
-
-```csharp
-using Flowery.Theming;
-using Flowery.Controls;
-
-public class MyCustomControl : ContentControl
-{
-    public DaisySize Size { get; set; } = DaisySize.Medium;
-
-    public MyCustomControl()
-    {
-        Loaded += OnLoaded;
-        Unloaded += OnUnloaded;
-    }
-
-    private void OnLoaded(object sender, RoutedEventArgs e)
-    {
-        FlowerySizeManager.SizeChanged += OnSizeChanged;
-        ApplySize(FlowerySizeManager.CurrentSize);
-    }
-
-    private void OnUnloaded(object sender, RoutedEventArgs e)
-    {
-        FlowerySizeManager.SizeChanged -= OnSizeChanged;
-    }
-
-    private void OnSizeChanged(object? sender, DaisySize size)
-    {
-        if (!FlowerySizeManager.GetIgnoreGlobalSize(this))
-            ApplySize(size);
-    }
-
-    private void ApplySize(DaisySize size)
-    {
-        var resources = Application.Current?.Resources;
-        if (resources != null)
-            DaisyTokenDefaults.EnsureDefaults(resources);
-
-        // Use centralized defaults - no inline switch needed!
-        Height = DaisyResourceLookup.GetDefaultHeight(size);
-        FontSize = DaisyResourceLookup.GetDefaultFontSize(size);
-        Padding = DaisyResourceLookup.GetDefaultPadding(size);
-    }
-}
-```
-
-### Option 2: Subscribe in Constructor (Simple)
-
-For simpler cases without full token integration:
-
-```csharp
-public class MyCustomControl : UserControl
-{
-    public MyCustomControl()
-    {
-        InitializeComponent();
-        
-        // Subscribe to global size changes
-        FlowerySizeManager.SizeChanged += OnSizeChanged;
-        
-        // Apply initial size
-        ApplySize(FlowerySizeManager.CurrentSize);
-    }
-
-    protected override void OnUnloaded(RoutedEventArgs e)
-    {
-        base.OnUnloaded(e);
-        // Clean up subscription
-        FlowerySizeManager.SizeChanged -= OnSizeChanged;
-    }
-
-    private void OnSizeChanged(object? sender, DaisySize size)
-    {
-        ApplySize(size);
-    }
-
-    private void ApplySize(DaisySize size)
-    {
-        // Use centralized defaults instead of inline switches
-        MyTextBlock.FontSize = DaisyResourceLookup.GetDefaultFontSize(size);
-    }
-}
-```
-
-### Option 2: Add a Size Property
-
-For DaisyUI-style controls, add a `Size` styled property:
-
-```csharp
-public class MyDaisyControl : Control
-{
-    public static readonly DependencyProperty SizeProperty =
-        DependencyProperty.Register(
-            nameof(Size), typeof(DaisySize), typeof(MyDaisyControl),
-            new PropertyMetadata(DaisySize.Small));
-
-    public DaisySize Size
-    {
-        get => (DaisySize)GetValue(SizeProperty);
-        set => SetValue(SizeProperty, value);
-    }
-}
-```
-
-Then apply sizing in your control's code or use a style:
-
-```xml
-<!-- In your control's resources or App.xaml -->
-<Style TargetType="local:MyDaisyControl">
-    <Setter Property="FontSize" Value="{ThemeResource DaisySizeMediumFontSize}" />
-    <Setter Property="Height" Value="{ThemeResource DaisySizeMediumHeight}" />
-</Style>
-```
-
-> **Note:** In WinUI 3, conditional styling based on property values is typically done in code-behind or using VisualStateManager rather than selector-based styles.
-
-## Bulk-Applying Size via Reflection
-
-For host applications like the Gallery, you can automatically apply sizes to all DaisyUI controls in the visual tree:
-
-```csharp
-private static void ApplyGlobalSizeToControls(Control root, DaisySize size)
-{
-    foreach (var control in root.GetVisualDescendants().OfType<Control>())
-    {
-        var sizeProperty = control.GetType().GetProperty("Size");
-        if (sizeProperty != null && 
-            sizeProperty.PropertyType == typeof(DaisySize) && 
-            sizeProperty.CanWrite)
-        {
-            sizeProperty.SetValue(control, size);
-        }
-    }
-}
-```
+See the complete [custom control example](FlowerySizeManager.md#custom-controls).
+Use public `DaisyResourceLookup.EnsureTokens()` before reading tokens.
+Do not use reflection or a second SizeChanged writer to assign child Size properties.
 
 ## Opting Out of Global Sizing
 
@@ -351,9 +227,9 @@ Mark a parent container to protect all descendant controls:
 
 The `IgnoreGlobalSize` property uses visual tree traversal with "first explicit setting wins" semantics:
 
-1. When a control receives a global size change event, it calls `FlowerySizeManager.ShouldIgnoreGlobalSize(this)`
+1. Auto resolution calls `FlowerySizeManager.ShouldIgnoreGlobalSize(this)` before using the global default
 2. The method walks up the visual tree from the control to the root
-3. It stops at the **first ancestor** with an explicitly set `IgnoreGlobalSize` value (either `True` or `False`)
+3. It stops at the first explicit value on the control or an ancestor (either `True` or `False`)
 4. If no explicit setting is found anywhere in the tree, the control responds to global size changes (returns `false`)
 
 This design enables both **opting out** and **opting back in**:
@@ -395,17 +271,18 @@ The sizing system works with [Design Tokens](DesignTokens.md). Each size tier ma
 
 | Size | Height Token | Font Size Token |
 | --- | --- | --- |
-| ExtraSmall | `DaisySizeExtraSmallHeight` (20) | `DaisySizeExtraSmallFontSize` (9) |
-| Small | `DaisySizeSmallHeight` (24) | `DaisySizeSmallFontSize` (10) |
-| Medium | `DaisySizeMediumHeight` (28) | `DaisySizeMediumFontSize` (12) |
-| Large | `DaisySizeLargeHeight` (32) | `DaisySizeLargeFontSize` (14) |
-| ExtraLarge | `DaisySizeExtraLargeHeight` (36) | `DaisySizeExtraLargeFontSize` (16) |
+| ExtraSmall | `DaisySizeExtraSmallHeight` (24) | `DaisySizeExtraSmallFontSize` (10) |
+| Small | `DaisySizeSmallHeight` (28) | `DaisySizeSmallFontSize` (12) |
+| Medium | `DaisySizeMediumHeight` (32) | `DaisySizeMediumFontSize` (14) |
+| Large | `DaisySizeLargeHeight` (36) | `DaisySizeLargeFontSize` (18) |
+| ExtraLarge | `DaisySizeExtraLargeHeight` (40) | `DaisySizeExtraLargeFontSize` (20) |
 
-> **Note:** Token values can be accessed programmatically via `DaisyResourceLookup.GetDefaultHeight(size)` and `DaisyResourceLookup.GetDefaultFontSize(size)`. See [Design Tokens](DesignTokens.md) for full reference.
+Read tokens with `DaisyResourceLookup.GetSizeDouble()` or `GetDouble()`.
+The `GetDefault*()` helpers supply native code fallbacks. See [Design Tokens](DesignTokens.md) for the distinction.
 
 ## Best Practices
 
-1. **Start with Small** - The default size of `Small` works well for most desktop applications.
+1. **Choose an initial tier** - CurrentSize starts at Medium; Reset selects Small.
 
 2. **Provide a size picker** - Give users control over the size preference, especially for accessibility.
 
@@ -413,7 +290,7 @@ The sizing system works with [Design Tokens](DesignTokens.md). Each size tier ma
 
 4. **Use tokens, not hardcoded values** - This ensures your custom controls scale properly.
 
-5. **Unsubscribe from events** - Always clean up `SizeChanged` subscriptions in `OnUnloaded` to prevent memory leaks.
+5. **Use the existing lifetime contract** - DaisyBaseContentControl handles loaded size registration and cleanup.
 
 ## Example: Settings Panel
 
@@ -429,7 +306,7 @@ A complete example of a settings panel with size selection:
                controls:FlowerySizeManager.ResponsiveFont="Primary" />
     
     <controls:DaisyButton Content="Sample Button" />
-    <controls:DaisyInput Watermark="Sample Input" />
+    <controls:DaisyInput PlaceholderText="Sample Input" />
 </StackPanel>
 ```
 

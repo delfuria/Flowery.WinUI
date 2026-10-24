@@ -335,7 +335,7 @@ namespace Flowery.WinUI.Gallery
             base.ApplySizeToControls();
 
             var metrics = GetSidebarMetrics();
-            var selectorSize = GetSelectorSize(Size);
+            var selectorSize = GetSelectorSize(ResolvedSize);
 
             if (_languageSelector != null)
             {
@@ -375,7 +375,7 @@ namespace Flowery.WinUI.Gallery
             base.ApplyControlFontSizes();
 
             var resources = Application.Current?.Resources;
-            var selectorSize = GetSelectorSize(Size);
+            var selectorSize = GetSelectorSize(ResolvedSize);
             var fontSize = GetFontSizeForSize(selectorSize, resources);
 
             if (_languageSelector != null)
@@ -452,7 +452,7 @@ namespace Flowery.WinUI.Gallery
             var panel = new StackPanel
             {
                 Spacing = 4,
-                HorizontalAlignment = HorizontalAlignment.Left
+                HorizontalAlignment = HorizontalAlignment.Stretch
             };
             panel.Children.Add(label);
             panel.Children.Add(selector);
@@ -463,7 +463,7 @@ namespace Flowery.WinUI.Gallery
         private StackPanel BuildThemeSelector(SidebarItem item, Panel parentPanel)
         {
             var metrics = GetSidebarMetrics();
-            var selectorSize = GetSelectorSize(Size);
+            var selectorSize = GetSelectorSize(ResolvedSize);
             var selectorHeight = DaisyResourceLookup.GetDefaultHeight(selectorSize);
 
             var selector = new DaisyThemeDropdown
@@ -471,8 +471,7 @@ namespace Flowery.WinUI.Gallery
                 Name = "SidebarThemeSelector",
                 Size = selectorSize,
                 Height = selectorHeight,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                Width = 220,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
                 PlaceholderText = FloweryLocalization.GetStringInternal("Select_Placeholder")
             };
 
@@ -492,7 +491,7 @@ namespace Flowery.WinUI.Gallery
         private StackPanel BuildLanguageSelector(SidebarItem item, Panel parentPanel)
         {
             var metrics = GetSidebarMetrics();
-            var selectorSize = GetSelectorSize(Size);
+            var selectorSize = GetSelectorSize(ResolvedSize);
             var selectorHeight = DaisyResourceLookup.GetDefaultHeight(selectorSize);
 
             var selector = new DaisySelect
@@ -500,8 +499,7 @@ namespace Flowery.WinUI.Gallery
                 Name = "SidebarLanguageSelector",
                 Size = selectorSize,
                 Height = selectorHeight,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                Width = 220,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
                 PlaceholderText = FloweryLocalization.GetStringInternal("Select_Placeholder")
             };
 
@@ -525,14 +523,14 @@ namespace Flowery.WinUI.Gallery
         private StackPanel BuildSizeSelector(SidebarItem item, Panel parentPanel)
         {
             var metrics = GetSidebarMetrics();
-            var selectorSize = GetSelectorSize(Size);
+            var selectorSize = GetSelectorSize(ResolvedSize);
             var selectorHeight = DaisyResourceLookup.GetDefaultHeight(selectorSize);
 
             var panel = new StackPanel
             {
                 Margin = metrics.SelectorPanelMargin,
                 Spacing = 6,
-                HorizontalAlignment = HorizontalAlignment.Left
+                HorizontalAlignment = HorizontalAlignment.Stretch
             };
 
             var selector = new DaisySizeDropdown
@@ -540,8 +538,7 @@ namespace Flowery.WinUI.Gallery
                 Name = "SidebarSizeSelector",
                 Size = selectorSize,
                 Height = selectorHeight,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                Width = 220
+                HorizontalAlignment = HorizontalAlignment.Stretch
             };
 
             FlowerySizeManager.SetIgnoreGlobalSize(selector, true);
@@ -552,8 +549,7 @@ namespace Flowery.WinUI.Gallery
                 Name = "SidebarNeumorphicSelector",
                 Size = selectorSize,
                 Height = selectorHeight,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                Width = 220,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
                 PlaceholderText = FloweryLocalization.GetStringInternal("Select_Placeholder")
             };
             FlowerySizeManager.SetIgnoreGlobalSize(neumorphicSelector, true);

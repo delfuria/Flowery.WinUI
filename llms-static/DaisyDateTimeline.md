@@ -72,6 +72,9 @@ Configure which parts of each date item are shown using the `DisplayElements` fl
 
 ## Size Options
 
+`Size` defaults to `Auto`. `ResolvedSize` reports the effective tier from the global sizing policy.
+Explicit tiers, including Medium, remain authored values. Generated date items use the parent's resolved tier.
+
 | Size | Item Height | Use Case |
 | --- | --- | --- |
 | ExtraSmall | ~56px | Compact toolbars, embedded widgets |
@@ -148,7 +151,7 @@ Configure which parts of each date item are shown using the `DisplayElements` fl
 | `HeaderType` | `DateTimelineHeaderType` | MonthYear | Header display style |
 | `Locale` | `CultureInfo` | CurrentCulture | Culture for date formatting |
 | `ShowTodayHighlight` | `bool` | true | Whether to highlight today's date |
-| `Size` | `DaisySize` | Medium | Overall size of date items |
+| `Size` | `DaisySize` | Auto | Authored tier; `ResolvedSize` reports the effective size |
 | `ItemLayout` | `DateItemLayout` | Vertical | Layout orientation (Vertical or Horizontal) |
 | `MarkedDates` | `IList<DateMarker>?` | null | Collection of dates to highlight with tooltips |
 | `ScrollBarVisibility` | `ScrollBarVisibility` | Hidden | Scrollbar display mode (Hidden still allows mouse wheel/drag) |

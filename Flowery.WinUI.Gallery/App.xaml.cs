@@ -21,6 +21,8 @@ namespace Flowery.WinUI.Gallery
 
         public App()
         {
+            if (RuntimeTestArguments.TryGetRuntimeTestsPath(null, RuntimeArguments ?? Environment.GetCommandLineArgs(), out _))
+                Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "en-US";
             InitializeComponent();
             ConfigureCrashLogging();
         }

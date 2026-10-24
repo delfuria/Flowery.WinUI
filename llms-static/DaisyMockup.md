@@ -39,7 +39,7 @@ The control respects `FlowDirection` and automatically flips chrome positioning:
 | --- | --- | --- |
 | `Variant` | `DaisyMockupVariant` | Selects shell style: Code, Window, or Browser. |
 | `ChromeStyle` | `DaisyChromeStyle` | Window chrome style: Mac, Windows, or Linux. |
-| `Size` | `DaisySize` | Control size (ExtraSmall, Small, Medium, Large). Respects global size manager. |
+| `Size` | `DaisySize` | Defaults to Auto; `ResolvedSize` reports the effective tier. Explicit local values, styles, and bindings retain their tier. |
 | `Url` | `string` | URL displayed in the Browser variant's address bar. |
 | `AppIcon` | `object` | Optional app icon for Windows chrome (accepts PathIcon, Image, etc.). Shows a default icon if not set. |
 

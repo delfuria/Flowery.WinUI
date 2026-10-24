@@ -17,7 +17,7 @@ The table and row controls collect their initial panel content when they load. `
 
 | Property | Description |
 | --- | --- |
-| `Size` | ExtraSmall, Small, Medium (default), Large, or ExtraLarge. Adjusts row padding and font size. |
+| `Size` | Defaults to `Auto`. A concrete table size supplies a default for automatic rows and their content. Explicit child sizes take precedence. |
 | `Zebra` (`bool`) | Applies alternate backgrounds to inactive rows. The first row has index zero. |
 | `PinRows` (`bool`) | Keeps header and footer rows visible in the ancestor `ScrollViewer`. |
 | `PinCols` (`bool`) | Keeps the first cell of each row visible during horizontal scroll. |
@@ -29,7 +29,7 @@ The table and row controls collect their initial panel content when they load. `
 | `DaisyTableRow` | `IsActive` | Highlights the row as selected/active. |
 | `DaisyTableRow` | `HighlightOnHover` | Enables hover highlighting. |
 | `DaisyTableRow` | `IsHeader` | Applies header styling. A final header row acts as the footer for row pinning. |
-| `DaisyTableRow` | `Size` | Selects row padding and font size. The table applies its size to its rows. |
+| `DaisyTableRow` | `Size` | Defaults to `Auto`. `ResolvedSize` selects row padding and font size. Explicit values, styles, and bindings retain their tier. |
 | `DaisyTableCell` | `ColumnWidth` (`double?`) | Sets the width of this cell's column in device-independent pixels. Null uses one star unit. |
 
 Each row has its own column definitions. Matching `ColumnWidth` values keep columns aligned across rows.

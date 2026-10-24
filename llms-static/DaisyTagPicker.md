@@ -21,7 +21,7 @@ DaisyTagPicker is an organized tag selection component inspired by "Animated Tag
 | `SelectedTags` (`IList<string>?`) | Currently selected tags. When null, managed internally. |
 | `Mode` (`DaisyTagPickerMode`) | Tag interaction mode: `Selection` (default) or `Library`. |
 | `Title` (`string`) | Header text for the selected tags box (default: "Selected Tags"). |
-| `Size` (`DaisySize`) | Size preset for the tag chips (default `Small`). |
+| `Size` (`DaisySize`) | Defaults to `Auto`; `ResolvedSize` reports the effective chip tier. Explicit local values, styles, and bindings retain their tier. Auto falls back to Small when global sizing is disabled or ignored. |
 
 ## Events
 

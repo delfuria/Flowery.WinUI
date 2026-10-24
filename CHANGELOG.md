@@ -6,6 +6,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-10-24
+
+### Added
+
+- Sizing: `DaisySize.Auto` (-1) is the default `Size` of every Daisy control. An Auto control takes the size of its containing composite control (button group, avatar group, list row, steps, dock, Fab, accordion, weather forecast) or the global size; `ResolvedSize` reports the concrete tier. The five tiers keep their values 0 to 4. `FlowerySizeManager.ResolveSize` resolves a requested size for an element.
+- `DaisyButton.ContentPadding` (`Thickness?`) and `ResolvedContentPadding`; `DaisyCard.ResolvedBodyPadding`.
+- `DaisyAccordion` and `DaisyAccordionItem`: `Size`. An accordion's size is the default for its items.
+- `DaisyStat`: `ValueFontSize` and `LabelFontSize`.
+- `DaisyBreadcrumbs` and `DaisyBreadcrumbItem`: `SeparatorBrush`. The item's brush wins over the container's.
+- `DaisyNumberFlow.DigitForeground`.
+- `DaisyMenuItem.IsTitle`: a non-interactive section heading (Primary, bold, Base300 divider below) that pointer, keyboard and selection skip.
+- Theming: every palette, including registered custom palettes, provides `DaisyBaseContentMuted` (70 % of BaseContent), `DaisyBaseContentSubtle` and `DaisyBaseContentDisabled` (50 %), and `DaisyButton{Variant}Soft`, `SoftHover` and `SoftBorder` (15, 30 and 45 % of the variant color; Business Primary Soft 12 %) colors and brushes. A color or brush the palette defines itself is kept; high contrast keeps its own brushes.
+
+### Changed
+
+- **Breaking:** Sizing: an unset `Size` now reads `Auto`. Code that reads `Size` for layout or token lookups must read `ResolvedSize`. Constructors, `DaisyControlLifecycle`, the size manager and the Gallery no longer write `Size`, so explicit values, styles and bindings keep their precedence and an explicit Medium stays explicit when the global size changes. Without a global size, Auto resolves to Medium, to Small for `DaisyModifierKeys`, `DaisyDivider`, `DaisyTabsHeaderButtons` and `DaisyTagPicker`, and to Large for `DaisyFab`.
+- **Breaking:** `FlowerySizeManager.ApplySize` throws `ArgumentOutOfRangeException` for `Auto` or a value outside the five tiers. With `EnableGlobalAutoSize` set to false it no longer refreshes responsive TextBlocks; `RefreshAllSizes` catches up all loaded controls.
+- **Breaking:** `DaisyControlLifecycle` only handles theme changes. Its constructor no longer takes `getSize`, `setSize` and `subscribeSizeChanges`. The protected `DaisyComboBoxBase(bool subscribeSizeChanges)` constructor is removed.
+- **Breaking:** `DaisyBaseContentControl`: the virtual `OnGlobalSizeChanged` and `SetControlSize` are replaced by `OnResolvedSizeChanged` and `DefaultSize`.
+- **Breaking:** Button: `Padding` is outer spacing added to the automatic inner padding. Code that set `Padding` to replace the inner padding sets `ContentPadding` instead; `null` selects the automatic padding, zero is kept. Custom templates bind `ResolvedContentPadding`.
+- **Breaking:** Card: `BodyPadding` is `Thickness?`. `null` selects 16/24/32/40/48 by tier (half in Compact); explicit values including zero survive size and variant changes. XAML values stay valid; code and custom templates that need the concrete value read `ResolvedBodyPadding`.
+- Composite controls give Auto children their size without overwriting a child's own `Size`. Dock no longer writes its items' `IconSize` or `IgnoreGlobalSize`; a supplied `DaisyWeatherForecastItem` keeps its `Size`.
+- Soft buttons and button groups use the Soft surface, hover and border brushes in the seven color variants.
+- Breadcrumbs: separators use the Subtle brush at `SeparatorOpacity` 1 (an explicit opacity still multiplies); the last item uses Muted. Authored content inherits the item's foreground.
+- Stat: title and description use the Muted brush at full opacity. Input, PasswordBox and TextArea: hint, helper and optional text use Muted, placeholders Subtle. CalendarDatePicker: the date hint uses the placeholder brush, a selected date the full foreground.
+- ThemeController: the checkbox mode follows the checkbox size tokens.
+- Gallery: the sidebar takes the library widths 190/205/220/235/250 per tier, the four selectors stretch to the sidebar width, and a size change keeps the pane open or closed. Gallery and Photos ignore a saved global size that is not one of the five tiers.
+- Runtime tests run in English, whatever the saved Gallery language.
+- Build: the Skia backdrop capture and image processor call the `DrawBitmap` overloads with `SKSamplingOptions`; the obsolete overloads raised `CS0618`.
+- Build: the Kiosk smoke report has an inconclusive outcome. A scaling checkpoint whose only problem is a zoom panel overflowing the slide is inconclusive instead of failed; its text measures taller in local console sessions than over Remote Desktop. `test_kiosk.ps1` lists inconclusive checks as warnings and fails only on failed checks.
+
+### Fixed
+
+- Button: an authored `MinWidth`, including one from a style or binding, is kept. Every size or shape update reset it to 0 (200 for `Wide`); the `Wide` shape still supplies 200 when nothing else sets a minimum width, and leaving `Wide` removes only that value.
+- IconText: a control that loads again shows its current `Text` and icon. Changes made while it was unloaded, for example in a hidden tab, kept the old content.
+- Tooltip: a tooltip opened with `IsOpen` closes when the control unloads, for example on navigation, and opens again when it loads while `IsOpen` is still true. It stayed on screen without its owner, partly outside the window. `IsOpen` set before the first load now opens the tooltip too.
+- Tour: a step no longer closes when another scroll, such as a page control bringing itself into view, moves its target out of view. The tour scrolls the targets into view again and closes with `TargetUnavailable` only when the target stays hidden. This made the Gallery connector demo test fail intermittently.
+
 ## [1.8.1] - 2026-10-23
 
 ### Added

@@ -107,7 +107,7 @@ namespace Flowery.Controls
         {
             if (_dotVisual == null || _compositor == null) return;
 
-            var amplitude = Math.Max(2f, (float)(DaisyResourceLookup.GetSizeValue(Size) * 0.5));
+            var amplitude = Math.Max(2f, (float)(DaisyResourceLookup.GetSizeValue(ResolvedSize) * 0.5));
 
             var translation = _compositor.CreateVector3KeyFrameAnimation();
             translation.InsertKeyFrame(0f, new Vector3(0, 0, 0));
@@ -169,7 +169,7 @@ namespace Flowery.Controls
         {
             if (_dotVisual == null || _compositor == null) return;
 
-            var amplitude = Math.Max(1f, (float)(DaisyResourceLookup.GetSizeValue(Size) * 0.25));
+            var amplitude = Math.Max(1f, (float)(DaisyResourceLookup.GetSizeValue(ResolvedSize) * 0.25));
 
             var translation = _compositor.CreateVector3KeyFrameAnimation();
             translation.InsertKeyFrame(0f, new Vector3(0, 0, 0));
@@ -293,7 +293,7 @@ namespace Flowery.Controls
         {
             if (_dotVisual == null || _compositor == null) return;
 
-            var amplitude = Math.Max(2f, (float)(DaisyResourceLookup.GetSizeValue(Size) * 0.5));
+            var amplitude = Math.Max(2f, (float)(DaisyResourceLookup.GetSizeValue(ResolvedSize) * 0.5));
 
             var translation = _compositor.CreateVector3KeyFrameAnimation();
             translation.InsertKeyFrame(0f, new Vector3(0, 0, 0));
@@ -311,7 +311,7 @@ namespace Flowery.Controls
         {
             if (_dotVisual == null || _compositor == null) return;
 
-            var step = Math.Max(1f, (float)(DaisyResourceLookup.GetSizeValue(Size) * 0.1));
+            var step = Math.Max(1f, (float)(DaisyResourceLookup.GetSizeValue(ResolvedSize) * 0.1));
 
             var translation = _compositor.CreateVector3KeyFrameAnimation();
             translation.InsertKeyFrame(0f, new Vector3(0, 0, 0));
@@ -468,7 +468,7 @@ namespace Flowery.Controls
             // Re-initialize for animation
             _isAnimating = true;
 
-            var size = _cachedSize > 0 ? _cachedSize : DaisyResourceLookup.GetSizeValue(Size);
+            var size = _cachedSize > 0 ? _cachedSize : DaisyResourceLookup.GetSizeValue(ResolvedSize);
 
             // Re-obtain the visual and restart dot animation
             ElementCompositionPreview.SetIsTranslationEnabled(dot, true);

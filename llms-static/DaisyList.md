@@ -15,6 +15,8 @@ DaisyList is a vertical list container with row and column primitives for struct
 
 | Element | Property | Description |
 | --- | --- | --- |
+| `DaisyList` | `Size` (default `Auto`) | A concrete list size supplies a default for automatic rows and their content. Child `Size` values remain unchanged. |
+| `DaisyListRow` | `Size` (default `Auto`) | `ResolvedSize` supplies row padding. Explicit values, styles, and bindings take precedence over the list and global defaults. |
 | `DaisyListRow` | `GrowColumn` (int, default 1) | 0-based index of the child that should fill remaining width; set `-1` to disable. |
 | `DaisyListRow` | `Spacing` (default 12) | Gap between columns. |
 | `DaisyListColumn` | `Grow` (bool) | Force this column to fill remaining space (overrides `GrowColumn`). |

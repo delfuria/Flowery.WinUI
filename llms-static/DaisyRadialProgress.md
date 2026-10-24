@@ -17,7 +17,7 @@ The control uses design tokens for size-dependent dimensions. When `ShowValue="T
 | --- | --- | --- | --- |
 | ExtraSmall | 24 | 2 | 7 |
 | Small | 32 | 3 | 9 |
-| Medium (default) | 48 | 4 | 12 |
+| Medium | 48 | 4 | 12 |
 | Large | 96 | 6 | 20 |
 | ExtraLarge | 128 | 8 | 28 |
 
@@ -29,7 +29,7 @@ The control uses design tokens for size-dependent dimensions. When `ShowValue="T
 | `Minimum` | `double` | `0` | Minimum value of the range. |
 | `Maximum` | `double` | `100` | Maximum value of the range. |
 | `Variant` | `DaisyProgressVariant` | `Default` | Color variant for the progress arc. |
-| `Size` | `DaisySize` | `Medium` | Size preset (acts as minimum when `ShowValue` is true). |
+| `Size` | `DaisySize` | `Auto` | `ResolvedSize` selects the preset. Explicit values, styles, and bindings win. The preset is a minimum when `ShowValue` is true. |
 | `Thickness` | `double?` | `null` | Stroke thickness (derived from Size if null). |
 | `ShowValue` | `bool` | `true` | Whether to display the percentage label. |
 | `Shimmer` | `bool` | `false` | Enables a subtle breathing opacity animation on the arc. |

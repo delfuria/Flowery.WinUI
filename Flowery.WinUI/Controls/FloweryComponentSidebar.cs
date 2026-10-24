@@ -308,13 +308,15 @@ namespace Flowery.Controls
                 nameof(Size),
                 typeof(DaisySize),
                 typeof(FloweryComponentSidebar),
-                new PropertyMetadata(DaisySize.Medium, OnSizeChanged));
+                new PropertyMetadata(DaisySize.Auto, OnSizeChanged));
 
         public DaisySize Size
         {
             get => (DaisySize)GetValue(SizeProperty);
             set => SetValue(SizeProperty, value);
         }
+
+        public DaisySize ResolvedSize => FlowerySizeManager.ResolveSize(this, Size);
 
         public static readonly DependencyProperty SearchTextProperty =
             DependencyProperty.Register(
@@ -337,26 +339,21 @@ namespace Flowery.Controls
             _lifecycle = new DaisyControlLifecycle(
                 this,
                 OnThemeUpdated,
-                () => Size,
-                s => Size = s,
                 handleLifecycleEvents: false);
+            FlowerySizeManager.Register(this, ApplySizing, () => ResolvedSize);
 
             BuildLayout();
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
             IsEnabledChanged += OnEnabledChanged;
 
-            if (FlowerySizeManager.UseGlobalSizeByDefault && !FlowerySizeManager.GetIgnoreGlobalSize(this))
-            {
-                Size = FlowerySizeManager.CurrentSize;
-            }
         }
 
         // Wrapper for lifecycle - combines all theme-related updates
         private void OnThemeUpdated()
         {
             UpdateThemeResources();
-            ApplyFontSizeForSize(Size);
+            ApplyFontSizeForSize(ResolvedSize);
             UpdateTextForegrounds();
             RefreshItemVisuals();
         }
@@ -417,7 +414,7 @@ namespace Flowery.Controls
             Content = _rootBorder;
 
             UpdateThemeResources();
-            ApplyFontSizeForSize(Size);
+            ApplyFontSizeForSize(ResolvedSize);
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
@@ -426,7 +423,7 @@ namespace Flowery.Controls
 
             // Apply current theme state (theme may have been applied before we subscribed)
             UpdateThemeResources();
-            ApplyFontSizeForSize(Size);
+            ApplyFontSizeForSize(ResolvedSize);
             UpdateTextForegrounds();
 
             if (_pendingRebuild)
@@ -488,7 +485,7 @@ namespace Flowery.Controls
         {
             if (d is FloweryComponentSidebar sidebar && e.NewValue is bool enabled && enabled)
             {
-                sidebar.ApplySidebarWidthForSize(sidebar.Size);
+                sidebar.ApplySidebarWidthForSize(sidebar.ResolvedSize);
             }
         }
 
@@ -496,10 +493,15 @@ namespace Flowery.Controls
         {
             if (d is FloweryComponentSidebar sidebar)
             {
-                sidebar.ApplySidebarWidthForSize(sidebar.Size);
-                sidebar.ApplyFontSizeForSize(sidebar.Size);
-                sidebar.ApplySizeToControls();
+                sidebar.ApplySizing();
             }
+        }
+
+        private void ApplySizing()
+        {
+            ApplySidebarWidthForSize(ResolvedSize);
+            ApplyFontSizeForSize(ResolvedSize);
+            ApplySizeToControls();
         }
 
         private static void OnSearchTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -625,7 +627,7 @@ namespace Flowery.Controls
         {
             if (_searchInput != null)
             {
-                _searchInput.Size = Size;
+                _searchInput.Size = ResolvedSize;
             }
         }
 
@@ -690,7 +692,7 @@ namespace Flowery.Controls
             if (resources != null)
                 DaisyTokenDefaults.EnsureDefaults(resources);
 
-            var fontSize = GetFontSizeForSize(Size, resources);
+            var fontSize = GetFontSizeForSize(ResolvedSize, resources);
 
             if (_searchInput != null)
             {
@@ -715,10 +717,10 @@ namespace Flowery.Controls
 
                 if (expander.Header is DaisyIconText dit)
                 {
-                    dit.FontSizeOverride = GetHeaderFontSize(Size);
+                    dit.FontSizeOverride = GetHeaderFontSize(ResolvedSize);
                     dit.IconSize = metrics.HeaderIconSize;
                     dit.Spacing = metrics.HeaderSpacing;
-                    dit.Size = Size;
+                    dit.Size = ResolvedSize;
                 }
             }
         }
@@ -731,19 +733,19 @@ namespace Flowery.Controls
                 view.Container.Padding = metrics.ItemPadding;
                 view.Container.Margin = metrics.ItemMargin;
 
-                view.TextItem.FontSizeOverride = GetItemFontSize(Size);
-                view.TextItem.Size = Size;
+                view.TextItem.FontSizeOverride = GetItemFontSize(ResolvedSize);
+                view.TextItem.Size = ResolvedSize;
 
                 if (view.FavoriteFilled is DaisyIconText filled)
                 {
                     filled.IconSize = metrics.FavoriteIconSize;
-                    filled.Size = Size;
+                    filled.Size = ResolvedSize;
                 }
 
                 if (view.FavoriteOutline is DaisyIconText outline)
                 {
                     outline.IconSize = metrics.FavoriteIconSize;
-                    outline.Size = Size;
+                    outline.Size = ResolvedSize;
                 }
             }
         }
@@ -919,10 +921,10 @@ namespace Flowery.Controls
                 Text = category.DisplayName,
                 // Use IconData (path string) instead of IconGeometry to avoid CloneGeometry issues on Skia
                 IconData = FloweryPathHelpers.GetIconPathData(category.IconKey),
-                Size = Size,
+                Size = ResolvedSize,
                 Spacing = _currentMetrics.HeaderSpacing,
                 IconSize = _currentMetrics.HeaderIconSize,
-                FontSizeOverride = GetHeaderFontSize(Size),
+                FontSizeOverride = GetHeaderFontSize(ResolvedSize),
                 FontWeight = FontWeights.SemiBold,
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(4, 0, 0, 0),
@@ -1137,7 +1139,7 @@ namespace Flowery.Controls
             var textItem = new DaisyIconText
             {
                 Text = item.DisplayName,
-                Size = Size,
+                Size = ResolvedSize,
                 VerticalAlignment = VerticalAlignment.Center,
                 HorizontalContentAlignment = HorizontalAlignment.Left,
                 NeumorphicEnabled = false
@@ -1178,7 +1180,7 @@ namespace Flowery.Controls
                     // Use IconData (path string) instead of IconGeometry to avoid CloneGeometry issues on Skia
                     IconData = FloweryPathHelpers.GetIconPathData("DaisyIconStarFilled"),
                     IconSize = metrics.FavoriteIconSize,
-                    Size = Size,
+                    Size = ResolvedSize,
                     Foreground = GetBrush(Application.Current?.Resources, "DaisyWarningBrush", new SolidColorBrush(Color.FromArgb(255, 245, 158, 11))),
                     NeumorphicEnabled = false
                 };
@@ -1194,7 +1196,7 @@ namespace Flowery.Controls
                     // Use IconData (path string) instead of IconGeometry to avoid CloneGeometry issues on Skia
                     IconData = FloweryPathHelpers.GetIconPathData("DaisyIconStarOutline"),
                     IconSize = metrics.FavoriteIconSize,
-                    Size = Size,
+                    Size = ResolvedSize,
                     Foreground = GetBrush(Application.Current?.Resources, "DaisyBaseContentBrush", new SolidColorBrush(Colors.White)),
                     NeumorphicEnabled = false
                 };
@@ -1679,7 +1681,7 @@ namespace Flowery.Controls
 
         protected SidebarMetrics GetSidebarMetrics()
         {
-            return Size switch
+            return ResolvedSize switch
             {
                 DaisySize.ExtraSmall => ExtraSmallMetrics,
                 DaisySize.Small => SmallMetrics,

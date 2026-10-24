@@ -22,6 +22,30 @@
             <SolidColorBrush x:Key="DaisyBase200Brush" Color="#191E24" />
             <SolidColorBrush x:Key="DaisyBase300Brush" Color="#15191E" />
             <SolidColorBrush x:Key="DaisyBaseContentBrush" Color="#A6ADBB" />
+            <SolidColorBrush x:Key="DaisyBaseContentMutedBrush" Color="#B2A6ADBB" />
+            <SolidColorBrush x:Key="DaisyBaseContentSubtleBrush" Color="#80A6ADBB" />
+            <SolidColorBrush x:Key="DaisyBaseContentDisabledBrush" Color="#80A6ADBB" />
+            <SolidColorBrush x:Key="DaisyButtonPrimarySoftBrush" Color="#26570DF8" />
+            <SolidColorBrush x:Key="DaisyButtonPrimarySoftHoverBrush" Color="#4C570DF8" />
+            <SolidColorBrush x:Key="DaisyButtonPrimarySoftBorderBrush" Color="#73570DF8" />
+            <SolidColorBrush x:Key="DaisyButtonSecondarySoftBrush" Color="#26F000B8" />
+            <SolidColorBrush x:Key="DaisyButtonSecondarySoftHoverBrush" Color="#4CF000B8" />
+            <SolidColorBrush x:Key="DaisyButtonSecondarySoftBorderBrush" Color="#73F000B8" />
+            <SolidColorBrush x:Key="DaisyButtonAccentSoftBrush" Color="#2637CDBE" />
+            <SolidColorBrush x:Key="DaisyButtonAccentSoftHoverBrush" Color="#4C37CDBE" />
+            <SolidColorBrush x:Key="DaisyButtonAccentSoftBorderBrush" Color="#7337CDBE" />
+            <SolidColorBrush x:Key="DaisyButtonInfoSoftBrush" Color="#2600B5FF" />
+            <SolidColorBrush x:Key="DaisyButtonInfoSoftHoverBrush" Color="#4C00B5FF" />
+            <SolidColorBrush x:Key="DaisyButtonInfoSoftBorderBrush" Color="#7300B5FF" />
+            <SolidColorBrush x:Key="DaisyButtonSuccessSoftBrush" Color="#2600A96E" />
+            <SolidColorBrush x:Key="DaisyButtonSuccessSoftHoverBrush" Color="#4C00A96E" />
+            <SolidColorBrush x:Key="DaisyButtonSuccessSoftBorderBrush" Color="#7300A96E" />
+            <SolidColorBrush x:Key="DaisyButtonWarningSoftBrush" Color="#26FFBE00" />
+            <SolidColorBrush x:Key="DaisyButtonWarningSoftHoverBrush" Color="#4CFFBE00" />
+            <SolidColorBrush x:Key="DaisyButtonWarningSoftBorderBrush" Color="#73FFBE00" />
+            <SolidColorBrush x:Key="DaisyButtonErrorSoftBrush" Color="#26FF5861" />
+            <SolidColorBrush x:Key="DaisyButtonErrorSoftHoverBrush" Color="#4CFF5861" />
+            <SolidColorBrush x:Key="DaisyButtonErrorSoftBorderBrush" Color="#73FF5861" />
             <SolidColorBrush x:Key="DaisyBorderBrush" Color="#15191E" />
             <SolidColorBrush x:Key="DaisyFocusBrush" Color="#570DF8" />
             <SolidColorBrush x:Key="DaisyLinkBrush" Color="#570DF8" />
@@ -55,6 +79,30 @@
             <SolidColorBrush x:Key="DaisyBase200Brush" Color="#F2F2F2" />
             <SolidColorBrush x:Key="DaisyBase300Brush" Color="#D1D5DB" />
             <SolidColorBrush x:Key="DaisyBaseContentBrush" Color="#18181B" />
+            <SolidColorBrush x:Key="DaisyBaseContentMutedBrush" Color="#B218181B" />
+            <SolidColorBrush x:Key="DaisyBaseContentSubtleBrush" Color="#8018181B" />
+            <SolidColorBrush x:Key="DaisyBaseContentDisabledBrush" Color="#8018181B" />
+            <SolidColorBrush x:Key="DaisyButtonPrimarySoftBrush" Color="#26422AD5" />
+            <SolidColorBrush x:Key="DaisyButtonPrimarySoftHoverBrush" Color="#4C422AD5" />
+            <SolidColorBrush x:Key="DaisyButtonPrimarySoftBorderBrush" Color="#73422AD5" />
+            <SolidColorBrush x:Key="DaisyButtonSecondarySoftBrush" Color="#26F43098" />
+            <SolidColorBrush x:Key="DaisyButtonSecondarySoftHoverBrush" Color="#4CF43098" />
+            <SolidColorBrush x:Key="DaisyButtonSecondarySoftBorderBrush" Color="#73F43098" />
+            <SolidColorBrush x:Key="DaisyButtonAccentSoftBrush" Color="#2600D3BB" />
+            <SolidColorBrush x:Key="DaisyButtonAccentSoftHoverBrush" Color="#4C00D3BB" />
+            <SolidColorBrush x:Key="DaisyButtonAccentSoftBorderBrush" Color="#7300D3BB" />
+            <SolidColorBrush x:Key="DaisyButtonInfoSoftBrush" Color="#2600BAFE" />
+            <SolidColorBrush x:Key="DaisyButtonInfoSoftHoverBrush" Color="#4C00BAFE" />
+            <SolidColorBrush x:Key="DaisyButtonInfoSoftBorderBrush" Color="#7300BAFE" />
+            <SolidColorBrush x:Key="DaisyButtonSuccessSoftBrush" Color="#2600D390" />
+            <SolidColorBrush x:Key="DaisyButtonSuccessSoftHoverBrush" Color="#4C00D390" />
+            <SolidColorBrush x:Key="DaisyButtonSuccessSoftBorderBrush" Color="#7300D390" />
+            <SolidColorBrush x:Key="DaisyButtonWarningSoftBrush" Color="#26FCB700" />
+            <SolidColorBrush x:Key="DaisyButtonWarningSoftHoverBrush" Color="#4CFCB700" />
+            <SolidColorBrush x:Key="DaisyButtonWarningSoftBorderBrush" Color="#73FCB700" />
+            <SolidColorBrush x:Key="DaisyButtonErrorSoftBrush" Color="#26FF627D" />
+            <SolidColorBrush x:Key="DaisyButtonErrorSoftHoverBrush" Color="#4CFF627D" />
+            <SolidColorBrush x:Key="DaisyButtonErrorSoftBorderBrush" Color="#73FF627D" />
             <SolidColorBrush x:Key="DaisyBorderBrush" Color="#D1D5DB" />
             <SolidColorBrush x:Key="DaisyFocusBrush" Color="#422AD5" />
             <SolidColorBrush x:Key="DaisyLinkBrush" Color="#422AD5" />
@@ -88,6 +136,30 @@
             <SolidColorBrush x:Key="DaisyBase200Brush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="DaisyBase300Brush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="DaisyBaseContentBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyBaseContentMutedBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyBaseContentSubtleBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyBaseContentDisabledBrush" Color="{ThemeResource SystemColorGrayTextColor}" />
+            <SolidColorBrush x:Key="DaisyButtonPrimarySoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="DaisyButtonPrimarySoftHoverBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="DaisyButtonPrimarySoftBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyButtonSecondarySoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="DaisyButtonSecondarySoftHoverBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="DaisyButtonSecondarySoftBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyButtonAccentSoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="DaisyButtonAccentSoftHoverBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="DaisyButtonAccentSoftBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyButtonInfoSoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="DaisyButtonInfoSoftHoverBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="DaisyButtonInfoSoftBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyButtonSuccessSoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="DaisyButtonSuccessSoftHoverBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="DaisyButtonSuccessSoftBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyButtonWarningSoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="DaisyButtonWarningSoftHoverBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="DaisyButtonWarningSoftBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="DaisyButtonErrorSoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="DaisyButtonErrorSoftHoverBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="DaisyButtonErrorSoftBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
             <SolidColorBrush x:Key="DaisyBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
             <SolidColorBrush x:Key="DaisyFocusBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <SolidColorBrush x:Key="DaisyLinkBrush" Color="{ThemeResource SystemColorHotlightColor}" />

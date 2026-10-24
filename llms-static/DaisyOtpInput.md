@@ -16,7 +16,7 @@ DaisyOtpInput is an OTP / verification code input composed of multiple single-ch
 | `AutoSelectOnFocus` (bool) | Selects slot content when focused (default true). |
 | `SeparatorInterval` (int) | Inserts a separator every N slots (0 disables separators). |
 | `SeparatorText` (string) | Separator text (default `–`). |
-| `Size` (`DaisySize`) | Size preset for the slots. |
+| `Size` (`DaisySize`) | Defaults to `Auto`; `ResolvedSize` reports the effective slot tier. Explicit local values, styles, and bindings retain their tier. |
 
 ## Events
 

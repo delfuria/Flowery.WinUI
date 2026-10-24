@@ -102,7 +102,8 @@ namespace Flowery.WinUI.Gallery
             if (string.IsNullOrWhiteSpace(line))
                 return null;
 
-            return Enum.TryParse(line.Trim(), ignoreCase: true, out DaisySize size) ? size : null;
+            return Enum.TryParse(line.Trim(), ignoreCase: true, out DaisySize size)
+                && size is >= DaisySize.ExtraSmall and <= DaisySize.ExtraLarge ? size : null;
         }
 
         public static void SaveGlobalSize(DaisySize size)
