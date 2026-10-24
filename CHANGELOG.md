@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Button: an authored `MinWidth`, including one from a style or binding, is kept. Every size or shape update reset it to 0 (200 for `Wide`); the `Wide` shape still supplies 200 when nothing else sets a minimum width, and leaving `Wide` removes only that value.
 - IconText: a control that loads again shows its current `Text` and icon. Changes made while it was unloaded, for example in a hidden tab, kept the old content.
+- Glass: `DaisyGlass` applies its `Padding` to the content. It builds its visual tree in code and ignored `Padding`, so the content touched the edges and the glass was only as tall as its content.
 - Tooltip: a tooltip opened with `IsOpen` closes when the control unloads, for example on navigation, and opens again when it loads while `IsOpen` is still true. It stayed on screen without its owner, partly outside the window. `IsOpen` set before the first load now opens the tooltip too.
 - Tour: a step no longer closes when another scroll, such as a page control bringing itself into view, moves its target out of view. The tour scrolls the targets into view again and closes with `TargetUnavailable` only when the target stays hidden. This made the Gallery connector demo test fail intermittently.
 
