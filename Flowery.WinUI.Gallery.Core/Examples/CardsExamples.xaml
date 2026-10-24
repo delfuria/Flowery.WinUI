@@ -5,6 +5,24 @@
     xmlns:daisy="using:Flowery.Controls"
     xmlns:local="using:Flowery.WinUI.Gallery.Examples">
 
+    <local:ScrollableExamplePage.Resources>
+        <!-- Each glass demo panel has a row of six stars: two stay left of the panel,
+             four run half behind its lower edge, so sharp and covered stars sit side by side. -->
+        <Style x:Key="GlassDemoStarRowStyle" TargetType="Grid">
+            <Setter Property="Margin" Value="-80,0,0,-18" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+        </Style>
+        <Style x:Key="GlassDemoStarStyle" TargetType="TextBlock">
+            <Setter Property="Text" Value="★" />
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{ThemeResource GalleryMediaAccentTextBrush}" />
+        </Style>
+        <Style x:Key="GlassDemoGoldStarStyle" TargetType="TextBlock" BasedOn="{StaticResource GlassDemoStarStyle}">
+            <Setter Property="Foreground" Value="{ThemeResource GalleryMediaGoldTextBrush}" />
+        </Style>
+    </local:ScrollableExamplePage.Resources>
+
     <ScrollViewer x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto" IsTabStop="True" Background="Transparent" Padding="0,0,0,32">
         <StackPanel Spacing="24" Margin="24,0,24,32">
 
@@ -367,41 +385,89 @@
 
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,24,0,88" Spacing="12">
                             <TextBlock Text="Compare: Simulated vs Real Blur" FontSize="16" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity80}" HorizontalAlignment="Center"/>
-                            <Grid>
-                                <!-- The stars straddle the lower edge of the first two cards and start before the first one,
-                                     so the same stars show sharp, behind simulated glass and behind real blur. -->
-                                <TextBlock Text="★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★" FontSize="28" Foreground="{ThemeResource GalleryMediaAccentTextBrush}"
-                                           HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-40,0,0,-18"/>
-                                <!-- Glass cards overlaid on background -->
-                                <daisy:WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                 HorizontalSpacing="20" VerticalSpacing="20">
-                                <daisy:DaisyCard IsGlass="True" Width="250" Foreground="{ThemeResource GalleryGlassTextBrush}">
-                                    <StackPanel Spacing="8">
-                                        <TextBlock Text="Simulated Glass" FontWeight="Bold" FontSize="18"/>
-                                        <TextBlock Text="No real blur - text behind stays sharp." TextWrapping="Wrap"/>
-                                        <daisy:DaisyButton Content="Action" Size="Small" HorizontalAlignment="Right"/>
-                                    </StackPanel>
-                                </daisy:DaisyCard>
+                            <!-- Glass cards overlaid on background; the left margin leaves room for the first card's free stars. -->
+                            <daisy:WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                             HorizontalSpacing="100" VerticalSpacing="32" Margin="80,0,0,0">
+                                <Grid>
+                                    <Grid Style="{StaticResource GlassDemoStarRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40" />
+                                            <ColumnDefinition Width="40" />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="1" Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="2" Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="3" Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="4" Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="5" Style="{StaticResource GlassDemoStarStyle}" />
+                                    </Grid>
+                                    <daisy:DaisyCard IsGlass="True" Width="250" Foreground="{ThemeResource GalleryGlassTextBrush}">
+                                        <StackPanel Spacing="8">
+                                            <TextBlock Text="Simulated Glass" FontWeight="Bold" FontSize="18"/>
+                                            <TextBlock Text="No real blur - text behind stays sharp." TextWrapping="Wrap"/>
+                                            <daisy:DaisyButton Content="Action" Size="Small" HorizontalAlignment="Right"/>
+                                        </StackPanel>
+                                    </daisy:DaisyCard>
+                                </Grid>
 
-                                <daisy:DaisyCard IsGlass="True" EnableBackdropBlur="True" BlurMode="SkiaSharp"
-                                                 GlassBlur="30" GlassSaturation="0.8" Width="250" Foreground="{ThemeResource GalleryGlassTextBrush}">
-                                    <StackPanel Spacing="8">
-                                        <TextBlock Text="Skia Blur Card" FontWeight="Bold" FontSize="18"/>
-                                        <TextBlock Text="Real blur - text behind is blurred!" TextWrapping="Wrap"/>
-                                        <daisy:DaisyButton Content="Action" Size="Small" HorizontalAlignment="Right"/>
-                                    </StackPanel>
-                                </daisy:DaisyCard>
+                                <Grid>
+                                    <Grid Style="{StaticResource GlassDemoStarRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40" />
+                                            <ColumnDefinition Width="40" />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="1" Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="2" Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="3" Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="4" Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="5" Style="{StaticResource GlassDemoStarStyle}" />
+                                    </Grid>
+                                    <daisy:DaisyCard IsGlass="True" EnableBackdropBlur="True" BlurMode="SkiaSharp"
+                                                     GlassBlur="30" GlassSaturation="0.8" Width="250" Foreground="{ThemeResource GalleryGlassTextBrush}">
+                                        <StackPanel Spacing="8">
+                                            <TextBlock Text="Skia Blur Card" FontWeight="Bold" FontSize="18"/>
+                                            <TextBlock Text="Real blur - text behind is blurred!" TextWrapping="Wrap"/>
+                                            <daisy:DaisyButton Content="Action" Size="Small" HorizontalAlignment="Right"/>
+                                        </StackPanel>
+                                    </daisy:DaisyCard>
+                                </Grid>
 
-                                <daisy:DaisyCard IsGlass="True" GlassTint="#000000" GlassOpacity="0.4"
-                                                 EnableBackdropBlur="True" BlurMode="BitmapCapture"
-                                                 GlassBlur="40" Width="250">
-                                    <StackPanel Spacing="8">
-                                        <TextBlock Text="Dark Blur Glass" FontWeight="Bold" FontSize="18" Foreground="{ThemeResource GalleryMediaTextBrush}"/>
-                                        <TextBlock Text="Dark tint + blur = frosted dark glass." TextWrapping="Wrap" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity90}"/>
-                                    </StackPanel>
-                                </daisy:DaisyCard>
-                                </daisy:WrapPanel>
-                            </Grid>
+                                <Grid>
+                                    <Grid Style="{StaticResource GlassDemoStarRowStyle}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40" />
+                                            <ColumnDefinition Width="40" />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="1" Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="2" Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="3" Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="4" Style="{StaticResource GlassDemoStarStyle}" />
+                                        <TextBlock Grid.Column="5" Style="{StaticResource GlassDemoStarStyle}" />
+                                    </Grid>
+                                    <daisy:DaisyCard IsGlass="True" GlassTint="#000000" GlassOpacity="0.4"
+                                                     EnableBackdropBlur="True" BlurMode="BitmapCapture"
+                                                     GlassBlur="40" Width="250">
+                                        <StackPanel Spacing="8">
+                                            <TextBlock Text="Dark Blur Glass" FontWeight="Bold" FontSize="18" Foreground="{ThemeResource GalleryMediaTextBrush}"/>
+                                            <TextBlock Text="Dark tint + blur = frosted dark glass." TextWrapping="Wrap" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity90}"/>
+                                        </StackPanel>
+                                    </daisy:DaisyCard>
+                                </Grid>
+                            </daisy:WrapPanel>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -437,14 +503,26 @@
                         <TextBlock Text="●●●" FontSize="48" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity50}"
                                    HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,16"/>
 
-                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <!-- The stars straddle the lower edge of the glass panels and extend past both sides,
-                                 so sharp and covered halves of the same stars show what the overlay does. -->
-                            <TextBlock Text="★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★" FontSize="28" Foreground="{ThemeResource GalleryMediaAccentTextBrush}"
-                                       HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="-80,0,-80,-18"/>
-
-                            <!-- Glass panels on top -->
-                            <daisy:WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalSpacing="20" VerticalSpacing="20">
+                        <!-- Glass panels on top; the left margin leaves room for the first panel's free stars. -->
+                        <daisy:WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                         HorizontalSpacing="100" VerticalSpacing="32" Margin="80,0,0,0">
+                            <Grid>
+                                <Grid Style="{StaticResource GlassDemoStarRowStyle}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40" />
+                                        <ColumnDefinition Width="40" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="1" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="2" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="3" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="4" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="5" Style="{StaticResource GlassDemoStarStyle}" />
+                                </Grid>
                                 <daisy:DaisyGlass Padding="24" CornerRadius="16" Width="220">
                                     <StackPanel Spacing="8">
                                         <TextBlock Text="Simulated" FontWeight="Bold" FontSize="18"
@@ -454,7 +532,25 @@
                                                    Foreground="{ThemeResource DaisyBaseContentBrush}"/>
                                     </StackPanel>
                                 </daisy:DaisyGlass>
+                            </Grid>
 
+                            <Grid>
+                                <Grid Style="{StaticResource GlassDemoStarRowStyle}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40" />
+                                        <ColumnDefinition Width="40" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="1" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="2" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="3" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="4" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="5" Style="{StaticResource GlassDemoStarStyle}" />
+                                </Grid>
                                 <daisy:DaisyGlass Padding="24" CornerRadius="16" Width="220"
                                                   GlassTint="#1a1a2e" GlassTintOpacity="0.7">
                                     <StackPanel Spacing="8">
@@ -462,8 +558,8 @@
                                         <TextBlock Text="Just tinted overlay." TextWrapping="Wrap" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity85}"/>
                                     </StackPanel>
                                 </daisy:DaisyGlass>
-                            </daisy:WrapPanel>
-                        </Grid>
+                            </Grid>
+                        </daisy:WrapPanel>
                     </Grid>
                 </Border>
             </StackPanel>
@@ -488,8 +584,6 @@
                         <!-- Background content spread across entire area -->
                         <TextBlock Text="BACKGROUND" FontSize="48" FontWeight="ExtraBold" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity90}"
                                    HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,30,0,0"/>
-                        <TextBlock Text="★ ★ ★ ★ ★" FontSize="36" Foreground="{ThemeResource GalleryMediaAccentTextBrush}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         <TextBlock Text="TEXT BEHIND GLASS" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity80}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,60,0,0"/>
                         <TextBlock Text="BLUR" FontSize="72" FontWeight="ExtraBold" Foreground="{ThemeResource GalleryMediaMutedTextBrush}"
@@ -497,25 +591,62 @@
                         <TextBlock Text="●●●●●" FontSize="48" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity60}"
                                    HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="20"/>
 
-                        <!-- Glass panels centered, overlapping the background content -->
-                        <daisy:WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalSpacing="20">
-                            <daisy:DaisyGlass Padding="24" CornerRadius="16" Width="220" Height="140"
-                                              EnableBackdropBlur="True" BlurMode="BitmapCapture"
-                                              GlassBlur="25" Foreground="{ThemeResource GalleryGlassTextBrush}">
-                                <StackPanel Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock Text="Bitmap Capture" FontWeight="Bold" FontSize="18"/>
-                                    <TextBlock Text="Blur=25" TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </daisy:DaisyGlass>
+                        <!-- Glass panels centered, overlapping the background content; the left margin leaves room for the first panel's free stars. -->
+                        <daisy:WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                         HorizontalSpacing="100" VerticalSpacing="32" Margin="80,0,0,0">
+                            <Grid>
+                                <Grid Style="{StaticResource GlassDemoStarRowStyle}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40" />
+                                        <ColumnDefinition Width="40" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="1" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="2" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="3" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="4" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="5" Style="{StaticResource GlassDemoStarStyle}" />
+                                </Grid>
+                                <daisy:DaisyGlass Padding="24" CornerRadius="16" Width="220" Height="140"
+                                                  EnableBackdropBlur="True" BlurMode="BitmapCapture"
+                                                  GlassBlur="25" Foreground="{ThemeResource GalleryGlassTextBrush}">
+                                    <StackPanel Spacing="8" VerticalAlignment="Center">
+                                        <TextBlock Text="Bitmap Capture" FontWeight="Bold" FontSize="18"/>
+                                        <TextBlock Text="Blur=25" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </daisy:DaisyGlass>
+                            </Grid>
 
-                            <daisy:DaisyGlass Padding="24" CornerRadius="16" Width="220" Height="140"
-                                              EnableBackdropBlur="True" BlurMode="BitmapCapture"
-                                              GlassBlur="50" GlassTint="#1a1a2e" GlassTintOpacity="0.5">
-                                <StackPanel Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock Text="Heavy Blur" FontWeight="Bold" FontSize="18" Foreground="{ThemeResource GalleryMediaTextBrush}"/>
-                                    <TextBlock Text="Blur=50, dark tint" TextWrapping="Wrap" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity85}"/>
-                                </StackPanel>
-                            </daisy:DaisyGlass>
+                            <Grid>
+                                <Grid Style="{StaticResource GlassDemoStarRowStyle}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40" />
+                                        <ColumnDefinition Width="40" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="1" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="2" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="3" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="4" Style="{StaticResource GlassDemoStarStyle}" />
+                                    <TextBlock Grid.Column="5" Style="{StaticResource GlassDemoStarStyle}" />
+                                </Grid>
+                                <daisy:DaisyGlass Padding="24" CornerRadius="16" Width="220" Height="140"
+                                                  EnableBackdropBlur="True" BlurMode="BitmapCapture"
+                                                  GlassBlur="50" GlassTint="#1a1a2e" GlassTintOpacity="0.5">
+                                    <StackPanel Spacing="8" VerticalAlignment="Center">
+                                        <TextBlock Text="Heavy Blur" FontWeight="Bold" FontSize="18" Foreground="{ThemeResource GalleryMediaTextBrush}"/>
+                                        <TextBlock Text="Blur=50, dark tint" TextWrapping="Wrap" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity85}"/>
+                                    </StackPanel>
+                                </daisy:DaisyGlass>
+                            </Grid>
                         </daisy:WrapPanel>
                     </Grid>
                 </Border>
@@ -539,21 +670,39 @@
                         <StackPanel Margin="20">
                             <TextBlock Text="FULL WIDTH TEST" FontSize="32" FontWeight="ExtraBold" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity90}"/>
                             <TextBlock Text="Background content blurred by the glass panel" FontSize="16" Foreground="{ThemeResource GalleryMediaTextBrush}" Opacity="{ThemeResource GalleryOpacity80}" Margin="0,8,0,0"/>
-                            <TextBlock Text="* * * * * * * *" FontSize="28" Foreground="{ThemeResource GalleryMediaGoldTextBrush}" Margin="0,12,0,0"/>
                         </StackPanel>
                         <TextBlock Text="BLUR" FontSize="72" FontWeight="ExtraBold" Foreground="{ThemeResource GalleryMediaMutedTextBrush}"
                                    HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="20"/>
 
-                        <daisy:DaisyGlass Margin="40" Height="120" VerticalAlignment="Center"
-                                          EnableBackdropBlur="True" BlurMode="SkiaSharp"
-                                          GlassBlur="30" GlassSaturation="0.5"
-                                          GlassTint="#FFFFFF" GlassTintOpacity="0.15"
-                                          GlassBorderOpacity="0.3" Foreground="{ThemeResource GalleryGlassTextBrush}">
-                            <StackPanel Spacing="8" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBlock Text="Milky Glass Panel" FontWeight="Bold" FontSize="24" HorizontalAlignment="Center"/>
-                                <TextBlock Text="Blur=30, Saturation=50%" HorizontalAlignment="Center" Opacity="{ThemeResource GalleryOpacity80}"/>
-                            </StackPanel>
-                        </daisy:DaisyGlass>
+                        <!-- The wide panel keeps its four covered stars at its left end, clear of the BLUR text. -->
+                        <Grid Margin="100,40" VerticalAlignment="Center">
+                            <Grid Style="{StaticResource GlassDemoStarRowStyle}" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40" />
+                                    <ColumnDefinition Width="40" />
+                                    <ColumnDefinition Width="40" />
+                                    <ColumnDefinition Width="40" />
+                                    <ColumnDefinition Width="40" />
+                                    <ColumnDefinition Width="40" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource GlassDemoGoldStarStyle}" />
+                                <TextBlock Grid.Column="1" Style="{StaticResource GlassDemoGoldStarStyle}" />
+                                <TextBlock Grid.Column="2" Style="{StaticResource GlassDemoGoldStarStyle}" />
+                                <TextBlock Grid.Column="3" Style="{StaticResource GlassDemoGoldStarStyle}" />
+                                <TextBlock Grid.Column="4" Style="{StaticResource GlassDemoGoldStarStyle}" />
+                                <TextBlock Grid.Column="5" Style="{StaticResource GlassDemoGoldStarStyle}" />
+                            </Grid>
+                            <daisy:DaisyGlass Height="120"
+                                              EnableBackdropBlur="True" BlurMode="SkiaSharp"
+                                              GlassBlur="30" GlassSaturation="0.5"
+                                              GlassTint="#FFFFFF" GlassTintOpacity="0.15"
+                                              GlassBorderOpacity="0.3" Foreground="{ThemeResource GalleryGlassTextBrush}">
+                                <StackPanel Spacing="8" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock Text="Milky Glass Panel" FontWeight="Bold" FontSize="24" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Blur=30, Saturation=50%" HorizontalAlignment="Center" Opacity="{ThemeResource GalleryOpacity80}"/>
+                                </StackPanel>
+                            </daisy:DaisyGlass>
+                        </Grid>
                     </Grid>
                 </Border>
             </StackPanel>
