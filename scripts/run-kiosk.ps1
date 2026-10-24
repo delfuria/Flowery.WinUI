@@ -4,7 +4,7 @@ param(
     [switch]$SkipBuild,
     [switch]$Manual,
     [switch]$NoWait,
-    [ValidateRange(0, 16)][int]$Monitor = 2,
+    [ValidateRange(0, 16)][int]$Monitor = 0,
     [ValidateSet('Full', 'UpperHalf', 'LowerHalf')][string]$WindowRegion = 'LowerHalf',
     [string]$SdkVersion,
     [string]$DotNetPath

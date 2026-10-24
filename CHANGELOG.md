@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Runtime tests run in English, whatever the saved Gallery language.
 - Build: the Skia backdrop capture and image processor call the `DrawBitmap` overloads with `SKSamplingOptions`; the obsolete overloads raised `CS0618`.
 - Build: the Kiosk smoke report has an inconclusive outcome. A scaling checkpoint whose only problem is a zoom panel overflowing the slide is inconclusive instead of failed; its text measures taller in local console sessions than over Remote Desktop. `test_kiosk.ps1` lists inconclusive checks as warnings and fails only on failed checks.
-- Build: `test_windows.ps1`, `test_kiosk.ps1` and `run-kiosk.ps1` accept `-WindowRegion UpperHalf`, and the Gallery, Kiosk and Photos accept `FLOWERY_MONITOR_REGION=upper-half`, to place the window in the upper half of the chosen monitor. The physical rendering probe checks that region too.
+- Build: `test_windows.ps1`, `test_kiosk.ps1` and `run-kiosk.ps1` accept `-WindowRegion UpperHalf`, and the Gallery, Kiosk and Photos accept `FLOWERY_MONITOR_REGION=upper-half`, to place the window in the upper half of the chosen monitor. The physical rendering probe checks that region too. Window placement stays optional: `run-kiosk.ps1` no longer defaults to monitor 2 and, like the test scripts, leaves the window to Windows unless `-Monitor` is given.
 - Release: every release asset has a signed build provenance attestation, verifiable with `gh attestation verify <file> --repo tobitege/Flowery.WinUI`, and `SHA256SUMS.txt` lists the SHA-256 checksum of each asset. The release notes explain both checks.
 
 ### Fixed

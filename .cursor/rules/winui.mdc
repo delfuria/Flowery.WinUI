@@ -62,7 +62,7 @@ The supported build is Windows-only.
 - The external Windows runner launches the prebuilt Gallery executable.
 - FLOWERY_TEST_RESULTS_ROOT stores reports outside temporary MSTest deployment directories.
 - Runtime tests use isolated state storage.
-- For monitor 2 in its lower half, pass -Monitor 2 -WindowRegion LowerHalf; use UpperHalf for its upper half.
+- Window placement is optional. To use one half of a display, pass for example -Monitor 2 -WindowRegion LowerHalf or UpperHalf.
 
 GitHub Actions workflows live in .github/workflows.
 Workflow dispatch, releases, commits, and pushes require the user's authorization.
