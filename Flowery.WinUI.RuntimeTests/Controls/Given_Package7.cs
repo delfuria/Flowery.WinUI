@@ -238,6 +238,77 @@ namespace Flowery.WinUI.RuntimeTests.Controls
             Assert.AreEqual(FloweryLocalization.GetString((string)title.Tag), title.Text);
         });
 
+        [TestMethod]
+        public Task When_ButtonMinWidthIsAuthored_SizeAndShapeChangesKeepIt() => WithSizingAsync(async () =>
+        {
+            var authored = new DaisyButton { Content = "Authored", MinWidth = 100 };
+            var style = new Style { TargetType = typeof(DaisyButton) };
+            style.Setters.Add(new Setter(FrameworkElement.MinWidthProperty, 120d));
+            var styled = new DaisyButton { Content = "Styled", Style = style };
+            var wide = new DaisyButton { Content = "Wide", Shape = DaisyButtonShape.Wide };
+            var host = new StackPanel { Children = { authored, styled, wide } };
+            RuntimeTestHelpers.AttachToHost(host);
+            await RuntimeTestHelpers.CompleteLayoutAsync(host, authored, styled, wide);
+
+            FlowerySizeManager.ApplySize(DaisySize.Large);
+            await RuntimeTestHelpers.CompleteLayoutAsync(host);
+            Assert.AreEqual(100d, authored.MinWidth);
+            Assert.IsTrue(authored.ActualWidth >= 100, $"Authored MinWidth must reach layout: {authored.ActualWidth}.");
+            Assert.AreEqual(120d, styled.MinWidth);
+            Assert.AreEqual(DependencyProperty.UnsetValue, styled.ReadLocalValue(FrameworkElement.MinWidthProperty));
+            Assert.AreEqual(200d, wide.MinWidth);
+
+            authored.Shape = DaisyButtonShape.Wide;
+            styled.Shape = DaisyButtonShape.Wide;
+            Assert.AreEqual(100d, authored.MinWidth);
+            Assert.AreEqual(120d, styled.MinWidth);
+            wide.Shape = DaisyButtonShape.Default;
+            Assert.AreEqual(DependencyProperty.UnsetValue, wide.ReadLocalValue(FrameworkElement.MinWidthProperty));
+            Assert.AreEqual(0d, wide.MinWidth);
+            wide.MinWidth = 50;
+            wide.Shape = DaisyButtonShape.Wide;
+            FlowerySizeManager.ApplySize(DaisySize.Small);
+            Assert.AreEqual(50d, wide.MinWidth);
+        });
+
+        [TestMethod]
+        public Task When_IconTextChangesWhileUnloaded_ReloadShowsTheCurrentContent() => WithSizingAsync(async () =>
+        {
+            var icon = new DaisyIconText { Text = "Before", IconSymbol = Symbol.Accept };
+            var host = new StackPanel { Children = { icon } };
+            RuntimeTestHelpers.AttachToHost(host);
+            await RuntimeTestHelpers.CompleteLayoutAsync(host, icon);
+            FindText(icon, "Before");
+
+            var unloaded = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            icon.Unloaded += (_, _) => unloaded.TrySetResult(null);
+            host.Children.Remove(icon);
+            await unloaded.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            icon.Text = "After";
+            icon.IconSymbol = Symbol.Add;
+            host.Children.Add(icon);
+            await RuntimeTestHelpers.CompleteLayoutAsync(host, icon);
+
+            FindText(icon, "After");
+            Assert.IsNull(TryFindText(icon, "Before"), "The text from before the unload must be replaced.");
+            Assert.AreEqual(Symbol.Add, FindDescendant<SymbolIcon>(icon).Symbol);
+        });
+
+        private static T FindDescendant<T>(DependencyObject root) where T : DependencyObject =>
+            TryFindDescendant<T>(root) ?? throw new InvalidOperationException($"Expected a {typeof(T).Name} in the visual tree.");
+
+        private static T? TryFindDescendant<T>(DependencyObject root) where T : DependencyObject
+        {
+            if (root is T match)
+                return match;
+            for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+            {
+                if (TryFindDescendant<T>(VisualTreeHelper.GetChild(root, i)) is { } nested)
+                    return nested;
+            }
+            return null;
+        }
+
         private static async Task WithSizingAsync(Func<Task> action)
         {
             var size = FlowerySizeManager.CurrentSize;

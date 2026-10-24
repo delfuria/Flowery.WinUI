@@ -202,6 +202,8 @@ namespace Flowery.Controls
         private bool _isPointerOver;
         private bool _hasCornerRadiusOverride;
         private bool _isApplyingCornerRadius;
+        private bool _ownsMinWidth;
+        private bool _isApplyingMinWidth;
 
         private DaisyShadowContainer? _shadowContainer;
         private Border? _buttonBorder;
@@ -265,6 +267,7 @@ namespace Flowery.Controls
             // Watch for Height changes to keep Width in sync for Circle/Square shapes
             RegisterPropertyChangedCallback(HeightProperty, OnHeightPropertyChanged);
             RegisterPropertyChangedCallback(CornerRadiusProperty, OnCornerRadiusPropertyChanged);
+            RegisterPropertyChangedCallback(MinWidthProperty, OnMinWidthPropertyChanged);
             RegisterPropertyChangedCallback(ContentProperty, OnIconLayoutPropertyChanged);
             RegisterPropertyChangedCallback(DaisyControlExtensions.IconProperty, OnIconLayoutPropertyChanged);
             RegisterPropertyChangedCallback(DaisyControlExtensions.IconPlacementProperty, OnIconLayoutPropertyChanged);
@@ -988,6 +991,30 @@ namespace Flowery.Controls
                 _hasCornerRadiusOverride = ReadLocalValue(CornerRadiusProperty) != DependencyProperty.UnsetValue;
         }
 
+        // A null value removes the shape's own MinWidth.
+        private void SetShapeMinWidth(double? value)
+        {
+            _isApplyingMinWidth = true;
+            try
+            {
+                if (value is { } width)
+                    MinWidth = width;
+                else
+                    ClearValue(MinWidthProperty);
+                _ownsMinWidth = value is not null;
+            }
+            finally
+            {
+                _isApplyingMinWidth = false;
+            }
+        }
+
+        private void OnMinWidthPropertyChanged(DependencyObject sender, DependencyProperty dp)
+        {
+            if (!_isApplyingMinWidth)
+                _ownsMinWidth = false;
+        }
+
         private void ApplyContentLineHeight(ResourceDictionary? resources)
         {
             var label = FindChildByType<TextBlock>(this);
@@ -1036,13 +1063,23 @@ namespace Flowery.Controls
                 ReadLocalValue(HorizontalAlignmentProperty) != DependencyProperty.UnsetValue;
 
             // Reset shape-related properties to reasonable defaults.
-            MinWidth = 0;
             if (!hasLocalHorizontalAlignment)
                 HorizontalAlignment = HorizontalAlignment.Left;
 
+            // Only the Wide shape supplies a minimum width. An authored MinWidth, style or binding is kept,
+            // and leaving Wide removes only the shape's own value.
             if (Shape == DaisyButtonShape.Wide)
             {
-                MinWidth = 200;
+                if (_ownsMinWidth || (ReadLocalValue(MinWidthProperty) == DependencyProperty.UnsetValue && MinWidth == 0))
+                    SetShapeMinWidth(200);
+            }
+            else if (_ownsMinWidth)
+            {
+                SetShapeMinWidth(null);
+            }
+
+            if (Shape == DaisyButtonShape.Wide)
+            {
                 if (!hasLocalHorizontalAlignment)
                     HorizontalAlignment = HorizontalAlignment.Center;
             }

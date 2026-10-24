@@ -276,13 +276,7 @@ namespace Flowery.Controls
                 _foregroundCallbackToken = RegisterPropertyChangedCallback(ForegroundProperty, OnForegroundChanged);
             }
 
-            if (_rootPanel != null)
-            {
-                ApplyTheme();
-                return;
-            }
-
-            // Watch for Foreground changes to sync internal elements
+            // Rebuild from current properties, including changes made while unloaded.
             BuildVisualTree();
             ApplyTheme();
         }
