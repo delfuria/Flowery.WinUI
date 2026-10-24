@@ -115,6 +115,8 @@ For the lower half of display 2, use:
 ./scripts/test_windows.ps1 -Configuration Debug -SkipBuild -Monitor 2 -WindowRegion LowerHalf
 ```
 
+`-WindowRegion UpperHalf` uses the upper half instead, and `Full` the whole work area.
+
 The Gallery resolves the Windows display device before it shows the window.
 If the requested device is absent, the run fails without a fallback to another display.
 

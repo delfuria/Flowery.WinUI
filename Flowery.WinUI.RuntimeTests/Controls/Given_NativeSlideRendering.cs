@@ -292,11 +292,15 @@ namespace Flowery.WinUI.RuntimeTests.Controls
                     if (string.Equals(requestedDevice, @"\\.\DISPLAY2", StringComparison.OrdinalIgnoreCase))
                         Assert.AreEqual(0u, info.Flags & 1u, "The local monitor-2 probe must not sample the primary display.");
                 }
+                var workAreaMiddle = info.WorkArea.Top + (info.WorkArea.Bottom - info.WorkArea.Top) / 2;
                 var allowedTop = string.Equals(requestedRegion, "lower-half", StringComparison.OrdinalIgnoreCase)
-                    ? info.WorkArea.Top + (info.WorkArea.Bottom - info.WorkArea.Top) / 2
+                    ? workAreaMiddle
                     : info.WorkArea.Top;
+                var allowedBottom = string.Equals(requestedRegion, "upper-half", StringComparison.OrdinalIgnoreCase)
+                    ? workAreaMiddle
+                    : info.WorkArea.Bottom;
                 Assert.IsTrue(_windowBounds.Left >= info.WorkArea.Left && _windowBounds.Right <= info.WorkArea.Right
-                    && _windowBounds.Top >= allowedTop && _windowBounds.Bottom <= info.WorkArea.Bottom,
+                    && _windowBounds.Top >= allowedTop && _windowBounds.Bottom <= allowedBottom,
                     "The physical rendering probe requires the test window entirely inside its requested monitor region.");
                 Assert.IsTrue(GetClientRect(_window, out var clientBounds), "Cannot inspect runtime-test client bounds.");
                 var origin = new NativePoint();
