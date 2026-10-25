@@ -5,6 +5,7 @@ using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace Flowery.Controls;
 
@@ -12,9 +13,20 @@ public partial class DaisyScheduler
 {
     private sealed record CalendarDate(DateTime Date);
 
+    private sealed record CalendarParts(Grid Root, Grid Navigator, Grid Heading, Grid Days, Grid Detail,
+        ScrollViewer Appointments, DaisyButton[] Arrows, DaisyButton[] DayButtons);
+
+    private CalendarParts? _calendarParts;
+
+    private const string ButtonForegroundKey = "DaisyButtonForeground";
+    private const string ButtonForegroundPointerOverKey = "DaisyButtonForegroundPointerOver";
+
     private FrameworkElement BuildCalendar()
     {
-        var root = new Grid { ColumnSpacing = SpacingMedium }.Define("Auto,*");
+        // Consecutive Calendar renders keep the 44 day and arrow buttons and update them in place:
+        // creating and loading the buttons cost most of this view's render time.
+        var parts = _calendarParts is { } cached && ReferenceEquals(_viewHost?.Child, cached.Root)
+            ? cached : _calendarParts = CreateCalendar();
         var month = new DateTime(SelectedDate.Year, SelectedDate.Month, 1);
         var start = WeekStart(month, FirstDayOfWeek);
         var resourceIds = (SchedulerResources ?? Array.Empty<ResourceModel>())
@@ -31,27 +43,18 @@ public partial class DaisyScheduler
                      day < end && day < occurrence.End; day = day.AddDays(1))
                     occupiedDays.Add(day);
         }
-        var calendar = new Grid
+        parts.Root.ColumnSpacing = SpacingMedium;
+        parts.Navigator.Width = Token<double>("DaisySchedulerCalendarWidth") * SizeScale;
+        parts.Navigator.RowSpacing = SpacingSmall;
+        RemoveLabels(parts.Heading);
+        parts.Heading.Children.Add(Label(month.ToString("MMMM yyyy", Culture)));
+        foreach (var button in parts.Arrows)
         {
-            Name = "PART_MonthNavigator", Width = Token<double>("DaisySchedulerCalendarWidth") * SizeScale,
-            RowSpacing = SpacingSmall
-        }.Define(null, "Auto,Auto");
-        var heading = new Grid().Define("*,Auto,Auto");
-        heading.Children.Add(Label(month.ToString("MMMM yyyy", Culture)));
-        foreach (var direction in new[] { -1, 1 })
-        {
-            var button = new DaisyButton
-            {
-                Content = direction < 0 ? "↑" : "↓", Size = _size, Variant = DaisyButtonVariant.Ghost,
-                Tag = direction
-            };
-            AutomationProperties.SetName(button, Text(direction < 0 ? "Previous" : "Next"));
-            button.Click += OnCalendarMonthChanged;
-            Grid.SetColumn(button, direction < 0 ? 1 : 2);
-            heading.Children.Add(button);
+            button.Size = _size;
+            AutomationProperties.SetName(button, Text(button.Tag is < 0 ? "Previous" : "Next"));
         }
-        calendar.Children.Add(heading);
-        var days = new Grid { Name = "PART_CalendarDays" }.Define("Auto,*,*,*,*,*,*,*", "Auto,Auto,Auto,Auto,Auto,Auto,Auto");
+        var days = parts.Days;
+        RemoveLabels(days);
         days.Children.Add(Label(Text("WeekNumber"), true));
         for (var column = 0; column < 7; column++)
         {
@@ -60,6 +63,10 @@ public partial class DaisyScheduler
             Grid.SetColumn(day, column + 1);
             days.Children.Add(day);
         }
+        var muted = Brush("DaisyBaseContentMutedBrush");
+        // Avalonia's Padding replaces the inner padding; in WinUI that is ContentPadding.
+        // Vertical padding would clip the day number in the ExtraSmall button height.
+        var padding = new Thickness(SpacingXS, 0, SpacingXS, 0);
         for (var week = 0; week < 6; week++)
         {
             var weekStart = start.AddDays(week * 7);
@@ -72,35 +79,24 @@ public partial class DaisyScheduler
                 var date = weekStart.AddDays(column);
                 var selected = date == SelectedDate.Date;
                 var occupied = occupiedDays.Contains(date);
-                var button = new DaisyButton
-                {
-                    Content = date.Day.ToString(Culture), Tag = new CalendarDate(date), Size = _size,
-                    Variant = selected || occupied ? DaisyButtonVariant.Primary : DaisyButtonVariant.Ghost,
-                    ButtonStyle = occupied && !selected ? DaisyButtonStyle.Soft : DaisyButtonStyle.Default,
-                    FontWeight = date == DateTime.Today || occupied ? FontWeights.Bold : FontWeights.Normal,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    // Avalonia's Padding replaces the inner padding; in WinUI that is ContentPadding.
-                    // Vertical padding would clip the day number in the ExtraSmall button height.
-                    MinWidth = 0, ContentPadding = new Thickness(SpacingXS, 0, SpacingXS, 0)
-                };
-                if (date.Month != month.Month)
-                    button.Foreground = Brush("DaisyBaseContentMutedBrush");
+                var button = parts.DayButtons[week * 7 + column];
+                button.Content = date.Day.ToString(Culture);
+                button.Tag = new CalendarDate(date);
+                button.Size = _size;
+                button.Variant = selected || occupied ? DaisyButtonVariant.Primary : DaisyButtonVariant.Ghost;
+                button.ButtonStyle = occupied && !selected ? DaisyButtonStyle.Soft : DaisyButtonStyle.Default;
+                button.FontWeight = date == DateTime.Today || occupied ? FontWeights.Bold : FontWeights.Normal;
+                // ContentPadding is a boxed value, so every assignment would count as a change and apply again.
+                if (button.ContentPadding != padding)
+                    button.ContentPadding = padding;
+                SetDayForeground(button, date.Month != month.Month ? muted : null);
                 AutomationProperties.SetName(button, date.ToString("D", Culture));
-                button.Click += OnCalendarDateSelected;
-                Grid.SetRow(button, week + 1);
-                Grid.SetColumn(button, column + 1);
-                days.Children.Add(button);
             }
         }
-        Grid.SetRow(days, 1);
-        calendar.Children.Add(days);
-        root.Children.Add(new ScrollViewer
-        {
-            Content = calendar, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto
-        });
 
-        var detail = new Grid { RowSpacing = SpacingSmall }.Define(null, "Auto,*");
+        var detail = parts.Detail;
+        detail.RowSpacing = SpacingSmall;
+        RemoveLabels(detail);
         detail.Children.Add(Label(SelectedDate.ToString("D", Culture)));
         var entries = new StackPanel { Name = "PART_CalendarAppointments", Spacing = SpacingSmall };
         var appointments = Items.Where(appointment => OnDate(appointment, SelectedDate.Date) &&
@@ -110,14 +106,83 @@ public partial class DaisyScheduler
             entries.Children.Add(CreateAppointment(appointment, AppointmentSurface.Timed));
         if (appointments.Length == 0)
             entries.Children.Add(Label(Text("NoEvents"), true));
-        var scroll = CreateScroll(entries);
+        parts.Appointments.Content = entries;
+        _bodyScroll = parts.Appointments;
+        return parts.Root;
+    }
+
+    private CalendarParts CreateCalendar()
+    {
+        var root = new Grid().Define("Auto,*");
+        var navigator = new Grid { Name = "PART_MonthNavigator" }.Define(null, "Auto,Auto");
+        var heading = new Grid().Define("*,Auto,Auto");
+        var arrows = new DaisyButton[2];
+        for (var index = 0; index < arrows.Length; index++)
+        {
+            var button = new DaisyButton { Content = index == 0 ? "↑" : "↓", Variant = DaisyButtonVariant.Ghost, Tag = index == 0 ? -1 : 1 };
+            button.Click += OnCalendarMonthChanged;
+            Grid.SetColumn(button, index + 1);
+            heading.Children.Add(button);
+            arrows[index] = button;
+        }
+        navigator.Children.Add(heading);
+        var days = new Grid { Name = "PART_CalendarDays" }.Define("Auto,*,*,*,*,*,*,*", "Auto,Auto,Auto,Auto,Auto,Auto,Auto");
+        var dayButtons = new DaisyButton[42];
+        for (var index = 0; index < dayButtons.Length; index++)
+        {
+            var button = new DaisyButton { HorizontalAlignment = HorizontalAlignment.Stretch, MinWidth = 0 };
+            button.Click += OnCalendarDateSelected;
+            Grid.SetRow(button, index / 7 + 1);
+            Grid.SetColumn(button, index % 7 + 1);
+            days.Children.Add(button);
+            dayButtons[index] = button;
+        }
+        Grid.SetRow(days, 1);
+        navigator.Children.Add(days);
+        root.Children.Add(new ScrollViewer
+        {
+            Content = navigator, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+        });
+
+        var detail = new Grid().Define(null, "Auto,*");
+        var scroll = CreateScroll(new StackPanel());
         scroll.Name = "PART_CalendarAppointmentScroll";
         scroll.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
         Grid.SetRow(scroll, 1);
         detail.Children.Add(scroll);
         Grid.SetColumn(detail, 1);
         root.Children.Add(detail);
-        return root;
+        return new CalendarParts(root, navigator, heading, days, detail, scroll, arrows, dayButtons);
+    }
+
+    private static void RemoveLabels(Panel panel)
+    {
+        for (var index = panel.Children.Count - 1; index >= 0; index--)
+            if (panel.Children[index] is TextBlock)
+                panel.Children.RemoveAt(index);
+    }
+
+    // DaisyButton sets its Foreground itself in every state; its lightweight styling resources override that.
+    // Avalonia's local Foreground on days outside the month does the same there.
+    private static void SetDayForeground(DaisyButton button, Brush? foreground)
+    {
+        var current = button.Resources.TryGetValue(ButtonForegroundKey, out var value) ? value : null;
+        if (ReferenceEquals(current, foreground))
+            return;
+        if (foreground is null)
+        {
+            button.Resources.Remove(ButtonForegroundKey);
+            button.Resources.Remove(ButtonForegroundPointerOverKey);
+        }
+        else
+        {
+            button.Resources[ButtonForegroundKey] = foreground;
+            button.Resources[ButtonForegroundPointerOverKey] = foreground;
+        }
+        // A button that has not loaded yet applies the resources at its first measure.
+        if (button.IsLoaded)
+            button.RefreshResolvedSize();
     }
 
     private int CalendarWeekNumber(DateTime date)

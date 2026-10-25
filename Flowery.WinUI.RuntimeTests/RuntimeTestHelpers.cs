@@ -1,14 +1,20 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Flowery.WinUI.RuntimeTests
 {
     internal static class RuntimeTestHelpers
     {
+        // WinUI sets IsLoaded when an element enters the live tree and raises Loaded later. Attached elements
+        // keep a task for that event, so a test does not continue before the Loaded handlers ran.
+        private static readonly ConditionalWeakTable<FrameworkElement, Task> PendingLoads = new();
+
         public static Panel GetHostPanel()
         {
             if (RuntimeTestContext.HostPanel is Panel hostPanel)
@@ -24,18 +30,40 @@ namespace Flowery.WinUI.RuntimeTests
         {
             var hostPanel = GetHostPanel();
             hostPanel.Children.Clear();
+            if (!element.IsLoaded)
+            {
+                PendingLoads.AddOrUpdate(element, WaitForLoadedEvent(element));
+            }
             hostPanel.Children.Add(element);
             element.UpdateLayout();
         }
 
+        /// <summary>Completes after the Loaded event of <paramref name="element"/> has been raised: its own event
+        /// while it is not loaded, otherwise the event of the element it was attached with.</summary>
+        /// <remarks>A loaded element that was neither attached through <see cref="AttachToHost"/> nor is inside
+        /// such an element completes at once.</remarks>
         public static Task EnsureLoadedAsync(FrameworkElement element)
         {
-            if (element.IsLoaded)
+            if (!element.IsLoaded)
             {
-                return Task.CompletedTask;
+                return PendingLoads.TryGetValue(element, out var own) && !own.IsCompleted ? own : WaitForLoadedEvent(element);
             }
 
-            var tcs = new TaskCompletionSource<object?>();
+            for (DependencyObject? current = element; current is not null; current = VisualTreeHelper.GetParent(current))
+            {
+                if (current is FrameworkElement attached && PendingLoads.TryGetValue(attached, out var pending))
+                {
+                    return pending;
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
+        // The continuation runs after WinUI has raised the Loaded events of the whole subtree.
+        private static Task WaitForLoadedEvent(FrameworkElement element)
+        {
+            var tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
             RoutedEventHandler? handler = null;
             handler = (_, _) =>
             {

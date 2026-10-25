@@ -251,6 +251,28 @@ public sealed partial class Given_DaisyScheduler
         Assert.AreEqual(new DateTime(2021, 2, 15), scope.Scheduler.SelectedDate.Date);
     }
 
+    [TestMethod]
+    public async Task When_CalendarMonthChanges_DayButtonsAreReusedAndOtherMonthsAreMuted()
+    {
+        var scope = await SchedulerScope.CreateAsync(SchedulerView.Calendar);
+        scope.Scheduler.SelectedDate = new DateTimeOffset(new DateTime(2021, 2, 10));
+        await scope.LayoutAsync();
+        DaisyButton[] Buttons() => Descendants<Grid>(scope.Scheduler).Single(grid => grid.Name == "PART_CalendarDays").Children.OfType<DaisyButton>().ToArray();
+        var muted = ((SolidColorBrush)Flowery.Theming.DaisyResourceLookup.GetBrush("DaisyBaseContentMutedBrush")).Color;
+        Windows.UI.Color Color(DateTime day) => ((SolidColorBrush)DayButton(scope, day).Foreground).Color;
+        // February 2021 starts on a Monday, so the grid ends with March days.
+        Assert.AreEqual(muted, Color(new DateTime(2021, 3, 1)));
+        Assert.AreNotEqual(muted, Color(new DateTime(2021, 2, 1)));
+        var buttons = Buttons();
+        scope.Scheduler.SelectedDate = new DateTimeOffset(new DateTime(2021, 3, 10));
+        await scope.LayoutAsync();
+        CollectionAssert.AreEqual(buttons, Buttons());
+        Assert.AreNotEqual(muted, Color(new DateTime(2021, 3, 1)));
+        Assert.AreEqual(muted, Color(new DateTime(2021, 4, 1)));
+        Assert.AreEqual(DaisyButtonVariant.Primary, DayButton(scope, new DateTime(2021, 3, 10)).Variant);
+        Assert.AreEqual(DaisyButtonVariant.Ghost, DayButton(scope, new DateTime(2021, 3, 11)).Variant);
+    }
+
     private static IEnumerable<T> Ancestors<T>(DependencyObject element) where T : DependencyObject
     {
         for (var parent = VisualTreeHelper.GetParent(element); parent is not null; parent = VisualTreeHelper.GetParent(parent))

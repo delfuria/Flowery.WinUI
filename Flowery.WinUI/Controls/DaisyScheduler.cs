@@ -414,16 +414,21 @@ public partial class DaisyScheduler : Control
     /// <summary>True while a requested render has not run yet.</summary>
     internal bool IsRenderPending => _renderPending;
 
+    // WinUI sets IsLoaded when the control enters the live tree and raises Loaded later. When the control moves
+    // to another parent in one tick, the old Unloaded can arrive after the move; the guarded handler keeps
+    // _attached then. Either one means the control is in the tree.
+    private bool IsAttached => IsLoaded || _attached;
+
     private void RequestRender()
     {
-        if (!_attached || _renderPending)
+        if (!IsAttached || _renderPending)
             return;
         _renderPending = true;
         // Render after the current layout pass. A request raised while rendering queues another render.
         if (!DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
             {
                 _renderPending = false;
-                if (_attached)
+                if (IsAttached)
                     RenderActiveView();
             }))
             _renderPending = false;

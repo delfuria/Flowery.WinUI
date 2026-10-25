@@ -202,6 +202,10 @@ namespace Flowery.Controls
         private bool _isPointerOver;
         private bool _hasCornerRadiusOverride;
         private bool _isApplyingCornerRadius;
+        private bool _isStylePending = true;
+        private bool _isHandlingLoaded;
+        private (DaisySize Size, int ThemeVersion)? _appliedState;
+        private static int _themeVersion;
         private bool _ownsMinWidth;
         private bool _isApplyingMinWidth;
 
@@ -249,15 +253,22 @@ namespace Flowery.Controls
         private ContentPresenter? _textPresenter;
         private readonly DaisyControlLifecycle _lifecycle;
 
+        static DaisyButton()
+        {
+            // Subscribed before any button subscribes, so the version is current when a button handles the change.
+            DaisyThemeManager.ThemeChanged += static (_, _) => _themeVersion++;
+            DaisySystemAppearance.ColorsChanged += static (_, _) => _themeVersion++;
+        }
+
         public DaisyButton()
         {
             DefaultStyleKey = typeof(DaisyButton);
 
             _lifecycle = new DaisyControlLifecycle(
                 this,
-                ApplyAll,
+                ApplyAllUnlessLoadedAndCurrent,
                 handleLifecycleEvents: false);
-            FlowerySizeManager.Register(this, RefreshResolvedSize, () => ResolvedSize);
+            FlowerySizeManager.Register(this, RefreshResolvedSizeUnlessCurrent, () => ResolvedSize);
 
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
@@ -603,16 +614,45 @@ namespace Flowery.Controls
 
         private static void OnStylePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is DaisyButton button)
+            if (d is not DaisyButton button)
             {
-                button.ApplyAll();
+                return;
             }
+
+            // An initializer sets several style properties before the button loads; apply them once before
+            // the first measure instead of once per property. Loaded skips its applies when nothing changed since.
+            if (!button.IsLoaded)
+            {
+                button._isStylePending = true;
+                button.InvalidateMeasure();
+                return;
+            }
+
+            button.ApplyAll();
+        }
+
+        protected override Windows.Foundation.Size MeasureOverride(Windows.Foundation.Size availableSize)
+        {
+            if (_isStylePending)
+            {
+                ApplyAll();
+            }
+
+            return base.MeasureOverride(availableSize);
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             DaisySystemAppearance.Initialize(XamlRoot);
-            _lifecycle.HandleLoaded();
+            _isHandlingLoaded = true;
+            try
+            {
+                _lifecycle.HandleLoaded();
+            }
+            finally
+            {
+                _isHandlingLoaded = false;
+            }
             BuildIconLayoutIfNeeded();
             BuildDashedBorderIfNeeded();
 
@@ -888,6 +928,8 @@ namespace Flowery.Controls
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
             _lifecycle.HandleUnloaded();
+            // A detached button may miss resource writes, so the next Loaded applies again.
+            _appliedState = null;
             DaisyBaseContentControl.GlobalNeumorphicChanged -= OnGlobalNeumorphicChanged;
             SizeChanged -= OnDashSizeChanged;
             ClearNeumorphicShadows();
@@ -928,8 +970,29 @@ namespace Flowery.Controls
 
         internal virtual void RefreshResolvedSize() => ApplyAll();
 
+        // The size registration and the lifecycle both apply on Loaded, after the first measure has applied.
+        // Skip them while that state is current; size and theme changes make it stale.
+        private bool IsAppliedStateCurrent => !_isStylePending && _appliedState == (ResolvedSize, _themeVersion);
+
+        private void RefreshResolvedSizeUnlessCurrent()
+        {
+            if (!IsAppliedStateCurrent)
+            {
+                RefreshResolvedSize();
+            }
+        }
+
+        private void ApplyAllUnlessLoadedAndCurrent()
+        {
+            if (!_isHandlingLoaded || !IsAppliedStateCurrent)
+            {
+                ApplyAll();
+            }
+        }
+
         private void ApplyAll()
         {
+            _isStylePending = false;
             var resources = Application.Current?.Resources;
             if (resources != null)
             {
@@ -940,6 +1003,7 @@ namespace Flowery.Controls
             ComputeThemeBrushes(resources);
             ApplyCurrentPointerState();
             RequestNeumorphicRefresh();
+            _appliedState = (ResolvedSize, _themeVersion);
         }
 
         private void ApplySizing(ResourceDictionary? resources)

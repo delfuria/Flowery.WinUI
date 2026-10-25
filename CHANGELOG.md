@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Gallery: a Scheduler page under Custom Controls with sample appointments, resource grouping, an appointment editor with overlap confirmation and color palette, a context menu, read-only mode, and resource-kind, date/time format and clock selectors.
 - Docs: `llms-static/DaisyScheduler.md`, and the scheduler in the custom-control list of the generated site and in the README.
 
+### Changed
+
+- `DaisyButton` applies style properties set before it loads (`Variant`, `Size`, `ButtonStyle`, `Shape`, `ContentPadding`) once, at its first measure, instead of once per property. On Loaded it skips the size and theme pass while the applied size and theme are still current. Creating and loading many buttons takes a fraction of the time.
+- `DaisyResourceLookup.TryGetResource` no longer searches the merged dictionaries again after a miss. WinUI's `TryGetValue` already searches nested merged and theme dictionaries, so the result is the same, and lookups of optional keys that do not exist, which every Daisy control makes, are much faster.
+
 ## [1.9.0] - 2026-10-24
 
 ### Added
