@@ -9,7 +9,7 @@
 
 [![WinUI 3](https://img.shields.io/badge/WinUI-3-0078D4?style=flat-square&logo=windows&logoColor=white)](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/) [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) [![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011-0078D4?style=flat-square&logo=windows&logoColor=white)](#requirements) [![MIT license](https://img.shields.io/github/license/tobitege/Flowery.WinUI?style=flat-square)](LICENSE)
 
-[![Windows CI](https://img.shields.io/github/actions/workflow/status/tobitege/Flowery.WinUI/ci.yml?branch=main&style=flat-square&label=Windows%20CI&logo=githubactions&logoColor=white)](https://github.com/tobitege/Flowery.WinUI/actions/workflows/ci.yml) [![CodeQL](https://img.shields.io/github/actions/workflow/status/tobitege/Flowery.WinUI/codeql-advanced.yml?branch=main&style=flat-square&label=CodeQL)](https://github.com/tobitege/Flowery.WinUI/actions/workflows/codeql-advanced.yml) [![Documentation](https://img.shields.io/github/actions/workflow/status/tobitege/Flowery.WinUI/generate-docs.yml?branch=main&style=flat-square&label=Documentation)](https://github.com/tobitege/Flowery.WinUI/actions/workflows/generate-docs.yml)
+[![Windows CI](https://img.shields.io/github/actions/workflow/status/tobitege/Flowery.WinUI/ci.yml?branch=main&style=flat-square&label=Windows%20CI&logo=githubactions&logoColor=white)](https://github.com/tobitege/Flowery.WinUI/actions/workflows/ci.yml) [![CodeQL](https://img.shields.io/github/actions/workflow/status/tobitege/Flowery.WinUI/codeql-advanced.yml?branch=main&style=flat-square&label=CodeQL)](https://github.com/tobitege/Flowery.WinUI/actions/workflows/codeql-advanced.yml) [![Docs](https://img.shields.io/badge/Docs-GitHub%20Pages-222222?style=flat-square&logo=githubpages&logoColor=white)](https://tobitege.github.io/Flowery.WinUI/#home)
 
 **NuGet packages**
 
@@ -17,15 +17,20 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/tobitege/Flowery.WinUI?style=flat-square&logo=github)](https://github.com/tobitege/Flowery.WinUI/stargazers) [![GitHub forks](https://img.shields.io/github/forks/tobitege/Flowery.WinUI?style=flat-square&logo=github)](https://github.com/tobitege/Flowery.WinUI/forks) [![Open issues](https://img.shields.io/github/issues/tobitege/Flowery.WinUI?style=flat-square)](https://github.com/tobitege/Flowery.WinUI/issues) [![Last commit](https://img.shields.io/github/last-commit/tobitege/Flowery.WinUI/main?style=flat-square)](https://github.com/tobitege/Flowery.WinUI/commits/main) [![Repository size](https://img.shields.io/github/repo-size/tobitege/Flowery.WinUI?style=flat-square)](https://github.com/tobitege/Flowery.WinUI)
 
-**[Documentation](https://tobitege.github.io/Flowery.WinUI/) · [Control reference](llms-static/README.md) · [Demo apps](#demo-apps) · [Changelog](CHANGELOG.md)**
+**[Documentation](https://tobitege.github.io/Flowery.WinUI/#home) · [Control reference](llms-static/README.md) · [Demo apps](#demo-apps) · [Changelog](CHANGELOG.md)**
 
-**12 languages** · Native Windows controls · Runtime themes · Kanban · Win2D
+Native Windows controls · Runtime themes · Kanban · Win2D
+
+🌐 **Localized in 12 languages** including:
+
+🇯🇵 日本語にローカライズ済み &nbsp;•&nbsp; 🇰🇷 한국어로 현지화됨 &nbsp;•&nbsp; 🇨🇳 已本地化为简体中文
+
+🇺🇦 Локалізовано українською &nbsp;•&nbsp; 🇸🇦 مترجم للعربية &nbsp;•&nbsp; 🇮🇱 מתורגם לעברית
 
 </div>
 
 Flowery.WinUI is a native WinUI 3 control library for the Windows App SDK.
 Build themed Windows applications with Flowery controls and optional Kanban, Win2D, and authentication packages.
-Version [1.2.1](https://github.com/tobitege/Flowery.WinUI/releases/tag/v1.2.1) is available on NuGet.
 
 ## Features
 
@@ -76,7 +81,7 @@ See [SDK selection](scripts/README.md#select-the-net-sdk) for exact-version and 
 1. Add the `Flowery.WinUI` NuGet package to a WinUI 3 application.
 
 ```powershell
-dotnet add package Flowery.WinUI --version 1.2.1
+dotnet add package Flowery.WinUI --version 1.9.0
 ```
 
 2. Merge the library resources after `XamlControlsResources` in the application resources.
