@@ -164,4 +164,22 @@ public sealed partial class Given_DaisyScheduler
         await scope.LayoutAsync();
         Assert.AreSame(hostStyle, ((ToolTip)ToolTipService.GetToolTip(scope.Frame(scope.Appointment))).Style);
     }
+
+    [TestMethod]
+    public async Task When_AnAppointmentIsSelected_ItsFrameAndContentDoNotMove()
+    {
+        foreach (var view in new[] { SchedulerView.Month, SchedulerView.Week, SchedulerView.Timeline })
+        {
+            var scope = await SchedulerScope.CreateAsync(view);
+            var frame = scope.Frame(scope.Appointment);
+            var content = (FrameworkElement)((Panel)frame.Child).Children[0];
+            var size = new Size(frame.ActualWidth, frame.ActualHeight);
+            var position = content.TransformToVisual(scope.Scheduler).TransformPoint(default);
+            await scope.ClickAsync(frame);
+            Assert.AreSame(scope.Appointment, scope.Scheduler.SelectedAppointment, view.ToString());
+            Assert.AreSame(frame, scope.Frame(scope.Appointment), view.ToString());
+            Assert.AreEqual(size, new Size(frame.ActualWidth, frame.ActualHeight), view.ToString());
+            Assert.AreEqual(position, content.TransformToVisual(scope.Scheduler).TransformPoint(default), view.ToString());
+        }
+    }
 }

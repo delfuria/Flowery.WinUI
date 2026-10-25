@@ -268,7 +268,7 @@ public partial class DaisyScheduler : Control
     private DaisyButton? _dateButton;
     private readonly List<AppointmentModel> _selection = new();
     private readonly Dictionary<AppointmentModel, object> _selectionResourceIds = new();
-    private readonly List<(Border Frame, AppointmentModel Appointment)> _frames = new();
+    private readonly List<(Border Frame, Border Selection, AppointmentModel Appointment)> _frames = new();
     private bool _selectionSyncing;
     private bool _renderPending;
     private bool _attached;
@@ -620,11 +620,12 @@ public partial class DaisyScheduler : Control
 
     private void ApplySelection()
     {
-        foreach (var (frame, appointment) in _frames)
+        foreach (var (frame, selection, appointment) in _frames)
         {
             var selected = _selection.Any(item => Same(item, appointment));
-            frame.BorderBrush = Brush(selected ? "DaisyPrimaryBrush" : "DaisyBase300Brush");
-            frame.BorderThickness = new Thickness(selected ? SelectionThickness : LineThickness);
+            // The selection ring is an overlay, so selecting neither moves nor resizes the appointment.
+            selection.BorderBrush = Brush("DaisyPrimaryBrush");
+            selection.Visibility = selected ? Visibility.Visible : Visibility.Collapsed;
             Canvas.SetZIndex(frame, selected ? 10 : 0);
         }
     }

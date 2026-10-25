@@ -42,13 +42,22 @@ public partial class DaisyScheduler
         };
         var content = AppointmentRenderer?.Invoke(context) ?? template?.LoadContent() as FrameworkElement ?? BuildAppointmentContent(context);
         content.DataContext = context;
+        // The selection ring lies over the frame border and takes no layout space.
+        var selection = new Border
+        {
+            BorderThickness = new Thickness(SelectionThickness), CornerRadius = new CornerRadius(EventCornerRadius),
+            Margin = new Thickness(-LineThickness), IsHitTestVisible = false, Visibility = Visibility.Collapsed
+        };
+        var layers = new Grid();
+        layers.Children.Add(content);
+        layers.Children.Add(selection);
         var frame = new Border
         {
             Background = background,
             BorderBrush = context.BorderBrush,
             BorderThickness = new Thickness(LineThickness),
             CornerRadius = new CornerRadius(EventCornerRadius),
-            Child = content,
+            Child = layers,
             MinHeight = ChipHeight,
             Tag = new AppointmentTarget(appointment, lane, shown, lane?.Resource?.Id ?? resourceId),
             DataContext = context,
@@ -61,7 +70,7 @@ public partial class DaisyScheduler
         var tooltip = AppointmentTooltipRenderer?.Invoke(context) ?? AppointmentTooltipTemplate?.LoadContent() as FrameworkElement ?? BuildTooltip(context);
         tooltip.DataContext = context;
         SetSchedulerTooltip(frame, tooltip);
-        _frames.Add((frame, appointment));
+        _frames.Add((frame, selection, appointment));
         return frame;
     }
 
