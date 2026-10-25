@@ -1,0 +1,46 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Flowery.Controls">
+
+    <!-- ===================== DaisyScheduler ===================== -->
+    <!-- Font size, corner radius and toolbar margins come from design tokens in code, so host
+         resource overrides apply. Hosts may also override DaisySchedulerTodayBrush and
+         DaisySchedulerEventBackgroundBrush. -->
+    <Style TargetType="controls:DaisyScheduler">
+        <Setter Property="Background" Value="{ThemeResource DaisyBase100Brush}" />
+        <Setter Property="Foreground" Value="{ThemeResource DaisyBaseContentBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource DaisyBase300Brush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="IsTabStop" Value="True" />
+        <Setter Property="UseSystemFocusVisuals" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controls:DaisyScheduler">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <controls:WrapPanel x:Name="PART_Toolbar" Orientation="Horizontal">
+                                <controls:DaisyButton Tag="Previous" Content="‹" Variant="Ghost" />
+                                <controls:DaisyButton x:Name="PART_Date" Tag="Date" Variant="Ghost" />
+                                <controls:DaisyButton Tag="Next" Content="›" Variant="Ghost" />
+                                <controls:DaisyButton Tag="Today" Variant="Ghost" />
+                                <controls:WrapPanel x:Name="PART_Views" Orientation="Horizontal" />
+                                <controls:WrapPanel x:Name="PART_CustomButtons" Orientation="Horizontal" />
+                                <controls:DaisyButton Tag="Settings" Variant="Ghost" />
+                            </controls:WrapPanel>
+                            <Border x:Name="PART_ViewHost" Grid.Row="1" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

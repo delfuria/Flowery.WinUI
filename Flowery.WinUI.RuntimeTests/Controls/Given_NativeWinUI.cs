@@ -37,6 +37,25 @@ namespace Flowery.WinUI.RuntimeTests.Controls
         }
 
         [TestMethod]
+        public void When_AKeyIsInANestedMergedOrThemeDictionary_TheLookupFindsIt()
+        {
+            var themed = new ResourceDictionary();
+            themed.ThemeDictionaries["Default"] = new ResourceDictionary { ["ThemedKey"] = 2d };
+            var nested = new ResourceDictionary { ["NestedKey"] = 1d };
+            nested.MergedDictionaries.Add(themed);
+            var middle = new ResourceDictionary();
+            middle.MergedDictionaries.Add(nested);
+            var root = new ResourceDictionary();
+            root.MergedDictionaries.Add(middle);
+            Assert.IsTrue(DaisyResourceLookup.TryGetResource(root, "NestedKey", out var value));
+            Assert.AreEqual(1d, value);
+            Assert.IsTrue(DaisyResourceLookup.TryGetResource(root, "ThemedKey", out value));
+            Assert.AreEqual(2d, value);
+            Assert.IsFalse(DaisyResourceLookup.TryGetResource(root, "MissingKey", out value));
+            Assert.IsNull(value);
+        }
+
+        [TestMethod]
         public void When_GalleryCultureChanges_EmbeddedTranslationsLoadFromNativeAssembly()
         {
             var previous = GalleryLocalization.CurrentCultureName;

@@ -59,21 +59,12 @@ namespace Flowery.Theming
             if (resources == null)
                 return false;
 
+            // WinUI's TryGetValue already searches nested merged and theme dictionaries. Searching them again by
+            // hand only repeated every miss through XamlControlsResources, and controls look up many optional keys.
             if (resources.TryGetValue(key, out var found))
             {
                 value = found;
                 return true;
-            }
-
-            // Search merged dictionaries explicitly when TryGetValue does not return their values.
-            // across platforms/versions. Search merged dictionaries recursively.
-            if (resources.MergedDictionaries != null)
-            {
-                foreach (var merged in resources.MergedDictionaries)
-                {
-                    if (merged != null && TryGetResource(merged, key, out value))
-                        return true;
-                }
             }
 
             return false;

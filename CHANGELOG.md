@@ -6,6 +6,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2026-10-25
+
+### Added
+
+- `DaisyScheduler`, ported from Flowery.NET 3.6.0 to 3.8.0 and adapted from the MIT-licensed Xtreme.Components scheduler. It has Day, Week, Month, Agenda, Calendar, resource Planner and horizontal Timeline day views, typed resources with resource kinds, named and collapsible Timeline groups, occupancy and conflict queries, continuous and daily appointment spans, week rules, editor time slots, regional date/time formats and 12/24-hour clocks. Selection, move, resize, creation, deletion, tooltips, decorations, templates, renderers, toolbar buttons and external drops raise host events and leave the host data unchanged.
+- `DaisyScheduler.ShowWeekends` (on by default) shows or hides Saturday and Sunday in the Week, Month and Planner views; the settings flyout has a check box for it.
+- Unlike Flowery.NET, chips and bars never trim their start time: status glyphs and tiles show only when they fit beside it, and the subject takes the rest. A Planner or Timeline hour is as wide as a one-hour bar with its full start time (for the current size, font, culture and clock format), every hour has a header label, and hours widen to fill the visible width; `DaisySchedulerTimelineMinimumHourWidth` (default 0) can raise the minimum.
+- Unlike Flowery.NET, Month and Agenda chips and Planner and Timeline bars show their subject in the secondary font size so it fits the bar height in Segoe UI, timed blocks use compact subject and time lines, and the Day and Week time column widens to its longest time label. Bind `SelectedDate`, `SelectedAppointment` and `CollapsedResourceGroupIds` with `Mode=TwoWay`, because WinUI has no per-property default binding mode.
+- The scheduler uses the Flowery themes, design tokens (overridable in host resources), all five size tiers and all twelve languages. `ExternalDropHandler.SetData` and `TryGetItem` carry an `ISchedulerDroppable` through a `DataPackage` in the same process.
+- The library output and NuGet package include the Xtreme.Components copyright and MIT license (`licenses/Xtreme.Components.txt`).
+- Gallery: a Scheduler page under Custom Controls with sample appointments, resource grouping, an appointment editor with overlap confirmation and color palette, a context menu, read-only mode, and resource-kind, date/time format and clock selectors.
+- Docs: `llms-static/DaisyScheduler.md`, and the scheduler in the custom-control list of the generated site and in the README.
+
+### Changed
+
+- `DaisyButton` applies style properties set before it loads (`Variant`, `Size`, `ButtonStyle`, `Shape`, `ContentPadding`) once, at its first measure, instead of once per property. On Loaded it skips the size and theme pass while the applied size and theme are still current. Creating and loading many buttons takes a fraction of the time.
+- `DaisyResourceLookup.TryGetResource` no longer searches the merged dictionaries again after a miss. WinUI's `TryGetValue` already searches nested merged and theme dictionaries, so the result is the same, and lookups of optional keys that do not exist, which every Daisy control makes, are much faster.
+
 ## [1.9.0] - 2026-10-24
 
 ### Added
