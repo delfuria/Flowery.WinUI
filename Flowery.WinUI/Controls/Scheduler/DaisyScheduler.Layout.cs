@@ -150,4 +150,90 @@ public partial class DaisyScheduler
             return finalSize;
         }
     }
+
+    // A single-line chip or bar keeps its start time whole. Status glyphs and tiles show only when they fit
+    // beside it, in the order they were added with Optional; the subject takes the rest and trims.
+    private sealed partial class AppointmentLinePanel(double spacing) : Panel
+    {
+        public const int Required = 0;
+        public const int Optional = 1;
+        public const int Fill = 2;
+
+        private readonly List<int> _roles = new();
+        private bool[] _shown = Array.Empty<bool>();
+        private double _fillWidth;
+        private double _fillMinimum;
+
+        /// <param name="minimumWidth">For the Fill part: the narrowest width worth showing, such as the
+        /// first characters and an ellipsis. Below it the part is hidden instead of showing fragments.</param>
+        public void Add(UIElement child, int role, double minimumWidth = 0)
+        {
+            Children.Add(child);
+            _roles.Add(role);
+            if (role == Fill)
+                _fillMinimum = minimumWidth;
+            _shown = new bool[Children.Count];
+        }
+
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            foreach (var child in Children)
+                child.Measure(new Size(double.PositiveInfinity, availableSize.Height));
+            Choose(availableSize.Width);
+            var width = 0d;
+            var height = 0d;
+            var count = 0;
+            for (var index = 0; index < Children.Count; index++)
+            {
+                if (!_shown[index])
+                    continue;
+                if (_roles[index] == Fill)
+                    Children[index].Measure(new Size(_fillWidth, availableSize.Height));
+                width += (count++ > 0 ? spacing : 0) + Children[index].DesiredSize.Width;
+                height = Math.Max(height, Children[index].DesiredSize.Height);
+            }
+            return new Size(width, height);
+        }
+
+        // Each shown part costs its width plus one spacing; the first spacing is given back.
+        private void Choose(double width)
+        {
+            Array.Clear(_shown);
+            var remaining = width + spacing;
+            foreach (var role in new[] { Required, Optional })
+                for (var index = 0; index < Children.Count; index++)
+                {
+                    if (_roles[index] != role)
+                        continue;
+                    var cost = Children[index].DesiredSize.Width + spacing;
+                    if (role == Optional && cost > remaining)
+                        continue;
+                    _shown[index] = true;
+                    remaining -= cost;
+                }
+            _fillWidth = Math.Max(0, remaining - spacing);
+            for (var index = 0; index < Children.Count; index++)
+                if (_roles[index] == Fill)
+                    _shown[index] = _fillWidth > 0 && _fillWidth >= _fillMinimum;
+        }
+
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            Choose(finalSize.Width);
+            var x = 0d;
+            for (var index = 0; index < Children.Count; index++)
+            {
+                var child = Children[index];
+                if (!_shown[index])
+                {
+                    child.Arrange(new Rect(0, 0, 0, 0));
+                    continue;
+                }
+                var width = _roles[index] == Fill ? _fillWidth : child.DesiredSize.Width;
+                child.Arrange(new Rect(x, 0, width, finalSize.Height));
+                x += width + spacing;
+            }
+            return finalSize;
+        }
+    }
 }

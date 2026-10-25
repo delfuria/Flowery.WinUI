@@ -16,10 +16,51 @@ public partial class DaisyScheduler
     private ScrollViewer? _gutterScroll;
     private readonly List<Lane> _lanes = new();
 
+    /// <summary>A Planner or Timeline element placed by minutes along the shown days. A width of NaN minutes
+    /// only places the element.</summary>
+    private sealed record HourItem(FrameworkElement Element, double Start, double Minutes, double Offset, double Trim, double MinimumWidth);
+
+    private readonly List<HourItem> _hourItems = new();
+    private int _hourDayCount;
+    private double _hourGutterWidth;
+
+    private void PlaceByMinutes(FrameworkElement element, double start, double minutes, double offset = 0, double trim = 0, double minimumWidth = 0)
+    {
+        var item = new HourItem(element, start, minutes, offset, trim, minimumWidth);
+        _hourItems.Add(item);
+        Place(item, _horizontalPixelsPerMinute);
+    }
+
+    private static void Place(HourItem item, double pixelsPerMinute)
+    {
+        Canvas.SetLeft(item.Element, item.Start * pixelsPerMinute + item.Offset);
+        if (!double.IsNaN(item.Minutes))
+            item.Element.Width = Math.Max(item.MinimumWidth, item.Minutes * pixelsPerMinute - item.Trim);
+    }
+
+    /// <summary>Rescales the Planner or Timeline to a new visible width without rendering it again.</summary>
+    private void RescaleHours()
+    {
+        if (_hourItems.Count == 0 || _renderedView is not (SchedulerView.Planner or SchedulerView.Timeline))
+            return;
+        var (_, pixelsPerMinute) = HourScale(_hourDayCount, _hourGutterWidth);
+        if (pixelsPerMinute == _horizontalPixelsPerMinute)
+            return;
+        _horizontalPixelsPerMinute = pixelsPerMinute;
+        foreach (var item in _hourItems)
+            Place(item, pixelsPerMinute);
+        foreach (var lane in _lanes)
+            if (lane.Horizontal)
+                lane.PixelsPerMinute = pixelsPerMinute;
+    }
+
     /// <summary>A gesture and drop surface. Its shown days sit side by side; hidden weekends take no space.</summary>
     private sealed record Lane(Canvas Surface, IReadOnlyList<DateTime> Days, ResourceModel? Resource,
         bool Horizontal, double PixelsPerMinute)
     {
+        // Planner and Timeline lanes rescale when the visible width changes.
+        public double PixelsPerMinute { get; set; } = PixelsPerMinute;
+
         public DateTime Origin => Days[0];
 
         /// <summary>The offset of a time along the lane. A time on a hidden day maps to the next shown day.</summary>
@@ -249,28 +290,33 @@ public partial class DaisyScheduler
         var resources = ActiveResources(days);
         if (resources.Count == 0)
             return Label(Text("NoResources"));
-        var ppm = dayCount == 1 ? TimelinePixelsPerMinute : Token<double>("DaisySchedulerPlannerPixelsPerMinute") * SizeScale;
-        var totalWidth = days.Length * 1440 * ppm;
+        var gutterWidth = Token<double>(dayCount == 1 ? "DaisySchedulerTimelineResourceWidth" : "DaisySchedulerPlannerResourceWidth") * SizeScale;
+        _hourDayCount = days.Length;
+        _hourGutterWidth = gutterWidth;
+        var (minimum, ppm) = HourScale(days.Length, gutterWidth);
+        _horizontalPixelsPerMinute = ppm;
+        var totalMinutes = days.Length * 1440d;
         var rowHeight = RowHeight;
-        var header = new Canvas { Width = totalWidth, Height = ChipHeight * 2 };
+        var header = new Canvas { Height = ChipHeight * 2 };
+        PlaceByMinutes(header, 0, totalMinutes);
         for (var day = 0; day < days.Length; day++)
         {
             var date = days[day];
             var dayHeader = Cell(Label(date.ToString("ddd, d MMM", Culture)), header: true, today: date == DateTime.Today);
-            dayHeader.Width = 1440 * ppm;
             dayHeader.Height = ChipHeight;
-            Canvas.SetLeft(dayHeader, day * 1440 * ppm);
+            PlaceByMinutes(dayHeader, day * 1440, 1440);
             header.Children.Add(dayHeader);
-            for (var hour = 0; hour < 24; hour += dayCount == 1 ? 1 : 6)
+            for (var hour = 0; hour < 24; hour++)
             {
                 var label = Label(FormatTime(date.AddHours(hour)), true);
-                Canvas.SetLeft(label, (day * 1440 + hour * 60) * ppm + 4);
+                PlaceByMinutes(label, day * 1440 + hour * 60, double.NaN, offset: 4);
                 Canvas.SetTop(label, ChipHeight);
                 header.Children.Add(label);
             }
         }
-        var body = new StackPanel { Width = totalWidth };
-        var gutter = new StackPanel { Width = Token<double>(dayCount == 1 ? "DaisySchedulerTimelineResourceWidth" : "DaisySchedulerPlannerResourceWidth") * SizeScale };
+        var body = new StackPanel();
+        PlaceByMinutes(body, 0, totalMinutes);
+        var gutter = new StackPanel { Width = gutterWidth };
         foreach (var rowGroup in TimelineGroups(resources, days))
         {
             if (rowGroup.Name is not null)
@@ -296,10 +342,12 @@ public partial class DaisyScheduler
                     shown.Add(copy);
                     originals[copy] = appointment;
                 }
-                var canvas = new Canvas { Width = totalWidth, Background = Brush("DaisyBase100Brush") };
+                var canvas = new Canvas { Background = Brush("DaisyBase100Brush") };
+                PlaceByMinutes(canvas, 0, totalMinutes);
                 var lane = new Lane(canvas, days, resource, true, ppm);
-                // Bars that lie only on hidden weekend days have no width and are left out.
-                var layouts = EventBlockLayout.LayoutRange(start, end, shown, ChipHeight / ppm)
+                // Bars that lie only on hidden weekend days have no width and are left out. Rows are packed
+                // for the narrowest hours, so wider hours never make short bars overlap.
+                var layouts = EventBlockLayout.LayoutRange(start, end, shown, ChipHeight / minimum)
                     .Where(layout => lane.Offset(start.AddMinutes(layout.EndMinutes)) > lane.Offset(start.AddMinutes(layout.StartMinutes)))
                     .ToArray();
                 var rows = new List<AppointmentModel>();
@@ -313,18 +361,19 @@ public partial class DaisyScheduler
                 canvas.Height = height;
                 _lanes.Add(lane);
                 for (var hour = 0; hour < days.Length * 24; hour++)
-                    AddRectangle(canvas, hour * 60 * ppm, 0, LineThickness, height, Brush("DaisyBase300Brush"));
+                    if (AddRectangle(canvas, 0, 0, LineThickness, height, Brush("DaisyBase300Brush")) is { } line)
+                        PlaceByMinutes(line, hour * 60, double.NaN);
                 for (var row = 1; row <= Math.Max(1, rows.Count); row++)
-                    AddRectangle(canvas, 0, row * rowHeight - LineThickness, totalWidth, LineThickness, Brush("DaisyBase300Brush"));
+                    if (AddRectangle(canvas, 0, row * rowHeight - LineThickness, totalMinutes * ppm, LineThickness, Brush("DaisyBase300Brush")) is { } line)
+                        PlaceByMinutes(line, 0, totalMinutes);
                 foreach (var layout in layouts)
                 {
                     var original = OriginalAppointment(originals[layout.Appointment]);
                     var block = CreateAppointment(originals[layout.Appointment], AppointmentSurface.Bar,
                         original.IsAllDay ? null : lane, layout.Appointment, resource.Id);
-                    var left = lane.Offset(start.AddMinutes(layout.StartMinutes));
-                    block.Width = Math.Max(ChipHeight, lane.Offset(start.AddMinutes(layout.EndMinutes)) - left - 2);
+                    var left = lane.Offset(start.AddMinutes(layout.StartMinutes)) / ppm;
+                    PlaceByMinutes(block, left, lane.Offset(start.AddMinutes(layout.EndMinutes)) / ppm - left, trim: 2, minimumWidth: ChipHeight);
                     block.Height = ChipHeight;
-                    Canvas.SetLeft(block, left);
                     Canvas.SetTop(block, rows.IndexOf(original) * rowHeight + (rowHeight - ChipHeight) / 2);
                     canvas.Children.Add(block);
                 }
@@ -420,8 +469,8 @@ public partial class DaisyScheduler
         var initial = CurrentView switch
         {
             SchedulerView.Day or SchedulerView.Week => new Windows.Foundation.Point(0, 7 * 60 * PixelsPerMinute),
-            SchedulerView.Planner => new Windows.Foundation.Point(WorkDayStart.TotalMinutes * Token<double>("DaisySchedulerPlannerPixelsPerMinute") * SizeScale, 0),
-            SchedulerView.Timeline => new Windows.Foundation.Point(7 * 60 * TimelinePixelsPerMinute, 0),
+            SchedulerView.Planner => new Windows.Foundation.Point(WorkDayStart.TotalMinutes * _horizontalPixelsPerMinute, 0),
+            SchedulerView.Timeline => new Windows.Foundation.Point(7 * 60 * _horizontalPixelsPerMinute, 0),
             _ => default
         };
         var offset = _savedOffset ?? initial;
@@ -429,13 +478,14 @@ public partial class DaisyScheduler
         _bodyScroll.ChangeView(offset.X, offset.Y, null, true);
     }
 
-    private static void AddRectangle(Canvas canvas, double x, double y, double width, double height, Brush fill)
+    private static Border? AddRectangle(Canvas canvas, double x, double y, double width, double height, Brush fill)
     {
         if (height <= 0 || width <= 0)
-            return;
+            return null;
         var rectangle = new Border { Width = width, Height = height, Background = fill, IsHitTestVisible = false };
         Canvas.SetLeft(rectangle, x);
         Canvas.SetTop(rectangle, y);
         canvas.Children.Add(rectangle);
+        return rectangle;
     }
 }

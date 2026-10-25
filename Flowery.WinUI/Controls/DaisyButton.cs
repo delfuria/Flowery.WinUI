@@ -203,6 +203,7 @@ namespace Flowery.Controls
         private bool _hasCornerRadiusOverride;
         private bool _isApplyingCornerRadius;
         private bool _isStylePending = true;
+        private bool _hasAppliedTemplate;
         private bool _isHandlingLoaded;
         private (DaisySize Size, int ThemeVersion)? _appliedState;
         private static int _themeVersion;
@@ -303,6 +304,14 @@ namespace Flowery.Controls
 
             // Visual tree fallback if GetTemplateChild fails (same as DaisyButtonTechDemo)
             _buttonBorder ??= FindChildByType<Border>(this);
+
+            // The first measure applies the template before it reads Height, so the first layout uses these values.
+            // Values set later inside MeasureOverride would only take effect in another layout pass.
+            _hasAppliedTemplate = true;
+            if (_isStylePending)
+            {
+                ApplyAll();
+            }
 
             RequestNeumorphicRefresh();
             BuildIconLayoutIfNeeded();
@@ -619,26 +628,15 @@ namespace Flowery.Controls
                 return;
             }
 
-            // An initializer sets several style properties before the button loads; apply them once before
-            // the first measure instead of once per property. Loaded skips its applies when nothing changed since.
-            if (!button.IsLoaded)
+            // An initializer sets several style properties before the button gets its template; OnApplyTemplate
+            // applies them once instead of once per property. Loaded skips its applies when nothing changed since.
+            if (!button._hasAppliedTemplate)
             {
                 button._isStylePending = true;
-                button.InvalidateMeasure();
                 return;
             }
 
             button.ApplyAll();
-        }
-
-        protected override Windows.Foundation.Size MeasureOverride(Windows.Foundation.Size availableSize)
-        {
-            if (_isStylePending)
-            {
-                ApplyAll();
-            }
-
-            return base.MeasureOverride(availableSize);
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
@@ -970,7 +968,7 @@ namespace Flowery.Controls
 
         internal virtual void RefreshResolvedSize() => ApplyAll();
 
-        // The size registration and the lifecycle both apply on Loaded, after the first measure has applied.
+        // The size registration and the lifecycle both apply on Loaded, after OnApplyTemplate has applied.
         // Skip them while that state is current; size and theme changes make it stale.
         private bool IsAppliedStateCurrent => !_isStylePending && _appliedState == (ResolvedSize, _themeVersion);
 

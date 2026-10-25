@@ -1,4 +1,5 @@
 using Flowery.Theming;
+using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -45,19 +46,30 @@ public partial class DaisyScheduler
         return Math.Ceiling(length * scaling) / scaling;
     }
 
-    private double TimelinePixelsPerMinute
+    // Planner and Timeline hours fit their header label and a one-hour bar that shows its start time whole
+    // (frame and accent borders, content margins, the gap between bars and one spacing of slack). The width
+    // follows the size, font, culture and clock format, and hours widen to fill the visible width. Hosts can
+    // raise the minimum with DaisySchedulerTimelineMinimumHourWidth. Text widths are rounded up to device pixels
+    // as layout rounds them.
+    private (double Minimum, double Current) HourScale(int dayCount, double gutterWidth)
     {
-        get
+        var infinite = new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity);
+        var barChrome = SpacingXS * 4 + LineThickness * 4 + 2;
+        var width = Token<double>("DaisySchedulerTimelineMinimumHourWidth") * SizeScale;
+        for (var hour = 0; hour < 24; hour++)
         {
-            var width = Token<double>("DaisySchedulerTimelineMinimumHourWidth") * SizeScale;
-            for (var hour = 0; hour < 24; hour++)
-            {
-                var label = Label(FormatTime(DateTime.Today.AddHours(hour)), true);
-                label.Measure(new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity));
-                width = Math.Max(width, label.DesiredSize.Width + SpacingSmall * 2);
-            }
-            return RoundToPixel(width) / 60;
+            var text = FormatTime(DateTime.Today.AddHours(hour));
+            var header = Label(text, true);
+            header.Measure(infinite);
+            var start = Label(text, true);
+            start.FontWeight = FontWeights.SemiBold;
+            start.Measure(infinite);
+            width = Math.Max(width, Math.Max(RoundToPixel(header.DesiredSize.Width) + SpacingSmall * 2,
+                RoundToPixel(start.DesiredSize.Width) + barChrome));
         }
+        var minimum = RoundToPixel(width) / 60;
+        var fill = ((_viewHost?.ActualWidth ?? 0) - gutterWidth) / (dayCount * 1440);
+        return (minimum, Math.Max(minimum, fill));
     }
 }
 

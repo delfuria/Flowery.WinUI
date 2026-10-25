@@ -262,6 +262,7 @@ public partial class DaisyScheduler : Control
     public event EventHandler<SchedulerTileOption>? TileOptionToggled;
 
     private Border? _viewHost;
+    private double _horizontalPixelsPerMinute;
     private WrapPanel? _toolbar;
     private WrapPanel? _views;
     private WrapPanel? _customButtons;
@@ -334,8 +335,12 @@ public partial class DaisyScheduler : Control
         CancelGesture();
         foreach (var button in _toolbar?.Children.OfType<DaisyButton>() ?? Enumerable.Empty<DaisyButton>())
             button.Click -= OnToolbarClick;
+        if (_viewHost is not null)
+            _viewHost.SizeChanged -= OnViewHostResized;
         base.OnApplyTemplate();
         _viewHost = GetTemplateChild("PART_ViewHost") as Border;
+        if (_viewHost is not null)
+            _viewHost.SizeChanged += OnViewHostResized;
         _toolbar = GetTemplateChild("PART_Toolbar") as WrapPanel;
         _views = GetTemplateChild("PART_Views") as WrapPanel;
         _customButtons = GetTemplateChild("PART_CustomButtons") as WrapPanel;
@@ -344,6 +349,9 @@ public partial class DaisyScheduler : Control
             button.Click += OnToolbarClick;
         RenderActiveView();
     }
+
+    // Planner and Timeline hours fill the visible width; a new width rescales them in place.
+    private void OnViewHostResized(object? sender, SizeChangedEventArgs e) => RescaleHours();
 
     private void OnSchedulerPropertyChanged(DependencyPropertyChangedEventArgs change)
     {
@@ -455,6 +463,7 @@ public partial class DaisyScheduler : Control
         _frames.Clear();
         _occurrenceSources.Clear();
         _lanes.Clear();
+        _hourItems.Clear();
         _visibleItems = GetVisibleOccurrences().ToArray();
         var appointments = Appointments ?? Array.Empty<AppointmentModel>();
         var retained = _selection.Select(old => appointments.FirstOrDefault(a => Same(a, old)))

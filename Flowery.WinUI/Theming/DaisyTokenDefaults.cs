@@ -373,8 +373,8 @@ namespace Flowery.Theming
 
             // ---- Scheduler ----
             // Fonts, chip heights, row heights, spacing and borders reuse the shared size tokens.
-            Ensure(resources, "DaisySchedulerTimelineMinimumHourWidth", 96d);
-            Ensure(resources, "DaisySchedulerPlannerPixelsPerMinute", 0.35d);
+            // Planner and Timeline hours fit their start times; this only raises that minimum.
+            Ensure(resources, "DaisySchedulerTimelineMinimumHourWidth", 0d);
             Ensure(resources, "DaisySchedulerTimelineResourceWidth", 220d);
             Ensure(resources, "DaisySchedulerPlannerResourceWidth", 150d);
             Ensure(resources, "DaisySchedulerMonthMinimumWidth", 560d);
