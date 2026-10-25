@@ -311,6 +311,7 @@ class SiteGenerator:
         'NumericUpDown',
         'OtpInput',
         'Popover',
+        'Scheduler',
         'ScreenColorPicker',
         'TagPicker',
         'Weather',

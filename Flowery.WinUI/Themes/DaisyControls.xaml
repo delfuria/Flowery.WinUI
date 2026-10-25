@@ -17,5 +17,6 @@
         <ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/DaisyLayout.xaml" />
         <ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/DaisyFeedback.xaml" />
         <ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/DaisyWeather.xaml" />
+        <ResourceDictionary Source="ms-appx:///Flowery.WinUI/Themes/DaisyScheduler.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

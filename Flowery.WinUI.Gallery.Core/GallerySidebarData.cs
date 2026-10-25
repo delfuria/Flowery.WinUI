@@ -270,6 +270,7 @@ namespace Flowery.WinUI.Gallery
                     Items = new()
                     {
                         new() { Id = "flow-kanban", Name = "Sidebar_FlowKanban", ControlName = "FlowKanban", TabHeader = "Sidebar_FlowKanban" },
+                        new() { Id = "scheduler", Name = "Sidebar_Scheduler", ControlName = "DaisyScheduler", TabHeader = "Sidebar_Scheduler" },
                         new() { Id = "scaling", Name = "Sidebar_ScalingItem", TabHeader = "Sidebar_Scaling" },
                         new() { Id = "size-dropdown", Name = "Sidebar_SizeDropdown", ControlName = "DaisySizeDropdown", TabHeader = "Sidebar_CustomControls" },
                         new() { Id = "modifier-keys", Name = "Sidebar_ModifierKeys", ControlName = "DaisyModifierKeys", TabHeader = "Sidebar_CustomControls" },

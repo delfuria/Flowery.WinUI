@@ -1,0 +1,112 @@
+<local:ScrollableExamplePage
+    x:Class="Flowery.WinUI.Gallery.Examples.SchedulerExamples"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:daisy="using:Flowery.Controls"
+    xmlns:local="using:Flowery.WinUI.Gallery.Examples">
+
+    <local:ScrollableExamplePage.Resources>
+        <DataTemplate x:Key="ColorChoiceTemplate" x:DataType="local:SchedulerColorChoice">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Border Width="18" Height="18" Background="{x:Bind Fill}" />
+                <TextBlock Text="{x:Bind Label}" VerticalAlignment="Center" />
+            </StackPanel>
+        </DataTemplate>
+    </local:ScrollableExamplePage.Resources>
+
+    <!-- The page fills the viewport, so the scheduler keeps its own scrolling. -->
+    <ScrollViewer x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto" Background="Transparent" Padding="0">
+        <Grid DataContext="{x:Bind Localization, Mode=OneWay}"
+              Margin="24,0,24,0"
+              RowSpacing="12"
+              Height="{Binding ElementName=MainScrollViewer, Path=ViewportHeight}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Text="{Binding [Scheduler_Description]}" TextWrapping="Wrap"
+                       daisy:FlowerySizeManager.ResponsiveFont="Primary"
+                       Foreground="{ThemeResource DaisyBaseContentMutedBrush}" />
+            <daisy:WrapPanel Grid.Row="1" Orientation="Horizontal">
+                <daisy:DaisyCheckBox x:Name="ResourcesOption" Content="{Binding [Scheduler_Resources]}" Margin="0,0,16,8" />
+                <daisy:DaisyCheckBox x:Name="TilesOption" Content="{Binding [Scheduler_Tiles]}" IsChecked="True" Margin="0,0,16,8" />
+                <daisy:DaisyCheckBox x:Name="IconsOption" Content="{Binding [Scheduler_Icons]}" IsChecked="True" Margin="0,0,16,8" />
+                <daisy:DaisyCheckBox x:Name="AdornmentsOption" Content="{Binding [Scheduler_Adornments]}" IsChecked="True" Margin="0,0,16,8" />
+                <daisy:DaisyCheckBox x:Name="DetailsOption" Content="{Binding [Scheduler_Details]}" IsChecked="True" Margin="0,0,16,8" />
+                <daisy:DaisyCheckBox x:Name="ReadOnlyOption" Content="{Binding [Scheduler_ReadOnly]}" Margin="0,0,16,8" />
+                <daisy:DaisyButton Content="{Binding [Scheduler_Reset]}" Variant="Ghost" Click="OnReset" />
+                <StackPanel Spacing="4" Margin="12,0,0,8">
+                    <TextBlock Text="{Binding [Scheduler_ResourceKind]}" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                               daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
+                    <daisy:DaisySelect x:Name="ResourceKindOption" MinWidth="160" SelectionChanged="OnResourceKindChanged"
+                                       AutomationProperties.Name="{Binding [Scheduler_ResourceKind]}" />
+                </StackPanel>
+                <StackPanel Spacing="4" Margin="12,0,12,8">
+                    <TextBlock Text="{Binding [Scheduler_DateTimeFormat]}" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                               daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
+                    <daisy:DaisySelect x:Name="DateTimeFormatOption" MinWidth="190" SelectionChanged="OnDateTimeFormatChanged"
+                                       AutomationProperties.Name="{Binding [Scheduler_DateTimeFormat]}" />
+                </StackPanel>
+                <StackPanel Spacing="4" Margin="0,0,12,8">
+                    <TextBlock Text="{Binding [Scheduler_ClockFormat]}" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                               daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
+                    <daisy:DaisySelect x:Name="ClockFormatOption" MinWidth="160" SelectionChanged="OnClockFormatChanged"
+                                       AutomationProperties.Name="{Binding [Scheduler_ClockFormat]}" />
+                </StackPanel>
+            </daisy:WrapPanel>
+            <Grid Grid.Row="2" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <daisy:DaisyScheduler x:Name="DemoScheduler" CurrentView="Month" />
+                <Border x:Name="EditorPanel" Grid.Column="1" Visibility="Collapsed" Width="280"
+                        Background="{ThemeResource DaisyBase200Brush}" BorderBrush="{ThemeResource DaisyBase300Brush}"
+                        BorderThickness="1" CornerRadius="8" Padding="16">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="{Binding [Scheduler_Editor]}" FontWeight="SemiBold"
+                                       Foreground="{ThemeResource DaisyBaseContentBrush}"
+                                       daisy:FlowerySizeManager.ResponsiveFont="SectionHeader" />
+                            <daisy:DaisyInput x:Name="SubjectInput" Label="{Binding [Scheduler_Subject]}" />
+                            <daisy:DaisyInput x:Name="StartInput" Label="{Binding [Scheduler_Start]}" />
+                            <daisy:DaisySelect x:Name="StartTimeInput" AutomationProperties.Name="{Binding [Scheduler_StartTime]}" />
+                            <daisy:DaisyInput x:Name="EndInput" Label="{Binding [Scheduler_End]}" />
+                            <daisy:DaisySelect x:Name="EndTimeInput" AutomationProperties.Name="{Binding [Scheduler_EndTime]}" />
+                            <daisy:DaisySelect x:Name="SpanModeInput" AutomationProperties.Name="{Binding [Scheduler_SpanMode]}" />
+                            <TextBlock Text="{Binding [Scheduler_SpanHelp]}" TextWrapping="Wrap"
+                                       Foreground="{ThemeResource DaisyBaseContentMutedBrush}"
+                                       daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
+                            <TextBlock Text="{Binding [Scheduler_Note]}" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                                       daisy:FlowerySizeManager.ResponsiveFont="Primary" />
+                            <daisy:DaisyTextArea x:Name="DescriptionInput" MinHeight="80" />
+                            <daisy:DaisyCheckBox x:Name="AllDayInput" Content="{Binding [Scheduler_AllDay]}" Checked="OnAllDayChanged" Unchecked="OnAllDayChanged" />
+                            <daisy:DaisySelect x:Name="ResourceInput" AutomationProperties.Name="{Binding [Scheduler_Resource]}" />
+                            <StackPanel x:Name="ColorPanel" Spacing="6">
+                                <TextBlock Text="{Binding [Scheduler_Color]}" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                                           daisy:FlowerySizeManager.ResponsiveFont="Primary" />
+                                <daisy:DaisySelect x:Name="ColorInput" ItemTemplate="{StaticResource ColorChoiceTemplate}"
+                                                   AutomationProperties.Name="{Binding [Scheduler_Color]}" />
+                            </StackPanel>
+                            <TextBlock x:Name="EditorError" TextWrapping="Wrap" Foreground="{ThemeResource DaisyErrorBrush}"
+                                       daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
+                            <TextBlock x:Name="OverlapWarning" TextWrapping="Wrap" Foreground="{ThemeResource DaisyBaseContentBrush}"
+                                       daisy:FlowerySizeManager.ResponsiveFont="Primary" />
+                            <daisy:DaisyButton x:Name="SaveAnywayButton" Visibility="Collapsed" Content="{Binding [Scheduler_SaveAnyway]}"
+                                               Variant="Warning" Click="OnSaveAnyway" />
+                            <daisy:WrapPanel Orientation="Horizontal">
+                                <daisy:DaisyButton Content="{Binding [Scheduler_Save]}" Variant="Primary" Click="OnSave" Margin="0,0,8,0" />
+                                <daisy:DaisyButton Content="{Binding [Scheduler_Cancel]}" Variant="Ghost" Click="OnCancel" />
+                            </daisy:WrapPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+            <TextBlock x:Name="StatusText" Grid.Row="3" Margin="0,0,0,16" Text="{Binding [Scheduler_Help]}" TextWrapping="Wrap"
+                       Foreground="{ThemeResource DaisyBaseContentMutedBrush}"
+                       daisy:FlowerySizeManager.ResponsiveFont="Secondary" />
+        </Grid>
+    </ScrollViewer>
+</local:ScrollableExamplePage>
